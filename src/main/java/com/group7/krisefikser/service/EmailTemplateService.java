@@ -5,9 +5,19 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+/**
+ * Service class for generating email templates.
+ * This class provides methods to get the subject and body of different email templates.
+ */
 @Service
 public class EmailTemplateService {
 
+  /**
+   * Gets the subject of the email template based on the type.
+   *
+   * @param type The type of the email template.
+   * @return The subject of the email template.
+   */
   String getSubject(EmailTemplateType type) {
     return switch (type) {
       case PASSWORD_RESET -> "Password Reset Request";
@@ -17,6 +27,13 @@ public class EmailTemplateService {
     };
   }
 
+  /**
+   * Gets the body of the email template based on the type and parameters.
+   *
+   * @param type   The type of the email template.
+   * @param params The parameters to be used in the template.
+   * @return The body of the email template.
+   */
   String getBody(EmailTemplateType type, Map<String, String> params) {
     return switch (type) {
       case PASSWORD_RESET -> "Click the link below to reset your password:\n"
