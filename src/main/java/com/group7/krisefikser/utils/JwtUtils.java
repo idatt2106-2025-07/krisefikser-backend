@@ -106,7 +106,7 @@ public class JwtUtils {
    * @param jwtToken The JWT token to be set in the cookie.
    * @param response The HttpServletResponse object to which the cookie will be added.
    */
-  public void setJWTCookie(String jwtToken, HttpServletResponse response) {
+  public void setJwtCookie(String jwtToken, HttpServletResponse response) {
     Cookie jwtCookie = new Cookie("JWT", jwtToken);
     jwtCookie.setHttpOnly(true);
     jwtCookie.setSecure(true);
@@ -122,7 +122,7 @@ public class JwtUtils {
    *
    * @param response The HttpServletResponse object to which the cookie will be added.
    */
-  public void setLogOutJWTCookie(HttpServletResponse response) {
+  public void setLogOutJwtCookie(HttpServletResponse response) {
     Cookie jwtCookie = new Cookie("JWT", null);
     jwtCookie.setHttpOnly(true);
     jwtCookie.setSecure(true);
