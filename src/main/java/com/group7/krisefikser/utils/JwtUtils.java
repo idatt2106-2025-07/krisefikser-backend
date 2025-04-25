@@ -7,6 +7,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.model.Role;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
@@ -33,9 +34,9 @@ public class JwtUtils {
    * @return a jwt for the user
    * @throws JwtMissingPropertyException if parameters are invalid
    */
-  public String generateToken(final int userId, final String role)
+  public String generateToken(final int userId, final Role role)
       throws JwtMissingPropertyException {
-    if (role == null || role.isBlank()) {
+    if (role == null || userId <= 0) {
       throw new JwtMissingPropertyException("Token generation call must include UserId and Role");
     }
     final Instant now = Instant.now();
@@ -45,7 +46,7 @@ public class JwtUtils {
         .withIssuer("krisefikser")
         .withIssuedAt(now)
         .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
-        .withClaim("role", role)
+        .withClaim("role", role.toString())
         .sign(hmac512);
   }
 
