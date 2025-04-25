@@ -2,7 +2,6 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.EmailRequest;
 import com.group7.krisefikser.dto.request.EmailTemplateRequest;
-import com.group7.krisefikser.enums.EmailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,7 @@ import com.group7.krisefikser.service.EmailService;
  *
  */
 @RestController
-@RequestMapping("/api/email")
+@RequestMapping("/api/auth/email")
 public class EmailController {
 
   @Autowired
