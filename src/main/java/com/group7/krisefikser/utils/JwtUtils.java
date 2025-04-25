@@ -2,7 +2,10 @@ package com.group7.krisefikser.utils;
 
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import java.time.Duration;
 import java.time.Instant;
@@ -40,6 +43,56 @@ public class JwtUtils {
         .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
         .withClaim("role", role)
         .sign(hmac512);
+  }
+
+  /**
+   * validates a given token.
+   *
+   * @param token the jwt to be validated
+   * @return the decoded jwt
+   * @throws JWTVerificationException if the verification failed
+   */
+  private DecodedJWT validateToken(final String token) throws JWTVerificationException {
+    try {
+      final Algorithm hmac512 = Algorithm.HMAC512(KEY_SECRET);
+      final JWTVerifier verifier = JWT.require(hmac512).build();
+      return verifier.verify(token);
+    } catch (final JWTVerificationException e) {
+      logger.warn("token is invalid {}", e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * validates and retrieves the user id from the given token.
+   *
+   * @param token the jwt to get user id from
+   * @return the user id
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validateTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
+    String subject = validateToken(token).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain a subject");
+      throw new JwtMissingPropertyException("Token does not contain a subject");
+    }
+    return subject;
+  }
+
+  /**
+   * validates and retrieves the role from the given token.
+   *
+   * @param token the jwt to get role from
+   * @return the role
+   * @throws JwtMissingPropertyException if token doesn't contain a role
+   */
+  public String validateTokenAndGetRole(final String token) throws JwtMissingPropertyException {
+    String role = validateToken(token).getClaim("role").asString();
+    if (role == null) {
+      logger.error("Token does not contain a role");
+      throw new JwtMissingPropertyException("Token does not contain a role");
+    }
+    return role;
   }
 }
 
