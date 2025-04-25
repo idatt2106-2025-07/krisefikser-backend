@@ -13,10 +13,12 @@ import java.time.Duration;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Utils class for JWT based tasks.
  */
+@Component
 public class JwtUtils {
   private static final String KEY_SECRET = "e256b71bd0e14db99e73badaeae8385c";
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
