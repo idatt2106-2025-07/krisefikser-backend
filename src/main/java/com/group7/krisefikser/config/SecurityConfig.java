@@ -3,6 +3,7 @@ package com.group7.krisefikser.config;
 import com.group7.krisefikser.security.JwtAuthorizationFilter;
 import com.group7.krisefikser.utils.JwtUtils;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +18,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * Configuration class for setting up authentication and authorization configurations.
  */
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+  private final JwtUtils jwtUtils;
+
+  /**
+   * Bean for the JWT authorization filter.
+   *
+   * @return the JwtAuthorizationFilter
+   */
+  @Bean
+  public JwtAuthorizationFilter jwtAuthorizationFilter() {
+    return new JwtAuthorizationFilter(jwtUtils);
+  }
 
   /**
    * Configuration for the filter chain, allowing for configuring endpoint authentication
@@ -47,7 +61,7 @@ public class SecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     http.addFilterBefore(
-        new JwtAuthorizationFilter(new JwtUtils()), UsernamePasswordAuthenticationFilter.class);
+        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
