@@ -3,6 +3,7 @@ package com.group7.krisefikser.config;
 import com.group7.krisefikser.security.JwtAuthorizationFilter;
 import com.group7.krisefikser.utils.JwtUtils;
 import java.util.List;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,6 +27,7 @@ public class SecurityConfig {
    * @return the configured SecurityChainFilter
    * @throws Exception if any error occurs while configuring the filter chain
    */
+  @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
     corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
