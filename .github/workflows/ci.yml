@@ -41,29 +41,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Build and start app in background
-        run: |
-          mvn clean verify javadoc:javadoc spring-boot:run &
-          sleep 20
-
-      - name: Generate Swagger UI
-        run: |
-          npm install -g swagger-ui-watcher
-          mkdir -p docs/swagger
-          curl http://localhost:8080/v3/api-docs -o openapi.json
-          swagger-ui-watcher openapi.json -d docs/swagger --no-open &
-          sleep 10
+      - name: Generate documentation
+        run: mvn clean verify javadoc:javadoc
 
       - name: Prepare docs directory
         run: |
           mkdir -p docs
-          cp -r target/site/jacoco docs/jacoco || true
-          cp -r target/site/apidocs docs/apidocs || true
+          cp -r target/site/jacoco docs/jacoco
+          cp -r target/site/apidocs docs/apidocs
 
       - name: Deploy docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
