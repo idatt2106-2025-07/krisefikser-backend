@@ -10,8 +10,12 @@ import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.Role;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,10 +25,31 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class JwtUtils {
-  private static final String KEY_SECRET = "e256b71bd0e14db99e73badaeae8385c";
+  private final String secretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
 
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+
+  /**
+   * Constructor for JwtUtils, generates a secret key.
+   *
+   * @throws NoSuchAlgorithmException if the algorithm is not found
+   */
+  public JwtUtils() throws NoSuchAlgorithmException {
+    KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+    SecretKey sk = keyGen.generateKey();
+    secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+  }
+
+  /**
+   * This method retrieves the secret key used to sign the JWT tokens.
+   *
+   * @return The secret key as an Algorithm object.
+   */
+  Algorithm getKey() {
+    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+    return Algorithm.HMAC512(keyBytes);
+  }
 
   /**
    * generates a json web token based on the userID and role parameters.
@@ -40,14 +65,13 @@ public class JwtUtils {
       throw new JwtMissingPropertyException("Token generation call must include UserId and Role");
     }
     final Instant now = Instant.now();
-    final Algorithm hmac512 = Algorithm.HMAC512(KEY_SECRET);
     return JWT.create()
         .withSubject(String.valueOf(userId))
         .withIssuer("krisefikser")
         .withIssuedAt(now)
         .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
         .withClaim("role", role.toString())
-        .sign(hmac512);
+        .sign(getKey());
   }
 
   /**
@@ -59,8 +83,7 @@ public class JwtUtils {
    */
   private DecodedJWT validateToken(final String token) throws JWTVerificationException {
     try {
-      final Algorithm hmac512 = Algorithm.HMAC512(KEY_SECRET);
-      final JWTVerifier verifier = JWT.require(hmac512).build();
+      final JWTVerifier verifier = JWT.require(getKey()).build();
       return verifier.verify(token);
     } catch (final JWTVerificationException e) {
       logger.warn("token is invalid {}", e.getMessage());
