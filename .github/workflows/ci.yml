@@ -1,4 +1,4 @@
-name: CI
+name: Maven Build and Deploy Docs
 
 on:
   push:
@@ -7,53 +7,30 @@ on:
     branches: [ "development" ]
 
 jobs:
-  build_and_test:
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: '21'
           distribution: 'temurin'
-          cache: maven
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-
-      - name: Run tests
-        run: mvn clean verify
-
-  docs:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
           java-version: '21'
-          distribution: 'temurin'
-          cache: maven
 
-      - name: Generate documentation
-        run: mvn clean verify javadoc:javadoc
+      - name: Build and run tests with Maven
+        run: mvn -B clean verify
 
-      - name: Prepare docs directory
+      - name: Generate JaCoCo and Javadoc
         run: |
-          mkdir -p docs
-          cp -r target/site/jacoco docs/jacoco
-          cp -r target/site/apidocs docs/apidocs
+          mvn jacoco:report
+          mvn javadoc:javadoc
 
-      - name: Deploy docs to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload site to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          publish_branch: gh-pages
-          keep_files: true
