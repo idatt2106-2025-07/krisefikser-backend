@@ -32,7 +32,7 @@ jobs:
       - name: Organize site contents
         run: |
           mkdir -p target/site/apidocs
-          cp -r target/reports/javadocs/* target/site/apidocs/
+          cp -r target/reports/apidocs/* target/site/apidocs/
 
       - name: Check target/site contents
         run: ls -R target/site
