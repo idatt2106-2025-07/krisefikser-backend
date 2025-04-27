@@ -2,7 +2,9 @@ package com.group7.krisefikser.config;
 
 import com.group7.krisefikser.security.JwtAuthorizationFilter;
 import com.group7.krisefikser.utils.JwtUtils;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,14 +56,15 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/**", corsConfiguration);
 
     http.cors(cors -> cors.configurationSource(source))
-        .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(authorize -> authorize
-            .anyRequest().authenticated())
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/api/point-of-interest").permitAll()
+                    .anyRequest().authenticated())
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     http.addFilterBefore(
-        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
