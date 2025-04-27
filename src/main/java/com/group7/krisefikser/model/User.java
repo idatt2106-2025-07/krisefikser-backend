@@ -1,5 +1,6 @@
 package com.group7.krisefikser.model;
 
+import com.group7.krisefikser.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -28,4 +28,9 @@ public class UserRepository {
     // Implementation to save user
     return null;
   }
+
+  public Optional<Object> findById(Long id) {
+    // Implementation to find user by id
+    return null;
+  }
 }

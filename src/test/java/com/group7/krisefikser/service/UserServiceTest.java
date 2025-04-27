@@ -279,4 +279,51 @@ public class UserServiceTest {
 
     verify(jwtUtils).validateTokenAndGetRole(token);
   }
+
+  @Test
+  void refreshToken_whenValidToken_returnsNewAuthResponse() throws JwtMissingPropertyException {
+    // Arrange
+    String oldToken = "old.token.here";
+    Long userId = 1L;
+    String role = Role.ROLE_USER.toString();
+    String newToken = "new.token.here";
+    Date expirationDate = new Date(System.currentTimeMillis() + 1000 * 60 * 60); // f.eks. 1 time fram
+
+    when(jwtUtils.validateTokenAndGetUserId(oldToken)).thenReturn(String.valueOf(userId));
+    when(jwtUtils.validateTokenAndGetRole(oldToken)).thenReturn(role);
+    when(jwtUtils.generateToken(userId, Role.valueOf(role))).thenReturn(newToken);
+    when(jwtUtils.getExpirationDate(newToken)).thenReturn(expirationDate);
+
+    // Act
+    AuthResponse response = userService.refreshToken(oldToken);
+
+    // Assert
+    assertNotNull(response);
+    assertEquals(String.valueOf(userId), response.getEmail());
+    assertEquals(AuthResponseMessage.TOKEN_REFRESH_ERROR.getMessage(), response.getMessage());
+    assertEquals(newToken, response.getToken());
+    assertEquals(expirationDate, response.getExpiryDate());
+    assertEquals(userId, response.getId());
+
+    verify(jwtUtils).validateTokenAndGetUserId(oldToken);
+    verify(jwtUtils).validateTokenAndGetRole(oldToken);
+    verify(jwtUtils).generateToken(userId, Role.valueOf(role));
+    verify(jwtUtils).getExpirationDate(newToken);
+  }
+
+  @Test
+  void refreshToken_whenInvalidToken_throwsException() throws JwtMissingPropertyException {
+    // Arrange
+    String invalidToken = "invalid.token.here";
+
+    when(jwtUtils.validateTokenAndGetUserId(invalidToken))
+        .thenThrow(new JwtMissingPropertyException("Invalid token"));
+
+    // Act & Assert
+    assertThrows(JwtMissingPropertyException.class, () -> {
+      userService.refreshToken(invalidToken);
+    });
+
+    verify(jwtUtils).validateTokenAndGetUserId(invalidToken);
+  }
 }
