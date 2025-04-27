@@ -16,9 +16,9 @@ import java.util.Map;
 public class EmailService {
 
   @Autowired
-  private JavaMailSender mailSender;
+  JavaMailSender mailSender;
   @Autowired
-  private EmailTemplateService emailTemplateService;
+  EmailTemplateService emailTemplateService;
 
   /**
    * Sends a simple email message.
