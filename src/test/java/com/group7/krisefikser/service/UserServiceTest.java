@@ -164,4 +164,119 @@ public class UserServiceTest {
     assertEquals(expirationDate, response.getExpiryDate());
     assertEquals(user.getId(), response.getId());
   }
+
+  @Test
+  void userExists_whenUserExists_returnsTrue() {
+    // Arrange
+    Long userId = 1L;
+    when(userRepo.findById(userId)).thenReturn(Optional.of(new User()));
+
+    // Act
+    boolean exists = userService.userExists(userId);
+
+    // Assert
+    assertTrue(exists);
+    verify(userRepo).findById(userId);
+  }
+
+  @Test
+  void userExists_whenUserDoesNotExist_returnsFalse() {
+    // Arrange
+    Long userId = 2L;
+    when(userRepo.findById(userId)).thenReturn(Optional.empty());
+
+    // Act
+    boolean exists = userService.userExists(userId);
+
+    // Assert
+    assertFalse(exists);
+    verify(userRepo).findById(userId);
+  }
+
+  @Test
+  void validateUserIdMatchesToken_whenIdsMatch_returnsTrue() throws JwtMissingPropertyException {
+    // Arrange
+    String token = "valid.token.here";
+    Long userId = 123L;
+    when(jwtUtils.validateTokenAndGetUserId(token)).thenReturn(String.valueOf(userId));
+
+    // Act
+    boolean matches = userService.validateUserIdMatchesToken(token, userId);
+
+    // Assert
+    assertTrue(matches);
+    verify(jwtUtils).validateTokenAndGetUserId(token);
+  }
+
+  @Test
+  void validateUserIdMatchesToken_whenIdsDoNotMatch_returnsFalse() throws JwtMissingPropertyException {
+    // Arrange
+    String token = "valid.token.here";
+    Long userId = 123L;
+    when(jwtUtils.validateTokenAndGetUserId(token)).thenReturn(String.valueOf(999L)); // feil ID
+
+    // Act
+    boolean matches = userService.validateUserIdMatchesToken(token, userId);
+
+    // Assert
+    assertFalse(matches);
+    verify(jwtUtils).validateTokenAndGetUserId(token);
+  }
+
+  @Test
+  void validateUserIdMatchesToken_whenTokenIsInvalid_throwsException() throws JwtMissingPropertyException {
+    // Arrange
+    String token = "invalid.token.here";
+    Long userId = 123L;
+    when(jwtUtils.validateTokenAndGetUserId(token)).thenThrow(new JwtMissingPropertyException("Missing user ID"));
+
+    // Act & Assert
+    assertThrows(JwtMissingPropertyException.class, () -> {
+      userService.validateUserIdMatchesToken(token, userId);
+    });
+
+    verify(jwtUtils).validateTokenAndGetUserId(token);
+  }
+
+  @Test
+  void validateAdmin_whenRoleIsAdmin_returnsTrue() throws JwtMissingPropertyException {
+    // Arrange
+    String token = "admin.token.here";
+    when(jwtUtils.validateTokenAndGetRole(token)).thenReturn(Role.ROLE_ADMIN.toString());
+
+    // Act
+    boolean isAdmin = userService.validateAdmin(token);
+
+    // Assert
+    assertTrue(isAdmin);
+    verify(jwtUtils).validateTokenAndGetRole(token);
+  }
+
+  @Test
+  void validateAdmin_whenRoleIsNotAdmin_returnsFalse() throws JwtMissingPropertyException {
+    // Arrange
+    String token = "user.token.here";
+    when(jwtUtils.validateTokenAndGetRole(token)).thenReturn(Role.ROLE_USER.toString());
+
+    // Act
+    boolean isAdmin = userService.validateAdmin(token);
+
+    // Assert
+    assertFalse(isAdmin);
+    verify(jwtUtils).validateTokenAndGetRole(token);
+  }
+
+  @Test
+  void validateAdmin_whenTokenIsInvalid_throwsException() throws JwtMissingPropertyException {
+    // Arrange
+    String token = "invalid.token.here";
+    when(jwtUtils.validateTokenAndGetRole(token)).thenThrow(new JwtMissingPropertyException("Missing role"));
+
+    // Act & Assert
+    assertThrows(JwtMissingPropertyException.class, () -> {
+      userService.validateAdmin(token);
+    });
+
+    verify(jwtUtils).validateTokenAndGetRole(token);
+  }
 }
