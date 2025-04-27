@@ -29,14 +29,16 @@ jobs:
           mvn jacoco:report
           mvn javadoc:javadoc
 
-      - name: Upload Jacoco to GitHub Pages
+      - name: Organize site contents
+        run: |
+          mkdir -p target/site/apidocs
+          cp -r target/reports/javadocs/* target/site/apidocs/
+
+      - name: Check target/site contents
+        run: ls -R target/site
+
+      - name: Upload site to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/site
-
-      - name: Upload Javadocs to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/reports
