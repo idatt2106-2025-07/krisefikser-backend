@@ -29,8 +29,14 @@ jobs:
           mvn jacoco:report
           mvn javadoc:javadoc
 
-      - name: Upload site to GitHub Pages
+      - name: Upload Jacoco to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./target/site
+
+      - name: Upload Javadocs to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/reports
