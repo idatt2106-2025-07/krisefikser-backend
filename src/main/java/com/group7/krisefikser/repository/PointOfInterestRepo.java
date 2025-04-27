@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import com.group7.krisefikser.enums.PointOfInterestType;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,5 +43,29 @@ public class PointOfInterestRepo {
                     rs.getDouble("longitude"),
                     PointOfInterestType.fromString(rs.getString("type"))
             ));
+  }
+
+  /**
+   * This method retrieves points of interest from the database based on their types.
+   * It takes a list of PointOfInterestType enums as input and returns a list of PointOfInterest objects.
+   *
+   * @param types A list of PointOfInterestType enums representing the types of points of interest to retrieve.
+   * @return A list of PointOfInterest objects that match the specified types.
+   */
+  public List<PointOfInterest> getPointsOfInterestByTypes(List<PointOfInterestType> types) {
+    String placeholders = String.join(",", Collections.nCopies(types.size(), "?"));
+    String sql = "SELECT * FROM points_of_interest WHERE type IN (" + placeholders + ")";
+
+    Object[] typeValues = types.stream()
+            .map(PointOfInterestType::getType)
+            .toArray();
+
+    return jdbcTemplate.query(sql, (rs, rowNum) ->
+            new PointOfInterest(
+                    rs.getLong("id"),
+                    rs.getDouble("latitude"),
+                    rs.getDouble("longitude"),
+                    PointOfInterestType.fromString(rs.getString("type"))
+            ), typeValues);
   }
 }

@@ -1,5 +1,6 @@
 package com.group7.krisefikser.repository;
 
+import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.model.PointOfInterest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,27 @@ class PointOfInterestRepoTest {
 
     assertNotNull(pointsOfInterest);
     assertEquals(5, pointsOfInterest.size());
+    assertEquals(1, pointsOfInterest.get(0).getId());
+    assertEquals(10.76, pointsOfInterest.get(0).getLongitude());
+    assertEquals(59.91, pointsOfInterest.get(0).getLatitude());
+    assertEquals("SHELTER", pointsOfInterest.get(0).getType().name());
+  }
+
+  /**
+   * This method tests the getPointsOfInterestByTypes method in the PointOfInterestRepo class.
+   * It retrieves points of interest based on their types from the database and checks if the list is not null,
+   * the size of the list is correct, and the attributes of the first point of interest are correct.
+   * It uses the PointOfInterestType enum to specify the types of points of interest to retrieve.
+   */
+  @Test
+  void getPointsOfInterestByTypes() {
+    List<PointOfInterest> pointsOfInterest = pointOfInterestRepo.getPointsOfInterestByTypes(List.of(
+            PointOfInterestType.SHELTER,
+            PointOfInterestType.FOOD_CENTRAL
+    ));
+
+    assertNotNull(pointsOfInterest);
+    assertEquals(2, pointsOfInterest.size());
     assertEquals(1, pointsOfInterest.get(0).getId());
     assertEquals(10.76, pointsOfInterest.get(0).getLongitude());
     assertEquals(59.91, pointsOfInterest.get(0).getLatitude());
