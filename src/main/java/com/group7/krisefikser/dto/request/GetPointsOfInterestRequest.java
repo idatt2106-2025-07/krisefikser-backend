@@ -1,9 +1,8 @@
 package com.group7.krisefikser.dto.request;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.List;
 
 /**
  * Request class for getting points of interest.
