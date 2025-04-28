@@ -41,9 +41,13 @@ public class PointOfInterestService {
 <span class="fc" id="L41">                    point.getId(),</span>
 <span class="fc" id="L42">                    point.getLatitude(),</span>
 <span class="fc" id="L43">                    point.getLongitude(),</span>
-<span class="fc" id="L44">                    point.getType().name()</span>
+<span class="fc" id="L44">                    point.getType().name(),</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">                    point.getOpensAt() != null ? point.getOpensAt().toString() : null,</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">                    point.getClosesAt() != null ? point.getClosesAt().toString() : null,</span>
+<span class="fc" id="L47">                    point.getContactNumber(),</span>
+<span class="fc" id="L48">                    point.getDescription()</span>
             ))
-<span class="fc" id="L46">            .toList();</span>
+<span class="fc" id="L50">            .toList();</span>
 
   }
 
@@ -54,13 +58,13 @@ public class PointOfInterestService {
    * @return List of PointOfInterestType enums
    */
   private List&lt;PointOfInterestType&gt; mapStringsToPointOfInterestTypes(List&lt;String&gt; types) {
-<span class="fc bfc" id="L57" title="All 4 branches covered.">    if (types == null || types.isEmpty()) {</span>
-<span class="fc" id="L58">      return List.of();</span>
+<span class="fc bfc" id="L61" title="All 4 branches covered.">    if (types == null || types.isEmpty()) {</span>
+<span class="fc" id="L62">      return List.of();</span>
     }
 
-<span class="fc" id="L61">    return types.stream()</span>
-<span class="fc" id="L62">            .map(PointOfInterestType::fromString)</span>
-<span class="fc" id="L63">            .toList();</span>
+<span class="fc" id="L65">    return types.stream()</span>
+<span class="fc" id="L66">            .map(PointOfInterestType::fromString)</span>
+<span class="fc" id="L67">            .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

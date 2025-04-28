@@ -35,10 +35,10 @@ public class AffectedAreaRepo {
 <span class="fc" id="L35">      area.setId(rs.getLong(&quot;id&quot;));</span>
 <span class="fc" id="L36">      area.setLongitude(rs.getDouble(&quot;longitude&quot;));</span>
 <span class="fc" id="L37">      area.setLatitude(rs.getDouble(&quot;latitude&quot;));</span>
-<span class="fc" id="L38">      area.setHighDangerRadiusKm(rs.getDouble(&quot;high_danger_radius_km&quot;));</span>
-<span class="fc" id="L39">      area.setMediumDangerRadiusKm(rs.getDouble(&quot;medium_danger_radius_km&quot;));</span>
-<span class="fc" id="L40">      area.setLowDangerRadiusKm(rs.getDouble(&quot;low_danger_radius_km&quot;));</span>
-<span class="fc" id="L41">      area.setNotificationMessage(rs.getString(&quot;notification_message&quot;));</span>
+<span class="fc" id="L38">      area.setDangerRadiusKm(rs.getDouble(&quot;danger_radius_km&quot;));</span>
+<span class="fc" id="L39">      area.setSeverityLevel(rs.getInt(&quot;severity_level&quot;));</span>
+<span class="fc" id="L40">      area.setDescription(rs.getString(&quot;description&quot;));</span>
+<span class="fc" id="L41">      area.setStartDate(rs.getTimestamp(&quot;start_time&quot;).toLocalDateTime());</span>
 <span class="fc" id="L42">      return area;</span>
     });
   }

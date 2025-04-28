@@ -16,7 +16,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PointOfInterestRepo {
   private final JdbcTemplate jdbcTemplate;
-
+  private static final String OPENS_AT_COLUMN_NAME = &quot;opens_at&quot;;
+  private static final String CLOSES_AT_COLUMN_NAME = &quot;closes_at&quot;;
   /**
    * Constructor for PointOfInterestRepo.
    *
@@ -24,23 +25,29 @@ public class PointOfInterestRepo {
    */
 
   @Autowired
-<span class="fc" id="L27">  public PointOfInterestRepo(JdbcTemplate jdbcTemplate) {</span>
-<span class="fc" id="L28">    this.jdbcTemplate = jdbcTemplate;</span>
-<span class="fc" id="L29">  }</span>
+<span class="fc" id="L28">  public PointOfInterestRepo(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L29">    this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L30">  }</span>
 
   /**
    * This method retrieves all points of interest from the database.
    * It returns a list of PointOfInterest objects.
    */
   public List&lt;PointOfInterest&gt; getAllPointsOfInterest() {
-<span class="fc" id="L36">    String sql = &quot;SELECT * FROM points_of_interest&quot;;</span>
+<span class="fc" id="L37">    String sql = &quot;SELECT * FROM points_of_interest&quot;;</span>
 
-<span class="fc" id="L38">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
-<span class="fc" id="L39">            new PointOfInterest(</span>
-<span class="fc" id="L40">                    rs.getLong(&quot;id&quot;),</span>
-<span class="fc" id="L41">                    rs.getDouble(&quot;latitude&quot;),</span>
-<span class="fc" id="L42">                    rs.getDouble(&quot;longitude&quot;),</span>
-<span class="fc" id="L43">                    PointOfInterestType.fromString(rs.getString(&quot;type&quot;))</span>
+<span class="fc" id="L39">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L40">            new PointOfInterest(</span>
+<span class="fc" id="L41">                    rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L42">                    rs.getDouble(&quot;latitude&quot;),</span>
+<span class="fc" id="L43">                    rs.getDouble(&quot;longitude&quot;),</span>
+<span class="fc" id="L44">                    PointOfInterestType.fromString(rs.getString(&quot;type&quot;)),</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">                    rs.getTime(OPENS_AT_COLUMN_NAME) != null</span>
+<span class="fc" id="L46">                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null</span>
+<span class="fc" id="L48">                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,</span>
+<span class="fc" id="L49">                    rs.getString(&quot;contact_number&quot;),</span>
+<span class="fc" id="L50">                    rs.getString(&quot;description&quot;)</span>
             ));
   }
 
@@ -54,19 +61,25 @@ public class PointOfInterestRepo {
    * @return A list of PointOfInterest objects that match the specified types.
    */
   public List&lt;PointOfInterest&gt; getPointsOfInterestByTypes(List&lt;PointOfInterestType&gt; types) {
-<span class="fc" id="L57">    String placeholders = String.join(&quot;,&quot;, Collections.nCopies(types.size(), &quot;?&quot;));</span>
-<span class="fc" id="L58">    String sql = &quot;SELECT * FROM points_of_interest WHERE type IN (&quot; + placeholders + &quot;)&quot;;</span>
+<span class="fc" id="L64">    String placeholders = String.join(&quot;,&quot;, Collections.nCopies(types.size(), &quot;?&quot;));</span>
+<span class="fc" id="L65">    String sql = &quot;SELECT * FROM points_of_interest WHERE type IN (&quot; + placeholders + &quot;)&quot;;</span>
 
-<span class="fc" id="L60">    Object[] typeValues = types.stream()</span>
-<span class="fc" id="L61">            .map(PointOfInterestType::getType)</span>
-<span class="fc" id="L62">            .toArray();</span>
+<span class="fc" id="L67">    Object[] typeValues = types.stream()</span>
+<span class="fc" id="L68">            .map(PointOfInterestType::getType)</span>
+<span class="fc" id="L69">            .toArray();</span>
 
-<span class="fc" id="L64">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
-<span class="fc" id="L65">            new PointOfInterest(</span>
-<span class="fc" id="L66">                    rs.getLong(&quot;id&quot;),</span>
-<span class="fc" id="L67">                    rs.getDouble(&quot;latitude&quot;),</span>
-<span class="fc" id="L68">                    rs.getDouble(&quot;longitude&quot;),</span>
-<span class="fc" id="L69">                    PointOfInterestType.fromString(rs.getString(&quot;type&quot;))</span>
+<span class="fc" id="L71">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L72">            new PointOfInterest(</span>
+<span class="fc" id="L73">                    rs.getLong(&quot;id&quot;),</span>
+<span class="fc" id="L74">                    rs.getDouble(&quot;latitude&quot;),</span>
+<span class="fc" id="L75">                    rs.getDouble(&quot;longitude&quot;),</span>
+<span class="fc" id="L76">                    PointOfInterestType.fromString(rs.getString(&quot;type&quot;)),</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                    rs.getTime(OPENS_AT_COLUMN_NAME) != null</span>
+<span class="pc" id="L78">                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null</span>
+<span class="pc" id="L80">                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,</span>
+<span class="fc" id="L81">                    rs.getString(&quot;contact_number&quot;),</span>
+<span class="fc" id="L82">                    rs.getString(&quot;description&quot;)</span>
             ), typeValues);
   }
 }

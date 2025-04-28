@@ -26,16 +26,16 @@ public class AffectedAreaService {
    */
   public List&lt;AffectedAreaResponse&gt; getAllAffectedAreas() {
 <span class="fc" id="L28">    return affectedAreaRepo.getAllAffectedAreas()</span>
-<span class="fc" id="L29">        .stream()</span>
-<span class="fc" id="L30">        .map(area -&gt; new AffectedAreaResponse(</span>
-<span class="fc" id="L31">            area.getId(),</span>
-<span class="fc" id="L32">            area.getLongitude(),</span>
-<span class="fc" id="L33">            area.getLatitude(),</span>
-<span class="fc" id="L34">            area.getHighDangerRadiusKm(),</span>
-<span class="fc" id="L35">            area.getMediumDangerRadiusKm(),</span>
-<span class="fc" id="L36">            area.getLowDangerRadiusKm(),</span>
-<span class="fc" id="L37">            area.getNotificationMessage()))</span>
-<span class="fc" id="L38">        .toList();</span>
+<span class="fc" id="L29">            .stream()</span>
+<span class="fc" id="L30">            .map(area -&gt; new AffectedAreaResponse(</span>
+<span class="fc" id="L31">                    area.getId(),</span>
+<span class="fc" id="L32">                    area.getLongitude(),</span>
+<span class="fc" id="L33">                    area.getLatitude(),</span>
+<span class="fc" id="L34">                    area.getDangerRadiusKm(),</span>
+<span class="fc" id="L35">                    area.getSeverityLevel(),</span>
+<span class="fc" id="L36">                    area.getDescription(),</span>
+<span class="fc" id="L37">                    area.getStartDate()))</span>
+<span class="fc" id="L38">                    .toList();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

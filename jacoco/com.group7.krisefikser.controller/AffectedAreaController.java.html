@@ -2,6 +2,11 @@
 
 import com.group7.krisefikser.dto.response.AffectedAreaResponse;
 import com.group7.krisefikser.service.AffectedAreaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
@@ -17,26 +22,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(&quot;/api/affected-area&quot;)
 @RequiredArgsConstructor
+@Tag(name = &quot;Affected Area&quot;, description = &quot;Endpoints for managing affected areas&quot;)
 public class AffectedAreaController {
   private final AffectedAreaService affectedAreaService;
 
-<span class="fc" id="L23">  private static final Logger logger = Logger.getLogger(AffectedAreaController.class.getName());</span>
+<span class="fc" id="L29">  private static final Logger logger = Logger.getLogger(AffectedAreaController.class.getName());</span>
 
   /**
    * Endpoint to fetch all affected areas.
    *
    * @return a list of affected areas
    */
+  @Operation(
+          summary = &quot;Get all affected areas&quot;,
+          description = &quot;Retrieves a list of all affected areas.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description =
+                          &quot;Successfully retrieved all affected areas&quot;,
+                          content = @Content(mediaType = &quot;application/json&quot;,
+                                  schema = @Schema(implementation = AffectedAreaResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
+  )
   @GetMapping
   public ResponseEntity&lt;List&lt;AffectedAreaResponse&gt;&gt; getAllAffectedAreas() {
-<span class="fc" id="L32">    logger.info(&quot;Fetching all affected areas&quot;);</span>
+<span class="fc" id="L49">    logger.info(&quot;Fetching all affected areas&quot;);</span>
     try {
-<span class="fc" id="L34">      List&lt;AffectedAreaResponse&gt; affectedAreas = affectedAreaService.getAllAffectedAreas();</span>
-<span class="fc" id="L35">      logger.info(&quot;Successfully fetched all affected areas&quot;);</span>
-<span class="fc" id="L36">      return ResponseEntity.ok(affectedAreas);</span>
-<span class="fc" id="L37">    } catch (Exception e) {</span>
-<span class="fc" id="L38">      logger.severe(&quot;Error fetching affected areas: &quot; + e.getMessage());</span>
-<span class="fc" id="L39">      return ResponseEntity.status(500).body(List.of());</span>
+<span class="fc" id="L51">      List&lt;AffectedAreaResponse&gt; affectedAreas = affectedAreaService.getAllAffectedAreas();</span>
+<span class="fc" id="L52">      logger.info(&quot;Successfully fetched all affected areas&quot;);</span>
+<span class="fc" id="L53">      return ResponseEntity.ok(affectedAreas);</span>
+<span class="fc" id="L54">    } catch (Exception e) {</span>
+<span class="fc" id="L55">      logger.severe(&quot;Error fetching affected areas: &quot; + e.getMessage());</span>
+<span class="fc" id="L56">      return ResponseEntity.status(500).body(List.of());</span>
     }
   }
 }
