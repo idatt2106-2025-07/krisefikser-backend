@@ -1,11 +1,10 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.AffectedArea;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * Repository class for accessing affected area data from the database.
@@ -14,6 +13,11 @@ import java.util.List;
 public class AffectedAreaRepo {
   private final JdbcTemplate jdbcTemplate;
 
+  /**
+   * Constructor for AffectedAreaRepo.
+   *
+   * @param jdbcTemplate the JdbcTemplate to be used for database operations
+   */
   @Autowired
   public AffectedAreaRepo(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
