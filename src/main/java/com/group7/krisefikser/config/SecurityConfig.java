@@ -57,6 +57,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/api/affected-area", "/api/point-of-interest").permitAll()
+                    .requestMatchers("/api/admin/invite").hasRole("SUPERADMIN")
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
