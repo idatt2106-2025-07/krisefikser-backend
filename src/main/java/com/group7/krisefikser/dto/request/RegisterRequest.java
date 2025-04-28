@@ -9,8 +9,10 @@ import lombok.Data;
 public class RegisterRequest {
   private String name;
   private String email;
-  private String phoneNumber;
   private String password;
   private Long householdId;
-  private Role role;
+  private Double longitude;
+  private Double latitude;
+  private String role;
+
 }
