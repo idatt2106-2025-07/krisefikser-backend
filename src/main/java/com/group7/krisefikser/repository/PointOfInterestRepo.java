@@ -2,10 +2,15 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.model.PointOfInterest;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -81,5 +86,35 @@ public class PointOfInterestRepo {
                     rs.getString("contact_number"),
                     rs.getString("description")
             ), typeValues);
+  }
+
+  /**
+   * This method adds a new point of interest to the database.
+   * It takes a PointOfInterest object as input and modifies the parameter to
+   * include the id of the newly added point of interest.
+   *
+   * @param pointOfInterest The PointOfInterest object to add to the database.
+   */
+  public void addPointOfInterest(PointOfInterest pointOfInterest) {
+    String sql = "INSERT INTO points_of_interest (latitude, longitude, type, opens_at, closes_at, contact_number, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+
+    jdbcTemplate.update(connection -> {
+      PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      ps.setDouble(1, pointOfInterest.getLatitude());
+      ps.setDouble(2, pointOfInterest.getLongitude());
+      ps.setString(3, pointOfInterest.getType().getType());
+      ps.setObject(4, pointOfInterest.getOpensAt());
+      ps.setObject(5, pointOfInterest.getClosesAt());
+      ps.setString(6, pointOfInterest.getContactNumber());
+      ps.setString(7, pointOfInterest.getDescription());
+      return ps;
+    }, keyHolder);
+
+    Number newId = keyHolder.getKey();
+    if (newId != null) {
+      pointOfInterest.setId(newId.longValue());
+    }
   }
 }

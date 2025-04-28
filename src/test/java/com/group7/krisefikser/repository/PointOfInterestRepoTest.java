@@ -5,12 +5,13 @@ import com.group7.krisefikser.model.PointOfInterest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class is a test class for the PointOfInterestRepo.
@@ -21,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class PointOfInterestRepoTest {
   @Autowired
   private PointOfInterestRepo pointOfInterestRepo;
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   /**
    * This method tests the getAllPointsOfInterest method in the PointOfInterestRepo class.
@@ -58,5 +61,32 @@ class PointOfInterestRepoTest {
     assertEquals(10.76, pointsOfInterest.get(0).getLongitude());
     assertEquals(59.91, pointsOfInterest.get(0).getLatitude());
     assertEquals("SHELTER", pointsOfInterest.get(0).getType().name());
+  }
+
+  /**
+   * This method tests the addPointOfInterest method in the PointOfInterestRepo class.
+   * It creates a new PointOfInterest object, adds it to the database, and checks if the
+   * ID of the new point is set correctly.
+   */
+  @Test
+  void addPointOfInterest_shouldInsertNewPointAndSetId() {
+    PointOfInterest newPoint = new PointOfInterest(
+            null,
+            63.4300,
+            10.4000,
+            PointOfInterestType.SHELTER,
+            LocalTime.of(9, 0),
+            LocalTime.of(17, 0),
+            "12345678",
+            "General supplies available here"
+    );
+
+    pointOfInterestRepo.addPointOfInterest(newPoint);
+
+    assertNotNull(newPoint.getId());
+    assertTrue(newPoint.getId() > 0);
+
+    String sql = "DELETE FROM points_of_interest WHERE id = ?";
+    jdbcTemplate.update(sql, newPoint.getId());
   }
 }
