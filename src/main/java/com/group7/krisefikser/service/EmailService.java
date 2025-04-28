@@ -1,12 +1,11 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.enums.EmailTemplateType;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * Service class for sending emails.

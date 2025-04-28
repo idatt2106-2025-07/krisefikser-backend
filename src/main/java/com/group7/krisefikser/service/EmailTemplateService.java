@@ -1,9 +1,9 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.enums.EmailTemplateType;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 
 /**
  * Service class for generating email templates.
@@ -38,9 +38,11 @@ public class EmailTemplateService {
     return switch (type) {
       case PASSWORD_RESET -> "Click the link below to reset your password:\n"
           + params.get("resetLink");
-      case HOUSEHOLD_INVITE -> "You have been invited to join a household. Click the link below to accept the invitation:\n"
+      case HOUSEHOLD_INVITE -> "You have been invited to join a household.\n"
+                              + "Click the link below to accept the invitation:\n"
           + params.get("inviteLink");
-      case ADMIN_INVITE -> "You have been invited to become an admin. Click the link below to accept the invitation:\n"
+      case ADMIN_INVITE -> "You have been invited to become an admin.\n"
+                            + "Click the link below to accept the invitation:\n"
           + params.get("inviteLink");
       case ADMIN_VERIFICATION -> "Your admin account has been verified. You can now log in.\n"
           + params.get("loginLink");
