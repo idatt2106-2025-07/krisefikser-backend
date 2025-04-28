@@ -3,6 +3,11 @@ package com.group7.krisefikser.controller;
 import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.service.PointOfInterestService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/point-of-interest")
+@Tag(name = "Point of Interest", description = "Endpoints for managing points of interest")
 public class PointOfInterestController {
   private final PointOfInterestService pointOfInterestService;
 
@@ -43,6 +49,33 @@ public class PointOfInterestController {
    * @param request The request containing the types of points of interest to be retrieved.
    * @return ResponseEntity containing a list of PointOfInterestResponse objects.
    */
+  @Operation(
+          summary = "Get points of interest by types",
+          description = "Retrieves a list of points of interest based on the "
+                  + "provided types in the request body.",
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = "List of point of interest types to filter by",
+                  required = true,
+                  content = @Content(mediaType = "application/json",
+                          schema = @Schema(implementation = GetPointsOfInterestRequest
+                                  .class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Successfully retrieved points of interest",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation =
+                                    PointOfInterestResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid point of interest type provided",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)))
+          }
+  )
   @GetMapping
   public ResponseEntity<List<PointOfInterestResponse>> getPointsOfInterest(
           @RequestBody GetPointsOfInterestRequest request) {

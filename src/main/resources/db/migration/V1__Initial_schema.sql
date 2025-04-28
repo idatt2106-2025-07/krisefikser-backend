@@ -69,18 +69,21 @@ CREATE TABLE points_of_interest
     'water_station',
     'defibrillator',
     'hospital'
-) NOT NULL
-);
+) NOT NULL,
+    opens_at TIME DEFAULT NULL,
+    closes_at TIME DEFAULT NULL,
+    contact_number VARCHAR(50) DEFAULT NULL,
+    description TEXT DEFAULT NULL);
 
 CREATE TABLE affected_areas
 (
     id                      INT PRIMARY KEY AUTO_INCREMENT,
     longitude               DOUBLE NOT NULL,
     latitude                DOUBLE NOT NULL,
-    low_danger_radius_km    DOUBLE NOT NULL CHECK (low_danger_radius_km >= 0),
-    medium_danger_radius_km DOUBLE NOT NULL CHECK (medium_danger_radius_km >= 0),
-    high_danger_radius_km   DOUBLE NOT NULL CHECK (high_danger_radius_km >= 0),
-    notification_message    TEXT   NOT NULL
+    danger_radius_km          INT NOT NULL,
+    severity_level        INT NOT NULL CHECK (severity_level >= 1 AND severity_level <= 3),
+    description    TEXT   NOT NULL,
+    start_time TIMESTAMP NOT NULL
 );
 
 CREATE TABLE join_household_requests

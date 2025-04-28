@@ -16,4 +16,8 @@ public class PointOfInterestResponse {
   private Double latitude;
   private Double longitude;
   private String type;
+  private String opensAt;
+  private String closesAt;
+  private String contactNumber;
+  private String description;
 }

@@ -66,8 +66,10 @@ class PointOfInterestServiceTest {
     GetPointsOfInterestRequest request = new GetPointsOfInterestRequest(requestedTypes);
 
     List<PointOfInterest> mockPoints = Arrays.asList(
-            new PointOfInterest(1L, 63.4297, 10.3933, PointOfInterestType.SHELTER),
-            new PointOfInterest(2L, 63.4300, 10.4000, PointOfInterestType.WATER_STATION)
+            new PointOfInterest(1L, 63.4297, 10.3933, PointOfInterestType.SHELTER,
+                    null, null, "12345678", "Shelter description"),
+            new PointOfInterest(2L, 63.4300, 10.4000, PointOfInterestType.WATER_STATION,
+                    null, null, "12345678", "Water station description")
     );
     when(pointOfInterestRepo.getPointsOfInterestByTypes(
             requestedTypes.stream().map(PointOfInterestType::fromString).toList())

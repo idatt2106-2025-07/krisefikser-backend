@@ -16,7 +16,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PointOfInterestRepo {
   private final JdbcTemplate jdbcTemplate;
-
+  private static final String OPENS_AT_COLUMN_NAME = "opens_at";
+  private static final String CLOSES_AT_COLUMN_NAME = "closes_at";
   /**
    * Constructor for PointOfInterestRepo.
    *
@@ -40,7 +41,13 @@ public class PointOfInterestRepo {
                     rs.getLong("id"),
                     rs.getDouble("latitude"),
                     rs.getDouble("longitude"),
-                    PointOfInterestType.fromString(rs.getString("type"))
+                    PointOfInterestType.fromString(rs.getString("type")),
+                    rs.getTime(OPENS_AT_COLUMN_NAME) != null
+                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null
+                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getString("contact_number"),
+                    rs.getString("description")
             ));
   }
 
@@ -66,7 +73,13 @@ public class PointOfInterestRepo {
                     rs.getLong("id"),
                     rs.getDouble("latitude"),
                     rs.getDouble("longitude"),
-                    PointOfInterestType.fromString(rs.getString("type"))
+                    PointOfInterestType.fromString(rs.getString("type")),
+                    rs.getTime(OPENS_AT_COLUMN_NAME) != null
+                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null
+                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getString("contact_number"),
+                    rs.getString("description")
             ), typeValues);
   }
 }

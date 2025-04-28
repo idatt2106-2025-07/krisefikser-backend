@@ -54,7 +54,8 @@ class PointOfInterestControllerTest {
   void getPointsOfInterest_shouldReturnOkWithPoints_whenServiceReturnsPoints() throws Exception {
     GetPointsOfInterestRequest request = new GetPointsOfInterestRequest(Arrays.asList("SHELTER"));
     List<PointOfInterestResponse> mockResponses = Collections.singletonList(
-            new PointOfInterestResponse(1L, 63.4297, 10.3933, "SHELTER")
+            new PointOfInterestResponse(1L, 63.4297, 10.3933, "SHELTER"
+                    , "08:00", "20:00", "123456789", "A shelter for people in need")
     );
     when(pointOfInterestService.getPointsOfInterestByTypes(request)).thenReturn(mockResponses);
 

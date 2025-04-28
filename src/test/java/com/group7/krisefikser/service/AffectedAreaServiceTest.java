@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,9 +37,9 @@ class AffectedAreaServiceTest {
   void getAllAffectedAreas_shouldReturnListOfAffectedAreaResponses() {
     List<AffectedArea> affectedAreas = Arrays.asList(
             new AffectedArea(1L, 10.0, 60.0, 5.0,
-                    10.0, 15.0, "High danger area 1"),
+                    1, "High danger area 1", null),
             new AffectedArea(2L, 11.0, 61.0, 3.0,
-                    7.0, 12.0, "Medium danger area 2")
+                    2, "Medium danger area 2", null)
     );
     when(affectedAreaRepo.getAllAffectedAreas()).thenReturn(affectedAreas);
 
@@ -50,19 +51,19 @@ class AffectedAreaServiceTest {
     assertEquals(1L, response1.getId());
     assertEquals(10.0, response1.getLongitude());
     assertEquals(60.0, response1.getLatitude());
-    assertEquals(5.0, response1.getHighDangerRadiusKm());
-    assertEquals(10.0, response1.getMediumDangerRadiusKm());
-    assertEquals(15.0, response1.getLowDangerRadiusKm());
-    assertEquals("High danger area 1", response1.getNotificationMessage());
+    assertEquals(5.0, response1.getDangerRadiusKm());
+    assertEquals(1.0, response1.getSeverityLevel());
+    assertEquals("High danger area 1", response1.getDescription());
+    assertNull(response1.getStartDate());
 
     AffectedAreaResponse response2 = responses.get(1);
     assertEquals(2L, response2.getId());
     assertEquals(11.0, response2.getLongitude());
     assertEquals(61.0, response2.getLatitude());
-    assertEquals(3.0, response2.getHighDangerRadiusKm());
-    assertEquals(7.0, response2.getMediumDangerRadiusKm());
-    assertEquals(12.0, response2.getLowDangerRadiusKm());
-    assertEquals("Medium danger area 2", response2.getNotificationMessage());
+    assertEquals(3.0, response2.getDangerRadiusKm());
+    assertEquals(2, response2.getSeverityLevel());
+    assertEquals("Medium danger area 2", response2.getDescription());
+    assertNull(response2.getStartDate());
   }
 
   /**

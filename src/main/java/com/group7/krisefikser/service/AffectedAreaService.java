@@ -26,15 +26,15 @@ public class AffectedAreaService {
    */
   public List<AffectedAreaResponse> getAllAffectedAreas() {
     return affectedAreaRepo.getAllAffectedAreas()
-        .stream()
-        .map(area -> new AffectedAreaResponse(
-            area.getId(),
-            area.getLongitude(),
-            area.getLatitude(),
-            area.getHighDangerRadiusKm(),
-            area.getMediumDangerRadiusKm(),
-            area.getLowDangerRadiusKm(),
-            area.getNotificationMessage()))
-        .toList();
+            .stream()
+            .map(area -> new AffectedAreaResponse(
+                    area.getId(),
+                    area.getLongitude(),
+                    area.getLatitude(),
+                    area.getDangerRadiusKm(),
+                    area.getSeverityLevel(),
+                    area.getDescription(),
+                    area.getStartDate()))
+                    .toList();
   }
 }
