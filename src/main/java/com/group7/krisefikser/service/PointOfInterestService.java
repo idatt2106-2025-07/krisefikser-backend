@@ -5,7 +5,7 @@ import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.repository.PointOfInterestRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
  * This class will contain methods to handle business logic related to points of interest.
  * It will interact with the repository layer to perform CRUD operations.
  */
-@Repository
+@Service
 @RequiredArgsConstructor
 public class PointOfInterestService {
   private final PointOfInterestRepo pointOfInterestRepo;
