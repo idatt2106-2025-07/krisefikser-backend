@@ -27,19 +27,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtils {
   private final String secretKey;
+  private final String inviteSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
+  private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);
+
 
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
   /**
-   * Constructor for JwtUtils, generates a secret key.
+   * Constructor for JwtUtils, generates two secret keys.
    *
    * @throws NoSuchAlgorithmException if the algorithm is not found
    */
   public JwtUtils() throws NoSuchAlgorithmException {
     KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+
     SecretKey sk = keyGen.generateKey();
     secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+
+    SecretKey isk = keyGen.generateKey();
+    inviteSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
   }
 
   /**
@@ -47,8 +54,8 @@ public class JwtUtils {
    *
    * @return The secret key as an Algorithm object.
    */
-  Algorithm getKey() {
-    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+  Algorithm getKey(String key) {
+    byte[] keyBytes = Base64.getDecoder().decode(key);
     return Algorithm.HMAC512(keyBytes);
   }
 
@@ -72,7 +79,22 @@ public class JwtUtils {
         .withIssuedAt(now)
         .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
         .withClaim("role", role.toString())
-        .sign(getKey());
+        .sign(getKey(secretKey));
+  }
+
+  public String generateInviteToken(final String username)
+      throws JwtMissingPropertyException {
+    if (username == null || username.isEmpty()) {
+      throw new JwtMissingPropertyException("Invite token generation call must include username");
+    }
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(username)
+        .withIssuer("krisefikser")
+        .withIssuedAt(now)
+        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
+        .withClaim("role", "ROLE_INVITE")
+        .sign(getKey(inviteSecretKey));
   }
 
   /**
@@ -82,9 +104,9 @@ public class JwtUtils {
    * @return the decoded jwt
    * @throws JWTVerificationException if the verification failed
    */
-  private DecodedJWT validateToken(final String token) throws JWTVerificationException {
+  private DecodedJWT validateToken(final String token, String key) throws JWTVerificationException {
     try {
-      final JWTVerifier verifier = JWT.require(getKey()).build();
+      final JWTVerifier verifier = JWT.require(getKey(key)).build();
       return verifier.verify(token);
     } catch (final JWTVerificationException e) {
       logger.warn("token is invalid {}", e.getMessage());
@@ -100,7 +122,7 @@ public class JwtUtils {
    * @throws JwtMissingPropertyException if token doesn't contain a subject
    */
   public String validateTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
-    String subject = validateToken(token).getSubject();
+    String subject = validateToken(token, secretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain a subject");
       throw new JwtMissingPropertyException("Token does not contain a subject");
@@ -116,12 +138,21 @@ public class JwtUtils {
    * @throws JwtMissingPropertyException if token doesn't contain a role
    */
   public String validateTokenAndGetRole(final String token) throws JwtMissingPropertyException {
-    String role = validateToken(token).getClaim("role").asString();
+    String role = validateToken(token, secretKey).getClaim("role").asString();
     if (role == null) {
       logger.error("Token does not contain a role");
       throw new JwtMissingPropertyException("Token does not contain a role");
     }
     return role;
+  }
+
+  public String validateInviteTokenAndGetUsername(final String token) throws JwtMissingPropertyException {
+    String username = validateToken(token, inviteSecretKey).getSubject();
+    if (username == null) {
+      logger.error("Token does not contain a subject");
+      throw new JwtMissingPropertyException("Token does not contain a subject");
+    }
+    return username;
   }
 
   /**
