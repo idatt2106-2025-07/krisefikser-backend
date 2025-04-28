@@ -1,6 +1,5 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.EmailRequest;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
