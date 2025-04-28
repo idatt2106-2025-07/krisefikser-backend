@@ -40,8 +40,8 @@ class AffectedAreaControllerTest {
   @Test
   void getAllAffectedAreas_shouldReturnOkAndJsonListOfAreas() throws Exception {
     List<AffectedAreaResponse> mockResponses = Arrays.asList(
-            new AffectedAreaResponse(1L, 10.0, 60.0, 5.0, 10.0, 15.0, "High danger area 1"),
-            new AffectedAreaResponse(2L, 11.0, 61.0, 3.0, 7.0, 12.0, "Medium danger area 2")
+            new AffectedAreaResponse(1L, 10.0, 60.0, 5.0, 1, "High danger area 1", null),
+            new AffectedAreaResponse(2L, 11.0, 61.0, 3.0, 2, "Medium danger area 2", null)
     );
     when(affectedAreaService.getAllAffectedAreas()).thenReturn(mockResponses);
 
@@ -52,7 +52,10 @@ class AffectedAreaControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(1))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].longitude").value(10.0))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(2))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[1].notificationMessage").value("Medium danger area 2"));
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].latitude").value(61.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].dangerRadiusKm").value(5.0))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].severityLevel").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].description").value("Medium danger area 2"));
   }
 
   /**

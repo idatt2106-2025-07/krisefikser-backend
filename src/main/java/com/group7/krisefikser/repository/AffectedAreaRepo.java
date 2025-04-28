@@ -1,7 +1,9 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.AffectedArea;
+
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -35,10 +37,10 @@ public class AffectedAreaRepo {
       area.setId(rs.getLong("id"));
       area.setLongitude(rs.getDouble("longitude"));
       area.setLatitude(rs.getDouble("latitude"));
-      area.setHighDangerRadiusKm(rs.getDouble("high_danger_radius_km"));
-      area.setMediumDangerRadiusKm(rs.getDouble("medium_danger_radius_km"));
-      area.setLowDangerRadiusKm(rs.getDouble("low_danger_radius_km"));
-      area.setNotificationMessage(rs.getString("notification_message"));
+      area.setDangerRadiusKm(rs.getDouble("danger_radius_km"));
+      area.setSeverityLevel(rs.getInt("severity_level"));
+      area.setDescription(rs.getString("description"));
+      area.setStartDate(rs.getTimestamp("start_time").toLocalDateTime());
       return area;
     });
   }

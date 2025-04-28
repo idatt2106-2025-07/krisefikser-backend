@@ -41,7 +41,11 @@ public class PointOfInterestService {
                     point.getId(),
                     point.getLatitude(),
                     point.getLongitude(),
-                    point.getType().name()
+                    point.getType().name(),
+                    point.getOpensAt() != null ? point.getOpensAt().toString() : null,
+                    point.getClosesAt() != null ? point.getClosesAt().toString() : null,
+                    point.getContactNumber(),
+                    point.getDescription()
             ))
             .toList();
 
