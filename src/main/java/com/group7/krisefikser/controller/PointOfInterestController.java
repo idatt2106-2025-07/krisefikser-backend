@@ -3,12 +3,15 @@ package com.group7.krisefikser.controller;
 import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.service.PointOfInterestService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 /**
  * Controller class for handling requests related to points of interest.

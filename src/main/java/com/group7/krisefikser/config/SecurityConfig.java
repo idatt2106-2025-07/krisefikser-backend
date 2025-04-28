@@ -2,9 +2,7 @@ package com.group7.krisefikser.config;
 
 import com.group7.krisefikser.security.JwtAuthorizationFilter;
 import com.group7.krisefikser.utils.JwtUtils;
-
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

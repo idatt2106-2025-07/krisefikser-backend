@@ -4,10 +4,9 @@ import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.repository.PointOfInterestRepo;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Service class for managing points of interest.
@@ -21,11 +20,13 @@ public class PointOfInterestService {
 
   /**
    * Method to get all points of interest.
-   * This method will interact with the repository to fetch all points of interest from the database.
+   * This method will interact with the repository to fetch all points of
+   * interest from the database.
    *
    * @return List of all points of interest
    */
-  public List<PointOfInterestResponse> getPointsOfInterestByTypes(GetPointsOfInterestRequest request) {
+  public List<PointOfInterestResponse> getPointsOfInterestByTypes(
+          GetPointsOfInterestRequest request) {
     List<PointOfInterestType> types;
     try {
       types = mapStringsToPointOfInterestTypes(request.getTypes());
