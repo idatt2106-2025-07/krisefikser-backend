@@ -7,6 +7,7 @@ import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.User;
+import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.PasswordUtil;
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
   private final UserRepository userRepo;
+  private final HouseholdRepository householdRepo;
   private final JwtUtils jwtUtils;
 
   @Override
@@ -42,19 +44,33 @@ public class UserService implements UserDetailsService {
     String email = request.getEmail();
     String hashedPassword = PasswordUtil.hashPassword(request.getPassword());
     String name = request.getName();
+    Long householdId = request.getHouseholdId();
+
     Optional<User> existingUser = userRepo.findByEmail(email);
     if (existingUser.isPresent()) {
       return new AuthResponse(email, AuthResponseMessage
           .USER_ALREADY_EXISTS.getMessage(), null, null, null);
     }
 
+    if (householdId == null) {
+      try {
+        // Create a new household using the user's name and default/provided coordinates
+        String householdName = name + "'s Household";
+
+        // Default coordinates (you might want to get these from the request instead)
+        double longitude = request.getLongitude() != null ? request.getLongitude() : 0.0;
+        double latitude = request.getLatitude() != null ? request.getLatitude() : 0.0;
+
+        householdId = householdRepo.createHousehold(householdName, longitude, latitude);
+      } catch (Exception e) {
+        return new AuthResponse(email, "Failed to create household: " + e.getMessage(), null, null, null);
+      }
+    }
     Optional<User> newUser;
     try {
-      User user = new User();
-      user.setEmail(email);
-      user.setPassword(hashedPassword);
-      user.setName(name);
-      newUser = userRepo.save(user);
+      Role role = request.getRole() != null ? Role.valueOf(request.getRole()) : Role.NORMAL;
+
+      newUser = userRepo.save(new User(name, email, hashedPassword, householdId, role));
       String token = jwtUtils.generateToken(newUser.get().getId(), newUser.get().getRole());
 
       return new AuthResponse(email, AuthResponseMessage
@@ -102,7 +118,7 @@ public class UserService implements UserDetailsService {
 
   public boolean validateAdmin(String token) throws JwtMissingPropertyException {
     String role = jwtUtils.validateTokenAndGetRole(token);
-    return role.equals(Role.ROLE_ADMIN.toString());
+    return role.equals(Role.ADMIN.toString());
   }
 
   public AuthResponse refreshToken(String token) throws JwtMissingPropertyException {

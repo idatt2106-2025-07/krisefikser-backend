@@ -21,7 +21,7 @@ public class UserRepository {
 
 
   public Optional<User> findByEmail(String email) {
-    String sql = "SELECT * FROM user WHERE email = ?";
+    String sql = "SELECT * FROM users WHERE email = ?";
     return jdbcTemplate.query(sql, (rs, rowNum) -> {
       User user = new User();
       user.setId(rs.getLong("id"));
@@ -29,15 +29,25 @@ public class UserRepository {
       user.setName(rs.getString("name"));
       user.setHouseholdId(rs.getLong("household_id"));
       user.setPassword(rs.getString("password"));
-      user.setRole(Role.valueOf(rs.getString("role")));
+      String roleStr = rs.getString("role").toUpperCase();
+      user.setRole(Role.valueOf(roleStr));
       return user;
     }, email).stream().findFirst();
   }
 
   public Optional<User> save(User user) {
+    if (user.getRole() == null) {
+      user.setRole(Role.NORMAL);
+    }
     String query = "INSERT INTO users (email, name, household_id, password, role) VALUES (?, ?, ?, ?, ?)";
-    jdbcTemplate.update(query, user.getEmail(), user.getName(), user.getHouseholdId(), user.getPassword(), user.getRole());
-    return findByEmail(user.getEmail());
+    try {
+      jdbcTemplate.update(query, user.getEmail(), user.getName(), user.getHouseholdId(), user.getPassword(), user.getRole().toString());
+      return findByEmail(user.getEmail());
+    } catch (Exception e) {
+      System.err.println("Failed to save user: " + e.getMessage());
+      e.printStackTrace();
+      return Optional.empty();
+    }
   }
 
   public Optional<Object> findById(Long id) {
