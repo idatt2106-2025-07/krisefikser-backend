@@ -54,15 +54,15 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/**", corsConfiguration);
 
     http.cors(cors -> cors.configurationSource(source))
-        .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/auth/**").permitAll()
-            .anyRequest().authenticated())
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/api/affected-area", "/api/point-of-interest").permitAll()
+                    .anyRequest().authenticated())
+            .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     http.addFilterBefore(
-        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
