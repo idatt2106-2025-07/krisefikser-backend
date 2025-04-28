@@ -56,7 +56,7 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/api/point-of-interest").permitAll()
+                    .requestMatchers("/api/affected-area", "/api/point-of-interest").permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
