@@ -15,8 +15,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PointOfInterestRequest {
-  @NotNull(message = "ID cannot be null")
-  private Long id;
   @NotNull(message = "Latitude cannot be null")
   private Double latitude;
   @NotNull(message = "Longitude cannot be null")

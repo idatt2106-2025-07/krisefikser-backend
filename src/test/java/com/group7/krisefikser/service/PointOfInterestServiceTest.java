@@ -49,13 +49,13 @@ class PointOfInterestServiceTest {
     invalidToken = "invalidTestToken";
 
     addRequest = new PointOfInterestRequest(
-            null, 10.0, 20.0, "shelter", "09:00", "17:00", "12345678", "A safe shelter"
+            10.0, 20.0, "shelter", "09:00", "17:00", "12345678", "A safe shelter"
     );
     savedPoint = new PointOfInterest(
             1L, 10.0, 20.0, PointOfInterestType.SHELTER, LocalTime.parse("09:00"), LocalTime.parse("17:00"), "12345678", "A safe shelter"
     );
     updateRequest = new PointOfInterestRequest(
-            1L, 11.0, 21.0, "hospital", "10:00", "18:00", "87654321", "Updated hospital info"
+            11.0, 21.0, "hospital", "10:00", "18:00", "87654321", "Updated hospital info"
     );
   }
 
@@ -233,10 +233,10 @@ class PointOfInterestServiceTest {
 
 
     PointOfInterestResponse response = pointOfInterestService
-            .updatePointOfInterest(validToken, updateRequest);
+            .updatePointOfInterest(1L, validToken, updateRequest);
 
     assertNotNull(response);
-    assertEquals(updateRequest.getId(), response.getId());
+    assertEquals(1L, response.getId());
     assertEquals(updateRequest.getLatitude(), response.getLatitude());
     assertEquals(updateRequest.getLongitude(), response.getLongitude());
     assertEquals(updateRequest.getType().toUpperCase(), response.getType());
@@ -251,14 +251,16 @@ class PointOfInterestServiceTest {
   @Test
   void updatePointOfInterest_nonExistingId_shouldThrowIllegalArgumentException() throws JwtMissingPropertyException {
     PointOfInterestRequest nonExistingRequest = new PointOfInterestRequest(
-            99L, 11.0, 21.0, "hospital", "10:00", "18:00", "87654321", "Updated hospital info"
+            11.0, 21.0, "hospital", "10:00", "18:00", "87654321", "Updated hospital info"
     );
     when(pointOfInterestRepo.updatePointOfInterest(any(PointOfInterest.class)))
             .thenReturn(0);
     when(jwtUtils.validateTokenAndGetRole(validToken)).thenReturn("admin");
 
-    assertThrows(IllegalArgumentException.class, () -> pointOfInterestService.updatePointOfInterest(validToken, nonExistingRequest));
-    verify(pointOfInterestRepo, times(1)).updatePointOfInterest(any(PointOfInterest.class));
+    assertThrows(IllegalArgumentException.class, () -> pointOfInterestService
+            .updatePointOfInterest(99L, validToken, nonExistingRequest));
+    verify(pointOfInterestRepo, times(1))
+            .updatePointOfInterest(any(PointOfInterest.class));
   }
 
   @Test
@@ -266,7 +268,8 @@ class PointOfInterestServiceTest {
     when(pointOfInterestRepo.updatePointOfInterest(any(PointOfInterest.class))).thenReturn(2);
     when(jwtUtils.validateTokenAndGetRole(validToken)).thenReturn("admin");
 
-    assertThrows(IllegalStateException.class, () -> pointOfInterestService.updatePointOfInterest(validToken, updateRequest));
+    assertThrows(IllegalStateException.class, () -> pointOfInterestService
+            .updatePointOfInterest(1L, validToken, updateRequest));
     verify(pointOfInterestRepo, times(1)).updatePointOfInterest(any(PointOfInterest.class));
   }
 
@@ -274,7 +277,8 @@ class PointOfInterestServiceTest {
   void updatePointOfInterest_unauthorizedUser_shouldThrowIllegalAccessException() throws JwtMissingPropertyException {
     when(jwtUtils.validateTokenAndGetRole(invalidToken)).thenReturn("normal");
 
-    assertThrows(IllegalAccessException.class, () -> pointOfInterestService.updatePointOfInterest(invalidToken, addRequest));
+    assertThrows(IllegalAccessException.class, () -> pointOfInterestService
+            .updatePointOfInterest(1L, invalidToken, addRequest));
     verify(pointOfInterestRepo, never()).addPointOfInterest(any(PointOfInterest.class));
   }
 }

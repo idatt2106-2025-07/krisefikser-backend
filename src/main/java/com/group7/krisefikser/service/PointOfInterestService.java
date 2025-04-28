@@ -101,7 +101,7 @@ public class PointOfInterestService {
     validateIsAdmin(token);
 
     PointOfInterest point = new PointOfInterest(
-            pointOfInterestRequest.getId(),
+            null,
             pointOfInterestRequest.getLatitude(),
             pointOfInterestRequest.getLongitude(),
             PointOfInterestType.fromString(pointOfInterestRequest.getType()),
@@ -161,11 +161,11 @@ public class PointOfInterestService {
    */
   @Transactional(rollbackFor = Exception.class)
   public PointOfInterestResponse updatePointOfInterest(
-          String token,
+          Long id, String token,
           PointOfInterestRequest pointOfInterestRequest) throws IllegalAccessException {
     validateIsAdmin(token);
     PointOfInterest point = new PointOfInterest(
-            pointOfInterestRequest.getId(),
+            id,
             pointOfInterestRequest.getLatitude(),
             pointOfInterestRequest.getLongitude(),
             PointOfInterestType.fromString(pointOfInterestRequest.getType()),
