@@ -51,14 +51,14 @@ public class EmailTemplateServiceTest {
   void testGetBody_householdInvite() {
     Map<String, String> params = Map.of("inviteLink", "http://example.com/household");
     String body = emailTemplateService.getBody(EmailTemplateType.HOUSEHOLD_INVITE, params);
-    assertEquals("You have been invited to join a household. Click the link below to accept the invitation:\nhttp://example.com/household", body);
+    assertEquals("You have been invited to join a household.\nClick the link below to accept the invitation:\nhttp://example.com/household", body);
   }
 
   @Test
   void testGetBody_adminInvite() {
     Map<String, String> params = Map.of("inviteLink", "http://example.com/admininvite");
     String body = emailTemplateService.getBody(EmailTemplateType.ADMIN_INVITE, params);
-    assertEquals("You have been invited to become an admin. Click the link below to accept the invitation:\nhttp://example.com/admininvite", body);
+    assertEquals("You have been invited to become an admin.\nClick the link below to accept the invitation:\nhttp://example.com/admininvite", body);
   }
 
   @Test
