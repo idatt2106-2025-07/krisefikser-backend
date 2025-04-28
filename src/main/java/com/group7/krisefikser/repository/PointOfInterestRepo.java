@@ -3,6 +3,8 @@ package com.group7.krisefikser.repository;
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.model.PointOfInterest;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
@@ -42,18 +44,7 @@ public class PointOfInterestRepo {
     String sql = "SELECT * FROM points_of_interest";
 
     return jdbcTemplate.query(sql, (rs, rowNum) ->
-            new PointOfInterest(
-                    rs.getLong("id"),
-                    rs.getDouble("latitude"),
-                    rs.getDouble("longitude"),
-                    PointOfInterestType.fromString(rs.getString("type")),
-                    rs.getTime(OPENS_AT_COLUMN_NAME) != null
-                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
-                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null
-                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
-                    rs.getString("contact_number"),
-                    rs.getString("description")
-            ));
+            mapRowToPointOfInterest(rs));
   }
 
   /**
@@ -74,18 +65,22 @@ public class PointOfInterestRepo {
             .toArray();
 
     return jdbcTemplate.query(sql, (rs, rowNum) ->
-            new PointOfInterest(
-                    rs.getLong("id"),
-                    rs.getDouble("latitude"),
-                    rs.getDouble("longitude"),
-                    PointOfInterestType.fromString(rs.getString("type")),
-                    rs.getTime(OPENS_AT_COLUMN_NAME) != null
-                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
-                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null
-                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
-                    rs.getString("contact_number"),
-                    rs.getString("description")
-            ), typeValues);
+            mapRowToPointOfInterest(rs), typeValues);
+  }
+
+  private PointOfInterest mapRowToPointOfInterest(ResultSet rs) throws SQLException {
+    return new PointOfInterest(
+            rs.getLong("id"),
+            rs.getDouble("latitude"),
+            rs.getDouble("longitude"),
+            PointOfInterestType.fromString(rs.getString("type")),
+            rs.getTime(OPENS_AT_COLUMN_NAME) != null
+                    ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
+            rs.getTime(CLOSES_AT_COLUMN_NAME) != null
+                    ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
+            rs.getString("contact_number"),
+            rs.getString("description")
+    );
   }
 
   /**
