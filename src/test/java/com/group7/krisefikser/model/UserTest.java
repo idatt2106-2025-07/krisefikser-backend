@@ -26,7 +26,7 @@ public class UserTest {
         "Test User",
         10L,
         "securepassword",
-        Role.ROLE_USER
+        Role.NORMAL
     );
 
     assertEquals(1L, user.getId());
@@ -34,7 +34,7 @@ public class UserTest {
     assertEquals("Test User", user.getName());
     assertEquals(10L, user.getHouseholdId());
     assertEquals("securepassword", user.getPassword());
-    assertEquals(Role.ROLE_USER, user.getRole());
+    assertEquals(Role.NORMAL, user.getRole());
   }
 
   @Test
@@ -43,7 +43,8 @@ public class UserTest {
         "test@example.com",
         "Test User",
         "securepassword",
-        Role.ROLE_ADMIN
+        15L,
+        Role.ADMIN
     );
 
     assertNull(user.getId());
@@ -51,7 +52,7 @@ public class UserTest {
     assertEquals("test@example.com", user.getEmail());
     assertEquals("Test User", user.getName());
     assertEquals("securepassword", user.getPassword());
-    assertEquals(Role.ROLE_ADMIN, user.getRole());
+    assertEquals(Role.ADMIN, user.getRole());
   }
 
   @Test
@@ -62,14 +63,14 @@ public class UserTest {
     user.setName("Setter User");
     user.setHouseholdId(20L);
     user.setPassword("anotherpassword");
-    user.setRole(Role.ROLE_ADMIN);
+    user.setRole(Role.ADMIN);
 
     assertEquals(2L, user.getId());
     assertEquals("setter@example.com", user.getEmail());
     assertEquals("Setter User", user.getName());
     assertEquals(20L, user.getHouseholdId());
     assertEquals("anotherpassword", user.getPassword());
-    assertEquals(Role.ROLE_ADMIN, user.getRole());
+    assertEquals(Role.ADMIN, user.getRole());
   }
 
   @Test
@@ -80,7 +81,7 @@ public class UserTest {
         "Test User",
         10L,
         "securepassword",
-        Role.ROLE_USER
+        Role.NORMAL
     );
 
     String toStringResult = user.toString();
