@@ -56,7 +56,7 @@ public class SecurityConfig {
 <span class="fc" id="L56">    http.cors(cors -&gt; cors.configurationSource(source))</span>
 <span class="fc" id="L57">            .csrf(AbstractHttpConfigurer::disable)</span>
 <span class="fc" id="L58">            .authorizeHttpRequests(authorize -&gt; authorize</span>
-<span class="fc" id="L59">                    .requestMatchers(&quot;/api/point-of-interest&quot;).permitAll()</span>
+<span class="fc" id="L59">                    .requestMatchers(&quot;/api/affected-area&quot;, &quot;/api/point-of-interest&quot;).permitAll()</span>
 <span class="fc" id="L60">                    .anyRequest().authenticated())</span>
 <span class="fc" id="L61">            .sessionManagement(session -&gt; session</span>
 <span class="fc" id="L62">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
