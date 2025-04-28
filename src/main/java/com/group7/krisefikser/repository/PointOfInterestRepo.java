@@ -2,7 +2,6 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.model.PointOfInterest;
-
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.Collections;
@@ -23,6 +22,7 @@ public class PointOfInterestRepo {
   private final JdbcTemplate jdbcTemplate;
   private static final String OPENS_AT_COLUMN_NAME = "opens_at";
   private static final String CLOSES_AT_COLUMN_NAME = "closes_at";
+
   /**
    * Constructor for PointOfInterestRepo.
    *
@@ -96,7 +96,8 @@ public class PointOfInterestRepo {
    * @param pointOfInterest The PointOfInterest object to add to the database.
    */
   public void addPointOfInterest(PointOfInterest pointOfInterest) {
-    String sql = "INSERT INTO points_of_interest (latitude, longitude, type, opens_at, closes_at, contact_number, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO points_of_interest (latitude, longitude, type, "
+            + "opens_at, closes_at, contact_number, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -116,5 +117,16 @@ public class PointOfInterestRepo {
     if (newId != null) {
       pointOfInterest.setId(newId.longValue());
     }
+  }
+
+  /**
+   * This method deletes a point of interest from the database based on its ID.
+   * It takes a long value representing the ID of the point of interest to delete.
+   *
+   * @param id The ID of the point of interest to delete.
+   */
+  public int deletePointOfInterest(long id) {
+    String sql = "DELETE FROM points_of_interest WHERE id = ?";
+    return jdbcTemplate.update(sql, id);
   }
 }

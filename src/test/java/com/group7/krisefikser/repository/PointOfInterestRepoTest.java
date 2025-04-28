@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -19,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
+@Rollback
 class PointOfInterestRepoTest {
   @Autowired
   private PointOfInterestRepo pointOfInterestRepo;
@@ -85,8 +89,46 @@ class PointOfInterestRepoTest {
 
     assertNotNull(newPoint.getId());
     assertTrue(newPoint.getId() > 0);
+  }
 
-    String sql = "DELETE FROM points_of_interest WHERE id = ?";
-    jdbcTemplate.update(sql, newPoint.getId());
+  /**
+   * This method tests the updatePointOfInterest method in the PointOfInterestRepo class.
+   * It updates an existing point of interest in the database and checks if the update was successful.
+   */
+  @Test
+  void deletePointOfInterest_shouldDeleteExistingPointAndReturnOne() {
+    long existingId = 1L;
+
+    String selectSqlBefore = "SELECT COUNT(*) FROM points_of_interest WHERE id = ?";
+    Integer countBefore = jdbcTemplate.queryForObject(selectSqlBefore, Integer.class, existingId);
+    assertEquals(1, countBefore);
+
+    int rowsAffected = pointOfInterestRepo.deletePointOfInterest(existingId);
+    assertEquals(1, rowsAffected);
+
+    String selectSqlAfter = "SELECT COUNT(*) FROM points_of_interest WHERE id = ?";
+    Integer countAfter = jdbcTemplate.queryForObject(selectSqlAfter, Integer.class, existingId);
+    assertEquals(0, countAfter);
+  }
+
+  /**
+   * This method tests the deletePointOfInterest method in the PointOfInterestRepo class.
+   * It attempts to delete a point of interest that does not exist in the database and checks
+   * if the deletion was handled correctly.
+   */
+  @Test
+  void deletePointOfInterest_shouldReturnZeroForNonExistingId() {
+    long nonExistingId = 999L;
+
+    String selectSqlBefore = "SELECT COUNT(*) FROM points_of_interest WHERE id = ?";
+    Integer countBefore = jdbcTemplate.queryForObject(selectSqlBefore, Integer.class, nonExistingId);
+    assertEquals(0, countBefore);
+
+    int rowsAffected = pointOfInterestRepo.deletePointOfInterest(nonExistingId);
+    assertEquals(0, rowsAffected);
+
+    String selectSqlAfter = "SELECT COUNT(*) FROM points_of_interest WHERE id = ?";
+    Integer countAfter = jdbcTemplate.queryForObject(selectSqlAfter, Integer.class, nonExistingId);
+    assertEquals(0, countAfter);
   }
 }
