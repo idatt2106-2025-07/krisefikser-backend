@@ -1,0 +1,42 @@
+name: Maven Deploy Docs
+
+on:
+  push:
+    branches: [ "development" ]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build and run tests with Maven
+        run: mvn -B clean verify
+
+      - name: Generate JaCoCo and Javadoc
+        run: |
+          mvn jacoco:report
+          mvn javadoc:javadoc
+
+      - name: Organize site contents
+        run: |
+          mkdir -p target/site/apidocs
+          cp -r target/reports/apidocs/* target/site/apidocs/
+
+      - name: Check target/site contents
+        run: ls -R target/site
+
+      - name: Upload site to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/site
