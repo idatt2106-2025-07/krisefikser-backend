@@ -25,11 +25,19 @@ public class User {
    * @param password the password of the user
    * @param role     the role of the user
    */
-  public User(String email, String name, String password, Role role) {
+  public User(String email, String name, String password, Long householdId, Role role) {
     this.email = email;
     this.name = name;
     this.password = password;
+    this.householdId = householdId;
     this.role = role;
+  }
+
+  public User(String name, String email, String hashedPassword, Long householdId) {
+    this.name = name;
+    this.email = email;
+    this.password = hashedPassword;
+    this.householdId = householdId;
   }
 }
 
