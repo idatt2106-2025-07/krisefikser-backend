@@ -1,6 +1,12 @@
 com.group7.krisefikser
 com.group7.krisefikser.config
+com.group7.krisefikser.controller
+com.group7.krisefikser.dto.request
+com.group7.krisefikser.dto.response
+com.group7.krisefikser.enums
 com.group7.krisefikser.exception
 com.group7.krisefikser.model
+com.group7.krisefikser.repository
 com.group7.krisefikser.security
+com.group7.krisefikser.service
 com.group7.krisefikser.utils

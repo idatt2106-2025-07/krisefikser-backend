@@ -36,11 +36,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-<span class="nc" id="L39">    logger.info(&quot;JWTAuthorizationFilter called for URI: {}&quot;, request.getRequestURI());</span>
+<span class="fc" id="L39">    logger.info(&quot;JWTAuthorizationFilter called for URI: {}&quot;, request.getRequestURI());</span>
 
-<span class="nc" id="L41">    String token = null;</span>
-<span class="nc" id="L42">    Cookie[] cookies = request.getCookies();</span>
-<span class="nc bnc" id="L43" title="All 2 branches missed.">    if (cookies != null) {</span>
+<span class="fc" id="L41">    String token = null;</span>
+<span class="fc" id="L42">    Cookie[] cookies = request.getCookies();</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">    if (cookies != null) {</span>
 <span class="nc bnc" id="L44" title="All 2 branches missed.">      for (Cookie cookie : cookies) {</span>
 <span class="nc bnc" id="L45" title="All 2 branches missed.">        if (&quot;JWT&quot;.equals(cookie.getName())) {</span>
 <span class="nc" id="L46">          token = cookie.getValue();</span>
@@ -49,10 +49,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       }
     }
 
-<span class="nc bnc" id="L52" title="All 2 branches missed.">    if (token == null) {</span>
-<span class="nc" id="L53">      logger.warn(&quot;No token found in request&quot;);</span>
-<span class="nc" id="L54">      filterChain.doFilter(request, response);</span>
-<span class="nc" id="L55">      return;</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">    if (token == null) {</span>
+<span class="fc" id="L53">      logger.warn(&quot;No token found in request&quot;);</span>
+<span class="fc" id="L54">      filterChain.doFilter(request, response);</span>
+<span class="fc" id="L55">      return;</span>
     }
 
     final String username;

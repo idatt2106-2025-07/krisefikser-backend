@@ -1,7 +1,11 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-krisefikser,com.group7.krisefikser.config,SecurityConfig,0,79,0,0,0,18,0,5,0,5
+krisefikser,com.group7.krisefikser.config,SecurityConfig,0,88,0,0,0,19,0,5,0,5
 krisefikser,com.group7.krisefikser.model,Role,21,0,0,0,4,0,1,0,1,0
 krisefikser,com.group7.krisefikser.exception,JwtMissingPropertyException,13,0,0,0,6,0,3,0,3,0
+krisefikser,com.group7.krisefikser.repository,PointOfInterestRepo,0,73,0,0,0,21,0,5,0,5
+krisefikser,com.group7.krisefikser.controller,PointOfInterestController,0,49,0,0,0,16,0,3,0,3
 krisefikser,com.group7.krisefikser,KrisefikserApplication,5,3,0,0,2,1,1,1,1,1
 krisefikser,com.group7.krisefikser.utils,JwtUtils,142,23,8,0,41,7,11,2,7,2
-krisefikser,com.group7.krisefikser.security,JwtAuthorizationFilter,106,0,12,0,28,0,7,0,1,0
+krisefikser,com.group7.krisefikser.enums,PointOfInterestType,0,68,0,0,0,13,0,5,0,5
+krisefikser,com.group7.krisefikser.security,JwtAuthorizationFilter,82,24,10,2,20,8,6,1,0,1
+krisefikser,com.group7.krisefikser.service,PointOfInterestService,0,50,0,4,0,17,0,5,0,3

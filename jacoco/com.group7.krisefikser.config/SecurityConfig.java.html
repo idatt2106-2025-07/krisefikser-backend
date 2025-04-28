@@ -54,16 +54,17 @@ public class SecurityConfig {
 <span class="fc" id="L54">    source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
 
 <span class="fc" id="L56">    http.cors(cors -&gt; cors.configurationSource(source))</span>
-<span class="fc" id="L57">        .csrf(AbstractHttpConfigurer::disable)</span>
-<span class="fc" id="L58">        .authorizeHttpRequests(authorize -&gt; authorize</span>
-<span class="fc" id="L59">            .anyRequest().authenticated())</span>
-<span class="fc" id="L60">        .sessionManagement(session -&gt; session</span>
-<span class="fc" id="L61">            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+<span class="fc" id="L57">            .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L58">            .authorizeHttpRequests(authorize -&gt; authorize</span>
+<span class="fc" id="L59">                    .requestMatchers(&quot;/api/point-of-interest&quot;).permitAll()</span>
+<span class="fc" id="L60">                    .anyRequest().authenticated())</span>
+<span class="fc" id="L61">            .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L62">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
 
-<span class="fc" id="L63">    http.addFilterBefore(</span>
-<span class="fc" id="L64">        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L64">    http.addFilterBefore(</span>
+<span class="fc" id="L65">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="fc" id="L66">    return http.build();</span>
+<span class="fc" id="L67">    return http.build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
