@@ -71,9 +71,9 @@ VALUES (10.76, 59.91, 'shelter'),
 INSERT INTO affected_areas (longitude, latitude,
                             high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km,
                             notification_message)
-VALUES (10.77, 59.92, 5.0, 3.0, 1.0, 'Evacuate immediately due to chemical spill.'),
-       (10.90, 59.95, 7.0, 4.0, 2.0, 'Flooding risk, move to higher ground.'),
-       (10.85, 60.00, 10.0, 6.0, 3.0, 'Tornado alert, stay inside.');
+VALUES (10.77, 59.92, 1.0, 3.0, 5.0, 'Evacuate immediately due to chemical spill.'),
+       (10.90, 59.95, 2.0, 4.0, 7.0, 'Flooding risk, move to higher ground.'),
+       (10.85, 60.00, 3.0, 6.0, 10.0, 'Tornado alert, stay inside.');
 
 -- Insert join household request (references users and households)
 INSERT INTO join_household_requests (user_id, household_id)
