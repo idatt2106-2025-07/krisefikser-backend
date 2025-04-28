@@ -42,10 +42,10 @@ public class PointOfInterestRepo {
                     rs.getDouble("latitude"),
                     rs.getDouble("longitude"),
                     PointOfInterestType.fromString(rs.getString("type")),
-                    rs.getTime(OPENS_AT_COLUMN_NAME) != null ?
-                            rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
-                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null ?
-                            rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getTime(OPENS_AT_COLUMN_NAME) != null
+                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null
+                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
                     rs.getString("contact_number"),
                     rs.getString("description")
             ));
@@ -74,10 +74,10 @@ public class PointOfInterestRepo {
                     rs.getDouble("latitude"),
                     rs.getDouble("longitude"),
                     PointOfInterestType.fromString(rs.getString("type")),
-                    rs.getTime(OPENS_AT_COLUMN_NAME) != null ?
-                            rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
-                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null ?
-                            rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getTime(OPENS_AT_COLUMN_NAME) != null
+                            ? rs.getTime(OPENS_AT_COLUMN_NAME).toLocalTime() : null,
+                    rs.getTime(CLOSES_AT_COLUMN_NAME) != null
+                            ? rs.getTime(CLOSES_AT_COLUMN_NAME).toLocalTime() : null,
                     rs.getString("contact_number"),
                     rs.getString("description")
             ), typeValues);

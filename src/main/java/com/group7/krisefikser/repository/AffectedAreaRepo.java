@@ -1,9 +1,7 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.AffectedArea;
-
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;

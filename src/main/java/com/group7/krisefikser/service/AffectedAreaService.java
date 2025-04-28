@@ -2,9 +2,7 @@ package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.response.AffectedAreaResponse;
 import com.group7.krisefikser.repository.AffectedAreaRepo;
-
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +22,7 @@ public class AffectedAreaService {
    * objects.
    *
    * @return a list of AffectedAreaResponse objects containing details of all
-   * affected areas.
+   *         affected areas.
    */
   public List<AffectedAreaResponse> getAllAffectedAreas() {
     return affectedAreaRepo.getAllAffectedAreas()
