@@ -129,4 +129,23 @@ public class PointOfInterestRepo {
     String sql = "DELETE FROM points_of_interest WHERE id = ?";
     return jdbcTemplate.update(sql, id);
   }
+
+  /**
+   * This method updates an existing point of interest in the database.
+   * It takes a PointOfInterest object as input and returns the number of rows affected.
+   */
+  public int updatePointOfInterest(PointOfInterest pointOfInterest) {
+    String sql = "UPDATE points_of_interest SET latitude = ?, longitude = ?, type = ?, "
+            + "opens_at = ?, closes_at = ?, contact_number = ?, description = ? WHERE id = ?";
+
+    return jdbcTemplate.update(sql,
+            pointOfInterest.getLatitude(),
+            pointOfInterest.getLongitude(),
+            pointOfInterest.getType().getType(),
+            pointOfInterest.getOpensAt(),
+            pointOfInterest.getClosesAt(),
+            pointOfInterest.getContactNumber(),
+            pointOfInterest.getDescription(),
+            pointOfInterest.getId());
+  }
 }

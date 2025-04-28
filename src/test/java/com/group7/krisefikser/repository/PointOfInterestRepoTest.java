@@ -131,4 +131,77 @@ class PointOfInterestRepoTest {
     Integer countAfter = jdbcTemplate.queryForObject(selectSqlAfter, Integer.class, nonExistingId);
     assertEquals(0, countAfter);
   }
+
+  /**
+   * This method tests the updatePointOfInterest method in the PointOfInterestRepo class.
+   * It updates an existing point of interest in the database and checks if the update was
+   * successful.
+   */
+  @Test
+  void updatePointOfInterest_shouldUpdateExistingPointAndReturnOne() {
+    long existingId = 3L;
+
+    PointOfInterest updatedPoint = new PointOfInterest(
+            existingId,
+            63.5000,
+            10.5000,
+            PointOfInterestType.HOSPITAL,
+            LocalTime.of(8, 0),
+            LocalTime.of(20, 0),
+            "98765432",
+            "Updated hospital description"
+    );
+
+    int rowsAffected = pointOfInterestRepo.updatePointOfInterest(updatedPoint);
+    assertEquals(1, rowsAffected);
+
+    String selectSqlAfter = "SELECT * FROM points_of_interest WHERE id = 3";
+    PointOfInterest pointAfter = jdbcTemplate.queryForObject(selectSqlAfter, (rs, rowNum) ->
+            new PointOfInterest(
+                    rs.getLong("id"),
+                    rs.getDouble("latitude"),
+                    rs.getDouble("longitude"),
+                    PointOfInterestType.fromString(rs.getString("type")),
+                    rs.getObject("opens_at", LocalTime.class),
+                    rs.getObject("closes_at", LocalTime.class),
+                    rs.getString("contact_number"),
+                    rs.getString("description")
+            ));
+
+    assertEquals(updatedPoint.getId(), pointAfter.getId());
+    assertEquals(updatedPoint.getLatitude(), pointAfter.getLatitude());
+    assertEquals(updatedPoint.getLongitude(), pointAfter.getLongitude());
+    assertEquals(updatedPoint.getType(), pointAfter.getType());
+    assertEquals(updatedPoint.getOpensAt(), pointAfter.getOpensAt());
+    assertEquals(updatedPoint.getClosesAt(), pointAfter.getClosesAt());
+    assertEquals(updatedPoint.getContactNumber(), pointAfter.getContactNumber());
+    assertEquals(updatedPoint.getDescription(), pointAfter.getDescription());
+  }
+
+  /**
+   * This method tests the updatePointOfInterest method in the PointOfInterestRepo class.
+   * It attempts to update a point of interest that does not exist in the database and checks
+   * if the update was handled correctly.
+   */
+  @Test
+  void updatePointOfInterest_shouldReturnZeroForNonExistingId() {
+    long nonExistingId = 999L;
+    PointOfInterest nonExistingPoint = new PointOfInterest(
+            nonExistingId,
+            63.5000,
+            10.5000,
+            PointOfInterestType.SHELTER,
+            LocalTime.of(8, 0),
+            LocalTime.of(20, 0),
+            "98765432",
+            "Updated hospital description"
+    );
+
+    int rowsAffected = pointOfInterestRepo.updatePointOfInterest(nonExistingPoint);
+    assertEquals(0, rowsAffected);
+
+    String selectAllSql = "SELECT COUNT(*) FROM points_of_interest";
+    Integer totalCount = jdbcTemplate.queryForObject(selectAllSql, Integer.class);
+    assertEquals(5, totalCount);
+  }
 }
