@@ -1,6 +1,5 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 krisefikser,com.group7.krisefikser.config,SecurityConfig,0,92,0,0,0,19,0,5,0,5
-krisefikser,com.group7.krisefikser.model,Role,21,0,0,0,4,0,1,0,1,0
 krisefikser,com.group7.krisefikser.exception,JwtMissingPropertyException,13,0,0,0,6,0,3,0,3,0
 krisefikser,com.group7.krisefikser.repository,AffectedAreaRepo,0,61,0,0,0,14,0,3,0,3
 krisefikser,com.group7.krisefikser.repository,PointOfInterestRepo,0,73,0,0,0,21,0,5,0,5
@@ -9,6 +8,10 @@ krisefikser,com.group7.krisefikser.controller,AffectedAreaController,0,29,0,0,0,
 krisefikser,com.group7.krisefikser,KrisefikserApplication,5,3,0,0,2,1,1,1,1,1
 krisefikser,com.group7.krisefikser.utils,JwtUtils,142,23,8,0,41,7,11,2,7,2
 krisefikser,com.group7.krisefikser.enums,PointOfInterestType,0,68,0,0,0,13,0,5,0,5
+krisefikser,com.group7.krisefikser.enums,Role,21,0,0,0,4,0,1,0,1,0
+krisefikser,com.group7.krisefikser.enums,EmailTemplateType,0,27,0,0,0,5,0,1,0,1
 krisefikser,com.group7.krisefikser.security,JwtAuthorizationFilter,82,24,10,2,20,8,6,1,0,1
 krisefikser,com.group7.krisefikser.service,AffectedAreaService,0,26,0,0,0,11,0,2,0,2
+krisefikser,com.group7.krisefikser.service,EmailService,0,41,0,0,0,12,0,3,0,3
+krisefikser,com.group7.krisefikser.service,EmailTemplateService,0,45,0,8,0,15,0,9,0,3
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,0,50,0,4,0,17,0,5,0,3

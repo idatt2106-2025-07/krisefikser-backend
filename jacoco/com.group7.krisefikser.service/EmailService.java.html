@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service</a> &gt; <span class="el_source">EmailService.java</span></div><h1>EmailService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service;
+
+import com.group7.krisefikser.enums.EmailTemplateType;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service class for sending emails.
+ * This class uses JavaMailSender to send simple and template-based emails.
+ */
+@Service
+<span class="fc" id="L15">public class EmailService {</span>
+
+  @Autowired
+  JavaMailSender mailSender;
+  @Autowired
+  EmailTemplateService emailTemplateService;
+
+  /**
+   * Sends a simple email message.
+   *
+   * @param to      The recipient's email address.
+   * @param subject The subject of the email.
+   * @param text    The body of the email.
+   */
+  public void sendSimpleMessage(String to, String subject, String text) {
+<span class="fc" id="L30">    SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L31">    message.setFrom(&quot;krisefikser@gmail.com&quot;);</span>
+<span class="fc" id="L32">    message.setTo(to);</span>
+<span class="fc" id="L33">    message.setSubject(subject);</span>
+<span class="fc" id="L34">    message.setText(text);</span>
+<span class="fc" id="L35">    mailSender.send(message);</span>
+<span class="fc" id="L36">  }</span>
+
+  /**
+   * Sends a template-based email message.
+   *
+   * @param to    The recipient's email address.
+   * @param type  The type of the email template.
+   * @param params The parameters to be used in the template.
+   */
+  public void sendTemplateMessage(String to, EmailTemplateType type, Map&lt;String, String&gt; params) {
+<span class="fc" id="L46">    String subject = emailTemplateService.getSubject(type);</span>
+<span class="fc" id="L47">    String body = emailTemplateService.getBody(type, params);</span>
+<span class="fc" id="L48">    sendSimpleMessage(to, subject, body);</span>
+<span class="fc" id="L49">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
