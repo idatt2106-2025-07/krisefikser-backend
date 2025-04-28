@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtAuthorizationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.security</a> &gt; <span class="el_source">JwtAuthorizationFilter.java</span></div><h1>JwtAuthorizationFilter.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.security;
+
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.utils.JwtUtils;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+/**
+ * The JWT filter for authenticating a JWT authenticated request.
+ */
+@RequiredArgsConstructor
+public class JwtAuthorizationFilter extends OncePerRequestFilter {
+
+  private final Logger logger = LoggerFactory.getLogger(JwtAuthorizationFilter.class);
+
+  private final JwtUtils jwtUtils;
+
+
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      FilterChain filterChain) throws ServletException, IOException {
+
+<span class="nc" id="L39">    logger.info(&quot;JWTAuthorizationFilter called for URI: {}&quot;, request.getRequestURI());</span>
+
+<span class="nc" id="L41">    String token = null;</span>
+<span class="nc" id="L42">    Cookie[] cookies = request.getCookies();</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">    if (cookies != null) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">      for (Cookie cookie : cookies) {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if (&quot;JWT&quot;.equals(cookie.getName())) {</span>
+<span class="nc" id="L46">          token = cookie.getValue();</span>
+<span class="nc" id="L47">          break;</span>
+        }
+      }
+    }
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">    if (token == null) {</span>
+<span class="nc" id="L53">      logger.warn(&quot;No token found in request&quot;);</span>
+<span class="nc" id="L54">      filterChain.doFilter(request, response);</span>
+<span class="nc" id="L55">      return;</span>
+    }
+
+    final String username;
+    final String role;
+<span class="nc" id="L60">    logger.info(&quot;Validating token&quot;);</span>
+    try {
+<span class="nc" id="L62">      username = jwtUtils.validateTokenAndGetUserId(token);</span>
+<span class="nc" id="L63">      role = jwtUtils.validateTokenAndGetRole(token);</span>
+<span class="nc" id="L64">    } catch (JwtMissingPropertyException | JWTVerificationException e) {</span>
+<span class="nc" id="L65">      filterChain.doFilter(request, response);</span>
+<span class="nc" id="L66">      return;</span>
+<span class="nc" id="L67">    }</span>
+
+<span class="nc bnc" id="L69" title="All 4 branches missed.">    if (username == null || role == null) {</span>
+<span class="nc" id="L70">      filterChain.doFilter(request, response);</span>
+<span class="nc" id="L71">      return;</span>
+    }
+
+<span class="nc" id="L74">    List&lt;SimpleGrantedAuthority&gt; authorities = Collections.singletonList(</span>
+        new SimpleGrantedAuthority(role));
+<span class="nc" id="L76">    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(</span>
+        username,
+        null,
+        authorities);
+<span class="nc" id="L80">    SecurityContextHolder.getContext().setAuthentication(auth);</span>
+
+<span class="nc" id="L82">    logger.info(&quot;user: {}, role: {}, has been authenticated&quot;, username, role);</span>
+<span class="nc" id="L83">    filterChain.doFilter(request, response);</span>
+<span class="nc" id="L84">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

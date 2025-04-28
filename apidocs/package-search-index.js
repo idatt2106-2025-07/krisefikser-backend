@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.group7.krisefikser"},{"l":"com.group7.krisefikser.config"},{"l":"com.group7.krisefikser.exception"},{"l":"com.group7.krisefikser.model"},{"l":"com.group7.krisefikser.security"},{"l":"com.group7.krisefikser.utils"}];updateSearchResults();

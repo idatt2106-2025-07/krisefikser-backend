@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.utils</a> &gt; <span class="el_source">JwtUtils.java</span></div><h1>JwtUtils.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.utils;
+
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.model.Role;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+/**
+ * Utils class for JWT based tasks.
+ */
+@Component
+public class JwtUtils {
+  private final String secretKey;
+<span class="fc" id="L29">  private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);</span>
+
+<span class="fc" id="L31">  private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);</span>
+
+  /**
+   * Constructor for JwtUtils, generates a secret key.
+   *
+   * @throws NoSuchAlgorithmException if the algorithm is not found
+   */
+<span class="fc" id="L38">  public JwtUtils() throws NoSuchAlgorithmException {</span>
+<span class="fc" id="L39">    KeyGenerator keyGen = KeyGenerator.getInstance(&quot;HmacSHA256&quot;);</span>
+<span class="fc" id="L40">    SecretKey sk = keyGen.generateKey();</span>
+<span class="fc" id="L41">    secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());</span>
+<span class="fc" id="L42">  }</span>
+
+  /**
+   * This method retrieves the secret key used to sign the JWT tokens.
+   *
+   * @return The secret key as an Algorithm object.
+   */
+  Algorithm getKey() {
+<span class="nc" id="L50">    byte[] keyBytes = Base64.getDecoder().decode(secretKey);</span>
+<span class="nc" id="L51">    return Algorithm.HMAC512(keyBytes);</span>
+  }
+
+  /**
+   * generates a json web token based on the userID and role parameters.
+   *
+   * @param userId the subject of the token
+   * @param role the authority of the token
+   * @return a jwt for the user
+   * @throws JwtMissingPropertyException if parameters are invalid
+   */
+  public String generateToken(final int userId, final Role role)
+      throws JwtMissingPropertyException {
+<span class="nc bnc" id="L64" title="All 4 branches missed.">    if (role == null || userId &lt;= 0) {</span>
+<span class="nc" id="L65">      throw new JwtMissingPropertyException(&quot;Token generation call must include UserId and Role&quot;);</span>
+    }
+<span class="nc" id="L67">    final Instant now = Instant.now();</span>
+<span class="nc" id="L68">    return JWT.create()</span>
+<span class="nc" id="L69">        .withSubject(String.valueOf(userId))</span>
+<span class="nc" id="L70">        .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="nc" id="L71">        .withIssuedAt(now)</span>
+<span class="nc" id="L72">        .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))</span>
+<span class="nc" id="L73">        .withClaim(&quot;role&quot;, role.toString())</span>
+<span class="nc" id="L74">        .sign(getKey());</span>
+  }
+
+  /**
+   * validates a given token.
+   *
+   * @param token the jwt to be validated
+   * @return the decoded jwt
+   * @throws JWTVerificationException if the verification failed
+   */
+  private DecodedJWT validateToken(final String token) throws JWTVerificationException {
+    try {
+<span class="nc" id="L86">      final JWTVerifier verifier = JWT.require(getKey()).build();</span>
+<span class="nc" id="L87">      return verifier.verify(token);</span>
+<span class="nc" id="L88">    } catch (final JWTVerificationException e) {</span>
+<span class="nc" id="L89">      logger.warn(&quot;token is invalid {}&quot;, e.getMessage());</span>
+<span class="nc" id="L90">      throw e;</span>
+    }
+  }
+
+  /**
+   * validates and retrieves the user id from the given token.
+   *
+   * @param token the jwt to get user id from
+   * @return the user id
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validateTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
+<span class="nc" id="L102">    String subject = validateToken(token).getSubject();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">    if (subject == null) {</span>
+<span class="nc" id="L104">      logger.error(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L105">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
+    }
+<span class="nc" id="L107">    return subject;</span>
+  }
+
+  /**
+   * validates and retrieves the role from the given token.
+   *
+   * @param token the jwt to get role from
+   * @return the role
+   * @throws JwtMissingPropertyException if token doesn't contain a role
+   */
+  public String validateTokenAndGetRole(final String token) throws JwtMissingPropertyException {
+<span class="nc" id="L118">    String role = validateToken(token).getClaim(&quot;role&quot;).asString();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">    if (role == null) {</span>
+<span class="nc" id="L120">      logger.error(&quot;Token does not contain a role&quot;);</span>
+<span class="nc" id="L121">      throw new JwtMissingPropertyException(&quot;Token does not contain a role&quot;);</span>
+    }
+<span class="nc" id="L123">    return role;</span>
+  }
+
+  /**
+   * Sets a JWT token as an HTTP-only, secure cookie in the response.
+   *
+   * @param jwtToken The JWT token to be set in the cookie.
+   * @param response The HttpServletResponse object to which the cookie will be added.
+   */
+  public void setJwtCookie(String jwtToken, HttpServletResponse response) {
+<span class="nc" id="L133">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, jwtToken);</span>
+<span class="nc" id="L134">    jwtCookie.setHttpOnly(true);</span>
+<span class="nc" id="L135">    jwtCookie.setSecure(true);</span>
+<span class="nc" id="L136">    jwtCookie.setPath(&quot;/&quot;);</span>
+<span class="nc" id="L137">    jwtCookie.setMaxAge((int) JWT_VALIDITY.getSeconds());</span>
+<span class="nc" id="L138">    response.addCookie(jwtCookie);</span>
+<span class="nc" id="L139">  }</span>
+
+
+  /**
+   * Sets a logout JWT cookie in the HTTP response to effectively log out the user.
+   * The cookie is configured to expire immediately, ending the client's session.
+   *
+   * @param response The HttpServletResponse object to which the cookie will be added.
+   */
+  public void setLogOutJwtCookie(HttpServletResponse response) {
+<span class="nc" id="L149">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, null);</span>
+<span class="nc" id="L150">    jwtCookie.setHttpOnly(true);</span>
+<span class="nc" id="L151">    jwtCookie.setSecure(true);</span>
+<span class="nc" id="L152">    jwtCookie.setPath(&quot;/&quot;);</span>
+<span class="nc" id="L153">    jwtCookie.setMaxAge(0);</span>
+<span class="nc" id="L154">    response.addCookie(jwtCookie);</span>
+<span class="nc" id="L155">  }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
