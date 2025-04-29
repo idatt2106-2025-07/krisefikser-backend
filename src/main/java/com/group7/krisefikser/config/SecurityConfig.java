@@ -56,8 +56,11 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
             .anyRequest().authenticated())
+        .headers(
+            headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
+        )
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
