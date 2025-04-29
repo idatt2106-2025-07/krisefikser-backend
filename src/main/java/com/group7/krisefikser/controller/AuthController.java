@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +26,16 @@ public class AuthController {
 
 
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> registerUser(@RequestBody RegisterRequest request) {
-    logger.info("Received register request for user: " + request.getEmail() + request.getHouseholdId());
+  public ResponseEntity<AuthResponse> registerUser(@RequestBody RegisterRequest request, HttpServletResponse response) {
+    logger.info("Received register request for user: " + request.getEmail());
     try {
-      AuthResponse response = userService.registerUser(request);
+      AuthResponse authResponse = userService.registerUser(request, response);
 
-      if (response.getToken() == null) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+      if (authResponse.getToken() == null) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);
       }
       logger.info("User registered successfully: " + request.getEmail());
-      return ResponseEntity.status(HttpStatus.CREATED).body(response);
+      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
 
     } catch (Exception e) {
       logger.warning("Error registering user: " + e.getMessage());
@@ -49,12 +50,12 @@ public class AuthController {
   public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request) {
     logger.info("Received login request for user: " + request.getEmail());
     try {
-      AuthResponse response = userService.loginUser(request);
-      if (response.getToken() == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+      AuthResponse authResponse = userService.loginUser(request);
+      if (authResponse.getToken() == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);
       }
       logger.info("User logged in successfully: " + request.getEmail());
-      return ResponseEntity.ok(response);
+      return ResponseEntity.ok(authResponse);
 
     } catch (Exception e) {
       logger.warning("Error logging in user: " + e.getMessage());

@@ -10,9 +10,4 @@ public class RegisterRequest {
   private String name;
   private String email;
   private String password;
-  private Long householdId;
-  private Double longitude;
-  private Double latitude;
-  private String role;
-
 }

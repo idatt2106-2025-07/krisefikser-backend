@@ -33,11 +33,17 @@ public class User {
     this.role = role;
   }
 
-  public User(String name, String email, String hashedPassword, Long householdId) {
+  public User(String email, String name, String hashedPassword, Long householdId) {
     this.name = name;
     this.email = email;
     this.password = hashedPassword;
     this.householdId = householdId;
+  }
+
+  public User(String email, String name, String hashedPassword) {
+    this.name = name;
+    this.email = email;
+    this.password = hashedPassword;
   }
 }
 

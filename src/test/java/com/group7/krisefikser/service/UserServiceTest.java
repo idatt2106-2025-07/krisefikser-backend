@@ -10,6 +10,7 @@ import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.PasswordUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -44,7 +45,8 @@ public class UserServiceTest {
     when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.of(new User()));
 
     // Act
-    AuthResponse response = userService.registerUser(request);
+    HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
+    AuthResponse response = userService.registerUser(request, httpServletResponse);
 
     // Assert
     assertEquals(AuthResponseMessage.USER_ALREADY_EXISTS.getMessage(), response.getMessage());

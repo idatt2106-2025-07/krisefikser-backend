@@ -6,11 +6,14 @@ import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.mapper.UserMapper;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.PasswordUtil;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -40,44 +43,50 @@ public class UserService implements UserDetailsService {
         new ArrayList<>());
   }
 
-  public AuthResponse registerUser(RegisterRequest request) {
-    String email = request.getEmail();
-    String hashedPassword = PasswordUtil.hashPassword(request.getPassword());
-    String name = request.getName();
-    Long householdId = request.getHouseholdId();
-
-    Optional<User> existingUser = userRepo.findByEmail(email);
-    if (existingUser.isPresent()) {
-      return new AuthResponse(email, AuthResponseMessage
-          .USER_ALREADY_EXISTS.getMessage(), null, null, null);
-    }
-
-    if (householdId == null) {
-      try {
-        // Create a new household using the user's name and default/provided coordinates
-        String householdName = name + "'s Household";
-
-        // Default coordinates (you might want to get these from the request instead)
-        double longitude = request.getLongitude() != null ? request.getLongitude() : 0.0;
-        double latitude = request.getLatitude() != null ? request.getLatitude() : 0.0;
-
-        householdId = householdRepo.createHousehold(householdName, longitude, latitude);
-      } catch (Exception e) {
-        return new AuthResponse(email, "Failed to create household: " + e.getMessage(), null, null, null);
-      }
-    }
-    Optional<User> newUser;
+  @Transactional
+  public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
+    User newUser = UserMapper.INSTANCE.registerRequestToUser(request);
+    newUser.setRole(Role.NORMAL);
+    newUser.setPassword(PasswordUtil.hashPassword(request.getPassword()));
+//    String email = request.getEmail();
+//    String hashedPassword = PasswordUtil.hashPassword(request.getPassword());
+//    String name = request.getName();
+//    Long householdId;
+//
+//    Optional<User> existingUser = userRepo.findByEmail(email);
+//    if (existingUser.isPresent()) {
+//      return new AuthResponse(email, AuthResponseMessage
+//          .USER_ALREADY_EXISTS.getMessage(), null, null, null);
+//    }
+//    Optional<User> newUser;
+    Long householdId;
     try {
-      Role role = request.getRole() != null ? Role.valueOf(request.getRole()) : Role.NORMAL;
 
-      newUser = userRepo.save(new User(name, email, hashedPassword, householdId, role));
-      String token = jwtUtils.generateToken(newUser.get().getId(), newUser.get().getRole());
+      String householdName = newUser.getName() + "'s household";
 
-      return new AuthResponse(email, AuthResponseMessage
-          .USER_REGISTERED_SUCCESSFULLY.getMessage(), token,
-          jwtUtils.getExpirationDate(token), newUser.get().getId());
+      double longitude = 0.0;
+      double latitude = 0.0;
+
+      householdId = householdRepo.createHousehold(householdName, longitude, latitude);
+      System.out.println("2");
     } catch (Exception e) {
-      return new AuthResponse(email, AuthResponseMessage
+      System.out.println("1");
+      return new AuthResponse(newUser.getEmail(), AuthResponseMessage
+          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null, null);
+    }
+    try {
+      newUser.setHouseholdId(householdId);
+      userRepo.save(newUser);
+      Optional<User> newNewUser = userRepo.findByEmail(newUser.getEmail());
+      String token = jwtUtils.generateToken(newNewUser.get().getId(), newUser.getRole());
+      jwtUtils.setJwtCookie(token, response);
+      System.out.println("4");
+
+      return new AuthResponse(newUser.getEmail(), AuthResponseMessage
+          .USER_REGISTERED_SUCCESSFULLY.getMessage(), token,
+          jwtUtils.getExpirationDate(token), newUser.getId());
+    } catch (Exception e) {
+      return new AuthResponse(newUser.getEmail(), AuthResponseMessage
           .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null, null);
     }
   }

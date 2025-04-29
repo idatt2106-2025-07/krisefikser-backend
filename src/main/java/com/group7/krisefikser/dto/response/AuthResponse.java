@@ -10,7 +10,6 @@ import java.util.Date;
 public class AuthResponse {
   private String email;
   private String message;
-  private String token;
   private Date expiryDate;
   private Long id;
 }
