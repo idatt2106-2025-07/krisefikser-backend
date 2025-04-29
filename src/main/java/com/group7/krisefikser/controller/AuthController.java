@@ -1,9 +1,9 @@
 package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
-import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,6 +41,26 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
           new AuthResponse(request.getEmail(),
               AuthResponseMessage.SAVING_USER_ERROR.getMessage()
+                  + e.getMessage(), null, null, null));
+    }
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request) {
+    logger.info("Received login request for user: " + request.getEmail());
+    try {
+      AuthResponse response = userService.loginUser(request);
+      if (response.getToken() == null) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+      }
+      logger.info("User logged in successfully: " + request.getEmail());
+      return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+      logger.warning("Error logging in user: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+          new AuthResponse(request.getEmail(),
+              AuthResponseMessage.USER_LOGIN_ERROR.getMessage()
                   + e.getMessage(), null, null, null));
     }
   }
