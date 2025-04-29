@@ -43,6 +43,7 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // have to make this "authorized"
     CorsConfiguration corsConfiguration = new CorsConfiguration();
     corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
