@@ -84,7 +84,15 @@ public class UserService implements UserDetailsService {
 
   public AuthResponse loginUser(LoginRequest request) throws JwtMissingPropertyException {
     String email = request.getEmail();
+    System.out.println("Looking up user with email: " + email); // Debug
+
     Optional<User> userOpt = userRepo.findByEmail(email);
+    System.out.println("User found: " + (userOpt.isPresent() ? "Yes" : "No")); // Debug
+
+    if (userOpt.isEmpty()) {
+      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null, null);
+    }
+
     if (userOpt.isEmpty()) {
       return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null, null);
     }
