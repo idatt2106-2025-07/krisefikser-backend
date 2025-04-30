@@ -78,7 +78,8 @@ public class PointOfInterestService {
 
   private void validateIsAdmin(String token) throws IllegalAccessException {
     try {
-      if (!jwtUtils.validateTokenAndGetRole(token).equalsIgnoreCase("admin")) {
+      String role = jwtUtils.validateTokenAndGetRole(token);
+      if (!role.equalsIgnoreCase("admin") && !role.equalsIgnoreCase("super_admin")) {
         throw new IllegalAccessException("User is not authorized to perform this action");
       }
     } catch (JwtMissingPropertyException e) {
