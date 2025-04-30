@@ -80,13 +80,8 @@ public class UserRepository {
         + "(email, name, household_id, password, role) "
         + "VALUES (?, ?, ?, ?, ?)";
     try {
-      int rowsAffected = jdbcTemplate.update(
-          query, user.getEmail(), user.getName(), user.getHouseholdId(),
-          user.getPassword(), user.getRole().toString());
-
-      Optional<User> savedUser = findByEmail(user.getEmail());
-
-      return savedUser;
+      jdbcTemplate.update(query, user.getEmail(), user.getName(), user.getHouseholdId(), user.getPassword(), user.getRole().toString());
+      return findByEmail(user.getEmail());
     } catch (Exception e) {
       System.err.println("Failed to save user: " + e.getMessage());
       e.printStackTrace();
