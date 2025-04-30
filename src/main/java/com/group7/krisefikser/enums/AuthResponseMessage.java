@@ -1,5 +1,9 @@
 package com.group7.krisefikser.enums;
 
+/**
+ * Enum representing various authentication response messages.
+ * These messages are used to provide feedback to the user during the authentication process.
+ */
 public enum AuthResponseMessage {
   USER_NOT_FOUND("User not found"),
   INVALID_CREDENTIALS("Invalid credentials"),

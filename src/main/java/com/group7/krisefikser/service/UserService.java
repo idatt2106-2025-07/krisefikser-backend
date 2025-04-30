@@ -15,14 +15,23 @@ import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.PasswordUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
 
+/**
+ * Service class for handling user-related operations.
+ * This class provides methods for user registration, login, and token management.
+ * It implements the UserDetailsService interface for loading user details.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
@@ -39,10 +48,20 @@ public class UserService implements UserDetailsService {
     if (user == null) {
       throw new UsernameNotFoundException("User not found");
     }
-    return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(),
+    return new org.springframework.security.core.userdetails.User(
+        user.getEmail(), user.getPassword(),
         new ArrayList<>());
   }
 
+  /**
+   * Registers a new user in the system.
+   * This method handles the registration process, including creating a household for the user.
+   * It also sends a verification email to the user.
+   *
+   * @param request the registration request containing user details
+   * @param response the HTTP response object
+   * @return an AuthResponse object containing the result of the registration
+   */
   @Transactional
   public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
     User user = UserMapper.INSTANCE.registerRequestToUser(request);
@@ -53,14 +72,14 @@ public class UserService implements UserDetailsService {
       return new AuthResponse(user.getEmail(), AuthResponseMessage
           .USER_ALREADY_EXISTS.getMessage(), null, null);
     }
-    /**
-     * When the user is created, we also create a household for them
-     * This is for when the user waits for the request to join a household to be accepted
-     * This is a temporary solution, in the future the user should be able to create a household
-     */
+
+    // When the user is created, we also create a household for them
+    // This is for when the user waits for the request to join a household to be accepted
+    // This is a temporary solution, in the future the user should be able to create a household
     try {
       int counter = 1;
-      String baseName = user.getName() + "'s household" + UUID.randomUUID().toString().substring(0, 8);
+      String baseName = user.getName() + "'s household"
+          + UUID.randomUUID().toString().substring(0, 8);
       String householdName = baseName;
 
       while (householdRepo.existsByName(householdName)) {
@@ -83,7 +102,8 @@ public class UserService implements UserDetailsService {
       String emailVerificationToken = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
       String verificationLink = "https://localhost:5173/verify?token=" + emailVerificationToken;
       Map<String, String> params = Map.of("verificationLink", verificationLink);
-      emailService.sendTemplateMessage(byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
+      emailService.sendTemplateMessage(
+          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
 
       String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
       jwtUtils.setJwtCookie(token, response);
@@ -96,6 +116,15 @@ public class UserService implements UserDetailsService {
     }
   }
 
+  /**
+   * Logs in a user and generates a JWT token.
+   * This method verifies the user's credentials and generates a token if valid.
+   * It also checks if the user is verified.
+   *
+   * @param request the login request containing user credentials
+   * @return an AuthResponse object containing the result of the login
+   * @throws JwtMissingPropertyException if there is an issue with the JWT token
+   */
   public AuthResponse loginUser(LoginRequest request) throws JwtMissingPropertyException {
     String email = request.getEmail();
     System.out.println("Looking up user with email: " + email); // Debug
@@ -107,13 +136,11 @@ public class UserService implements UserDetailsService {
       return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
     }
 
-    if (userOpt.isEmpty()) {
-      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
-    }
     User user = userOpt.get();
 
     if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
-      return new AuthResponse(email, AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
+      return new AuthResponse(
+          email, AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
     }
 
     String token = jwtUtils.generateToken(user.getId(), user.getRole());
@@ -128,20 +155,45 @@ public class UserService implements UserDetailsService {
     );
   }
 
-  public boolean userExists(Long id) {
-    return userRepo.findById(id).isPresent();
-  }
-
-  public boolean validateUserIdMatchesToken(String token, Long userId) throws JwtMissingPropertyException {
+  /**
+   * Validates if the user ID matches the one in the token.
+   * This method checks if the user ID in the token
+   * matches the provided user ID.
+   *
+   * @param token the JWT token to validate
+   * @param userId the user ID to compare with
+   * @return true if the user ID matches, false otherwise
+   * @throws JwtMissingPropertyException if there is an issue with the JWT token
+   */
+  public boolean validateUserIdMatchesToken(String token, Long userId)
+      throws JwtMissingPropertyException {
     String tokenUserId = jwtUtils.validateTokenAndGetUserId(token);
     return tokenUserId.equals(String.valueOf(userId));
   }
 
+  /**
+   * Validates if the user has admin role.
+   * This method checks if the role in the token
+   * matches the admin role.
+   *
+   * @param token the JWT token to validate
+   * @return true if the user has admin role, false otherwise
+   * @throws JwtMissingPropertyException if there is an issue with the JWT token
+   */
   public boolean validateAdmin(String token) throws JwtMissingPropertyException {
     String role = jwtUtils.validateTokenAndGetRole(token);
     return role.equals(Role.ROLE_ADMIN.toString());
   }
 
+  /**
+   * Refreshes the JWT token for the user.
+   * This method generates a new token
+   * based on the user ID and role in the provided token.
+   *
+   * @param token the JWT token to refresh
+   * @return an AuthResponse object containing the new token and expiration date
+   * @throws JwtMissingPropertyException if there is an issue with the JWT token
+   */
   public AuthResponse refreshToken(String token) throws JwtMissingPropertyException {
     String userId = jwtUtils.validateTokenAndGetUserId(token);
     String role = jwtUtils.validateTokenAndGetRole(token);

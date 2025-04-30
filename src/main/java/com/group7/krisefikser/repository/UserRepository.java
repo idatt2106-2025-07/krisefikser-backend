@@ -2,27 +2,45 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.model.User;
+import java.util.Optional;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.logging.Logger;
-
+/**
+ * Repository class for managing user data in the database.
+ * This class provides methods to find users by email,
+ * save new users, and find users by ID.
+ */
 @Repository
 public class UserRepository {
 
-  private final static Logger logger = Logger.getLogger(UserRepository.class.getName());
+  private static final Logger logger = Logger.getLogger(UserRepository.class.getName());
 
   private final JdbcTemplate jdbcTemplate;
 
+  /**
+   * Constructor for UserRepository.
+   * This constructor initializes the JdbcTemplate used for database operations.
+   *
+   * @param jdbcTemplate the JdbcTemplate to be used for database operations
+   */
   @Autowired
   public UserRepository(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
   }
 
-
+  /**
+   * Finds a user by their email address.
+   * This method queries the database for a user with the specified email.
+   * If a user is found, it returns an Optional containing the user.
+   * If no user is found, it returns an empty Optional.
+   *
+   * @param email the email address of the user to be found
+   * @return an Optional containing the user if found, or an empty Optional if not found
+   */
   public Optional<User> findByEmail(String email) {
     String sql = "SELECT * FROM users WHERE email = ?";
     try {
@@ -44,18 +62,29 @@ public class UserRepository {
     }
   }
 
+  /**
+   * Saves a new user to the database.
+   * This method inserts a new user into the users table.
+   * If the user does not have a role, it sets the role to ROLE_NORMAL by default.
+   * If the user is saved successfully, it returns an Optional containing the saved user.
+   * If an error occurs during the save operation, it returns an empty Optional.
+   *
+   * @param user the user to be saved
+   * @return an Optional containing the saved user if successful, or an empty Optional if not
+   */
   public Optional<User> save(User user) {
     if (user.getRole() == null) {
       user.setRole(Role.ROLE_NORMAL);
     }
-    String query = "INSERT INTO users (email, name, household_id, password, role) VALUES (?, ?, ?, ?, ?)";
+    String query = "INSERT INTO users "
+        + "(email, name, household_id, password, role) "
+        + "VALUES (?, ?, ?, ?, ?)";
     try {
-      int rowsAffected = jdbcTemplate.update(query, user.getEmail(), user.getName(), user.getHouseholdId(), user.getPassword(), user.getRole().toString());
-      System.out.println("Rows affected by save: " + rowsAffected); // Add this debug line
+      int rowsAffected = jdbcTemplate.update(
+          query, user.getEmail(), user.getName(), user.getHouseholdId(),
+          user.getPassword(), user.getRole().toString());
 
-      // Test if findByEmail works properly
       Optional<User> savedUser = findByEmail(user.getEmail());
-      System.out.println("User found after save: " + (savedUser.isPresent() ? "Yes" : "No"));
 
       return savedUser;
     } catch (Exception e) {
@@ -63,10 +92,5 @@ public class UserRepository {
       e.printStackTrace();
       return Optional.empty();
     }
-  }
-
-  public Optional<Object> findById(Long id) {
-    // Implementation to find user by id
-    return null;
   }
 }
