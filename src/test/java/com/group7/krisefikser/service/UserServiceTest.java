@@ -4,9 +4,11 @@ import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
+import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.User;
+import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.PasswordUtil;
@@ -33,6 +35,12 @@ public class UserServiceTest {
   @InjectMocks
   private UserService userService;
 
+  @Mock
+  private HouseholdRepository householdRepo;
+
+  @Mock
+  private EmailService emailService;
+
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
@@ -41,7 +49,7 @@ public class UserServiceTest {
   @Test
   void registerUser_whenUserAlreadyExists_returnsUserAlreadyExistsResponse() throws JwtMissingPropertyException {
     // Arrange
-    RegisterRequest request = new RegisterRequest("existing@example.com", "Existing User", "password", "12345678", null);
+    RegisterRequest request = new RegisterRequest("test", "test@example.com", "password");
     when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.of(new User()));
 
     // Act
@@ -50,7 +58,6 @@ public class UserServiceTest {
 
     // Assert
     assertEquals(AuthResponseMessage.USER_ALREADY_EXISTS.getMessage(), response.getMessage());
-    assertNull(response.getToken());
     assertNull(response.getExpiryDate());
     assertNull(response.getId());
 
@@ -61,48 +68,53 @@ public class UserServiceTest {
   @Test
   void registerUser_whenNewUserSavedSuccessfully_returnsSuccessResponse() throws JwtMissingPropertyException {
     // Arrange
-    RegisterRequest request = new RegisterRequest("new@example.com", "New User", "password", "98765432", 69L);
-    when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+    RegisterRequest request = new RegisterRequest("New User", "new@example.com", "password");
 
     User savedUser = new User();
     savedUser.setId(1L);
-    savedUser.setRole(Role.ROLE_USER);
+    savedUser.setEmail(request.getEmail());
+    savedUser.setRole(Role.ROLE_NORMAL);
 
-    when(userRepo.save(any(User.class))).thenReturn(Optional.of(savedUser));
+    // Første kall: sjekk om bruker finnes (skal ikke finnes)
+    // Andre kall: etter lagring, hent bruker for token-generering
+    when(userRepo.findByEmail(request.getEmail()))
+        .thenReturn(Optional.empty()) // første kall: bruker finnes ikke
+        .thenReturn(Optional.of(savedUser)); // andre kall: bruker finnes nå
+
+    when(userRepo.save(any(User.class))).thenAnswer(invocation -> null); // save returnerer void
 
     String fakeToken = "fake.jwt.token";
-    Date expirationDate = new Date(System.currentTimeMillis() + 3600 * 1000); // 1 time frem i tid
+    Date expirationDate = new Date(System.currentTimeMillis() + 3600 * 1000);
     when(jwtUtils.generateToken(savedUser.getId(), savedUser.getRole())).thenReturn(fakeToken);
     when(jwtUtils.getExpirationDate(fakeToken)).thenReturn(expirationDate);
 
     // Act
-    AuthResponse response = userService.registerUser(request);
+    AuthResponse response = userService.registerUser(request, mock(HttpServletResponse.class));
 
     // Assert
     assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), response.getMessage());
-    assertEquals(fakeToken, response.getToken());
     assertEquals(expirationDate, response.getExpiryDate());
     assertEquals(savedUser.getId(), response.getId());
 
     verify(userRepo).save(any(User.class));
-    verify(jwtUtils).generateToken(savedUser.getId(), savedUser.getRole());
+    verify(jwtUtils, times(2)).generateToken(savedUser.getId(), savedUser.getRole());
   }
 
   @Test
   void registerUser_whenSaveFails_returnsSavingUserErrorResponse() throws JwtMissingPropertyException {
     // Arrange
-    RegisterRequest request = new RegisterRequest("fail@example.com", "Fail User", "password", "11223344", 96L);
+    RegisterRequest request = new RegisterRequest("Fail User", "fail@example.com", "password");
+
     when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
     when(userRepo.save(any(User.class))).thenThrow(new RuntimeException("Database is down"));
 
     // Act
-    AuthResponse response = userService.registerUser(request);
+    AuthResponse response = userService.registerUser(request, mock(HttpServletResponse.class));
 
     // Assert
     assertTrue(response.getMessage().contains(AuthResponseMessage.SAVING_USER_ERROR.getMessage()));
     assertTrue(response.getMessage().contains("Database is down"));
-    assertNull(response.getToken());
     assertNull(response.getExpiryDate());
     assertNull(response.getId());
 
@@ -119,7 +131,6 @@ public class UserServiceTest {
     AuthResponse response = userService.loginUser(request);
 
     assertEquals(AuthResponseMessage.USER_NOT_FOUND.getMessage(), response.getMessage());
-    assertNull(response.getToken());
     assertNull(response.getExpiryDate());
     assertNull(response.getId());
   }
@@ -139,7 +150,6 @@ public class UserServiceTest {
     AuthResponse response = userService.loginUser(request);
 
     assertEquals(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), response.getMessage());
-    assertNull(response.getToken());
     assertNull(response.getExpiryDate());
     assertNull(response.getId());
   }
@@ -162,37 +172,8 @@ public class UserServiceTest {
     AuthResponse response = userService.loginUser(request);
 
     assertEquals(AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(), response.getMessage());
-    assertEquals(generatedToken, response.getToken());
     assertEquals(expirationDate, response.getExpiryDate());
     assertEquals(user.getId(), response.getId());
-  }
-
-  @Test
-  void userExists_whenUserExists_returnsTrue() {
-    // Arrange
-    Long userId = 1L;
-    when(userRepo.findById(userId)).thenReturn(Optional.of(new User()));
-
-    // Act
-    boolean exists = userService.userExists(userId);
-
-    // Assert
-    assertTrue(exists);
-    verify(userRepo).findById(userId);
-  }
-
-  @Test
-  void userExists_whenUserDoesNotExist_returnsFalse() {
-    // Arrange
-    Long userId = 2L;
-    when(userRepo.findById(userId)).thenReturn(Optional.empty());
-
-    // Act
-    boolean exists = userService.userExists(userId);
-
-    // Assert
-    assertFalse(exists);
-    verify(userRepo).findById(userId);
   }
 
   @Test
@@ -258,7 +239,7 @@ public class UserServiceTest {
   void validateAdmin_whenRoleIsNotAdmin_returnsFalse() throws JwtMissingPropertyException {
     // Arrange
     String token = "user.token.here";
-    when(jwtUtils.validateTokenAndGetRole(token)).thenReturn(Role.ROLE_USER.toString());
+    when(jwtUtils.validateTokenAndGetRole(token)).thenReturn(Role.ROLE_NORMAL.toString());
 
     // Act
     boolean isAdmin = userService.validateAdmin(token);
@@ -287,7 +268,7 @@ public class UserServiceTest {
     // Arrange
     String oldToken = "old.token.here";
     Long userId = 1L;
-    String role = Role.ROLE_USER.toString();
+    String role = Role.ROLE_NORMAL.toString();
     String newToken = "new.token.here";
     Date expirationDate = new Date(System.currentTimeMillis() + 1000 * 60 * 60); // f.eks. 1 time fram
 
@@ -303,7 +284,6 @@ public class UserServiceTest {
     assertNotNull(response);
     assertEquals(String.valueOf(userId), response.getEmail());
     assertEquals(AuthResponseMessage.TOKEN_REFRESH_ERROR.getMessage(), response.getMessage());
-    assertEquals(newToken, response.getToken());
     assertEquals(expirationDate, response.getExpiryDate());
     assertEquals(userId, response.getId());
 

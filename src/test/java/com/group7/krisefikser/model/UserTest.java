@@ -26,7 +26,7 @@ public class UserTest {
         "Test User",
         10L,
         "securepassword",
-        Role.NORMAL
+        Role.ROLE_NORMAL
     );
 
     assertEquals(1L, user.getId());
@@ -34,7 +34,7 @@ public class UserTest {
     assertEquals("Test User", user.getName());
     assertEquals(10L, user.getHouseholdId());
     assertEquals("securepassword", user.getPassword());
-    assertEquals(Role.NORMAL, user.getRole());
+    assertEquals(Role.ROLE_NORMAL, user.getRole());
   }
 
   @Test
@@ -43,8 +43,8 @@ public class UserTest {
         "test@example.com",
         "Test User",
         "securepassword",
-        15L,
-        Role.ADMIN
+        null,
+        Role.ROLE_ADMIN
     );
 
     assertNull(user.getId());
@@ -52,7 +52,7 @@ public class UserTest {
     assertEquals("test@example.com", user.getEmail());
     assertEquals("Test User", user.getName());
     assertEquals("securepassword", user.getPassword());
-    assertEquals(Role.ADMIN, user.getRole());
+    assertEquals(Role.ROLE_ADMIN, user.getRole());
   }
 
   @Test
@@ -63,14 +63,14 @@ public class UserTest {
     user.setName("Setter User");
     user.setHouseholdId(20L);
     user.setPassword("anotherpassword");
-    user.setRole(Role.ADMIN);
+    user.setRole(Role.ROLE_ADMIN);
 
     assertEquals(2L, user.getId());
     assertEquals("setter@example.com", user.getEmail());
     assertEquals("Setter User", user.getName());
     assertEquals(20L, user.getHouseholdId());
     assertEquals("anotherpassword", user.getPassword());
-    assertEquals(Role.ADMIN, user.getRole());
+    assertEquals(Role.ROLE_ADMIN, user.getRole());
   }
 
   @Test
@@ -81,13 +81,13 @@ public class UserTest {
         "Test User",
         10L,
         "securepassword",
-        Role.NORMAL
+        Role.ROLE_NORMAL
     );
 
     String toStringResult = user.toString();
     assertTrue(toStringResult.contains("test@example.com"));
     assertTrue(toStringResult.contains("Test User"));
     assertTrue(toStringResult.contains("securepassword"));
-    assertTrue(toStringResult.contains("USER"));
+    assertTrue(toStringResult.contains("ROLE_NORMAL"));
   }
 }
