@@ -7,6 +7,7 @@ import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 import java.util.Date;
 
@@ -50,9 +49,9 @@ class AuthControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.email").value("john@example.com"))
         .andExpect(jsonPath("$.message").value("User registered successfully"))
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(jsonPath("$.expiryDate").exists())
+        .andExpect(jsonPath("$.role").value("ROLE_NORMAL"));
   }
 
   @Test
@@ -66,10 +65,9 @@ class AuthControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.email").value("jane@example.com"))
         .andExpect(jsonPath("$.message").value(AuthResponseMessage.SAVING_USER_ERROR.getMessage() + "Database error"))
         .andExpect(jsonPath("$.expiryDate").doesNotExist())
-        .andExpect(jsonPath("$.id").doesNotExist());
+        .andExpect(jsonPath("$.role").doesNotExist());
   }
 
   @Test
@@ -77,15 +75,16 @@ class AuthControllerTest {
     LoginRequest request = new LoginRequest("john@example.com", "password123");
     AuthResponse response = new AuthResponse("Login successful", new Date(), Role.ROLE_NORMAL);
 
-    Mockito.when(userService.loginUser(any(LoginRequest.class))).thenReturn(response);
+    Mockito.when(userService.loginUser(any(LoginRequest.class)))
+        .thenReturn(response);
 
     mockMvc.perform(post("/api/auth/login")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.email").value("john@example.com"))
         .andExpect(jsonPath("$.message").value("Login successful"))
-        .andExpect(jsonPath("$.id").value(1));
+        .andExpect(jsonPath("$.expiryDate").exists())
+        .andExpect(jsonPath("$.role").value("ROLE_NORMAL"));
   }
 
   @Test
@@ -99,9 +98,8 @@ class AuthControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isInternalServerError())
-        .andExpect(jsonPath("$.email").value("jane@example.com"))
         .andExpect(jsonPath("$.message").value(AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + "Authentication failed"))
         .andExpect(jsonPath("$.expiryDate").doesNotExist())
-        .andExpect(jsonPath("$.id").doesNotExist());
+        .andExpect(jsonPath("$.role").doesNotExist());
   }
 }
