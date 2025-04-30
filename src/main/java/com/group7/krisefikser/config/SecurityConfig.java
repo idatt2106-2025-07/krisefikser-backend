@@ -59,6 +59,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.GET, "/api/affected-area",
                             "/api/point-of-interest").permitAll()
+                    .requestMatchers("/api/point-of-interest/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));

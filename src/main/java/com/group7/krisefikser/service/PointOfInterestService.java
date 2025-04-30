@@ -8,8 +8,10 @@ import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.PointOfInterest;
 import com.group7.krisefikser.repository.PointOfInterestRepo;
 import com.group7.krisefikser.utils.JwtUtils;
+
 import java.time.LocalTime;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,17 +76,6 @@ public class PointOfInterestService {
             .toList();
   }
 
-  private void validateIsAdmin(String token) throws IllegalAccessException {
-    try {
-      String role = jwtUtils.validateTokenAndGetRole(token);
-      if (!role.equalsIgnoreCase("admin") && !role.equalsIgnoreCase("super_admin")) {
-        throw new IllegalAccessException("User is not authorized to perform this action");
-      }
-    } catch (JwtMissingPropertyException e) {
-      throw new IllegalAccessException("User is not authorized to perform this action");
-    }
-  }
-
   /**
    * Method to add a new point of interest.
    * This method will interact with the repository to add a new point of
@@ -94,12 +85,8 @@ public class PointOfInterestService {
    * @return The added point of interest.
    */
   @Transactional(rollbackFor = Exception.class)
-  public PointOfInterestResponse addPointOfInterest(
-          String token,
-          PointOfInterestRequest pointOfInterestRequest)
-          throws IllegalAccessException {
-    validateIsAdmin(token);
-
+  public PointOfInterestResponse addPointOfInterest(PointOfInterestRequest
+                                                              pointOfInterestRequest) {
     PointOfInterest point = new PointOfInterest(
             null,
             pointOfInterestRequest.getLatitude(),
@@ -138,9 +125,7 @@ public class PointOfInterestService {
    * interest from the database.
    */
   @Transactional(rollbackFor = Exception.class)
-  public void deletePointOfInterest(String token, Long id)
-          throws IllegalAccessException {
-    validateIsAdmin(token);
+  public void deletePointOfInterest(Long id) {
     int rowsAffected = pointOfInterestRepo.deletePointOfInterest(id);
 
     if (rowsAffected == 0) {
@@ -161,9 +146,8 @@ public class PointOfInterestService {
    */
   @Transactional(rollbackFor = Exception.class)
   public PointOfInterestResponse updatePointOfInterest(
-          Long id, String token,
-          PointOfInterestRequest pointOfInterestRequest) throws IllegalAccessException {
-    validateIsAdmin(token);
+          Long id, PointOfInterestRequest pointOfInterestRequest) {
+
     PointOfInterest point = new PointOfInterest(
             id,
             pointOfInterestRequest.getLatitude(),

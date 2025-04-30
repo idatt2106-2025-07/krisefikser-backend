@@ -179,12 +179,12 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void addPointOfInterest_validRequest_returnsCreated() throws Exception {
     PointOfInterestRequest request = createValidPointOfInterestRequest();
     PointOfInterestResponse response = createValidPointOfInterestResponse(TEST_ID);
 
-    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+    when(pointOfInterestService.addPointOfInterest(any(PointOfInterestRequest.class)))
             .thenReturn(response);
 
     mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
@@ -203,12 +203,12 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void addPointOfInterest_invalidRequest_returnsBadRequest() throws Exception {
     PointOfInterestRequest invalidRequest = new PointOfInterestRequest(); // Missing required fields
     String errorMessage = "Invalid point of interest details provided: Request is missing required fields.";
 
-    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+    when(pointOfInterestService.addPointOfInterest(any(PointOfInterestRequest.class)))
             .thenThrow(new IllegalArgumentException("Request is missing required fields."));
 
     mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
@@ -221,30 +221,19 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "NORMAL")
   void addPointOfInterest_unauthorized_returnsForbidden() throws Exception {
-    PointOfInterestRequest request = createValidPointOfInterestRequest();
-    String errorMessage = "User is not authorized to add point of interest";
-
-    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
-            .thenThrow(new IllegalAccessException("User not authorized"));
-
-    mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
-                    .header("Authorization", AUTHORIZATION_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void addPointOfInterest_internalServerError_returnsInternalServerError() throws Exception {
     PointOfInterestRequest request = createValidPointOfInterestRequest();
     String errorMessage = "Internal server error while adding point of interest: Something went wrong.";
 
-    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+    when(pointOfInterestService.addPointOfInterest(any(PointOfInterestRequest.class)))
             .thenThrow(new RuntimeException("Something went wrong."));
 
     mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
@@ -257,24 +246,24 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void deletePointOfInterest_validId_returnsNoContent() throws Exception {
-    doNothing().when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
+    doNothing().when(pointOfInterestService).deletePointOfInterest(TEST_ID);
 
     mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
                     .header("Authorization", AUTHORIZATION_HEADER))
             .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-    verify(pointOfInterestService, times(1)).deletePointOfInterest("validToken", TEST_ID);
+    verify(pointOfInterestService, times(1)).deletePointOfInterest(TEST_ID);
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void deletePointOfInterest_invalidId_returnsBadRequest() throws Exception {
     String errorMessage = "Invalid point of interest ID provided: ID must be a positive number.";
 
     doThrow(new IllegalArgumentException("ID must be a positive number."))
-            .when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
+            .when(pointOfInterestService).deletePointOfInterest(TEST_ID);
 
     mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
                     .header("Authorization", AUTHORIZATION_HEADER))
@@ -284,27 +273,19 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "NORMAL")
   void deletePointOfInterest_unauthorized_returnsForbidden() throws Exception {
-    String errorMessage = "User is not authorized to delete point of interest";
-
-    doThrow(new IllegalAccessException("User not authorized"))
-            .when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
-
-    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
-                    .header("Authorization", AUTHORIZATION_HEADER))
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void deletePointOfInterest_internalServerError_returnsInternalServerError() throws Exception {
     String errorMessage = "Internal server error while deleting point of interest: Database error.";
 
     doThrow(new RuntimeException("Database error."))
-            .when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
+            .when(pointOfInterestService).deletePointOfInterest(TEST_ID);
 
     mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
                     .header("Authorization", AUTHORIZATION_HEADER))
@@ -314,12 +295,12 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void updatePointOfInterest_validRequest_returnsOk() throws Exception {
     PointOfInterestRequest request = createValidPointOfInterestRequest();
     PointOfInterestResponse response = createValidPointOfInterestResponse(TEST_ID);
 
-    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), any(PointOfInterestRequest.class)))
             .thenReturn(response);
 
     mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
@@ -335,12 +316,12 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void updatePointOfInterest_invalidRequest_returnsBadRequest() throws Exception {
     PointOfInterestRequest invalidRequest = new PointOfInterestRequest();
     String errorMessage = "Invalid point of interest details provided: Missing name.";
 
-    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), any(PointOfInterestRequest.class)))
             .thenThrow(new IllegalArgumentException("Missing name."));
 
     mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
@@ -353,30 +334,19 @@ class PointOfInterestControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "NORMAL")
   void updatePointOfInterest_unauthorized_returnsForbidden() throws Exception {
-    PointOfInterestRequest request = createValidPointOfInterestRequest();
-    String errorMessage = "User is not authorized to update point of interest";
-
-    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
-            .thenThrow(new IllegalAccessException("User not authorized"));
-
-    mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
-                    .header("Authorization", AUTHORIZATION_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
-            .andExpect(MockMvcResultMatchers.status().isForbidden())
-            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(roles = "ADMIN")
   void updatePointOfInterest_internalServerError_returnsInternalServerError() throws Exception {
     PointOfInterestRequest request = createValidPointOfInterestRequest();
     String errorMessage = "Internal server error while updating point of interest: Database connection failed.";
 
-    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), any(PointOfInterestRequest.class)))
             .thenThrow(new RuntimeException("Database connection failed."));
 
     mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)

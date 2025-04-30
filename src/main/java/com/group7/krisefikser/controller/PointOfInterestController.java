@@ -128,10 +128,6 @@ public class PointOfInterestController {
   @Operation(
           summary = "Add a new point of interest",
           description = "Creates a new point of interest based on the provided details.",
-          parameters = {
-            @Parameter(name = "Authorization", in = ParameterIn.HEADER,
-                    required = true, description = "Bearer token for authentication")
-          },
           requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                   required = true,
                   description = "Details of the point of interest to add",
@@ -148,10 +144,6 @@ public class PointOfInterestController {
             @ApiResponse(responseCode = "400", description = "Invalid request payload",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description =
-                    "Forbidden - User not authorized to add",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)))
@@ -159,13 +151,11 @@ public class PointOfInterestController {
   )
   @PostMapping
   public ResponseEntity<Object> addPointOfInterest(
-          @RequestHeader("Authorization") String authorization,
           @Valid @RequestBody PointOfInterestRequest pointOfInterestRequest) {
     logger.info("Received request to add a new point of interest");
     try {
       PointOfInterestResponse addedPoint = pointOfInterestService
-              .addPointOfInterest(TokenExtractor.extractToken(authorization),
-                      pointOfInterestRequest);
+              .addPointOfInterest(pointOfInterestRequest);
       URI location = ServletUriComponentsBuilder.fromCurrentRequest()
               .path("/{id}")
               .buildAndExpand(addedPoint.getId())
@@ -176,11 +166,6 @@ public class PointOfInterestController {
       logger.info("Error adding point of interest: " + e.getMessage());
       return ResponseEntity.badRequest().body(new ErrorResponse(
               "Invalid point of interest details provided: " + e.getMessage()
-      ));
-    } catch (IllegalAccessException e) {
-      logger.warning("User is not authorized to add point of interest");
-      return ResponseEntity.status(403).body(new ErrorResponse(
-              "User is not authorized to add point of interest"
       ));
     } catch (Exception e) {
       logger.severe("Unexpected error: " + e.getMessage());
@@ -203,9 +188,7 @@ public class PointOfInterestController {
           parameters = {
             @Parameter(name = "id", in = ParameterIn.PATH, required = true,
                     description = "ID of the point of interest to delete",
-                    schema = @Schema(type = "integer", format = "int64")),
-            @Parameter(name = "Authorization", in = ParameterIn.HEADER,
-                    required = true, description = "Bearer token for authentication")
+                    schema = @Schema(type = "integer", format = "int64"))
           },
           responses = {
             @ApiResponse(responseCode = "204",
@@ -214,33 +197,22 @@ public class PointOfInterestController {
                     description = "Invalid point of interest ID provided",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403",
-                    description = "Forbidden - User not authorized to delete",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
+               @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)))
           }
   )
   @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deletePointOfInterest(
-          @PathVariable Long id,
-          @RequestHeader("Authorization") String token) {
+  public ResponseEntity<Object> deletePointOfInterest(@PathVariable Long id) {
     logger.info("Received request to delete point of interest with ID: " + id);
     try {
-      pointOfInterestService.deletePointOfInterest(TokenExtractor.extractToken(token), id);
+      pointOfInterestService.deletePointOfInterest(id);
       logger.info("Successfully deleted point of interest with ID: " + id);
       return ResponseEntity.noContent().build();
     } catch (IllegalArgumentException e) {
       logger.info("Error deleting point of interest: " + e.getMessage());
       return ResponseEntity.badRequest().body(new ErrorResponse(
               "Invalid point of interest ID provided: " + e.getMessage()
-      ));
-    } catch (IllegalAccessException e) {
-      logger.warning("User is not authorized to delete point of interest");
-      return ResponseEntity.status(403).body(new ErrorResponse(
-              "User is not authorized to delete point of interest"
       ));
     } catch (Exception e) {
       logger.severe("Unexpected error: " + e.getMessage());
@@ -256,7 +228,6 @@ public class PointOfInterestController {
    * to be updated and the new details for the point of interest.
    *
    * @param id The ID of the point of interest to be updated.
-   * @param token The authorization token for authentication.
    * @param pointOfInterestRequest The request containing the new details for the
    *                               point of interest.
    * @return ResponseEntity containing the updated PointOfInterestResponse object.
@@ -268,9 +239,7 @@ public class PointOfInterestController {
             @Parameter(name = "id", in = ParameterIn.PATH, required = true,
                     description = "ID of the point of interest to update",
                     schema = @Schema(type = "integer", format = "int64")),
-            @Parameter(name = "Authorization", in = ParameterIn.HEADER,
-                    required = true, description = "Bearer token for authentication")
-          },
+             },
           requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                   required = true,
                   description = "Point of interest details to be updated",
@@ -288,11 +257,7 @@ public class PointOfInterestController {
                     description = "Invalid request payload or parameters",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403",
-                    description = "Forbidden - User not authorized to update",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
+             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)))
           }
@@ -300,24 +265,17 @@ public class PointOfInterestController {
   @PutMapping("/{id}")
   public ResponseEntity<Object> updatePointOfInterest(
           @PathVariable Long id,
-          @RequestHeader("Authorization") String token,
           @Valid @RequestBody PointOfInterestRequest pointOfInterestRequest) {
     logger.info("Received request to update point of interest with ID: " + id);
     try {
       PointOfInterestResponse updatedPoint = pointOfInterestService
-              .updatePointOfInterest(id, TokenExtractor
-                      .extractToken(token), pointOfInterestRequest);
+              .updatePointOfInterest(id, pointOfInterestRequest);
       logger.info("Successfully updated point of interest with ID: " + id);
       return ResponseEntity.ok(updatedPoint);
     } catch (IllegalArgumentException e) {
       logger.info("Error updating point of interest: " + e.getMessage());
       return ResponseEntity.badRequest().body(new ErrorResponse(
               "Invalid point of interest details provided: " + e.getMessage()
-      ));
-    } catch (IllegalAccessException e) {
-      logger.warning("User is not authorized to update point of interest");
-      return ResponseEntity.status(403).body(new ErrorResponse(
-              "User is not authorized to update point of interest"
       ));
     } catch (Exception e) {
       logger.severe("Unexpected error: " + e.getMessage());
