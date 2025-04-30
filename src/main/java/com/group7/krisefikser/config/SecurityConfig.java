@@ -59,7 +59,7 @@ public class SecurityConfig {
                     .requestMatchers(
                         "/api/affected-area",
                         "/api/point-of-interest",
-                        "/token",
+                        "/api/admin/register",
                         "/h2-console/**")
                 .permitAll()
                     .requestMatchers(
