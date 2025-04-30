@@ -4,6 +4,7 @@ import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
 import java.util.List;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/households")
 public class HouseholdController {
   private final HouseholdService householdService;
+  private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());
 
   /**
    * Constructor for injecting the HouseholdService dependency.
@@ -45,6 +47,7 @@ public class HouseholdController {
   @PostMapping("/create")
   public ResponseEntity<Household> createHousehold(@RequestBody Household household,
                                                    @RequestParam Long userId) {
+    logger.info("Creating household for userId: " + userId);
     return ResponseEntity.ok(householdService.createHousehold(household, userId));
   }
 
@@ -58,6 +61,7 @@ public class HouseholdController {
   @PostMapping("/join-request")
   public ResponseEntity<JoinHouseholdRequest> requestToJoin(@RequestParam Long householdId,
                                                             @RequestParam Long userId) {
+    logger.info("User " + userId + " requesting to join household " + userId);
     return ResponseEntity.ok(householdService.requestToJoin(householdId, userId));
   }
 
@@ -69,6 +73,7 @@ public class HouseholdController {
    */
   @GetMapping("/{householdId}/requests")
   public ResponseEntity<List<JoinHouseholdRequest>> getRequests(@PathVariable Long householdId) {
+    logger.info("Retrieving request for household: " + householdId);
     return ResponseEntity.ok(householdService.getRequestsForHousehold(householdId));
   }
 
@@ -81,6 +86,7 @@ public class HouseholdController {
   @PutMapping("/requests/{requestId}/accept")
   public ResponseEntity<Void> acceptRequest(@PathVariable Long requestId) {
     householdService.acceptJoinRequest(requestId);
+    logger.info("Accepting join request: " + requestId);
     return ResponseEntity.ok().build();
   }
 
@@ -93,6 +99,7 @@ public class HouseholdController {
   @PutMapping("/requests/{requestId}/decline")
   public ResponseEntity<Void> declineRequest(@PathVariable Long requestId) {
     householdService.declineJoinRequest(requestId);
+    logger.info("declining join request: " + requestId);
     return ResponseEntity.ok().build();
   }
 }
