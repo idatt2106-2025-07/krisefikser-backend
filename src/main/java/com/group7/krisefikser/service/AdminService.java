@@ -4,7 +4,9 @@ import com.group7.krisefikser.dto.request.InviteAdminRequest;
 import com.group7.krisefikser.dto.request.RegisterAdminRequest;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.exception.UsernameGenerationException;
 import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.utils.UuidUtils;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
@@ -24,14 +26,29 @@ public class AdminService {
 
   private final JwtUtils jwtUtils;
 
+  private final UserRepository userRepository;
+
   /**
    * Invites an admin by generating a jwt invite token and sending an email with the invite link.
    *
    * @param request The request containing the email of the admin to be invited.
    * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
    */
-  public void inviteAdmin(InviteAdminRequest request) throws JwtMissingPropertyException {
-    String username = "admin" + generateShortenedUuid();
+  public void inviteAdmin(InviteAdminRequest request)
+      throws JwtMissingPropertyException, UsernameGenerationException {
+    String username = "admin" + UuidUtils.generateShortenedUuid();
+
+    for (int i = 0; i < 15; i++) {
+      if (userRepository.existUserByName(username)) {
+        username = "admin" + UuidUtils.generateShortenedUuid();
+      } else {
+        break;
+      }
+    }
+
+    if (userRepository.existUserByName(username)) {
+      throw new UsernameGenerationException("Failed to generate a unique username");
+    }
 
     String inviteToken = jwtUtils.generateInviteToken(username);
 
@@ -52,19 +69,5 @@ public class AdminService {
    */
   public void registerAdmin(RegisterAdminRequest request) throws JwtMissingPropertyException {
     String username = jwtUtils.validateInviteTokenAndGetUsername(request.getToken());
-  }
-
-  /**
-   * Generates a shortened UUID for the admin username.
-   *
-   * @return A shortened UUID as a string.
-   */
-  private String generateShortenedUuid() {
-    UUID uuid = UUID.randomUUID();
-
-    return Base64.getEncoder()
-        .encodeToString(uuid.toString().getBytes())
-        .replaceAll("[=+/]", "")
-        .substring(0, 8);
   }
 }
