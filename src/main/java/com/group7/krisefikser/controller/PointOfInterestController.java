@@ -6,7 +6,6 @@ import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.service.PointOfInterestService;
-import com.group7.krisefikser.utils.TokenExtractor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
