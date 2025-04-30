@@ -11,4 +11,5 @@ public enum EmailTemplateType {
   HOUSEHOLD_INVITE,
   ADMIN_INVITE,
   ADMIN_VERIFICATION,
+  VERIFY_EMAIL
 }
