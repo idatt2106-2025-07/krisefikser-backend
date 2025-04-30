@@ -1,8 +1,7 @@
 package com.group7.krisefikser.dto.response;
 
-import java.util.Date;
-
 import com.group7.krisefikser.enums.Role;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
