@@ -197,7 +197,7 @@ public class PointOfInterestController {
                     description = "Invalid point of interest ID provided",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))),
-               @ApiResponse(responseCode = "500", description = "Internal server error",
+            @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)))
           }
@@ -239,7 +239,7 @@ public class PointOfInterestController {
             @Parameter(name = "id", in = ParameterIn.PATH, required = true,
                     description = "ID of the point of interest to update",
                     schema = @Schema(type = "integer", format = "int64")),
-             },
+          },
           requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                   required = true,
                   description = "Point of interest details to be updated",
@@ -257,7 +257,7 @@ public class PointOfInterestController {
                     description = "Invalid request payload or parameters",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class))),
-             @ApiResponse(responseCode = "500", description = "Internal server error",
+            @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ErrorResponse.class)))
           }

@@ -4,14 +4,11 @@ import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
 import com.group7.krisefikser.dto.request.PointOfInterestRequest;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.enums.PointOfInterestType;
-import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.PointOfInterest;
 import com.group7.krisefikser.repository.PointOfInterestRepo;
 import com.group7.krisefikser.utils.JwtUtils;
-
 import java.time.LocalTime;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
