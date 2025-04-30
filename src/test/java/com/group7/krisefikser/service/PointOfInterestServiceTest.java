@@ -222,7 +222,7 @@ class PointOfInterestServiceTest {
     when(jwtUtils.validateTokenAndGetRole(invalidToken)).thenReturn("normal");
 
     assertThrows(IllegalAccessException.class, () -> pointOfInterestService.deletePointOfInterest(invalidToken, 1L));
-    verify(pointOfInterestRepo, never()).addPointOfInterest(any(PointOfInterest.class));
+    verify(pointOfInterestRepo, never()).deletePointOfInterest(anyLong());
   }
 
   @Test
