@@ -199,7 +199,7 @@ public class UserService implements UserDetailsService {
     Date expirationDate = jwtUtils.getExpirationDate(newToken);
     return new AuthResponse(
         userId,
-        AuthResponseMessage.TOKEN_REFRESH_ERROR.getMessage(),
+        AuthResponseMessage.TOKEN_REFRESH_SUCCESS.getMessage(),
         expirationDate,
         Long.parseLong(userId)
     );
