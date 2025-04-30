@@ -82,6 +82,13 @@ public class JwtUtils {
         .sign(getKey(secretKey));
   }
 
+  /**
+   * generates an invitation token for the given username.
+   *
+   * @param username the subject of the token
+   * @return a jwt for the user
+   * @throws JwtMissingPropertyException if parameters are invalid
+  **/
   public String generateInviteToken(final String username)
       throws JwtMissingPropertyException {
     if (username == null || username.isEmpty()) {
@@ -146,7 +153,15 @@ public class JwtUtils {
     return role;
   }
 
-  public String validateInviteTokenAndGetUsername(final String token) throws JwtMissingPropertyException {
+  /**
+   * validates and retrieves the username from the given invite token.
+   *
+   * @param token the jwt to get username from
+   * @return the username
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validateInviteTokenAndGetUsername(final String token)
+      throws JwtMissingPropertyException {
     String username = validateToken(token, inviteSecretKey).getSubject();
     if (username == null) {
       logger.error("Token does not contain a subject");
