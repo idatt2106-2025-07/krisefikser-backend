@@ -9,10 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
 
@@ -31,9 +28,6 @@ public class AuthController {
     try {
       AuthResponse authResponse = userService.registerUser(request, response);
 
-      if (authResponse.getToken() == null) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);
-      }
       logger.info("User registered successfully: " + request.getEmail());
       return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
 
@@ -42,7 +36,7 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
           new AuthResponse(request.getEmail(),
               AuthResponseMessage.SAVING_USER_ERROR.getMessage()
-                  + e.getMessage(), null, null, null));
+                  + e.getMessage(), null, null));
     }
   }
 
@@ -51,9 +45,7 @@ public class AuthController {
     logger.info("Received login request for user: " + request.getEmail());
     try {
       AuthResponse authResponse = userService.loginUser(request);
-      if (authResponse.getToken() == null) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);
-      }
+
       logger.info("User logged in successfully: " + request.getEmail());
       return ResponseEntity.ok(authResponse);
 
@@ -62,7 +54,7 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
           new AuthResponse(request.getEmail(),
               AuthResponseMessage.USER_LOGIN_ERROR.getMessage()
-                  + e.getMessage(), null, null, null));
+                  + e.getMessage(), null, null));
     }
   }
 }
