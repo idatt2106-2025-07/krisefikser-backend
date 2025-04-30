@@ -26,7 +26,7 @@ public class AdminService {
 
   private final JwtUtils jwtUtils;
 
-  private final UserRepository userRepository;
+  //  private final UserRepository userRepository;
 
   /**
    * Invites an admin by generating a jwt invite token and sending an email with the invite link.
@@ -38,17 +38,17 @@ public class AdminService {
       throws JwtMissingPropertyException, UsernameGenerationException {
     String username = "admin" + UuidUtils.generateShortenedUuid();
 
-    for (int i = 0; i < 15; i++) {
-      if (userRepository.existUserByName(username)) {
-        username = "admin" + UuidUtils.generateShortenedUuid();
-      } else {
-        break;
-      }
-    }
-
-    if (userRepository.existUserByName(username)) {
-      throw new UsernameGenerationException("Failed to generate a unique username");
-    }
+    //    for (int i = 0; i < 15; i++) {
+    //      if (userRepository.existUserByName(username)) {
+    //        username = "admin" + UuidUtils.generateShortenedUuid();
+    //      } else {
+    //        break;
+    //      }
+    //    }
+    //
+    //    if (userRepository.existUserByName(username)) {
+    //      throw new UsernameGenerationException("Failed to generate a unique username");
+    //    }
 
     String inviteToken = jwtUtils.generateInviteToken(username);
 
