@@ -4,6 +4,7 @@ import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
 import com.group7.krisefikser.dto.request.PointOfInterestRequest;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
+import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.service.PointOfInterestService;
 import com.group7.krisefikser.utils.TokenExtractor;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,15 +21,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
@@ -66,15 +59,18 @@ public class PointOfInterestController {
   @Operation(
           summary = "Get points of interest by types",
           description = "Retrieves a list of points of interest based on the "
-                  + "provided types in the request body.",
-          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                  description = "List of point of interest types to filter by valid "
-                          + "types are: shelter, food_central, water_station, "
-                          + "defibrillator, hospital",
+                  + "provided types in the query parameters.",
+          parameters = @Parameter(
+                  name = "types",
+                  description = "List of point of interest types to filter by. "
+                          + "Valid types are: shelter, food_central, water_station, "
+                          + "defibrillator, hospital. Multiple types can be provided "
+                          + "by repeating the 'types' parameter in the URL "
+                          + "(e.g., /api/poi?types=shelter&types=food_central).",
                   required = true,
-                  content = @Content(mediaType = "application/json",
-                          schema = @Schema(implementation = GetPointsOfInterestRequest
-                                  .class))
+                  schema = @Schema(type = "array",
+                          enumAsRef = true,
+                          implementation =  PointOfInterestType.class)
           ),
           responses = {
             @ApiResponse(responseCode = "200",
@@ -94,7 +90,7 @@ public class PointOfInterestController {
   )
   @GetMapping
   public ResponseEntity<List<PointOfInterestResponse>> getPointsOfInterest(
-          @RequestBody GetPointsOfInterestRequest request) {
+          @ModelAttribute GetPointsOfInterestRequest request) {
     logger.info("Received request to get points of interest with types: "
             + request.getTypes());
     try {

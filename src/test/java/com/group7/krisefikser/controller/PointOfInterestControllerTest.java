@@ -85,23 +85,24 @@ class PointOfInterestControllerTest {
    */
   @Test
   void getPointsOfInterest_shouldReturnOkWithPoints_whenServiceReturnsPoints() throws Exception {
-    GetPointsOfInterestRequest request = new GetPointsOfInterestRequest(Arrays.asList("SHELTER"));
-    List<PointOfInterestResponse> mockResponses = Collections.singletonList(
+    GetPointsOfInterestRequest request = new GetPointsOfInterestRequest(Arrays.asList("SHELTER", "WATER_STATION"));
+    String requestString = "?types=SHELTER&types=WATER_STATION";
+    List<PointOfInterestResponse> mockResponses = Arrays.asList(
             new PointOfInterestResponse(1L, 63.4297, 10.3933, "SHELTER"
-                    , "08:00", "20:00", "123456789", "A shelter for people in need")
+                    , "08:00", "20:00", "123456789", "A shelter for people in need"),
+            new PointOfInterestResponse(2L, 63.4297, 10.3933, "WATER_STATION",
+                    "08:00", "20:00", "123456789", "A water station for people in need")
     );
     when(pointOfInterestService.getPointsOfInterestByTypes(request)).thenReturn(mockResponses);
 
-    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/point-of-interest")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/point-of-interest" + requestString))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
 
     String responseContent = result.getResponse().getContentAsString();
     List<PointOfInterestResponse> actualResponses = objectMapper.readValue(responseContent, new TypeReference<List<PointOfInterestResponse>>() {
     });
-    assertEquals(1, actualResponses.size());
+    assertEquals(2, actualResponses.size());
     assertEquals(1L, actualResponses.get(0).getId());
     assertEquals("SHELTER", actualResponses.get(0).getType());
   }
@@ -138,14 +139,13 @@ class PointOfInterestControllerTest {
    * @throws Exception if an error occurs during the test
    */
   @Test
-  void getPointsOfInterest_shouldReturnBadRequestWithEmptyList_whenIllegalArgumentException() throws Exception {
+  void getPointsOfInterest_shouldReturnBadRequestWithInvalidType_whenIllegalArgumentException() throws Exception {
     GetPointsOfInterestRequest request = new GetPointsOfInterestRequest(Collections.singletonList("INVALID_TYPE"));
+    String requestString = "?types=INVALID_TYPE";
     when(pointOfInterestService.getPointsOfInterestByTypes(request))
             .thenThrow(new IllegalArgumentException("Invalid point of interest type provided"));
 
-    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/point-of-interest")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/point-of-interest" + requestString))
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
 
@@ -165,11 +165,10 @@ class PointOfInterestControllerTest {
   @Test
   void getPointsOfInterest_shouldReturnInternalServerErrorWithEmptyList_whenUnexpectedException() throws Exception {
     GetPointsOfInterestRequest request = new GetPointsOfInterestRequest(Collections.singletonList("SHELTER"));
+    String requestString = "?types=SHELTER";
     when(pointOfInterestService.getPointsOfInterestByTypes(request)).thenThrow(new RuntimeException("Database error"));
 
-    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/point-of-interest")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/api/point-of-interest" + requestString))
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
             .andReturn();
 
@@ -266,7 +265,7 @@ class PointOfInterestControllerTest {
                     .header("Authorization", AUTHORIZATION_HEADER))
             .andExpect(MockMvcResultMatchers.status().isNoContent());
 
-    verify(pointOfInterestService, times(1)).deletePointOfInterest("validToken", eq(TEST_ID));
+    verify(pointOfInterestService, times(1)).deletePointOfInterest("validToken", TEST_ID);
   }
 
   @Test
@@ -275,7 +274,7 @@ class PointOfInterestControllerTest {
     String errorMessage = "Invalid point of interest ID provided: ID must be a positive number.";
 
     doThrow(new IllegalArgumentException("ID must be a positive number."))
-            .when(pointOfInterestService).deletePointOfInterest("validToken", eq(TEST_ID));
+            .when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
 
     mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
                     .header("Authorization", AUTHORIZATION_HEADER))
@@ -290,7 +289,7 @@ class PointOfInterestControllerTest {
     String errorMessage = "User is not authorized to delete point of interest";
 
     doThrow(new IllegalAccessException("User not authorized"))
-            .when(pointOfInterestService).deletePointOfInterest("validToken", eq(TEST_ID));
+            .when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
 
     mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
                     .header("Authorization", AUTHORIZATION_HEADER))
@@ -305,7 +304,7 @@ class PointOfInterestControllerTest {
     String errorMessage = "Internal server error while deleting point of interest: Database error.";
 
     doThrow(new RuntimeException("Database error."))
-            .when(pointOfInterestService).deletePointOfInterest("validToken", eq(TEST_ID));
+            .when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
 
     mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
                     .header("Authorization", AUTHORIZATION_HEADER))
