@@ -155,6 +155,14 @@ public class JwtUtils {
     response.addCookie(jwtCookie);
   }
 
+  /**
+   * Retrieves the expiration date of a given JWT token.
+   * This method validates the token and returns its expiration date.
+   * If the token is invalid, it logs an error message and returns null.
+   *
+   * @param token The JWT token whose expiration date is to be retrieved.
+   * @return The expiration date of the token, or null if the token is invalid.
+   */
   public Date getExpirationDate(String token) {
     try {
       return validateToken(token).getExpiresAt();
