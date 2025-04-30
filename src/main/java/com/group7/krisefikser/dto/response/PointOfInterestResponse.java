@@ -2,6 +2,7 @@ package com.group7.krisefikser.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * This class represents a response object for a point of interest (POI).
@@ -11,6 +12,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class PointOfInterestResponse {
   private Long id;
   private Double latitude;
