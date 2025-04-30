@@ -30,9 +30,8 @@ class PointOfInterestRepoTest {
   @Test
   void getAllPointsOfInterest() {
     List<PointOfInterest> pointsOfInterest = pointOfInterestRepo.getAllPointsOfInterest();
-
     assertNotNull(pointsOfInterest);
-    assertEquals(5, pointsOfInterest.size());
+    assertEquals(6, pointsOfInterest.size());
     assertEquals(1, pointsOfInterest.get(0).getId());
     assertEquals(10.76, pointsOfInterest.get(0).getLongitude());
     assertEquals(59.91, pointsOfInterest.get(0).getLatitude());
