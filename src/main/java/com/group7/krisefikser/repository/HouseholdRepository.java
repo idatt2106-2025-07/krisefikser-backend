@@ -1,7 +1,6 @@
 package com.group7.krisefikser.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -29,5 +28,11 @@ public class HouseholdRepository {
     }, keyHolder);
 
     return keyHolder.getKey().longValue();
+  }
+
+  public boolean existsByName(String householdName) {
+    String sql = "SELECT COUNT(*) FROM households WHERE name = ?";
+    Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);
+    return count != null && count > 0;
   }
 }

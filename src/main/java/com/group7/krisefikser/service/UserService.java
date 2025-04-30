@@ -21,10 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +59,14 @@ public class UserService implements UserDetailsService {
      * This is a temporary solution, in the future the user should be able to create a household
      */
     try {
-      String householdName = request.getHouseholdName();
+      int counter = 1;
+      String baseName = user.getName() + "'s household" + UUID.randomUUID().toString().substring(0, 8);
+      String householdName = baseName;
+
+      while (householdRepo.existsByName(householdName)) {
+        counter++;
+        householdName = baseName + " (" + counter + ")";
+      }
       // Right now we are creating a household with default values for longitude and latitude
       // In the future, we might want to get these values from the user or use a geolocation service
       double longitude = 0.0;
@@ -75,7 +79,6 @@ public class UserService implements UserDetailsService {
     try {
       user.setHouseholdId(householdId);
       userRepo.save(user);
-
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
       String emailVerificationToken = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
       String verificationLink = "https://localhost:5173/verify?token=" + emailVerificationToken;
