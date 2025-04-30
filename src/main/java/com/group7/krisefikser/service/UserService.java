@@ -4,6 +4,7 @@ import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
+import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.mapper.UserMapper;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -31,6 +33,7 @@ public class UserService implements UserDetailsService {
   private final UserRepository userRepo;
   private final HouseholdRepository householdRepo;
   private final JwtUtils jwtUtils;
+  private final EmailService emailService;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -46,16 +49,24 @@ public class UserService implements UserDetailsService {
   @Transactional
   public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
     User user = UserMapper.INSTANCE.registerRequestToUser(request);
-    user.setRole(Role.NORMAL);
+    user.setRole(Role.ROLE_NORMAL);
     user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
     Long householdId;
+    if (userRepo.findByEmail(user.getEmail()).isPresent()) {
+      return new AuthResponse(user.getEmail(), AuthResponseMessage
+          .USER_ALREADY_EXISTS.getMessage(), null, null);
+    }
+    /**
+     * When the user is created, we also create a household for them
+     * This is for when the user waits for the request to join a household to be accepted
+     * This is a temporary solution, in the future the user should be able to create a household
+     */
     try {
-
-      String householdName = user.getName() + "'s household";
-
+      String householdName = request.getHouseholdName();
+      // Right now we are creating a household with default values for longitude and latitude
+      // In the future, we might want to get these values from the user or use a geolocation service
       double longitude = 0.0;
       double latitude = 0.0;
-
       householdId = householdRepo.createHousehold(householdName, longitude, latitude);
     } catch (Exception e) {
       return new AuthResponse(user.getEmail(), AuthResponseMessage
@@ -65,11 +76,17 @@ public class UserService implements UserDetailsService {
       user.setHouseholdId(householdId);
       userRepo.save(user);
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
+      String emailVerificationToken = jwtUtils.generateEmailVerificationToken(byEmail.get().getEmail());
+
+      String verificationLink = "https://localhost:5173/verify?token=" + emailVerificationToken;
+      Map<String, String> params = Map.of("verificationLink", verificationLink);
+      emailService.sendTemplateMessage(byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
+
       String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
       jwtUtils.setJwtCookie(token, response);
       return new AuthResponse(user.getEmail(), AuthResponseMessage
           .USER_REGISTERED_SUCCESSFULLY.getMessage(),
-          jwtUtils.getExpirationDate(token), user.getId());
+          jwtUtils.getExpirationDate(token), byEmail.get().getId());
     } catch (Exception e) {
       return new AuthResponse(user.getEmail(), AuthResponseMessage
           .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);
@@ -119,7 +136,7 @@ public class UserService implements UserDetailsService {
 
   public boolean validateAdmin(String token) throws JwtMissingPropertyException {
     String role = jwtUtils.validateTokenAndGetRole(token);
-    return role.equals(Role.ADMIN.toString());
+    return role.equals(Role.ROLE_ADMIN.toString());
   }
 
   public AuthResponse refreshToken(String token) throws JwtMissingPropertyException {
