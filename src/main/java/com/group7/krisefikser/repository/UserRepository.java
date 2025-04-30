@@ -46,7 +46,7 @@ public class UserRepository {
 
   public Optional<User> save(User user) {
     if (user.getRole() == null) {
-      user.setRole(Role.NORMAL);
+      user.setRole(Role.ROLE_NORMAL);
     }
     String query = "INSERT INTO users (email, name, household_id, password, role) VALUES (?, ?, ?, ?, ?)";
     try {
