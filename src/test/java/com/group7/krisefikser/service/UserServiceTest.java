@@ -4,7 +4,6 @@ import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
-import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.User;
@@ -59,7 +58,7 @@ public class UserServiceTest {
     // Assert
     assertEquals(AuthResponseMessage.USER_ALREADY_EXISTS.getMessage(), response.getMessage());
     assertNull(response.getExpiryDate());
-    assertNull(response.getId());
+    assertNull(response.getRole());
 
     verify(userRepo, never()).save(any(User.class));
     verify(jwtUtils, never()).generateToken(any(), any());
@@ -94,7 +93,7 @@ public class UserServiceTest {
     // Assert
     assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), response.getMessage());
     assertEquals(expirationDate, response.getExpiryDate());
-    assertEquals(savedUser.getId(), response.getId());
+    assertEquals(savedUser.getRole(), response.getRole());
 
     verify(userRepo).save(any(User.class));
     verify(jwtUtils, times(2)).generateToken(savedUser.getId(), savedUser.getRole());
@@ -116,7 +115,7 @@ public class UserServiceTest {
     assertTrue(response.getMessage().contains(AuthResponseMessage.SAVING_USER_ERROR.getMessage()));
     assertTrue(response.getMessage().contains("Database is down"));
     assertNull(response.getExpiryDate());
-    assertNull(response.getId());
+    assertNull(response.getRole());
 
     verify(userRepo).save(any(User.class));
     verify(jwtUtils, never()).generateToken(any(), any());
@@ -132,7 +131,7 @@ public class UserServiceTest {
 
     assertEquals(AuthResponseMessage.USER_NOT_FOUND.getMessage(), response.getMessage());
     assertNull(response.getExpiryDate());
-    assertNull(response.getId());
+    assertNull(response.getRole());
   }
 
   @Test
@@ -151,7 +150,7 @@ public class UserServiceTest {
 
     assertEquals(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), response.getMessage());
     assertNull(response.getExpiryDate());
-    assertNull(response.getId());
+    assertNull(response.getRole());
   }
 
   @Test
@@ -173,7 +172,7 @@ public class UserServiceTest {
 
     assertEquals(AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(), response.getMessage());
     assertEquals(expirationDate, response.getExpiryDate());
-    assertEquals(user.getId(), response.getId());
+    assertEquals(user.getId(), response.getRole());
   }
 
   @Test
@@ -282,10 +281,9 @@ public class UserServiceTest {
 
     // Assert
     assertNotNull(response);
-    assertEquals(String.valueOf(userId), response.getEmail());
     assertEquals(AuthResponseMessage.TOKEN_REFRESH_ERROR.getMessage(), response.getMessage());
     assertEquals(expirationDate, response.getExpiryDate());
-    assertEquals(userId, response.getId());
+    assertEquals(role, response.getRole().toString());
 
     verify(jwtUtils).validateTokenAndGetUserId(oldToken);
     verify(jwtUtils).validateTokenAndGetRole(oldToken);

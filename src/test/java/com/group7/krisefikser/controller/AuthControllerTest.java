@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
+import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -40,7 +41,7 @@ class AuthControllerTest {
   @Test
   void registerUser_validRequest_returnsCreatedResponse() throws Exception {
     RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "password123");
-    AuthResponse response = new AuthResponse("john@example.com", "User registered successfully", new Date(), 1L);
+    AuthResponse response = new AuthResponse("User registered successfully", new Date(), Role.ROLE_NORMAL);
 
     Mockito.when(userService.registerUser(any(RegisterRequest.class), any(HttpServletResponse.class)))
         .thenReturn(response);
@@ -74,7 +75,7 @@ class AuthControllerTest {
   @Test
   void loginUser_validRequest_returnsOkResponse() throws Exception {
     LoginRequest request = new LoginRequest("john@example.com", "password123");
-    AuthResponse response = new AuthResponse("john@example.com", "Login successful", new Date(), 1L);
+    AuthResponse response = new AuthResponse("Login successful", new Date(), Role.ROLE_NORMAL);
 
     Mockito.when(userService.loginUser(any(LoginRequest.class))).thenReturn(response);
 
