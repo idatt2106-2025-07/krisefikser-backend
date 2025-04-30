@@ -1,15 +1,21 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
+import com.group7.krisefikser.dto.request.RegisterAdminRequest;
 import com.group7.krisefikser.service.AdminService;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Controller class for handling requests related to admins.
+ * This class provides endpoints to register and invite admins.
+ */
 @Controller
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -19,9 +25,16 @@ public class AdminController {
 
   private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
+  /**
+   * Endpoint to invite an admin.
+   * This endpoint will accept a request containing the email of the admin to be invited.
+   *
+   * @param request The request containing the email of the admin to be invited.
+   * @return ResponseEntity indicating the result of the operation.
+   */
   @PostMapping("/invite")
   public ResponseEntity<String> invite(@RequestBody InviteAdminRequest request) {
-    logger.info("Inviting admin");
+    logger.info("Inviting admin request");
     try {
       adminService.inviteAdmin(request);
       logger.info("Admin invited successfully");
