@@ -7,11 +7,9 @@ import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.PointOfInterest;
 import com.group7.krisefikser.repository.PointOfInterestRepo;
-
+import com.group7.krisefikser.utils.JwtUtils;
 import java.time.LocalTime;
 import java.util.List;
-
-import com.group7.krisefikser.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,6 +84,7 @@ public class PointOfInterestService {
       throw new IllegalAccessException("User is not authorized to perform this action");
     }
   }
+
   /**
    * Method to add a new point of interest.
    * This method will interact with the repository to add a new point of
