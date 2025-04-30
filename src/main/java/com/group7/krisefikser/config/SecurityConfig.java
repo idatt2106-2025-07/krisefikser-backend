@@ -56,8 +56,15 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/api/affected-area", "/api/point-of-interest").permitAll()
-                    .requestMatchers("/api/admin/invite").hasRole("SUPERADMIN")
+                    .requestMatchers(
+                        "/api/affected-area",
+                        "/api/point-of-interest",
+                        "/token",
+                        "/h2-console/**")
+                .permitAll()
+                    .requestMatchers(
+                        "/api/admin/invite")
+                .hasRole("SUPERADMIN")
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
