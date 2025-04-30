@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -57,7 +58,9 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/api/affected-area", "/api/point-of-interest").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/affected-area",
+                            "/api/point-of-interest").permitAll()
+                    .requestMatchers("/api/point-of-interest/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
