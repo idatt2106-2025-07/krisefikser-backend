@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,7 +31,7 @@ public class SecurityConfig {
    */
   @Bean
   public JwtAuthorizationFilter jwtAuthorizationFilter() {
-<span class="fc" id="L33">    return new JwtAuthorizationFilter(jwtUtils);</span>
+<span class="fc" id="L34">    return new JwtAuthorizationFilter(jwtUtils);</span>
   }
 
   /**
@@ -44,28 +45,30 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     // have to make this &quot;authorized&quot;
-<span class="fc" id="L47">    CorsConfiguration corsConfiguration = new CorsConfiguration();</span>
-<span class="fc" id="L48">    corsConfiguration.setAllowedOrigins(List.of(&quot;http://localhost:5173&quot;));</span>
-<span class="fc" id="L49">    corsConfiguration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
-<span class="fc" id="L50">    corsConfiguration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
-<span class="fc" id="L51">    corsConfiguration.setAllowCredentials(true);</span>
-<span class="fc" id="L52">    corsConfiguration.setMaxAge(3600L);</span>
+<span class="fc" id="L48">    CorsConfiguration corsConfiguration = new CorsConfiguration();</span>
+<span class="fc" id="L49">    corsConfiguration.setAllowedOrigins(List.of(&quot;http://localhost:5173&quot;));</span>
+<span class="fc" id="L50">    corsConfiguration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
+<span class="fc" id="L51">    corsConfiguration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="fc" id="L52">    corsConfiguration.setAllowCredentials(true);</span>
+<span class="fc" id="L53">    corsConfiguration.setMaxAge(3600L);</span>
 
-<span class="fc" id="L54">    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="fc" id="L55">    source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
+<span class="fc" id="L55">    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L56">    source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
 
-<span class="fc" id="L57">    http.cors(cors -&gt; cors.configurationSource(source))</span>
-<span class="fc" id="L58">            .csrf(AbstractHttpConfigurer::disable)</span>
-<span class="fc" id="L59">            .authorizeHttpRequests(authorize -&gt; authorize</span>
-<span class="fc" id="L60">                    .requestMatchers(&quot;/api/affected-area&quot;, &quot;/api/point-of-interest&quot;).permitAll()</span>
-<span class="fc" id="L61">                    .anyRequest().authenticated())</span>
-<span class="fc" id="L62">            .sessionManagement(session -&gt; session</span>
-<span class="fc" id="L63">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+<span class="fc" id="L58">    http.cors(cors -&gt; cors.configurationSource(source))</span>
+<span class="fc" id="L59">            .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L60">            .authorizeHttpRequests(authorize -&gt; authorize</span>
+<span class="fc" id="L61">                    .requestMatchers(HttpMethod.GET, &quot;/api/affected-area&quot;,</span>
+<span class="fc" id="L62">                            &quot;/api/point-of-interest&quot;).permitAll()</span>
+<span class="fc" id="L63">                    .requestMatchers(&quot;/api/point-of-interest/**&quot;).hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L64">                    .anyRequest().authenticated())</span>
+<span class="fc" id="L65">            .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L66">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
 
-<span class="fc" id="L65">    http.addFilterBefore(</span>
-<span class="fc" id="L66">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L68">    http.addFilterBefore(</span>
+<span class="fc" id="L69">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="fc" id="L68">    return http.build();</span>
+<span class="fc" id="L71">    return http.build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
