@@ -58,9 +58,9 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.GET, "/api/affected-area",
-                            "/api/point-of-interest",
-                                     "/api/auth/**", 
-                                     "/h2-console/**").permitAll()
+                            "/api/point-of-interest").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/**",
+                    "/h2-console/**").permitAll()
                     .requestMatchers("/api/point-of-interest/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                     .anyRequest().authenticated())
          .headers(
