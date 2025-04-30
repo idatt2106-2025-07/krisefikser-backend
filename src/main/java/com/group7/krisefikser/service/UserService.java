@@ -69,7 +69,7 @@ public class UserService implements UserDetailsService {
     user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
     Long householdId;
     if (userRepo.findByEmail(user.getEmail()).isPresent()) {
-      return new AuthResponse(user.getEmail(), AuthResponseMessage
+      return new AuthResponse(AuthResponseMessage
           .USER_ALREADY_EXISTS.getMessage(), null, null);
     }
 
@@ -92,7 +92,7 @@ public class UserService implements UserDetailsService {
       double latitude = 0.0;
       householdId = householdRepo.createHousehold(householdName, longitude, latitude);
     } catch (Exception e) {
-      return new AuthResponse(user.getEmail(), AuthResponseMessage
+      return new AuthResponse(AuthResponseMessage
           .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);
     }
     try {
@@ -107,11 +107,11 @@ public class UserService implements UserDetailsService {
 
       String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
       jwtUtils.setJwtCookie(token, response);
-      return new AuthResponse(user.getEmail(), AuthResponseMessage
+      return new AuthResponse(AuthResponseMessage
           .USER_REGISTERED_SUCCESSFULLY.getMessage(),
-          jwtUtils.getExpirationDate(token), byEmail.get().getId());
+          jwtUtils.getExpirationDate(token), byEmail.get().getRole());
     } catch (Exception e) {
-      return new AuthResponse(user.getEmail(), AuthResponseMessage
+      return new AuthResponse(AuthResponseMessage
           .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);
     }
   }
@@ -131,25 +131,24 @@ public class UserService implements UserDetailsService {
     Optional<User> userOpt = userRepo.findByEmail(email);
 
     if (userOpt.isEmpty()) {
-      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
+      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
     }
 
     User user = userOpt.get();
 
     if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
       return new AuthResponse(
-          email, AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
+          AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
     }
 
     String token = jwtUtils.generateToken(user.getId(), user.getRole());
     Date expirationDate = jwtUtils.getExpirationDate(token);
-    Long userId = user.getId();
+    Role role = user.getRole();
 
     return new AuthResponse(
-        email,
         AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),
         expirationDate,
-        userId
+        role
     );
   }
 
@@ -198,10 +197,9 @@ public class UserService implements UserDetailsService {
     String newToken = jwtUtils.generateToken(Long.parseLong(userId), Role.valueOf(role));
     Date expirationDate = jwtUtils.getExpirationDate(newToken);
     return new AuthResponse(
-        userId,
         AuthResponseMessage.TOKEN_REFRESH_SUCCESS.getMessage(),
         expirationDate,
-        Long.parseLong(userId)
+        Role.valueOf(role)
     );
   }
 }

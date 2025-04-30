@@ -49,8 +49,7 @@ public class AuthController {
     } catch (Exception e) {
       logger.warning("Error registering user: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-          new AuthResponse(request.getEmail(),
-              AuthResponseMessage.SAVING_USER_ERROR.getMessage()
+          new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()
                   + e.getMessage(), null, null));
     }
   }
@@ -75,8 +74,7 @@ public class AuthController {
     } catch (Exception e) {
       logger.warning("Error logging in user: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-          new AuthResponse(request.getEmail(),
-              AuthResponseMessage.USER_LOGIN_ERROR.getMessage()
+          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()
                   + e.getMessage(), null, null));
     }
   }

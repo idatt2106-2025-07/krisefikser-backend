@@ -1,6 +1,8 @@
 package com.group7.krisefikser.dto.response;
 
 import java.util.Date;
+
+import com.group7.krisefikser.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,8 +14,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AuthResponse {
-  private String email;
   private String message;
   private Date expiryDate;
-  private Long id;
+  private Role role;
 }
