@@ -11,7 +11,8 @@ public enum AuthResponseMessage {
   TOKEN_REFRESH_ERROR("Error refreshing token: "),
   INVALID_EMAIL_FORMAT("Invalid email format"),
   PASSWORD_TOO_WEAK("Password is too weak"),
-  HOUSEHOLD_FAILURE("Household creation failed");
+  HOUSEHOLD_FAILURE("Household creation failed"),
+  EMAIL_NOT_VERIFIED("Please verify your email before logging in");
 
 
 
