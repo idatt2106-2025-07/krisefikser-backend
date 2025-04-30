@@ -13,6 +13,7 @@ public enum AuthResponseMessage {
   USER_LOGGED_IN_SUCCESSFULLY("User logged in successfully"),
   USER_LOGIN_ERROR("Error logging in user: "),
   TOKEN_REFRESH_ERROR("Error refreshing token: "),
+  TOKEN_REFRESH_SUCCESS("Token refreshed successfully"),
   INVALID_EMAIL_FORMAT("Invalid email format"),
   PASSWORD_TOO_WEAK("Password is too weak"),
   HOUSEHOLD_FAILURE("Household creation failed"),
