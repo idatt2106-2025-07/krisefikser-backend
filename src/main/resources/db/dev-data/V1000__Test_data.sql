@@ -57,23 +57,21 @@ VALUES ('2025-12-31 00:00:00', 10, 1, 1),
        ('2025-01-20 00:00:00', 8, 3, 7),
        ('2025-07-10 00:00:00', 50, 4, 8),
        ('2024-06-30 00:00:00', 6, 5, 9),
-       ('2024-12-15 00:00:00', 10, 1, 10); -- Now item with ID 10 exists
+       ('2024-12-15 00:00:00', 10, 1, 10);
 
 -- Insert points of interest (no foreign key dependencies)
-INSERT INTO points_of_interest (longitude, latitude, type)
-VALUES (10.76, 59.91, 'shelter'),
-       (10.80, 59.90, 'defibrillator'),
-       (10.90, 59.95, 'food_central'),
-       (10.85, 59.85, 'water_station'),
-       (10.95, 60.05, 'hospital');
+INSERT INTO points_of_interest (longitude, latitude, type, opens_at, closes_at, contact_number, description)
+VALUES (10.76, 59.91, 'shelter', '08:00:00', '18:00:00', '+47 123 45 678', 'A safe place to rest.'),
+       (10.80, 59.90, 'defibrillator', NULL, NULL, NULL, 'Publicly accessible AED.'),
+       (10.90, 59.95, 'food_central', '09:00:00', '20:00:00', '+47 987 65 432', 'Distribution point for food supplies.'),
+       (10.85, 59.85, 'water_station', NULL, NULL, NULL, 'Source of clean drinking water.'),
+       (10.95, 60.05, 'hospital', '00:00:00', '23:59:59', '+47 555 12 121', 'Medical facility.');
 
 -- Insert affected areas (no foreign key dependencies)
-INSERT INTO affected_areas (longitude, latitude,
-                            high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km,
-                            notification_message)
-VALUES (10.77, 59.92, 5.0, 3.0, 1.0, 'Evacuate immediately due to chemical spill.'),
-       (10.90, 59.95, 7.0, 4.0, 2.0, 'Flooding risk, move to higher ground.'),
-       (10.85, 60.00, 10.0, 6.0, 3.0, 'Tornado alert, stay inside.');
+INSERT INTO affected_areas (longitude, latitude, danger_radius_km, severity_level, description, start_time)
+VALUES (10.77, 59.92, 1, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
+       (10.90, 59.95, 2, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
+       (10.85, 60.00, 3, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
 
 -- Insert join household request (references users and households)
 INSERT INTO join_household_requests (user_id, household_id)

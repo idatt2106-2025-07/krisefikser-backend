@@ -56,7 +56,7 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+            .requestMatchers("/api/affected-area", "/api/point-of-interest", "/api/auth/**", "/h2-console/**").permitAll()
             .anyRequest().authenticated())
         .headers(
             headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
@@ -65,7 +65,7 @@ public class SecurityConfig {
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
     http.addFilterBefore(
-        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

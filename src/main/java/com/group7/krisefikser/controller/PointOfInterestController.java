@@ -1,0 +1,97 @@
+package com.group7.krisefikser.controller;
+
+import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
+import com.group7.krisefikser.dto.response.PointOfInterestResponse;
+import com.group7.krisefikser.service.PointOfInterestService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+/**
+ * Controller class for handling requests related to points of interest.
+ * This class will contain endpoints for retrieving points of interest based on type.
+ * It will use the PointOfInterestService to perform the necessary operations.
+ */
+@RestController
+@RequestMapping("/api/point-of-interest")
+@Tag(name = "Point of Interest", description = "Endpoints for managing points of interest")
+public class PointOfInterestController {
+  private final PointOfInterestService pointOfInterestService;
+
+  private static final Logger logger = Logger.getLogger(PointOfInterestController.class.getName());
+
+  /**
+   * Constructor for PointOfInterestController.
+   * This constructor is used for dependency injection of the PointOfInterestService.
+   *
+   * @param pointOfInterestService The service to be injected.
+   */
+  @Autowired
+  public PointOfInterestController(PointOfInterestService pointOfInterestService) {
+    this.pointOfInterestService = pointOfInterestService;
+  }
+
+  /**
+   * Endpoint to get points of interest based on type.
+   * This endpoint will accept a request containing a list of point of interest types
+   *
+   * @param request The request containing the types of points of interest to be retrieved.
+   * @return ResponseEntity containing a list of PointOfInterestResponse objects.
+   */
+  @Operation(
+          summary = "Get points of interest by types",
+          description = "Retrieves a list of points of interest based on the "
+                  + "provided types in the request body.",
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = "List of point of interest types to filter by",
+                  required = true,
+                  content = @Content(mediaType = "application/json",
+                          schema = @Schema(implementation = GetPointsOfInterestRequest
+                                  .class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Successfully retrieved points of interest",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation =
+                                    PointOfInterestResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid point of interest type provided",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)))
+          }
+  )
+  @GetMapping
+  public ResponseEntity<List<PointOfInterestResponse>> getPointsOfInterest(
+          @RequestBody GetPointsOfInterestRequest request) {
+    logger.info("Received request to get points of interest with types: "
+            + request.getTypes());
+    try {
+      List<PointOfInterestResponse> pointsOfInterest = pointOfInterestService
+              .getPointsOfInterestByTypes(request);
+      logger.info("Successfully retrieved points of interest");
+      return ResponseEntity.ok(pointsOfInterest);
+    } catch (IllegalArgumentException e) {
+      logger.info("Error retrieving points of interest: " + e.getMessage());
+      return ResponseEntity.badRequest().body(List.of());
+    } catch (Exception e) {
+      logger.severe("Unexpected error: " + e.getMessage());
+      return ResponseEntity.status(500).body(List.of());
+    }
+  }
+}
