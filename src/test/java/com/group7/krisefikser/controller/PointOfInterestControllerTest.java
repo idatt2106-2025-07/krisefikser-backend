@@ -3,6 +3,7 @@ package com.group7.krisefikser.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
+import com.group7.krisefikser.dto.request.PointOfInterestRequest;
 import com.group7.krisefikser.dto.response.PointOfInterestResponse;
 import com.group7.krisefikser.service.PointOfInterestService;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,7 +25,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for the PointOfInterestController.
@@ -42,6 +46,35 @@ class PointOfInterestControllerTest {
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  private static final String BASE_URL = "/api/point-of-interest";
+  private static final String AUTHORIZATION_HEADER = "Bearer validToken";
+  private static final long TEST_ID = 1L;
+
+  private PointOfInterestRequest createValidPointOfInterestRequest() {
+    PointOfInterestRequest request = new PointOfInterestRequest();
+    request.setLatitude(10.0);
+    request.setLongitude(20.0);
+    request.setType("shelter");
+    request.setOpensAt("08:00");
+    request.setClosesAt("20:00");
+    request.setContactNumber("12345678");
+    request.setDescription("A test point of interest");
+    return request;
+  }
+
+  private PointOfInterestResponse createValidPointOfInterestResponse(Long id) {
+    PointOfInterestResponse response = new PointOfInterestResponse();
+    response.setId(id);
+    response.setLatitude(10.0);
+    response.setLongitude(20.0);
+    response.setType("shelter");
+    response.setOpensAt("08:00");
+    response.setClosesAt("20:00");
+    response.setContactNumber("12345678");
+    response.setDescription("A test point of interest");
+    return response;
+  }
 
   /**
    * Test for the getPointsOfInterest method.
@@ -144,5 +177,215 @@ class PointOfInterestControllerTest {
     List<PointOfInterestResponse> actualResponses = objectMapper.readValue(responseContent, new TypeReference<List<PointOfInterestResponse>>() {
     });
     assertTrue(actualResponses.isEmpty());
+  }
+
+  @Test
+  @WithMockUser
+  void addPointOfInterest_validRequest_returnsCreated() throws Exception {
+    PointOfInterestRequest request = createValidPointOfInterestRequest();
+    PointOfInterestResponse response = createValidPointOfInterestResponse(TEST_ID);
+
+    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenReturn(response);
+
+    mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(MockMvcResultMatchers.status().isCreated())
+            .andExpect(MockMvcResultMatchers.header().string("Location",
+                    "http://localhost" + BASE_URL + "/" + TEST_ID))
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType
+                    .APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(TEST_ID))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.latitude").value(request.getLatitude()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.longitude").value(request.getLongitude()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(request.getDescription()));
+  }
+
+  @Test
+  @WithMockUser
+  void addPointOfInterest_invalidRequest_returnsBadRequest() throws Exception {
+    PointOfInterestRequest invalidRequest = new PointOfInterestRequest(); // Missing required fields
+    String errorMessage = "Invalid point of interest details provided: Request is missing required fields.";
+
+    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenThrow(new IllegalArgumentException("Request is missing required fields."));
+
+    mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(invalidRequest)))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void addPointOfInterest_unauthorized_returnsForbidden() throws Exception {
+    PointOfInterestRequest request = createValidPointOfInterestRequest();
+    String errorMessage = "User is not authorized to add point of interest";
+
+    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenThrow(new IllegalAccessException("User not authorized"));
+
+    mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void addPointOfInterest_internalServerError_returnsInternalServerError() throws Exception {
+    PointOfInterestRequest request = createValidPointOfInterestRequest();
+    String errorMessage = "Internal server error while adding point of interest: Something went wrong.";
+
+    when(pointOfInterestService.addPointOfInterest(eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenThrow(new RuntimeException("Something went wrong."));
+
+    mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void deletePointOfInterest_validId_returnsNoContent() throws Exception {
+    doNothing().when(pointOfInterestService).deletePointOfInterest("validToken", TEST_ID);
+
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+    verify(pointOfInterestService, times(1)).deletePointOfInterest("validToken", eq(TEST_ID));
+  }
+
+  @Test
+  @WithMockUser
+  void deletePointOfInterest_invalidId_returnsBadRequest() throws Exception {
+    String errorMessage = "Invalid point of interest ID provided: ID must be a positive number.";
+
+    doThrow(new IllegalArgumentException("ID must be a positive number."))
+            .when(pointOfInterestService).deletePointOfInterest("validToken", eq(TEST_ID));
+
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void deletePointOfInterest_unauthorized_returnsForbidden() throws Exception {
+    String errorMessage = "User is not authorized to delete point of interest";
+
+    doThrow(new IllegalAccessException("User not authorized"))
+            .when(pointOfInterestService).deletePointOfInterest("validToken", eq(TEST_ID));
+
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void deletePointOfInterest_internalServerError_returnsInternalServerError() throws Exception {
+    String errorMessage = "Internal server error while deleting point of interest: Database error.";
+
+    doThrow(new RuntimeException("Database error."))
+            .when(pointOfInterestService).deletePointOfInterest("validToken", eq(TEST_ID));
+
+    mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void updatePointOfInterest_validRequest_returnsOk() throws Exception {
+    PointOfInterestRequest request = createValidPointOfInterestRequest();
+    PointOfInterestResponse response = createValidPointOfInterestResponse(TEST_ID);
+
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenReturn(response);
+
+    mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(TEST_ID))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.latitude").value(request.getLatitude()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.longitude").value(request.getLongitude()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(request.getDescription()));
+  }
+
+  @Test
+  @WithMockUser
+  void updatePointOfInterest_invalidRequest_returnsBadRequest() throws Exception {
+    PointOfInterestRequest invalidRequest = new PointOfInterestRequest();
+    String errorMessage = "Invalid point of interest details provided: Missing name.";
+
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenThrow(new IllegalArgumentException("Missing name."));
+
+    mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(invalidRequest)))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void updatePointOfInterest_unauthorized_returnsForbidden() throws Exception {
+    PointOfInterestRequest request = createValidPointOfInterestRequest();
+    String errorMessage = "User is not authorized to update point of interest";
+
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenThrow(new IllegalAccessException("User not authorized"));
+
+    mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
+  }
+
+  @Test
+  @WithMockUser
+  void updatePointOfInterest_internalServerError_returnsInternalServerError() throws Exception {
+    PointOfInterestRequest request = createValidPointOfInterestRequest();
+    String errorMessage = "Internal server error while updating point of interest: Database connection failed.";
+
+    when(pointOfInterestService.updatePointOfInterest(eq(TEST_ID), eq("validToken"), any(PointOfInterestRequest.class)))
+            .thenThrow(new RuntimeException("Database connection failed."));
+
+    mockMvc.perform(MockMvcRequestBuilders.put(BASE_URL + "/" + TEST_ID)
+                    .header("Authorization", AUTHORIZATION_HEADER)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(errorMessage));
   }
 }
