@@ -31,4 +31,24 @@ public class AdminController {
       return ResponseEntity.status(500).body("Error inviting admin");
     }
   }
+
+  /**
+   * Endpoint to register an admin.
+   * This endpoint will accept a request containing the invite token and other registration details.
+   *
+   * @param request The request containing the invite token and other registration details.
+   * @return ResponseEntity indicating the result of the operation.
+   */
+  @PostMapping("/register")
+  public ResponseEntity<String> register(@RequestBody RegisterAdminRequest request) {
+    logger.info("Registering admin request");
+    try {
+      adminService.registerAdmin(request);
+      logger.info("Admin registered successfully");
+      return ResponseEntity.ok("Admin registered successfully");
+    } catch (Exception e) {
+      logger.severe("Error registering admin: " + e.getMessage());
+      return ResponseEntity.status(500).body("Error registering admin");
+    }
+  }
 }
