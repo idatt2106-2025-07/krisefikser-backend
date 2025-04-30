@@ -172,7 +172,7 @@ public class UserServiceTest {
 
     assertEquals(AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(), response.getMessage());
     assertEquals(expirationDate, response.getExpiryDate());
-    assertEquals(user.getId(), response.getRole());
+    assertEquals(user.getRole(), response.getRole());
   }
 
   @Test
@@ -281,7 +281,7 @@ public class UserServiceTest {
 
     // Assert
     assertNotNull(response);
-    assertEquals(AuthResponseMessage.TOKEN_REFRESH_ERROR.getMessage(), response.getMessage());
+    assertEquals(AuthResponseMessage.TOKEN_REFRESH_SUCCESS.getMessage(), response.getMessage());
     assertEquals(expirationDate, response.getExpiryDate());
     assertEquals(role, response.getRole().toString());
 
