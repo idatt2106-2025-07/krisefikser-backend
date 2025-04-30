@@ -45,49 +45,34 @@ public class UserService implements UserDetailsService {
 
   @Transactional
   public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
-    User newUser = UserMapper.INSTANCE.registerRequestToUser(request);
-    newUser.setRole(Role.NORMAL);
-    newUser.setPassword(PasswordUtil.hashPassword(request.getPassword()));
-//    String email = request.getEmail();
-//    String hashedPassword = PasswordUtil.hashPassword(request.getPassword());
-//    String name = request.getName();
-//    Long householdId;
-//
-//    Optional<User> existingUser = userRepo.findByEmail(email);
-//    if (existingUser.isPresent()) {
-//      return new AuthResponse(email, AuthResponseMessage
-//          .USER_ALREADY_EXISTS.getMessage(), null, null, null);
-//    }
-//    Optional<User> newUser;
+    User user = UserMapper.INSTANCE.registerRequestToUser(request);
+    user.setRole(Role.NORMAL);
+    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
     Long householdId;
     try {
 
-      String householdName = newUser.getName() + "'s household";
+      String householdName = user.getName() + "'s household";
 
       double longitude = 0.0;
       double latitude = 0.0;
 
       householdId = householdRepo.createHousehold(householdName, longitude, latitude);
-      System.out.println("2");
     } catch (Exception e) {
-      System.out.println("1");
-      return new AuthResponse(newUser.getEmail(), AuthResponseMessage
-          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null, null);
+      return new AuthResponse(user.getEmail(), AuthResponseMessage
+          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);
     }
     try {
-      newUser.setHouseholdId(householdId);
-      userRepo.save(newUser);
-      Optional<User> newNewUser = userRepo.findByEmail(newUser.getEmail());
-      String token = jwtUtils.generateToken(newNewUser.get().getId(), newUser.getRole());
+      user.setHouseholdId(householdId);
+      userRepo.save(user);
+      Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
+      String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
       jwtUtils.setJwtCookie(token, response);
-      System.out.println("4");
-
-      return new AuthResponse(newUser.getEmail(), AuthResponseMessage
-          .USER_REGISTERED_SUCCESSFULLY.getMessage(), token,
-          jwtUtils.getExpirationDate(token), newUser.getId());
+      return new AuthResponse(user.getEmail(), AuthResponseMessage
+          .USER_REGISTERED_SUCCESSFULLY.getMessage(),
+          jwtUtils.getExpirationDate(token), user.getId());
     } catch (Exception e) {
-      return new AuthResponse(newUser.getEmail(), AuthResponseMessage
-          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null, null);
+      return new AuthResponse(user.getEmail(), AuthResponseMessage
+          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);
     }
   }
 
@@ -99,16 +84,16 @@ public class UserService implements UserDetailsService {
     System.out.println("User found: " + (userOpt.isPresent() ? "Yes" : "No")); // Debug
 
     if (userOpt.isEmpty()) {
-      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null, null);
+      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
     }
 
     if (userOpt.isEmpty()) {
-      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null, null);
+      return new AuthResponse(email, AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
     }
     User user = userOpt.get();
 
     if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
-      return new AuthResponse(email, AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null, null);
+      return new AuthResponse(email, AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
     }
 
     String token = jwtUtils.generateToken(user.getId(), user.getRole());
@@ -118,7 +103,6 @@ public class UserService implements UserDetailsService {
     return new AuthResponse(
         email,
         AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),
-        token,
         expirationDate,
         userId
     );
@@ -146,7 +130,6 @@ public class UserService implements UserDetailsService {
     return new AuthResponse(
         userId,
         AuthResponseMessage.TOKEN_REFRESH_ERROR.getMessage(),
-        newToken,
         expirationDate,
         Long.parseLong(userId)
     );
