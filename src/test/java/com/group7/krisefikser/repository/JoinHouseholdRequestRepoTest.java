@@ -31,8 +31,8 @@ class JoinHouseholdRequestRepoTest {
 
     assertNotNull(requests);
     assertEquals(1, requests.size());
-    assertEquals(3L, requests.get(0).getUserId());
-    assertEquals(1L, requests.get(0).getHouseholdId());
+    assertEquals(3L, requests.getFirst().getUserId());
+    assertEquals(1L, requests.getFirst().getHouseholdId());
   }
 
   /**
