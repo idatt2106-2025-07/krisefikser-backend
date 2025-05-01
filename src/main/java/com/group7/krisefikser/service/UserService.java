@@ -58,7 +58,7 @@ public class UserService implements UserDetailsService {
    * This method handles the registration process, including creating a household for the user.
    * It also sends a verification email to the user.
    *
-   * @param request the registration request containing user details
+   * @param request  the registration request containing user details
    * @param response the HTTP response object
    * @return an AuthResponse object containing the result of the registration
    */
@@ -125,7 +125,7 @@ public class UserService implements UserDetailsService {
    * @return an AuthResponse object containing the result of the login
    * @throws JwtMissingPropertyException if there is an issue with the JWT token
    */
-  public AuthResponse loginUser(LoginRequest request) throws JwtMissingPropertyException {
+  public AuthResponse loginUser(LoginRequest request, HttpServletResponse response) {
     String email = request.getEmail();
 
     Optional<User> userOpt = userRepo.findByEmail(email);
@@ -137,70 +137,21 @@ public class UserService implements UserDetailsService {
     User user = userOpt.get();
 
     if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
-      return new AuthResponse(
-          AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
+      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
     }
 
-    String token = jwtUtils.generateToken(user.getId(), user.getRole());
-    Date expirationDate = jwtUtils.getExpirationDate(token);
-    Role role = user.getRole();
+    try {
+      String token = jwtUtils.generateToken(user.getId(), user.getRole());
+      jwtUtils.setJwtCookie(token, response);
+      Date expirationDate = jwtUtils.getExpirationDate(token);
 
-    return new AuthResponse(
-        AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),
-        expirationDate,
-        role
-    );
-  }
-
-  /**
-   * Validates if the user ID matches the one in the token.
-   * This method checks if the user ID in the token
-   * matches the provided user ID.
-   *
-   * @param token the JWT token to validate
-   * @param userId the user ID to compare with
-   * @return true if the user ID matches, false otherwise
-   * @throws JwtMissingPropertyException if there is an issue with the JWT token
-   */
-  public boolean validateUserIdMatchesToken(String token, Long userId)
-      throws JwtMissingPropertyException {
-    String tokenUserId = jwtUtils.validateTokenAndGetUserId(token);
-    return tokenUserId.equals(String.valueOf(userId));
-  }
-
-  /**
-   * Validates if the user has admin role.
-   * This method checks if the role in the token
-   * matches the admin role.
-   *
-   * @param token the JWT token to validate
-   * @return true if the user has admin role, false otherwise
-   * @throws JwtMissingPropertyException if there is an issue with the JWT token
-   */
-  public boolean validateAdmin(String token) throws JwtMissingPropertyException {
-    String role = jwtUtils.validateTokenAndGetRole(token);
-    return role.equals(Role.ROLE_ADMIN.toString());
-  }
-
-  /**
-   * Refreshes the JWT token for the user.
-   * This method generates a new token
-   * based on the user ID and role in the provided token.
-   *
-   * @param token the JWT token to refresh
-   * @return an AuthResponse object containing the new token and expiration date
-   * @throws JwtMissingPropertyException if there is an issue with the JWT token
-   */
-  public AuthResponse refreshToken(String token) throws JwtMissingPropertyException {
-    String userId = jwtUtils.validateTokenAndGetUserId(token);
-    String role = jwtUtils.validateTokenAndGetRole(token);
-    String newToken = jwtUtils.generateToken(Long.parseLong(userId), Role.valueOf(role));
-    Date expirationDate = jwtUtils.getExpirationDate(newToken);
-    return new AuthResponse(
-        AuthResponseMessage.TOKEN_REFRESH_SUCCESS.getMessage(),
-        expirationDate,
-        Role.valueOf(role)
-    );
+      return new AuthResponse(
+          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),
+          expirationDate,
+          user.getRole()
+      );
+    } catch (Exception e) {
+      return new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);
+    }
   }
 }
-
