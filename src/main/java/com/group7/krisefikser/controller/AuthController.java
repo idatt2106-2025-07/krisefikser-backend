@@ -6,6 +6,7 @@ import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
