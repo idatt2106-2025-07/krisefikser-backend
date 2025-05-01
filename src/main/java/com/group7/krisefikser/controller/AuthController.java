@@ -60,6 +60,7 @@ public class AuthController {
    * It accepts a LoginRequest object containing user credentials.
    *
    * @param request the login request containing user credentials
+   * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
   @PostMapping("/login")
