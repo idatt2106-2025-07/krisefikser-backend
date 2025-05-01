@@ -17,6 +17,7 @@ CREATE TABLE users
     'role_admin',
     'role_super_admin'
 ) NOT NULL DEFAULT 'normal',
+    verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (household_id) REFERENCES households(id),
     INDEX (household_id)
 );
