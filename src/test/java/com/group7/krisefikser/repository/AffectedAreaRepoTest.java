@@ -35,7 +35,9 @@ class AffectedAreaRepoTest {
     assertEquals(1L, affectedAreaList.get(0).getId());
     assertEquals(10.77, affectedAreaList.get(0).getLongitude());
     assertEquals(59.92, affectedAreaList.get(0).getLatitude());
-    assertEquals(1.0, affectedAreaList.get(0).getDangerRadiusKm());
+    assertEquals(1.0, affectedAreaList.get(0).getHighDangerRadiusKm());
+    assertEquals(2.0, affectedAreaList.get(0).getMediumDangerRadiusKm());
+    assertEquals(3.0, affectedAreaList.get(0).getLowDangerRadiusKm());
     assertEquals(3, affectedAreaList.get(0).getSeverityLevel());
     assertEquals("Evacuate immediately due to chemical spill.", affectedAreaList.get(0).getDescription());
     assertEquals("2023-10-01T12:00", affectedAreaList.get(0).getStartDate().toString());

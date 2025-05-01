@@ -36,9 +36,9 @@ class AffectedAreaServiceTest {
   @Test
   void getAllAffectedAreas_shouldReturnListOfAffectedAreaResponses() {
     List<AffectedArea> affectedAreas = Arrays.asList(
-            new AffectedArea(1L, 10.0, 60.0, 5.0,
+            new AffectedArea(1L, 10.0, 60.0, 5.0, 6.1, 7.0,
                     1, "High danger area 1", null),
-            new AffectedArea(2L, 11.0, 61.0, 3.0,
+            new AffectedArea(2L, 11.0, 61.0, 3.0, 4.1, 4.9,
                     2, "Medium danger area 2", null)
     );
     when(affectedAreaRepo.getAllAffectedAreas()).thenReturn(affectedAreas);
@@ -51,7 +51,9 @@ class AffectedAreaServiceTest {
     assertEquals(1L, response1.getId());
     assertEquals(10.0, response1.getLongitude());
     assertEquals(60.0, response1.getLatitude());
-    assertEquals(5.0, response1.getDangerRadiusKm());
+    assertEquals(5.0, response1.getHighDangerRadiusKm());
+    assertEquals(6.1, response1.getMediumDangerRadiusKm());
+    assertEquals(7.0, response1.getLowDangerRadiusKm());
     assertEquals(1.0, response1.getSeverityLevel());
     assertEquals("High danger area 1", response1.getDescription());
     assertNull(response1.getStartDate());
@@ -60,7 +62,9 @@ class AffectedAreaServiceTest {
     assertEquals(2L, response2.getId());
     assertEquals(11.0, response2.getLongitude());
     assertEquals(61.0, response2.getLatitude());
-    assertEquals(3.0, response2.getDangerRadiusKm());
+    assertEquals(3.0, response2.getHighDangerRadiusKm());
+    assertEquals(4.1, response2.getMediumDangerRadiusKm());
+    assertEquals(4.9, response2.getLowDangerRadiusKm());
     assertEquals(2, response2.getSeverityLevel());
     assertEquals("Medium danger area 2", response2.getDescription());
     assertNull(response2.getStartDate());

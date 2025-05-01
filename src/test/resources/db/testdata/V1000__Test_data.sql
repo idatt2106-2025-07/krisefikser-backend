@@ -68,10 +68,10 @@ VALUES (10.76, 59.91, 'shelter', '08:00:00', '18:00:00', '+47 123 45 678', 'A sa
        (10.95, 60.05, 'hospital', '00:00:00', '23:59:59', '+47 555 12 121', 'Medical facility.');
 
 -- Insert affected areas (no foreign key dependencies)
-INSERT INTO affected_areas (longitude, latitude, danger_radius_km, severity_level, description, start_time)
-VALUES (10.77, 59.92, 1, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
-       (10.90, 59.95, 2, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
-       (10.85, 60.00, 3, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
+INSERT INTO affected_areas (longitude, latitude, high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km, severity_level, description, start_time)
+VALUES (10.77, 59.92, 1, 2, 3, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
+       (10.90, 59.95, 2, 4, 7, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
+       (10.85, 60.00, 3, 5.2, 5.7, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
 
 -- Insert join household request (references users and households)
 INSERT INTO join_household_requests (user_id, household_id)

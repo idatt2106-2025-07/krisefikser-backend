@@ -31,7 +31,9 @@ public class AffectedAreaService {
                     area.getId(),
                     area.getLongitude(),
                     area.getLatitude(),
-                    area.getDangerRadiusKm(),
+                    area.getHighDangerRadiusKm(),
+                    area.getMediumDangerRadiusKm(),
+                    area.getLowDangerRadiusKm(),
                     area.getSeverityLevel(),
                     area.getDescription(),
                     area.getStartDate()))

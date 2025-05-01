@@ -1,9 +1,15 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.AffectedArea;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -35,7 +41,9 @@ public class AffectedAreaRepo {
       area.setId(rs.getLong("id"));
       area.setLongitude(rs.getDouble("longitude"));
       area.setLatitude(rs.getDouble("latitude"));
-      area.setDangerRadiusKm(rs.getDouble("danger_radius_km"));
+      area.setHighDangerRadiusKm(rs.getDouble("high_danger_radius_km"));
+      area.setMediumDangerRadiusKm(rs.getDouble("medium_danger_radius_km"));
+      area.setLowDangerRadiusKm(rs.getDouble("low_danger_radius_km"));
       area.setSeverityLevel(rs.getInt("severity_level"));
       area.setDescription(rs.getString("description"));
       area.setStartDate(rs.getTimestamp("start_time").toLocalDateTime());
