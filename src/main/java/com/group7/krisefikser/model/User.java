@@ -21,5 +21,6 @@ public class User {
   private Long householdId;
   private String password;
   private Role role;
+  private Boolean verified;
 }
 
