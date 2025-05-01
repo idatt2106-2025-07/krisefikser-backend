@@ -61,7 +61,7 @@ public class HouseholdController {
   @PostMapping("/join-request")
   public ResponseEntity<JoinHouseholdRequest> requestToJoin(@RequestParam Long householdId,
                                                             @RequestParam Long userId) {
-    logger.info("User " + userId + " requesting to join household " + userId);
+    logger.info("User " + userId + " requesting to join household " + householdId);
     return ResponseEntity.ok(householdService.requestToJoin(householdId, userId));
   }
 
