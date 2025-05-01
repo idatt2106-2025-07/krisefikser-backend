@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,6 +33,7 @@ class HouseholdControllerTest {
   private ObjectMapper objectMapper;
 
   @Test
+  @WithMockUser
   void createHousehold_shouldReturnOkAndCreatedHousehold() throws Exception {
     Household household = new Household();
     household.setId(1L);
@@ -52,6 +54,7 @@ class HouseholdControllerTest {
   }
 
   @Test
+  @WithMockUser
   void requestToJoin_shouldReturnOkAndJoinRequest() throws Exception {
     JoinHouseholdRequest request = new JoinHouseholdRequest();
     request.setId(1L);
@@ -70,6 +73,7 @@ class HouseholdControllerTest {
   }
 
   @Test
+  @WithMockUser
   void getRequests_shouldReturnOkAndListOfRequests() throws Exception {
     List<JoinHouseholdRequest> requests = Arrays.asList(
       new JoinHouseholdRequest(1L, 2L, 3L),
@@ -85,12 +89,14 @@ class HouseholdControllerTest {
   }
 
   @Test
+  @WithMockUser
   void acceptRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/accept"))
       .andExpect(MockMvcResultMatchers.status().isOk());
   }
 
   @Test
+  @WithMockUser
   void declineRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/decline"))
       .andExpect(MockMvcResultMatchers.status().isOk());
