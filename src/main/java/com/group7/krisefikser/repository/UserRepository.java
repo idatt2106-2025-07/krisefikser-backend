@@ -54,6 +54,7 @@ public class UserRepository {
         String roleString = rs.getString("role").toUpperCase();
         Role role = Role.valueOf(roleString);
         user.setRole(role);
+        user.setVerified(rs.getBoolean("verified"));
         return user;
       }, email).stream().findFirst();
     } catch (EmptyResultDataAccessException e) {
@@ -85,6 +86,29 @@ public class UserRepository {
       return findByEmail(user.getEmail());
     } catch (Exception e) {
       System.err.println("Failed to save user: " + e.getMessage());
+      e.printStackTrace();
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Changes a user's verified status in the database.
+   * This method updates the verified status of a user
+   * based on their email address.
+   * If the update is successful, it returns an Optional
+   * containing the updated user.
+   *
+   * @param user the user whose verified status is to be changed
+   * @return an Optional containing the updated user if successful,
+   *         or an empty Optional if not
+   */
+  public Optional<User> setVerified(User user) {
+    String query = "UPDATE users SET verified = ? WHERE email = ?";
+    try {
+      jdbcTemplate.update(query, user.getVerified(), user.getEmail());
+      return findByEmail(user.getEmail());
+    } catch (Exception e) {
+      System.err.println("Failed to set verified: " + e.getMessage());
       e.printStackTrace();
       return Optional.empty();
     }
