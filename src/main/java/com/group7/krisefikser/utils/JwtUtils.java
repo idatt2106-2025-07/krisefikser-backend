@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class JwtUtils {
    * @return a jwt for the user
    * @throws JwtMissingPropertyException if parameters are invalid
    */
-  public String generateToken(final int userId, final Role role)
+  public String generateToken(final Long userId, final Role role)
       throws JwtMissingPropertyException {
     if (role == null || userId <= 0) {
       throw new JwtMissingPropertyException("Token generation call must include UserId and Role");
@@ -152,6 +153,23 @@ public class JwtUtils {
     jwtCookie.setPath("/");
     jwtCookie.setMaxAge(0);
     response.addCookie(jwtCookie);
+  }
+
+  /**
+   * Retrieves the expiration date of a given JWT token.
+   * This method validates the token and returns its expiration date.
+   * If the token is invalid, it logs an error message and returns null.
+   *
+   * @param token The JWT token whose expiration date is to be retrieved.
+   * @return The expiration date of the token, or null if the token is invalid.
+   */
+  public Date getExpirationDate(String token) {
+    try {
+      return validateToken(token).getExpiresAt();
+    } catch (JWTVerificationException e) {
+      logger.error("Token is invalid: {}", e.getMessage());
+      return null;
+    }
   }
 }
 
