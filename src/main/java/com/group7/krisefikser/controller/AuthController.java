@@ -5,6 +5,11 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +43,19 @@ public class AuthController {
    * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
+  @Operation(
+      summary = "Register a new user",
+      description = "Registers a new user account using the provided email, name and password. "
+          + "A verification email is sent to the provided email address."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "201", description = "User registered successfully",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Server error while saving the user",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> registerUser(
             @RequestBody RegisterRequest request, HttpServletResponse response) {
@@ -65,6 +83,19 @@ public class AuthController {
    * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
+  @Operation(
+      summary = "Log in a user",
+      description = "Logs in a user using their email and password. "
+          + "If the credentials are valid and the user is verified, a JWT token is returned."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User logged in successfully",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Server error during login process",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request,
                                                 HttpServletResponse response) {
@@ -91,6 +122,28 @@ public class AuthController {
    * @param token the verification token
    * @return a ResponseEntity containing the authentication response
    */
+  @Operation(
+      summary = "Verify user email",
+      description = "Verifies a user's email address using a token sent to them via email after registration.",
+      parameters = @Parameter(
+          name = "token",
+          description = "Verification token received by email. "
+              + "Must match a token issued during registration.",
+          required = true,
+          schema = @Schema(type = "string")
+      )
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User verified successfully",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = "400", description = "Invalid or expired verification token",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Server error during email verification",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
   @GetMapping("/verify-email")
   public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token) {
     logger.info("Received email verification request with token: " + token);
