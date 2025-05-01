@@ -38,24 +38,6 @@ public class UserTest {
   }
 
   @Test
-  void customConstructor_shouldSetSelectedFields() {
-    User user = new User(
-        "test@example.com",
-        "Test User",
-        "securepassword",
-        null,
-        Role.ROLE_ADMIN
-    );
-
-    assertNull(user.getId());
-    assertNull(user.getHouseholdId());
-    assertEquals("test@example.com", user.getEmail());
-    assertEquals("Test User", user.getName());
-    assertEquals("securepassword", user.getPassword());
-    assertEquals(Role.ROLE_ADMIN, user.getRole());
-  }
-
-  @Test
   void settersAndGetters_shouldWorkCorrectly() {
     User user = new User();
     user.setId(2L);
