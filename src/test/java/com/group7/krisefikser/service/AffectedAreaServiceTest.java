@@ -172,7 +172,7 @@ class AffectedAreaServiceTest {
     long areaIdToDelete = 1L;
     when(affectedAreaRepo.deleteAffectedArea(areaIdToDelete)).thenReturn(0);
 
-    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
       affectedAreaService.deleteAffectedArea(areaIdToDelete);
     });
 

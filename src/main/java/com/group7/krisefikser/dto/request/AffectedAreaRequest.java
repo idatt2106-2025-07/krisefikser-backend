@@ -43,12 +43,13 @@ public class AffectedAreaRequest {
   @NotNull(message = "Severity level cannot be null")
   @Min(value = 1, message = "Severity level must be greater than or equal to 1")
   @Max(value = 3, message = "Severity level must be less than or equal to 3")
-  private int severityLevel;
+  private Integer severityLevel;
 
   private String description;
 
   @NotNull(message = "Start date cannot be null")
-  @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}",
-          message = "Date must be in ISO format (yyyy-MM-ddTHH:mm:ss)")
+  @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?"
+      + "(Z|[+-]\\d{2}:\\d{2})?$",
+          message = "Start date must be in ISO format (yyyy-MM-ddTHH:mm:ss[.nnn][Z/+HH:MM])")
   private String startDate;
 }

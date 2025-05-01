@@ -13,6 +13,12 @@ import org.springframework.validation.FieldError;
  */
 public class ValidationUtils {
 
+  /**
+   * Private constructor to prevent instantiation of the utility class.
+   */
+  private ValidationUtils() {
+  }
+
   private static final Logger logger = Logger.getLogger(ValidationUtils.class.getName());
 
   /**
@@ -26,7 +32,8 @@ public class ValidationUtils {
     List<String> errorMessages = errors.stream()
             .map(FieldError::getDefaultMessage)
             .toList();
-    logger.severe("Validation failed: " + String.join(", ", errorMessages));
+    logger.severe("Validation failed: " + String
+            .join(", ", errorMessages));
     return ResponseEntity.badRequest().body(new ErrorResponse("Validation failed: " + errorMessages));
   }
 }
