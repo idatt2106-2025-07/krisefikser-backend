@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.Role;
+import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.mapper.UserMapper;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
@@ -51,7 +52,7 @@ public class UserServiceTest {
   }
 
   @Test
-  void registerUser_successfulRegistration() {
+  void registerUser_successfulRegistration() throws JwtMissingPropertyException {
     RegisterRequest request = new RegisterRequest("Test User", "test@example.com", "password123");
     User user = UserMapper.INSTANCE.registerRequestToUser(request);
     user.setId(1L);
@@ -68,7 +69,7 @@ public class UserServiceTest {
     AuthResponse response = userService.registerUser(request, httpServletResponse);
 
     assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), response.getMessage());
-    assertNotNull(response.getExpiration());
+    assertNotNull(response.getExpiryDate());
     assertEquals(Role.ROLE_NORMAL, response.getRole());
     verify(emailService).sendTemplateMessage(eq("test@example.com"), any(), any());
   }
@@ -81,12 +82,12 @@ public class UserServiceTest {
     AuthResponse response = userService.registerUser(request, httpServletResponse);
 
     assertEquals(AuthResponseMessage.USER_ALREADY_EXISTS.getMessage(), response.getMessage());
-    assertNull(response.getExpiration());
+    assertNull(response.getExpiryDate());
     assertNull(response.getRole());
   }
 
   @Test
-  void loginUser_successfulLogin() {
+  void loginUser_successfulLogin() throws JwtMissingPropertyException {
     String rawPassword = "password123";
     String hashedPassword = PasswordUtil.hashPassword(rawPassword);
     User user = new User();
@@ -104,7 +105,7 @@ public class UserServiceTest {
 
     assertEquals(AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(), response.getMessage());
     assertEquals(Role.ROLE_NORMAL, response.getRole());
-    assertNotNull(response.getExpiration());
+    assertNotNull(response.getExpiryDate());
   }
 
   @Test
@@ -115,7 +116,7 @@ public class UserServiceTest {
     AuthResponse response = userService.loginUser(request, httpServletResponse);
 
     assertEquals(AuthResponseMessage.USER_NOT_FOUND.getMessage(), response.getMessage());
-    assertNull(response.getExpiration());
+    assertNull(response.getExpiryDate());
     assertNull(response.getRole());
   }
 
@@ -132,7 +133,7 @@ public class UserServiceTest {
     AuthResponse response = userService.loginUser(request, httpServletResponse);
 
     assertEquals(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), response.getMessage());
-    assertNull(response.getExpiration());
+    assertNull(response.getExpiryDate());
     assertNull(response.getRole());
   }
 }
