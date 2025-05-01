@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -57,16 +56,19 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.GET, "/api/affected-area",
-                            "/api/point-of-interest", "/h2-console/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                    .requestMatchers("/api/point-of-interest/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
+                    .requestMatchers(
+                        "/api/affected-area",
+                        "/api/point-of-interest",
+                        "/api/admin/register",
+                        "/h2-console/**")
+                .permitAll()
+                    .requestMatchers(
+                        "/api/admin/invite")
+                .hasRole("SUPERADMIN")
                     .anyRequest().authenticated())
-         .headers(
-            headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
-        )
             .sessionManagement(session -> session
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
     http.addFilterBefore(
             jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
