@@ -125,7 +125,8 @@ public class AuthController {
    */
   @Operation(
       summary = "Verify user email",
-      description = "Verifies a user's email address using a token sent to them via email after registration.",
+      description = "Verifies a user's email address using a token sent "
+          + "to them via email after registration.",
       parameters = @Parameter(
           name = "token",
           description = "Verification token received by email. "
