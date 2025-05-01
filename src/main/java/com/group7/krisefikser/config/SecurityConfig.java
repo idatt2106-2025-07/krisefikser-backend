@@ -59,7 +59,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.GET, "/api/affected-area",
                             "/api/point-of-interest", "/h2-console/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
                     .requestMatchers("/api/point-of-interest/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                     .anyRequest().authenticated())
          .headers(
