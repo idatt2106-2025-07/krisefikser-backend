@@ -1,7 +1,5 @@
 package com.group7.krisefikser.dto.response;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +20,5 @@ public class AffectedAreaResponse {
   private Double lowDangerRadiusKm;
   private int severityLevel;
   private String description;
-  private LocalDateTime startDate;
+  private String startDate;
 }

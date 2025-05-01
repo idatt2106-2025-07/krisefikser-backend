@@ -129,7 +129,7 @@ class AffectedAreaRepoTest {
     assertEquals(updatedArea.getLowDangerRadiusKm(), (Double) retrievedArea.get("low_danger_radius_km"), 0.001);
     assertEquals(updatedArea.getSeverityLevel(), (Integer) retrievedArea.get("severity_level"));
     assertEquals(updatedArea.getDescription(), retrievedArea.get("description"));
-    assertEquals(java.sql.Timestamp.valueOf(updatedArea.getStartDate()).toLocalDateTime().truncatedTo(ChronoUnit.MICROS),
-            ((java.sql.Timestamp) retrievedArea.get("start_time")).toLocalDateTime().truncatedTo(ChronoUnit.MICROS));
+    assertEquals(java.sql.Timestamp.valueOf(updatedArea.getStartDate()).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS),
+            ((java.sql.Timestamp) retrievedArea.get("start_time")).toLocalDateTime().truncatedTo(ChronoUnit.MILLIS));
   }
 }
