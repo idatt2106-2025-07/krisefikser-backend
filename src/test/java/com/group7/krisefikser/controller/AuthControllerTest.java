@@ -75,7 +75,7 @@ class AuthControllerTest {
     LoginRequest request = new LoginRequest("john@example.com", "password123");
     AuthResponse response = new AuthResponse("Login successful", new Date(), Role.ROLE_NORMAL);
 
-    Mockito.when(userService.loginUser(any(LoginRequest.class)))
+    Mockito.when(userService.loginUser(any(LoginRequest.class), any(HttpServletResponse.class)))
         .thenReturn(response);
 
     mockMvc.perform(post("/api/auth/login")
@@ -91,7 +91,7 @@ class AuthControllerTest {
   void loginUser_serviceThrowsException_returnsInternalServerError() throws Exception {
     LoginRequest request = new LoginRequest("jane@example.com", "wrongpassword");
 
-    Mockito.when(userService.loginUser(any(LoginRequest.class)))
+    Mockito.when(userService.loginUser(any(LoginRequest.class), any(HttpServletResponse.class)))
         .thenThrow(new RuntimeException("Authentication failed"));
 
     mockMvc.perform(post("/api/auth/login")

@@ -63,7 +63,8 @@ public class AuthController {
    * @return a ResponseEntity containing the authentication response
    */
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request, HttpServletResponse response) {
+  public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request,
+                                                HttpServletResponse response) {
     logger.info("Received login request for user: " + request.getEmail());
     try {
       AuthResponse authResponse = userService.loginUser(request, response);

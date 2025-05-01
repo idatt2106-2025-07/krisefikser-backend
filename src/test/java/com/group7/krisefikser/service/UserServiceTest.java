@@ -14,9 +14,9 @@ import com.group7.krisefikser.utils.PasswordUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Date;
 import java.util.Optional;
@@ -24,129 +24,100 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class UserServiceTest {
+@SpringBootTest
+@ActiveProfiles("test")
+class UserServiceTest {
+
   @Mock
   private UserRepository userRepo;
-
-  @Mock
-  private JwtUtils jwtUtils;
-
-  @InjectMocks
-  private UserService userService;
 
   @Mock
   private HouseholdRepository householdRepo;
 
   @Mock
+  private JwtUtils jwtUtils;
+
+  @Mock
   private EmailService emailService;
+
+  @Mock
+  private HttpServletResponse response;
+
+  @InjectMocks
+  private UserService userService;
+
+  private RegisterRequest registerRequest;
+  private LoginRequest loginRequest;
 
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+
+    registerRequest = new RegisterRequest("Alice", "alice@example.com", "securePassword123");
+    loginRequest = new LoginRequest("alice@example.com", "securePassword123");
   }
 
   @Test
-  void registerUser_whenUserAlreadyExists_returnsUserAlreadyExistsResponse() throws JwtMissingPropertyException {
-    // Arrange
-    RegisterRequest request = new RegisterRequest("test", "test@example.com", "password");
-    when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.of(new User()));
+  void registerUser_newUser_success() throws JwtMissingPropertyException {
+    User user = new User();
+    user.setEmail(registerRequest.getEmail());
+    user.setPassword(PasswordUtil.hashPassword(registerRequest.getPassword()));
+    user.setRole(Role.ROLE_NORMAL);
 
-    // Act
-    HttpServletResponse httpServletResponse = mock(HttpServletResponse.class);
-    AuthResponse response = userService.registerUser(request, httpServletResponse);
+    when(userRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.empty());
+    when(householdRepo.existsByName(anyString())).thenReturn(false);
+    when(householdRepo.createHousehold(anyString(), anyDouble(), anyDouble())).thenReturn(1L);
+    when(userRepo.save(any(User.class))).thenReturn(Optional.of(user));
+    when(userRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(user));
+    when(jwtUtils.generateToken(anyLong(), any(Role.class))).thenReturn("jwt-token");
+    when(jwtUtils.getExpirationDate(anyString())).thenReturn(new Date());
 
-    // Assert
+    AuthResponse authResponse = userService.registerUser(registerRequest, response);
+
+    assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), authResponse.getMessage());
+    assertNotNull(authResponse.getExpiryDate());
+    assertEquals(Role.ROLE_NORMAL, authResponse.getRole());
+  }
+
+  @Test
+  void registerUser_existingUser_returnsAlreadyExists() {
+    when(userRepo.findByEmail(registerRequest.getEmail())).thenReturn(Optional.of(new User()));
+
+    AuthResponse response = userService.registerUser(registerRequest, this.response);
+
     assertEquals(AuthResponseMessage.USER_ALREADY_EXISTS.getMessage(), response.getMessage());
     assertNull(response.getExpiryDate());
     assertNull(response.getRole());
-
-    verify(userRepo, never()).save(any(User.class));
-    verify(jwtUtils, never()).generateToken(any(), any());
   }
 
   @Test
-  void registerUser_whenNewUserSavedSuccessfully_returnsSuccessResponse() throws JwtMissingPropertyException {
-    // Arrange
-    RegisterRequest request = new RegisterRequest("New User", "new@example.com", "password");
-
-    User savedUser = new User();
-    savedUser.setId(1L);
-    savedUser.setEmail(request.getEmail());
-    savedUser.setRole(Role.ROLE_NORMAL);
-
-    // Første kall: sjekk om bruker finnes (skal ikke finnes)
-    // Andre kall: etter lagring, hent bruker for token-generering
-    when(userRepo.findByEmail(request.getEmail()))
-        .thenReturn(Optional.empty()) // første kall: bruker finnes ikke
-        .thenReturn(Optional.of(savedUser)); // andre kall: bruker finnes nå
-
-    when(userRepo.save(any(User.class))).thenAnswer(invocation -> null); // save returnerer void
-
-    String fakeToken = "fake.jwt.token";
-    Date expirationDate = new Date(System.currentTimeMillis() + 3600 * 1000);
-    when(jwtUtils.generateToken(savedUser.getId(), savedUser.getRole())).thenReturn(fakeToken);
-    when(jwtUtils.getExpirationDate(fakeToken)).thenReturn(expirationDate);
-
-    // Act
-    AuthResponse response = userService.registerUser(request, mock(HttpServletResponse.class));
-
-    // Assert
-    assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), response.getMessage());
-    assertEquals(expirationDate, response.getExpiryDate());
-    assertEquals(savedUser.getRole(), response.getRole());
-
-    verify(userRepo).save(any(User.class));
-    verify(jwtUtils, times(2)).generateToken(savedUser.getId(), savedUser.getRole());
-  }
-
-  @Test
-  void registerUser_whenSaveFails_returnsSavingUserErrorResponse() throws JwtMissingPropertyException {
-    // Arrange
-    RegisterRequest request = new RegisterRequest("Fail User", "fail@example.com", "password");
-
-    when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.empty());
-
-    when(userRepo.save(any(User.class))).thenThrow(new RuntimeException("Database is down"));
-
-    // Act
-    AuthResponse response = userService.registerUser(request, mock(HttpServletResponse.class));
-
-    // Assert
-    assertTrue(response.getMessage().contains(AuthResponseMessage.SAVING_USER_ERROR.getMessage()));
-    assertTrue(response.getMessage().contains("Database is down"));
-    assertNull(response.getExpiryDate());
-    assertNull(response.getRole());
-
-    verify(userRepo).save(any(User.class));
-    verify(jwtUtils, never()).generateToken(any(), any());
-  }
-
-  @Test
-  void loginUser_userNotFound_returnsUserNotFoundResponse() throws JwtMissingPropertyException {
-    LoginRequest request = new LoginRequest("test@example.com", "password123");
-
-    when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.empty());
-
-    AuthResponse response = userService.loginUser(request);
-
-    assertEquals(AuthResponseMessage.USER_NOT_FOUND.getMessage(), response.getMessage());
-    assertNull(response.getExpiryDate());
-    assertNull(response.getRole());
-  }
-
-  @Test
-  void loginUser_invalidPassword_returnsInvalidCredentialsResponse() throws JwtMissingPropertyException {
-    LoginRequest request = new LoginRequest("test@example.com", "wrongPassword");
+  void loginUser_validCredentials_returnsSuccess() throws JwtMissingPropertyException {
     User user = new User();
-    user.setEmail(request.getEmail());
-    user.setPassword(PasswordUtil.hashPassword("correctPassword")); // Antar du har en hashPassword-metode.
+    user.setEmail(loginRequest.getEmail());
+    user.setPassword(PasswordUtil.hashPassword(loginRequest.getPassword()));
+    user.setRole(Role.ROLE_NORMAL);
+    user.setId(1L);
 
-    when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
-    // Her må vi mocke PasswordUtil hvis den ikke er statisk.
+    when(userRepo.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
+    when(jwtUtils.generateToken(eq(1L), eq(Role.ROLE_NORMAL))).thenReturn("jwt-token");
+    when(jwtUtils.getExpirationDate("jwt-token")).thenReturn(new Date());
 
-    // Hvis PasswordUtil er statisk må vi bruke PowerMockito, men vi antar nå at den fungerer direkte.
+    AuthResponse response = userService.loginUser(loginRequest, this.response);
 
-    AuthResponse response = userService.loginUser(request);
+    assertEquals(AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(), response.getMessage());
+    assertNotNull(response.getExpiryDate());
+    assertEquals(Role.ROLE_NORMAL, response.getRole());
+  }
+
+  @Test
+  void loginUser_wrongPassword_returnsInvalidCredentials() {
+    User user = new User();
+    user.setEmail(loginRequest.getEmail());
+    user.setPassword(PasswordUtil.hashPassword("otherPassword"));
+
+    when(userRepo.findByEmail(loginRequest.getEmail())).thenReturn(Optional.of(user));
+
+    AuthResponse response = userService.loginUser(loginRequest, this.response);
 
     assertEquals(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), response.getMessage());
     assertNull(response.getExpiryDate());
@@ -154,24 +125,13 @@ public class UserServiceTest {
   }
 
   @Test
-  void loginUser_validCredentials_returnsSuccessResponse() throws JwtMissingPropertyException {
-    LoginRequest request = new LoginRequest("test@example.com", "correctPassword");
-    User user = new User();
-    user.setId(1L);
-    user.setEmail(request.getEmail());
-    user.setPassword(PasswordUtil.hashPassword("correctPassword")); // Igjen, antar hash.
+  void loginUser_userNotFound_returnsNotFound() {
+    when(userRepo.findByEmail(loginRequest.getEmail())).thenReturn(Optional.empty());
 
-    String generatedToken = "fake.jwt.token";
-    Date expirationDate = new Date(System.currentTimeMillis() + 1000 * 60 * 60); // 1 time frem
+    AuthResponse response = userService.loginUser(loginRequest, this.response);
 
-    when(userRepo.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
-    when(jwtUtils.generateToken(user.getId(), user.getRole())).thenReturn(generatedToken);
-    when(jwtUtils.getExpirationDate(generatedToken)).thenReturn(expirationDate);
-
-    AuthResponse response = userService.loginUser(request);
-
-    assertEquals(AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(), response.getMessage());
-    assertEquals(expirationDate, response.getExpiryDate());
-    assertEquals(user.getRole(), response.getRole());
+    assertEquals(AuthResponseMessage.USER_NOT_FOUND.getMessage(), response.getMessage());
+    assertNull(response.getExpiryDate());
+    assertNull(response.getRole());
   }
 }

@@ -151,7 +151,8 @@ public class UserService implements UserDetailsService {
           user.getRole()
       );
     } catch (Exception e) {
-      return new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);
+      return new AuthResponse(
+          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);
     }
   }
 }
