@@ -80,7 +80,9 @@ CREATE TABLE affected_areas
     id                      INT PRIMARY KEY AUTO_INCREMENT,
     longitude               DOUBLE NOT NULL,
     latitude                DOUBLE NOT NULL,
-    danger_radius_km          INT NOT NULL,
+    high_danger_radius_km          DOUBLE NOT NULL,
+    medium_danger_radius_km        DOUBLE NOT NULL,
+    low_danger_radius_km           DOUBLE NOT NULL,
     severity_level        INT NOT NULL CHECK (severity_level >= 1 AND severity_level <= 3),
     description    TEXT   NOT NULL,
     start_time TIMESTAMP NOT NULL

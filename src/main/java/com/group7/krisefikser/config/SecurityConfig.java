@@ -60,7 +60,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/affected-area",
                             "/api/point-of-interest", "/h2-console/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                    .requestMatchers("/api/point-of-interest/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
+                    .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
+                    .hasAnyRole("SUPER_ADMIN", "ADMIN")
                     .anyRequest().authenticated())
          .headers(
             headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
