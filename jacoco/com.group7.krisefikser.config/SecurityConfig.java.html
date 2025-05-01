@@ -60,17 +60,18 @@ public class SecurityConfig {
 <span class="fc" id="L60">                    .requestMatchers(HttpMethod.GET, &quot;/api/affected-area&quot;,</span>
 <span class="fc" id="L61">                            &quot;/api/point-of-interest&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
 <span class="fc" id="L62">                    .requestMatchers(HttpMethod.POST, &quot;/api/auth/**&quot;).permitAll()</span>
-<span class="fc" id="L63">                    .requestMatchers(&quot;/api/point-of-interest/**&quot;).hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
-<span class="fc" id="L64">                    .anyRequest().authenticated())</span>
-<span class="fc" id="L65">         .headers(</span>
-<span class="fc" id="L66">            headers -&gt; headers.frameOptions(frameOptionsConfig -&gt; frameOptionsConfig.sameOrigin())</span>
+<span class="fc" id="L63">                    .requestMatchers(&quot;/api/point-of-interest/**&quot;, &quot;/api/affected-area/**&quot;)</span>
+<span class="fc" id="L64">                    .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L65">                    .anyRequest().authenticated())</span>
+<span class="fc" id="L66">         .headers(</span>
+<span class="fc" id="L67">            headers -&gt; headers.frameOptions(frameOptionsConfig -&gt; frameOptionsConfig.sameOrigin())</span>
         )
-<span class="fc" id="L68">            .sessionManagement(session -&gt; session</span>
-<span class="fc" id="L69">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
-<span class="fc" id="L70">    http.addFilterBefore(</span>
-<span class="fc" id="L71">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L69">            .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L70">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+<span class="fc" id="L71">    http.addFilterBefore(</span>
+<span class="fc" id="L72">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="fc" id="L73">    return http.build();</span>
+<span class="fc" id="L74">    return http.build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
