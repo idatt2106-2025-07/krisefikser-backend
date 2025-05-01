@@ -60,7 +60,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers(HttpMethod.GET, "/api/affected-area",
                             "/api/point-of-interest").permitAll()
-                    .requestMatchers("/api/point-of-interest/**", "api/affected-area/**")
+                    .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
                     .hasAnyRole("SUPER_ADMIN", "ADMIN")
                     .anyRequest().authenticated())
             .sessionManagement(session -> session
