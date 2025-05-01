@@ -75,7 +75,7 @@ public class AffectedAreaService {
     int rowsAffected = affectedAreaRepo.deleteAffectedArea(id);
 
     if (rowsAffected == 0) {
-      throw new IllegalStateException("Failed to delete affected area");
+      throw new IllegalArgumentException("Failed to delete affected area");
     }
     if (rowsAffected > 1) {
       throw new IllegalStateException("Multiple rows deleted, check database integrity");
