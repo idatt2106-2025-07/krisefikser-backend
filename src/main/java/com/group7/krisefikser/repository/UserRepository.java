@@ -85,8 +85,7 @@ public class UserRepository {
           user.getHouseholdId(), user.getPassword(), user.getRole().toString());
       return findByEmail(user.getEmail());
     } catch (Exception e) {
-      System.err.println("Failed to save user: " + e.getMessage());
-      e.printStackTrace();
+      logger.info("Failed to save user: " + e.getMessage());
       return Optional.empty();
     }
   }
@@ -108,7 +107,7 @@ public class UserRepository {
       jdbcTemplate.update(query, user.getVerified(), user.getEmail());
       return findByEmail(user.getEmail());
     } catch (Exception e) {
-      System.err.println("Failed to set verified: " + e.getMessage());
+      logger.info("Failed to update verified: " + e.getMessage());
       e.printStackTrace();
       return Optional.empty();
     }

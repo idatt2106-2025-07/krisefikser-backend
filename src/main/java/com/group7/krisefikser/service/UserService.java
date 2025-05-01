@@ -99,7 +99,6 @@ public class UserService implements UserDetailsService {
       user.setHouseholdId(householdId);
       userRepo.save(user);
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
-      //TODO: make generateverificationtoken take the user object
       String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());
       String verificationLink = "https://localhost:5173/verify?token=" + emailVerificationToken;
       Map<String, String> params = Map.of("verificationLink", verificationLink);
