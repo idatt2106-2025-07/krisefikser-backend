@@ -1,11 +1,9 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.AffectedArea;
-
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -55,10 +53,11 @@ public class AffectedAreaRepo {
    * Inserts a new affected area into the database.
    *
    * @param area the AffectedArea object to be inserted
-   * @return the ID of the newly inserted affected area
    */
   public void addAffectedArea(AffectedArea area) {
-    String sql = "INSERT INTO affected_areas (longitude, latitude, high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km, severity_level, description, start_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO affected_areas (longitude, latitude, high_danger_radius_km, "
+        + "medium_danger_radius_km, low_danger_radius_km, severity_level, description, "
+        + "start_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcTemplate.update(connection -> {
       PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);

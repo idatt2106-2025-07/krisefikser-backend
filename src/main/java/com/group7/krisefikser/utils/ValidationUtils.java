@@ -34,6 +34,7 @@ public class ValidationUtils {
             .toList();
     logger.severe("Validation failed: " + String
             .join(", ", errorMessages));
-    return ResponseEntity.badRequest().body(new ErrorResponse("Validation failed: " + errorMessages));
+    return ResponseEntity.badRequest().body(new ErrorResponse("Validation failed: "
+            + errorMessages));
   }
 }

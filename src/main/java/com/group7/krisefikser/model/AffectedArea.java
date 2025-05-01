@@ -1,7 +1,6 @@
 package com.group7.krisefikser.model;
 
 import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

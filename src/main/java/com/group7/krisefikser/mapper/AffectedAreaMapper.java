@@ -3,14 +3,17 @@ package com.group7.krisefikser.mapper;
 import com.group7.krisefikser.dto.request.AffectedAreaRequest;
 import com.group7.krisefikser.dto.response.AffectedAreaResponse;
 import com.group7.krisefikser.model.AffectedArea;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
+/**
+ * Mapper interface for converting between AffectedArea entity and DTOs.
+ * This interface uses MapStruct to generate the implementation at compile time.
+ */
 @Mapper
 public interface AffectedAreaMapper {
   AffectedAreaMapper INSTANCE = Mappers.getMapper(AffectedAreaMapper.class);

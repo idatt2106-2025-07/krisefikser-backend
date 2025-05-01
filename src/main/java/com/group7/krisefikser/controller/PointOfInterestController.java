@@ -15,11 +15,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.net.URI;
 import java.util.List;
 import java.util.logging.Logger;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -84,19 +82,19 @@ public class PointOfInterestController {
                           implementation = PointOfInterestType.class)
           ),
           responses = {
-                  @ApiResponse(responseCode = "200",
-                          description = "Successfully retrieved points of interest",
-                          content = @Content(mediaType = "application/json",
-                                  schema = @Schema(implementation =
-                                          PointOfInterestResponse.class))),
-                  @ApiResponse(responseCode = "400",
-                          description = "Invalid point of interest type provided",
-                          content = @Content(mediaType = "application/json",
-                                  schema = @Schema(implementation = List.class))),
-                  @ApiResponse(responseCode = "500",
-                          description = "Internal server error",
-                          content = @Content(mediaType = "application/json",
-                                  schema = @Schema(implementation = List.class)))
+            @ApiResponse(responseCode = "200",
+                    description = "Successfully retrieved points of interest",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation =
+                                    PointOfInterestResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid point of interest type provided",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)))
           }
   )
   @GetMapping
@@ -139,16 +137,16 @@ public class PointOfInterestController {
                   )
           ),
           responses = {
-                  @ApiResponse(responseCode = "201", description =
-                          "Successfully created the new point of interest",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = PointOfInterestResponse.class))),
-                  @ApiResponse(responseCode = "400", description = "Invalid request payload",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = ErrorResponse.class))),
-                  @ApiResponse(responseCode = "500", description = "Internal server error",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "201", description =
+                    "Successfully created the new point of interest",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PointOfInterestResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)))
           }
   )
   @PostMapping
@@ -194,20 +192,20 @@ public class PointOfInterestController {
           summary = "Delete a point of interest",
           description = "Deletes a specific point of interest identified by its ID.",
           parameters = {
-                  @Parameter(name = "id", in = ParameterIn.PATH, required = true,
-                          description = "ID of the point of interest to delete",
-                          schema = @Schema(type = "integer", format = "int64"))
+            @Parameter(name = "id", in = ParameterIn.PATH, required = true,
+                    description = "ID of the point of interest to delete",
+                    schema = @Schema(type = "integer", format = "int64"))
           },
           responses = {
-                  @ApiResponse(responseCode = "204",
-                          description = "Successfully deleted the point of interest"),
-                  @ApiResponse(responseCode = "400",
-                          description = "Invalid point of interest ID provided",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = ErrorResponse.class))),
-                  @ApiResponse(responseCode = "500", description = "Internal server error",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "204",
+                    description = "Successfully deleted the point of interest"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid point of interest ID provided",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)))
           }
   )
   @DeleteMapping("/{id}")
@@ -244,9 +242,9 @@ public class PointOfInterestController {
           summary = "Update an existing point of interest",
           description = "Updates the details of a specific point of interest identified by its ID.",
           parameters = {
-                  @Parameter(name = "id", in = ParameterIn.PATH, required = true,
-                          description = "ID of the point of interest to update",
-                          schema = @Schema(type = "integer", format = "int64")),
+            @Parameter(name = "id", in = ParameterIn.PATH, required = true,
+                    description = "ID of the point of interest to update",
+                    schema = @Schema(type = "integer", format = "int64")),
           },
           requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                   required = true,
@@ -257,17 +255,17 @@ public class PointOfInterestController {
                   )
           ),
           responses = {
-                  @ApiResponse(responseCode = "200",
-                          description = "Successfully updated the point of interest",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = PointOfInterestResponse.class))),
-                  @ApiResponse(responseCode = "400",
-                          description = "Invalid request payload or parameters",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = ErrorResponse.class))),
-                  @ApiResponse(responseCode = "500", description = "Internal server error",
-                          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                  schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200",
+                    description = "Successfully updated the point of interest",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PointOfInterestResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid request payload or parameters",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ErrorResponse.class)))
           }
   )
   @PutMapping("/{id}")
