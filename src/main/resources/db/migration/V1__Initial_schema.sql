@@ -13,9 +13,9 @@ CREATE TABLE users
     name         VARCHAR(255) NOT NULL,
     household_id INT          NOT NULL,
     password     VARCHAR(255) NOT NULL,
-    role         ENUM('normal',
-    'admin',
-    'super_admin'
+    role         ENUM('role_normal',
+    'role_admin',
+    'role_super_admin'
 ) NOT NULL DEFAULT 'normal',
     FOREIGN KEY (household_id) REFERENCES households(id),
     INDEX (household_id)
