@@ -19,11 +19,12 @@ import org.springframework.stereotype.Service;
    * @return The subject of the email template.
    */
   String getSubject(EmailTemplateType type) {
-<span class="fc bfc" id="L22" title="All 4 branches covered.">    return switch (type) {</span>
+<span class="pc bpc" id="L22" title="1 of 5 branches missed.">    return switch (type) {</span>
 <span class="fc" id="L23">      case PASSWORD_RESET -&gt; &quot;Password Reset Request&quot;;</span>
 <span class="fc" id="L24">      case HOUSEHOLD_INVITE -&gt; &quot;Household Invite&quot;;</span>
 <span class="fc" id="L25">      case ADMIN_INVITE -&gt; &quot;Admin Invite&quot;;</span>
 <span class="fc" id="L26">      case ADMIN_VERIFICATION -&gt; &quot;Admin Verification&quot;;</span>
+<span class="nc" id="L27">      case VERIFY_EMAIL -&gt; &quot;Email Verification&quot;;</span>
     };
   }
 
@@ -35,17 +36,19 @@ import org.springframework.stereotype.Service;
    * @return The body of the email template.
    */
   String getBody(EmailTemplateType type, Map&lt;String, String&gt; params) {
-<span class="fc bfc" id="L38" title="All 4 branches covered.">    return switch (type) {</span>
-<span class="fc" id="L39">      case PASSWORD_RESET -&gt; &quot;Click the link below to reset your password:\n&quot;</span>
-<span class="fc" id="L40">          + params.get(&quot;resetLink&quot;);</span>
-<span class="fc" id="L41">      case HOUSEHOLD_INVITE -&gt; &quot;You have been invited to join a household.\n&quot;</span>
+<span class="pc bpc" id="L39" title="1 of 5 branches missed.">    return switch (type) {</span>
+<span class="fc" id="L40">      case PASSWORD_RESET -&gt; &quot;Click the link below to reset your password:\n&quot;</span>
+<span class="fc" id="L41">          + params.get(&quot;resetLink&quot;);</span>
+<span class="fc" id="L42">      case HOUSEHOLD_INVITE -&gt; &quot;You have been invited to join a household.\n&quot;</span>
                               + &quot;Click the link below to accept the invitation:\n&quot;
-<span class="fc" id="L43">          + params.get(&quot;inviteLink&quot;);</span>
-<span class="fc" id="L44">      case ADMIN_INVITE -&gt; &quot;You have been invited to become an admin.\n&quot;</span>
+<span class="fc" id="L44">          + params.get(&quot;inviteLink&quot;);</span>
+<span class="fc" id="L45">      case ADMIN_INVITE -&gt; &quot;You have been invited to become an admin.\n&quot;</span>
                             + &quot;Click the link below to accept the invitation:\n&quot;
-<span class="fc" id="L46">          + params.get(&quot;inviteLink&quot;);</span>
-<span class="fc" id="L47">      case ADMIN_VERIFICATION -&gt; &quot;Your admin account has been verified. You can now log in.\n&quot;</span>
-<span class="fc" id="L48">          + params.get(&quot;loginLink&quot;);</span>
+<span class="fc" id="L47">          + params.get(&quot;inviteLink&quot;);</span>
+<span class="fc" id="L48">      case ADMIN_VERIFICATION -&gt; &quot;Your admin account has been verified. You can now log in.\n&quot;</span>
+<span class="fc" id="L49">          + params.get(&quot;loginLink&quot;);</span>
+<span class="nc" id="L50">      case VERIFY_EMAIL -&gt; &quot;Click the link below to verify your email address:\n&quot;</span>
+<span class="nc" id="L51">          + params.get(&quot;verificationLink&quot;);</span>
     };
   }
 }

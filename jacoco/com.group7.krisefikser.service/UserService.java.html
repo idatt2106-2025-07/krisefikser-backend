@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service</a> &gt; <span class="el_source">UserService.java</span></div><h1>UserService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service;
+
+import com.group7.krisefikser.dto.request.LoginRequest;
+import com.group7.krisefikser.dto.request.RegisterRequest;
+import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.enums.AuthResponseMessage;
+import com.group7.krisefikser.enums.EmailTemplateType;
+import com.group7.krisefikser.enums.Role;
+import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.mapper.UserMapper;
+import com.group7.krisefikser.model.User;
+import com.group7.krisefikser.repository.HouseholdRepository;
+import com.group7.krisefikser.repository.UserRepository;
+import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.utils.PasswordUtil;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+
+/**
+ * Service class for handling user-related operations.
+ * This class provides methods for user registration, login, and token management.
+ * It implements the UserDetailsService interface for loading user details.
+ */
+@Service
+@RequiredArgsConstructor
+public class UserService implements UserDetailsService {
+
+  private final UserRepository userRepo;
+  private final HouseholdRepository householdRepo;
+  private final JwtUtils jwtUtils;
+  private final EmailService emailService;
+
+  @Override
+  public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+<span class="nc" id="L46">    User user = userRepo.findByEmail(email)</span>
+<span class="nc" id="L47">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">    if (user == null) {</span>
+<span class="nc" id="L49">      throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
+    }
+<span class="nc" id="L51">    return new org.springframework.security.core.userdetails.User(</span>
+<span class="nc" id="L52">        user.getEmail(), user.getPassword(),</span>
+        new ArrayList&lt;&gt;());
+  }
+
+  /**
+   * Registers a new user in the system.
+   * This method handles the registration process, including creating a household for the user.
+   * It also sends a verification email to the user.
+   *
+   * @param request  the registration request containing user details
+   * @param response the HTTP response object
+   * @return an AuthResponse object containing the result of the registration
+   */
+  @Transactional
+  public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
+<span class="fc" id="L67">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
+<span class="fc" id="L68">    user.setRole(Role.ROLE_NORMAL);</span>
+<span class="fc" id="L69">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
+    Long householdId;
+<span class="fc bfc" id="L71" title="All 2 branches covered.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
+<span class="fc" id="L72">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L73">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
+    }
+
+    // When the user is created, we also create a household for them
+    // This is for when the user waits for the request to join a household to be accepted
+    // This is a temporary solution, in the future the user should be able to create a household
+    try {
+<span class="fc" id="L80">      int counter = 1;</span>
+<span class="fc" id="L81">      String baseName = user.getName() + &quot;'s household&quot;</span>
+<span class="fc" id="L82">          + UUID.randomUUID().toString().substring(0, 8);</span>
+<span class="fc" id="L83">      String householdName = baseName;</span>
+
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">      while (householdRepo.existsByName(householdName)) {</span>
+<span class="nc" id="L86">        counter++;</span>
+<span class="nc" id="L87">        householdName = baseName + &quot; (&quot; + counter + &quot;)&quot;;</span>
+      }
+      // Right now we are creating a household with default values for longitude and latitude
+      // In the future, we might want to get these values from the user or use a geolocation service
+<span class="fc" id="L91">      double longitude = 0.0;</span>
+<span class="fc" id="L92">      double latitude = 0.0;</span>
+<span class="fc" id="L93">      householdId = householdRepo.createHousehold(householdName, longitude, latitude);</span>
+<span class="nc" id="L94">    } catch (Exception e) {</span>
+<span class="nc" id="L95">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L96">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L97">    }</span>
+    try {
+<span class="fc" id="L99">      user.setHouseholdId(householdId);</span>
+<span class="fc" id="L100">      userRepo.save(user);</span>
+<span class="fc" id="L101">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
+<span class="fc" id="L102">      String emailVerificationToken = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());</span>
+<span class="fc" id="L103">      String verificationLink = &quot;https://localhost:5173/verify?token=&quot; + emailVerificationToken;</span>
+<span class="fc" id="L104">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
+<span class="fc" id="L105">      emailService.sendTemplateMessage(</span>
+<span class="fc" id="L106">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
+
+<span class="fc" id="L108">      String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());</span>
+<span class="fc" id="L109">      jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L110">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L111">          .USER_REGISTERED_SUCCESSFULLY.getMessage(),</span>
+<span class="fc" id="L112">          jwtUtils.getExpirationDate(token), byEmail.get().getRole());</span>
+<span class="nc" id="L113">    } catch (Exception e) {</span>
+<span class="nc" id="L114">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L115">          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);</span>
+    }
+  }
+
+  /**
+   * Logs in a user and generates a JWT token.
+   * This method verifies the user's credentials and generates a token if valid.
+   * It also checks if the user is verified.
+   *
+   * @param request the login request containing user credentials
+   * @return an AuthResponse object containing the result of the login
+   * @throws JwtMissingPropertyException if there is an issue with the JWT token
+   */
+  public AuthResponse loginUser(LoginRequest request, HttpServletResponse response) {
+<span class="fc" id="L129">    String email = request.getEmail();</span>
+
+<span class="fc" id="L131">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+
+<span class="fc bfc" id="L133" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
+<span class="fc" id="L134">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+    }
+
+<span class="fc" id="L137">    User user = userOpt.get();</span>
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
+<span class="fc" id="L140">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
+    }
+
+    try {
+<span class="fc" id="L144">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
+<span class="fc" id="L145">      jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L146">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
+
+<span class="fc" id="L148">      return new AuthResponse(</span>
+<span class="fc" id="L149">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
+          expirationDate,
+<span class="fc" id="L151">          user.getRole()</span>
+      );
+<span class="nc" id="L153">    } catch (Exception e) {</span>
+<span class="nc" id="L154">      return new AuthResponse(</span>
+<span class="nc" id="L155">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

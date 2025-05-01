@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.repository</a> &gt; <span class="el_source">UserRepository.java</span></div><h1>UserRepository.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.repository;
+
+import com.group7.krisefikser.enums.Role;
+import com.group7.krisefikser.model.User;
+import java.util.Optional;
+import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository class for managing user data in the database.
+ * This class provides methods to find users by email,
+ * save new users, and find users by ID.
+ */
+@Repository
+public class UserRepository {
+
+<span class="fc" id="L20">  private static final Logger logger = Logger.getLogger(UserRepository.class.getName());</span>
+
+  private final JdbcTemplate jdbcTemplate;
+
+  /**
+   * Constructor for UserRepository.
+   * This constructor initializes the JdbcTemplate used for database operations.
+   *
+   * @param jdbcTemplate the JdbcTemplate to be used for database operations
+   */
+  @Autowired
+<span class="fc" id="L31">  public UserRepository(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L32">    this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L33">  }</span>
+
+  /**
+   * Finds a user by their email address.
+   * This method queries the database for a user with the specified email.
+   * If a user is found, it returns an Optional containing the user.
+   * If no user is found, it returns an empty Optional.
+   *
+   * @param email the email address of the user to be found
+   * @return an Optional containing the user if found, or an empty Optional if not found
+   */
+  public Optional&lt;User&gt; findByEmail(String email) {
+<span class="fc" id="L45">    String sql = &quot;SELECT * FROM users WHERE email = ?&quot;;</span>
+    try {
+<span class="fc" id="L47">      return jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="fc" id="L48">        User user = new User();</span>
+<span class="fc" id="L49">        user.setId(rs.getLong(&quot;id&quot;));</span>
+<span class="fc" id="L50">        user.setEmail(rs.getString(&quot;email&quot;));</span>
+<span class="fc" id="L51">        user.setName(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L52">        user.setHouseholdId(rs.getLong(&quot;household_id&quot;));</span>
+<span class="fc" id="L53">        user.setPassword(rs.getString(&quot;password&quot;));</span>
+<span class="fc" id="L54">        String roleString = rs.getString(&quot;role&quot;).toUpperCase();</span>
+<span class="fc" id="L55">        Role role = Role.valueOf(roleString);</span>
+<span class="fc" id="L56">        user.setRole(role);</span>
+<span class="fc" id="L57">        return user;</span>
+<span class="fc" id="L58">      }, email).stream().findFirst();</span>
+<span class="nc" id="L59">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L60">      logger.info(&quot;No user found with email: &quot; + email);</span>
+<span class="nc" id="L61">      return Optional.empty();</span>
+    }
+  }
+
+  /**
+   * Saves a new user to the database.
+   * This method inserts a new user into the users table.
+   * If the user does not have a role, it sets the role to ROLE_NORMAL by default.
+   * If the user is saved successfully, it returns an Optional containing the saved user.
+   * If an error occurs during the save operation, it returns an empty Optional.
+   *
+   * @param user the user to be saved
+   * @return an Optional containing the saved user if successful, or an empty Optional if not
+   */
+  public Optional&lt;User&gt; save(User user) {
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">    if (user.getRole() == null) {</span>
+<span class="fc" id="L77">      user.setRole(Role.ROLE_NORMAL);</span>
+    }
+<span class="fc" id="L79">    String query = &quot;INSERT INTO users &quot;</span>
+        + &quot;(email, name, household_id, password, role) &quot;
+        + &quot;VALUES (?, ?, ?, ?, ?)&quot;;
+    try {
+<span class="fc" id="L83">      jdbcTemplate.update(query, user.getEmail(), user.getName(),</span>
+<span class="fc" id="L84">          user.getHouseholdId(), user.getPassword(), user.getRole().toString());</span>
+<span class="fc" id="L85">      return findByEmail(user.getEmail());</span>
+<span class="fc" id="L86">    } catch (Exception e) {</span>
+<span class="fc" id="L87">      System.err.println(&quot;Failed to save user: &quot; + e.getMessage());</span>
+<span class="fc" id="L88">      e.printStackTrace();</span>
+<span class="fc" id="L89">      return Optional.empty();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
