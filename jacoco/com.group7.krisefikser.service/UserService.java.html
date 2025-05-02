@@ -59,60 +59,56 @@ public class UserService implements UserDetailsService {
    * It also sends a verification email to the user.
    *
    * @param request  the registration request containing user details
-   * @param response the HTTP response object
    * @return an AuthResponse object containing the result of the registration
    */
   @Transactional
-  public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
-<span class="fc" id="L67">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
-<span class="fc" id="L68">    user.setRole(Role.ROLE_NORMAL);</span>
-<span class="fc" id="L69">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
+  public AuthResponse registerUser(RegisterRequest request) {
+<span class="fc" id="L66">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
+<span class="fc" id="L67">    user.setRole(Role.ROLE_NORMAL);</span>
+<span class="fc" id="L68">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
     Long householdId;
-<span class="fc bfc" id="L71" title="All 2 branches covered.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
-<span class="fc" id="L72">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L73">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
+<span class="fc" id="L71">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L72">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
     }
 
     // When the user is created, we also create a household for them
     // This is for when the user waits for the request to join a household to be accepted
     // This is a temporary solution, in the future the user should be able to create a household
     try {
-<span class="fc" id="L80">      int counter = 1;</span>
-<span class="fc" id="L81">      String baseName = user.getName() + &quot;'s household&quot;</span>
-<span class="fc" id="L82">          + UUID.randomUUID().toString().substring(0, 8);</span>
-<span class="fc" id="L83">      String householdName = baseName;</span>
+<span class="fc" id="L79">      int counter = 1;</span>
+<span class="fc" id="L80">      String baseName = user.getName() + &quot;'s household&quot;</span>
+<span class="fc" id="L81">          + UUID.randomUUID().toString().substring(0, 8);</span>
+<span class="fc" id="L82">      String householdName = baseName;</span>
 
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">      while (householdRepo.existsByName(householdName)) {</span>
-<span class="nc" id="L86">        counter++;</span>
-<span class="nc" id="L87">        householdName = baseName + &quot; (&quot; + counter + &quot;)&quot;;</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">      while (householdRepo.existsByName(householdName)) {</span>
+<span class="nc" id="L85">        counter++;</span>
+<span class="nc" id="L86">        householdName = baseName + &quot; (&quot; + counter + &quot;)&quot;;</span>
       }
       // Right now we are creating a household with default values for longitude and latitude
       // In the future, we might want to get these values from the user or use a geolocation service
-<span class="fc" id="L91">      double longitude = 0.0;</span>
-<span class="fc" id="L92">      double latitude = 0.0;</span>
-<span class="fc" id="L93">      householdId = householdRepo.createHousehold(householdName, longitude, latitude);</span>
-<span class="fc" id="L94">    } catch (Exception e) {</span>
-<span class="fc" id="L95">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L96">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
-<span class="fc" id="L97">    }</span>
+<span class="fc" id="L90">      double longitude = 0.0;</span>
+<span class="fc" id="L91">      double latitude = 0.0;</span>
+<span class="fc" id="L92">      householdId = householdRepo.createHousehold(householdName, longitude, latitude);</span>
+<span class="fc" id="L93">    } catch (Exception e) {</span>
+<span class="fc" id="L94">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L95">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L96">    }</span>
     try {
-<span class="fc" id="L99">      user.setHouseholdId(householdId);</span>
-<span class="fc" id="L100">      userRepo.save(user);</span>
-<span class="fc" id="L101">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
-<span class="fc" id="L102">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
-<span class="fc" id="L103">      String verificationLink = &quot;https://localhost:5173/verify?token=&quot; + emailVerificationToken;</span>
-<span class="fc" id="L104">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
-<span class="fc" id="L105">      emailService.sendTemplateMessage(</span>
-<span class="fc" id="L106">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
+<span class="fc" id="L98">      user.setHouseholdId(householdId);</span>
+<span class="fc" id="L99">      userRepo.save(user);</span>
+<span class="fc" id="L100">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
+<span class="fc" id="L101">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
+<span class="fc" id="L102">      String verificationLink = &quot;https://localhost:5173/verify?token=&quot; + emailVerificationToken;</span>
+<span class="fc" id="L103">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
+<span class="fc" id="L104">      emailService.sendTemplateMessage(</span>
+<span class="fc" id="L105">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
 
-<span class="fc" id="L108">      String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());</span>
-<span class="fc" id="L109">      jwtUtils.setJwtCookie(token, response);</span>
-<span class="fc" id="L110">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L111">          .USER_REGISTERED_SUCCESSFULLY.getMessage(),</span>
-<span class="fc" id="L112">          jwtUtils.getExpirationDate(token), byEmail.get().getRole());</span>
-<span class="nc" id="L113">    } catch (Exception e) {</span>
-<span class="nc" id="L114">      return new AuthResponse(AuthResponseMessage</span>
-<span class="nc" id="L115">          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L107">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L108">          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());</span>
+<span class="nc" id="L109">    } catch (Exception e) {</span>
+<span class="nc" id="L110">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L111">          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);</span>
     }
   }
 
@@ -125,37 +121,37 @@ public class UserService implements UserDetailsService {
    * @return an AuthResponse object containing the result of the login
    */
   public AuthResponse loginUser(LoginRequest request, HttpServletResponse response) {
-<span class="fc" id="L128">    String email = request.getEmail();</span>
+<span class="fc" id="L124">    String email = request.getEmail();</span>
 
-<span class="fc" id="L130">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc" id="L126">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 
-<span class="fc bfc" id="L132" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
-<span class="fc" id="L133">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
+<span class="fc" id="L129">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
     }
 
-<span class="fc bfc" id="L136" title="All 2 branches covered.">    if (!userOpt.get().getVerified()) {</span>
-<span class="fc" id="L137">      return new AuthResponse(AuthResponseMessage.USER_NOT_VERIFIED.getMessage(), null, null);</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">    if (!userOpt.get().getVerified()) {</span>
+<span class="fc" id="L133">      return new AuthResponse(AuthResponseMessage.USER_NOT_VERIFIED.getMessage(), null, null);</span>
     }
 
-<span class="fc" id="L140">    User user = userOpt.get();</span>
+<span class="fc" id="L136">    User user = userOpt.get();</span>
 
-<span class="fc bfc" id="L142" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
-<span class="fc" id="L143">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
+<span class="fc" id="L139">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
     }
 
     try {
-<span class="fc" id="L147">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
-<span class="fc" id="L148">      jwtUtils.setJwtCookie(token, response);</span>
-<span class="fc" id="L149">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
+<span class="fc" id="L143">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
+<span class="fc" id="L144">      jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L145">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
 
-<span class="fc" id="L151">      return new AuthResponse(</span>
-<span class="fc" id="L152">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
+<span class="fc" id="L147">      return new AuthResponse(</span>
+<span class="fc" id="L148">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
           expirationDate,
-<span class="fc" id="L154">          user.getRole()</span>
+<span class="fc" id="L150">          user.getRole()</span>
       );
-<span class="fc" id="L156">    } catch (Exception e) {</span>
-<span class="fc" id="L157">      return new AuthResponse(</span>
-<span class="fc" id="L158">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L152">    } catch (Exception e) {</span>
+<span class="fc" id="L153">      return new AuthResponse(</span>
+<span class="fc" id="L154">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
     }
   }
 
@@ -168,20 +164,20 @@ public class UserService implements UserDetailsService {
    */
   public AuthResponse verifyEmail(String token) {
     try {
-<span class="fc" id="L171">      String email = jwtUtils.validateVerificationTokenAndGetEmail(token);</span>
-<span class="fc" id="L172">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc" id="L167">      String email = jwtUtils.validateVerificationTokenAndGetEmail(token);</span>
+<span class="fc" id="L168">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 
-<span class="fc bfc" id="L174" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
-<span class="fc" id="L175">        User user = userOpt.get();</span>
-<span class="fc" id="L176">        user.setVerified(true);</span>
-<span class="fc" id="L177">        userRepo.setVerified(user);</span>
-<span class="fc" id="L178">        return new AuthResponse(</span>
-<span class="fc" id="L179">            AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage(), null, null);</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
+<span class="fc" id="L171">        User user = userOpt.get();</span>
+<span class="fc" id="L172">        user.setVerified(true);</span>
+<span class="fc" id="L173">        userRepo.setVerified(user);</span>
+<span class="fc" id="L174">        return new AuthResponse(</span>
+<span class="fc" id="L175">            AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage(), null, null);</span>
       } else {
-<span class="fc" id="L181">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+<span class="fc" id="L177">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
       }
-<span class="fc" id="L183">    } catch (JwtMissingPropertyException e) {</span>
-<span class="fc" id="L184">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
+<span class="fc" id="L179">    } catch (JwtMissingPropertyException e) {</span>
+<span class="fc" id="L180">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
     }
   }
 }
