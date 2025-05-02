@@ -112,4 +112,17 @@ public class UserRepository {
       return Optional.empty();
     }
   }
+
+  /**
+   * Updates a user's household association in the database.
+   * This method sets the household_id for a user with the specified user ID.
+   *
+   * @param userId the ID of the user whose household is being updated
+   * @param householdId the ID of the household to associate with the user
+   */
+  public void updateUserHousehold(Long userId, Long householdId) {
+    jdbcTemplate.update(
+        "UPDATE users SET household_id = ? WHERE id = ?",
+        householdId, userId);
+  }
 }
