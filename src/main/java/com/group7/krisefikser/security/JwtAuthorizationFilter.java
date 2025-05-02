@@ -35,9 +35,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       HttpServletRequest request,
       HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-
-    logger.info("JWTAuthorizationFilter called for URI: {}", request.getRequestURI());
-
+  
+    String path = request.getRequestURI();
+    logger.info("JWTAuthorizationFilter called for URI: {}", path);
+  
+    // 🔐 Bypass token validation for public endpoints
+    if (path.startsWith("/api/auth/login") ||
+        path.startsWith("/api/auth/register") ||
+        path.startsWith("/api/auth/verify-email")) {
+      logger.info("Skipping JWT validation for public path: {}", path);
+      filterChain.doFilter(request, response);
+      return;
+    }
+  
     String token = null;
     Cookie[] cookies = request.getCookies();
     if (cookies != null) {
@@ -48,13 +58,13 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
       }
     }
-
+  
     if (token == null) {
       logger.warn("No token found in request");
       filterChain.doFilter(request, response);
       return;
     }
-
+  
     final String username;
     final String role;
     logger.info("Validating token");
@@ -62,15 +72,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
       username = jwtUtils.validateTokenAndGetUserId(token);
       role = jwtUtils.validateTokenAndGetRole(token);
     } catch (JwtMissingPropertyException | JWTVerificationException e) {
+      logger.warn("Invalid token: {}", e.getMessage());
       filterChain.doFilter(request, response);
       return;
     }
-
+  
     if (username == null || role == null) {
+      logger.warn("Token missing username or role");
       filterChain.doFilter(request, response);
       return;
     }
-
+  
     List<SimpleGrantedAuthority> authorities = Collections.singletonList(
         new SimpleGrantedAuthority(role));
     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
@@ -78,8 +90,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         null,
         authorities);
     SecurityContextHolder.getContext().setAuthentication(auth);
-
-    logger.info("user: {}, role: {}, has been authenticated", username, role);
+  
+    logger.info("User: {}, role: {} has been authenticated", username, role);
     filterChain.doFilter(request, response);
   }
 }
