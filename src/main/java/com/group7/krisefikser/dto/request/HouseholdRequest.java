@@ -1,6 +1,5 @@
 package com.group7.krisefikser.dto.request;
 
-import com.group7.krisefikser.model.Household;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

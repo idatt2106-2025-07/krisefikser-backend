@@ -2,9 +2,7 @@ package com.group7.krisefikser.mapper;
 
 import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
-import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
 import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.model.JoinHouseholdRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
