@@ -1,6 +1,8 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
+import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
@@ -33,39 +35,54 @@ class HouseholdControllerTest {
   private ObjectMapper objectMapper;
 
   @Test
-  @WithMockUser
-  void createHousehold_shouldReturnOkAndCreatedHousehold() throws Exception {
+  @WithMockUser(username = "1") // This will set the authentication name to "1"
+  void createHousehold_shouldReturnCreatedAndHousehold() throws Exception {
+    // Create a HouseholdRequest object (what the controller expects)
+    HouseholdRequest householdRequest = new HouseholdRequest();
+    householdRequest.setName("Test Household");
+    householdRequest.setLongitude(10.0);
+    householdRequest.setLatitude(60.0);
+
     Household household = new Household();
     household.setId(1L);
     household.setName("Test Household");
     household.setLongitude(10.0);
     household.setLatitude(60.0);
 
-    when(householdService.createHousehold(org.mockito.ArgumentMatchers.any(Household.class), org.mockito.ArgumentMatchers.anyLong()))
+    when(householdService.createHousehold(
+      org.mockito.ArgumentMatchers.any(Household.class),
+      org.mockito.ArgumentMatchers.eq(1L)))
       .thenReturn(household);
 
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/households/create")
+    mockMvc.perform(MockMvcRequestBuilders.post("/api/households")
         .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(household))
-        .param("userId", "1"))
-      .andExpect(MockMvcResultMatchers.status().isOk())
+        .content(objectMapper.writeValueAsString(householdRequest)))
+      .andExpect(MockMvcResultMatchers.status().isCreated())
       .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
       .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Test Household"));
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(username = "3") // Set the authenticated user ID to 3
   void requestToJoin_shouldReturnOkAndJoinRequest() throws Exception {
-    JoinHouseholdRequest request = new JoinHouseholdRequest();
-    request.setId(1L);
-    request.setHouseholdId(2L);
-    request.setUserId(3L);
+    // Create the request DTO
+    HouseholdJoinRequest joinRequest = new HouseholdJoinRequest();
+    joinRequest.setHouseholdId(2L);
 
-    when(householdService.requestToJoin(2L, 3L)).thenReturn(request);
+    // Create the expected response
+    JoinHouseholdRequest responseObj = new JoinHouseholdRequest();
+    responseObj.setId(1L);
+    responseObj.setHouseholdId(2L);
+    responseObj.setUserId(3L);
 
+    // Mock the service call with the expected parameters
+    // UserId 3 comes from the security context
+    when(householdService.requestToJoin(2L, 3L)).thenReturn(responseObj);
+
+    // Perform the request with JSON body
     mockMvc.perform(MockMvcRequestBuilders.post("/api/households/join-request")
-        .param("householdId", "2")
-        .param("userId", "3"))
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(joinRequest)))
       .andExpect(MockMvcResultMatchers.status().isOk())
       .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
       .andExpect(MockMvcResultMatchers.jsonPath("$.householdId").value(2))
@@ -74,7 +91,7 @@ class HouseholdControllerTest {
 
   @Test
   @WithMockUser
-  void getRequests_shouldReturnOkAndListOfRequests() throws Exception {
+  void getRequests_shouldReturnOkAndListOfJoinRequests() throws Exception {
     List<JoinHouseholdRequest> requests = Arrays.asList(
       new JoinHouseholdRequest(1L, 2L, 3L),
       new JoinHouseholdRequest(2L, 2L, 4L)
@@ -90,14 +107,14 @@ class HouseholdControllerTest {
 
   @Test
   @WithMockUser
-  void acceptRequest_shouldReturnOk() throws Exception {
+  void acceptJoinRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/accept"))
       .andExpect(MockMvcResultMatchers.status().isOk());
   }
 
   @Test
   @WithMockUser
-  void declineRequest_shouldReturnOk() throws Exception {
+  void declineJoinRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/decline"))
       .andExpect(MockMvcResultMatchers.status().isOk());
   }
