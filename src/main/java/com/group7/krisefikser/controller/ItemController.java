@@ -1,6 +1,8 @@
 package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.request.ItemFilterRequest;
 import com.group7.krisefikser.dto.request.ItemRequest;
+import com.group7.krisefikser.dto.request.ItemSortRequest;
 import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.Item;
@@ -10,21 +12,21 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import java.util.ArrayList;
+import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -35,6 +37,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/items")
 public class ItemController {
   private final ItemService itemService;
+  private static final Logger logger = Logger.getLogger(ItemController.class.getName());
+
 
   @Autowired
   public ItemController(ItemService itemService) {
@@ -60,9 +64,7 @@ public class ItemController {
   @GetMapping
   public ResponseEntity<List<ItemResponse>> getAllItems() {
     List<Item> items = itemService.getAllItems();
-    List<ItemResponse> itemResponses = items.stream()
-        .map(ItemResponse::fromEntity)
-        .collect(Collectors.toList());
+    List<ItemResponse> itemResponses = itemService.convertToItemResponses(items);
     return ResponseEntity.ok(itemResponses);
   }
 
@@ -92,48 +94,30 @@ public class ItemController {
       if (e.getMessage().contains("not found")) {
         return ResponseEntity.notFound().build();
       }
-      throw e;
+      logger.severe("Unexpected error retrieving item with ID " + id + ": " + e.getMessage());
+      return ResponseEntity.status(500).body(null);
     }
-  }
-
-  /**
-   * Helper method to convert a list of Item entities to ItemResponse DTOs.
-   *
-   * @param items The list of Item entities to convert
-   * @return A list of corresponding ItemResponse objects
-   */
-  private List<ItemResponse> convertToItemResponses(List<Item> items) {
-    return items.stream()
-      .map(ItemResponse::fromEntity)
-      .collect(Collectors.toList());
-  }
-
-  /**
-   * Helper method to validate sort parameters.
-   *
-   * @param value        The value to validate
-   * @param defaultValue The default value if validation fails
-   * @param validValues  A list of valid values
-   * @return The validated value or the default value
-   */
-  private String validateSortParameter(String value, String defaultValue,
-                                       List<String> validValues) {
-    if (value == null || !validValues.contains(value.toLowerCase())) {
-      return defaultValue;
-    }
-    return value.toLowerCase();
   }
 
   /**
    * Endpoint to filter items based on their types.
+   * This endpoint accepts a request containing a list of item types to filter by
+   * and returns a list of items that match those types. If no types are provided,
+   * it returns all items.
    *
-   * @param types The list of types to filter by
-   * @return A list of filtered items
+   * @param request The GetItemsByTypesRequest containing the types to filter by
+   * @return A ResponseEntity containing a list of filtered ItemResponse objects
    */
   @Operation(
       summary = "Filter items by type",
       description = "Retrieves a list of items filtered by the specified types. "
-        + "If no types are provided, returns all items.",
+      + "If no types are provided, returns all items.",
+      parameters = @Parameter(
+      name = "types",
+      description = "Item types to filter by (e.g., FOOD, DRINK, ACCESSORIES)",
+      example = "FOOD",
+      schema = @Schema(type = "array", implementation = String.class)
+      ),
       responses = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved filtered items",
           content = @Content(mediaType = "application/json",
@@ -143,35 +127,30 @@ public class ItemController {
   )
   @GetMapping("/filter")
   public ResponseEntity<List<ItemResponse>> filterItems(
-      @Parameter(description = "Item types to filter by (e.g., FOOD, DRINK, ACCESSORIES)",
-      example = "FOOD", schema = @Schema(type = "array", implementation = String.class))
-      @RequestParam(required = false) List<String> types) {
+      @Valid @ModelAttribute ItemFilterRequest request) {
+
+    logger.info("Received request to filter items by types: " + request.getTypes());
     try {
-      List<ItemType> itemTypes = new ArrayList<>();
-      if (types != null && !types.isEmpty()) {
-        for (String typeStr : types) {
-          try {
-            ItemType type = ItemType.fromString(typeStr);
-            itemTypes.add(type);
-          } catch (IllegalArgumentException e) {
-            // Skip invalid types
-          }
-        }
-      }
+      // Use the service method to convert strings to ItemTypes
+      List<ItemType> itemTypes = itemService.convertToItemTypes(request.getTypes());
 
       List<Item> items = itemService.getItemsByTypes(itemTypes);
-      return ResponseEntity.ok(convertToItemResponses(items));
+      logger.info("Successfully retrieved filtered items");
+      return ResponseEntity.ok(itemService.convertToItemResponses(items));
     } catch (Exception e) {
+      logger.severe("Unexpected error filtering items: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
     }
   }
 
   /**
    * Endpoint to sort items based on a specified field and direction.
+   * This endpoint accepts a request object containing sort parameters and returns
+   * a list of items sorted according to these parameters. The sorting is handled
+   * by the ItemService, with validation performed through Jakarta validation annotations.
    *
-   * @param sortBy The field to sort by (default: "name")
-   * @param sortDirection The direction to sort (default: "asc")
-   * @return A list of sorted items
+   * @param request The ItemSortRequest object containing sortBy and sortDirection parameters
+   * @return ResponseEntity containing a list of sorted ItemResponse objects
    */
   @Operation(
       summary = "Sort items",
@@ -181,83 +160,70 @@ public class ItemController {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved sorted items",
           content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid sort parameters"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
       }
   )
   @GetMapping("/sort")
   public ResponseEntity<List<ItemResponse>> sortItems(
-      @Parameter(description = "Field to sort by", schema = @Schema(type = "string",
-        allowableValues = {"name", "calories"}),
-        example = "name")
-      @RequestParam(required = false, defaultValue = "name") String sortBy,
-      @Parameter(description = "Sort direction", schema = @Schema(type = "string",
-        allowableValues = {"asc", "desc"}),
-        example = "asc")
-      @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
+      @Valid @ModelAttribute ItemSortRequest request) {
+    logger.info("Received request to sort items by: " + request.getSortBy()
+        + " in direction: " + request.getSortDirection());
     try {
-      sortBy = validateSortParameter(sortBy, "name", List.of("name", "calories"));
-      sortDirection = validateSortParameter(sortDirection, "asc", List.of("asc", "desc"));
-
-      List<Item> items = itemService.getSortedItems(sortBy, sortDirection);
-      return ResponseEntity.ok(convertToItemResponses(items));
+      List<Item> items = itemService.getSortedItems(
+          request.getSortBy().toLowerCase(),
+          request.getSortDirection().toLowerCase());
+      logger.info("Successfully sorted items");
+      return ResponseEntity.ok(itemService.convertToItemResponses(items));
     } catch (Exception e) {
+      logger.severe("Unexpected error sorting items: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
     }
   }
 
   /**
    * Endpoint to filter and sort items based on specified criteria.
+   * This endpoint accepts separate filter and sort request objects and returns
+   * a list of items that are both filtered by the specified types and sorted
+   * according to the provided sort parameters. The filtering and sorting is
+   * performed by the ItemService.
    *
-   * @param types The list of types to filter by
-   * @param sortBy The field to sort by (default: "name")
-   * @param sortDirection The direction to sort (default: "asc")
-   * @return A list of filtered and sorted items
+   * @param filterRequest The ItemFilterRequest containing the types to filter by
+   * @param sortRequest The ItemSortRequest containing sortBy and sortDirection parameters
+   * @return ResponseEntity containing a list of filtered and sorted ItemResponse objects
    */
   @Operation(
       summary = "Filter and sort items",
-      description = "Retrieves a list of items filtered by the specified types and "
-        + "sorted by the specified criteria. If no types are provided, returns all items sorted. "
+        description = "Retrieves a list of items filtered by the specified types and "
+      + "sorted by the specified criteria. If no types are provided, returns all items sorted. "
       + "Valid sort fields: name, calories. Valid directions: asc, desc.",
       responses = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"
           + " filtered and sorted items",
           content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid filter or sort parameters"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
       }
   )
   @GetMapping("/filter-and-sort")
   public ResponseEntity<List<ItemResponse>> filterAndSortItems(
-      @Parameter(description = "Item types to filter by (e.g., FOOD, DRINK, ACCESSORIES)",
-        example = "FOOD", schema = @Schema(type = "array", implementation = String.class))
-      @RequestParam(required = false) List<String> types,
-      @Parameter(description = "Field to sort by", schema = @Schema(type = "string",
-        allowableValues = {"name", "calories"}),
-        example = "name")
-      @RequestParam(required = false, defaultValue = "name") String sortBy,
-      @Parameter(description = "Sort direction", schema = @Schema(type = "string",
-        allowableValues = {"asc", "desc"}),
-        example = "asc")
-      @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
+      @Valid @ModelAttribute ItemFilterRequest filterRequest,
+      @Valid @ModelAttribute ItemSortRequest sortRequest) {
+
+    logger.info("Received request to filter and sort items");
     try {
-      List<ItemType> itemTypes = new ArrayList<>();
-      if (types != null && !types.isEmpty()) {
-        for (String typeStr : types) {
-          try {
-            ItemType type = ItemType.fromString(typeStr);
-            itemTypes.add(type);
-          } catch (IllegalArgumentException e) {
-            // Skip invalid types
-          }
-        }
-      }
+      // Use the service method to convert strings to ItemTypes
+      List<ItemType> itemTypes = itemService.convertToItemTypes(filterRequest.getTypes());
 
-      sortBy = validateSortParameter(sortBy, "name", List.of("name", "calories"));
-      sortDirection = validateSortParameter(sortDirection, "asc", List.of("asc", "desc"));
-
-      List<Item> items = itemService.getFilteredAndSortedItems(itemTypes, sortBy, sortDirection);
-      return ResponseEntity.ok(convertToItemResponses(items));
+      List<Item> items = itemService.getFilteredAndSortedItems(
+          itemTypes,
+          sortRequest.getSortBy().toLowerCase(),
+          sortRequest.getSortDirection().toLowerCase());
+      logger.info("Successfully filtered and sorted items");
+      return ResponseEntity.ok(itemService.convertToItemResponses(items));
     } catch (Exception e) {
+      logger.severe("Unexpected error filtering and sorting items: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
     }
   }
@@ -287,13 +253,15 @@ public class ItemController {
       }
     )
   @PostMapping
-  public ResponseEntity<ItemResponse> addItem(@RequestBody ItemRequest itemRequest) {
+  public ResponseEntity<ItemResponse> addItem(@Valid @RequestBody ItemRequest itemRequest) {
+    logger.info("Received request to add a new item: " + itemRequest.getName());
     try {
-      Item item = itemRequest.toEntity();
-      Item createdItem = itemService.addItem(item);
-      return ResponseEntity.status(HttpStatus.CREATED).body(ItemResponse.fromEntity(createdItem));
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      ItemResponse createdItemResponse = itemService.addItemFromRequest(itemRequest);
+      logger.info("Successfully added item with ID: " + createdItemResponse.getId());
+      return ResponseEntity.status(HttpStatus.CREATED).body(createdItemResponse);
+    } catch (Exception e) {
+      logger.severe("Error adding item: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -326,18 +294,19 @@ public class ItemController {
   public ResponseEntity<ItemResponse> updateItem(
       @Parameter(description = "ID of the item to update", required = true, example = "1")
       @PathVariable int id,
-      @RequestBody ItemRequest itemRequest) {
+      @Valid @RequestBody ItemRequest itemRequest) {
+    logger.info("Received request to update item with ID: " + id);
     try {
-      Item item = itemRequest.toEntity(id);
-      Item updatedItem = itemService.updateItem(id, item);
-      return ResponseEntity.ok(ItemResponse.fromEntity(updatedItem));
+      ItemResponse updatedItemResponse = itemService.updateItemFromRequest(id, itemRequest);
+      logger.info("Successfully updated item with ID: " + id);
+      return ResponseEntity.ok(updatedItemResponse);
     } catch (RuntimeException e) {
       if (e.getMessage().contains("not found")) {
+        logger.info("Item not found with ID: " + id);
         return ResponseEntity.notFound().build();
-      } else if (e instanceof IllegalArgumentException) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
       }
-      throw e;
+      logger.severe("Error updating item: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -360,14 +329,18 @@ public class ItemController {
   public ResponseEntity<Void> deleteItem(
       @Parameter(description = "ID of the item to delete", required = true, example = "1")
       @PathVariable int id) {
+    logger.info("Received request to delete item with ID: " + id);
     try {
       itemService.deleteItem(id);
+      logger.info("Successfully deleted item with ID: " + id);
       return ResponseEntity.noContent().build();
     } catch (RuntimeException e) {
       if (e.getMessage().contains("not found")) {
+        logger.info("Item not found with ID: " + id);
         return ResponseEntity.notFound().build();
       }
-      throw e;
+      logger.severe("Error deleting item: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 }
