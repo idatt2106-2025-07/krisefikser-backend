@@ -1,5 +1,7 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.ItemRequest;
+import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.repository.ItemRepo;
@@ -437,5 +439,216 @@ class ItemServiceTest {
         assertEquals("Apple", result.get(1).getName());
         assertEquals("Water", result.get(2).getName());
         verify(itemRepo, times(1)).getAllItems();
+    }
+
+    /**
+     * Test for convertToItemResponses method.
+     * This test verifies that the method correctly converts a list of items to a list of item responses.
+     */
+    @Test
+    void convertToItemResponses_shouldConvertItemsToResponses() {
+        // Setup test data
+        Item item1 = new Item(1, "Water", "liter", 0, ItemType.DRINK);
+        Item item2 = new Item(2, "Bread", "piece", 265, ItemType.FOOD);
+        List<Item> items = Arrays.asList(item1, item2);
+
+        // Execute the method
+        List<ItemResponse> responses = itemService.convertToItemResponses(items);
+
+        // Verify results
+        assertNotNull(responses);
+        assertEquals(2, responses.size());
+
+        // Verify first response
+        assertEquals(1, responses.get(0).getId());
+        assertEquals("Water", responses.get(0).getName());
+        assertEquals("liter", responses.get(0).getUnit());
+        assertEquals(0, responses.get(0).getCalories());
+        assertEquals(ItemType.DRINK, responses.get(0).getType());
+
+        // Verify second response
+        assertEquals(2, responses.get(1).getId());
+        assertEquals("Bread", responses.get(1).getName());
+        assertEquals("piece", responses.get(1).getUnit());
+        assertEquals(265, responses.get(1).getCalories());
+        assertEquals(ItemType.FOOD, responses.get(1).getType());
+    }
+
+    /**
+     * Test for convertToItemResponses method with an empty list.
+     * This test verifies that the method returns an empty list when given an empty list of items.
+     */
+    @Test
+    void convertToItemResponses_shouldReturnEmptyList_whenItemsListIsEmpty() {
+        // Execute the method with an empty list
+        List<ItemResponse> responses = itemService.convertToItemResponses(Collections.emptyList());
+
+        // Verify results
+        assertNotNull(responses);
+        assertTrue(responses.isEmpty());
+    }
+
+    /**
+     * Test for convertToItemTypes method.
+     * This test verifies that the method correctly converts a list of type strings to a list of ItemType enums.
+     */
+    @Test
+    void convertToItemTypes_shouldConvertValidTypes() {
+        // Setup test data
+        List<String> typeStrings = Arrays.asList("DRINK", "FOOD");
+
+        // Execute the method
+        List<ItemType> itemTypes = itemService.convertToItemTypes(typeStrings);
+
+        // Verify results
+        assertNotNull(itemTypes);
+        assertEquals(2, itemTypes.size());
+        assertEquals(ItemType.DRINK, itemTypes.get(0));
+        assertEquals(ItemType.FOOD, itemTypes.get(1));
+    }
+
+    /**
+     * Test for convertToItemTypes method with invalid types.
+     * This test verifies that the method filters out invalid type strings.
+     */
+    @Test
+    void convertToItemTypes_shouldFilterOutInvalidTypes() {
+        // Setup test data with valid and invalid types
+        List<String> typeStrings = Arrays.asList("DRINK", "INVALID_TYPE", "FOOD");
+
+        // Execute the method
+        List<ItemType> itemTypes = itemService.convertToItemTypes(typeStrings);
+
+        // Verify results
+        assertNotNull(itemTypes);
+        assertEquals(2, itemTypes.size());
+        assertEquals(ItemType.DRINK, itemTypes.get(0));
+        assertEquals(ItemType.FOOD, itemTypes.get(1));
+    }
+
+    /**
+     * Test for convertToItemTypes method with null or empty input.
+     * This test verifies that the method returns an empty list when given null or empty input.
+     */
+    @Test
+    void convertToItemTypes_shouldReturnEmptyList_whenInputIsNullOrEmpty() {
+        // Test with null
+        List<ItemType> result1 = itemService.convertToItemTypes(null);
+        assertNotNull(result1);
+        assertTrue(result1.isEmpty());
+
+        // Test with empty list
+        List<ItemType> result2 = itemService.convertToItemTypes(Collections.emptyList());
+        assertNotNull(result2);
+        assertTrue(result2.isEmpty());
+    }
+
+    /**
+     * Test for addItemFromRequest method.
+     * This test verifies that the method successfully adds an item from a request.
+     */
+    @Test
+    void addItemFromRequest_shouldAddValidItem() {
+        // Setup test data
+        ItemRequest request = new ItemRequest("New Item", "unit", 100, ItemType.DRINK);
+        Item createdItem = new Item(1, "New Item", "unit", 100, ItemType.DRINK);
+
+        // Mock behavior
+        when(itemRepo.add(any(Item.class))).thenReturn(createdItem);
+
+        // Execute the method
+        ItemResponse response = itemService.addItemFromRequest(request);
+
+        // Verify results
+        assertNotNull(response);
+        assertEquals(1, response.getId());
+        assertEquals("New Item", response.getName());
+        assertEquals("unit", response.getUnit());
+        assertEquals(100, response.getCalories());
+        assertEquals(ItemType.DRINK, response.getType());
+
+        // Verify interactions
+        verify(itemRepo, times(1)).add(any(Item.class));
+    }
+
+    /**
+     * Test for updateItemFromRequest method.
+     * This test verifies that the method successfully updates an item from a request.
+     */
+    @Test
+    void updateItemFromRequest_shouldUpdateExistingItem() {
+        // Setup test data
+        int itemId = 1;
+        ItemRequest request = new ItemRequest("Updated Item", "kg", 200, ItemType.FOOD);
+        Item updatedItem = new Item(itemId, "Updated Item", "kg", 200, ItemType.FOOD);
+
+        // Mock behavior
+        when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
+        when(itemRepo.update(any(Item.class))).thenReturn(updatedItem);
+
+        // Execute the method
+        ItemResponse response = itemService.updateItemFromRequest(itemId, request);
+
+        // Verify results
+        assertNotNull(response);
+        assertEquals(itemId, response.getId());
+        assertEquals("Updated Item", response.getName());
+        assertEquals("kg", response.getUnit());
+        assertEquals(200, response.getCalories());
+        assertEquals(ItemType.FOOD, response.getType());
+
+        // Verify interactions
+        verify(itemRepo, times(1)).findById(itemId);
+        verify(itemRepo, times(1)).update(any(Item.class));
+    }
+
+    /**
+     * Test for updateItemFromRequest method when the item does not exist.
+     * This test verifies that the method throws an exception when trying to update a non-existent item.
+     */
+    @Test
+    void updateItemFromRequest_shouldThrowException_whenItemDoesNotExist() {
+        // Setup test data
+        int itemId = 999;
+        ItemRequest request = new ItemRequest("Updated Item", "kg", 200, ItemType.FOOD);
+
+        // Mock behavior
+        when(itemRepo.findById(itemId)).thenReturn(Optional.empty());
+
+        // Execute and verify
+        RuntimeException exception = assertThrows(RuntimeException.class, () ->
+          itemService.updateItemFromRequest(itemId, request)
+        );
+
+        assertEquals("Item not found with id: 999", exception.getMessage());
+
+        // Verify interactions
+        verify(itemRepo, times(1)).findById(itemId);
+        verify(itemRepo, never()).update(any());
+    }
+
+    /**
+     * Test for updateItemFromRequest method with invalid item data.
+     * This test verifies that validation is performed during updates via request.
+     */
+    @Test
+    void updateItemFromRequest_shouldThrowException_whenItemDataIsInvalid() {
+        // Setup test data
+        int itemId = 1;
+        ItemRequest request = new ItemRequest("", "kg", 200, ItemType.FOOD);
+
+        // Mock behavior
+        when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
+
+        // Execute and verify
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+          itemService.updateItemFromRequest(itemId, request)
+        );
+
+        assertEquals("Item name cannot be empty", exception.getMessage());
+
+        // Verify interactions
+        verify(itemRepo, times(1)).findById(itemId);
+        verify(itemRepo, never()).update(any());
     }
 }
