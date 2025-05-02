@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 public class JwtUtils {
   private final String secretKey;
   private final String inviteSecretKey;
+  private final String twoFactorSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
   private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);
 
@@ -47,6 +48,9 @@ public class JwtUtils {
 
     SecretKey isk = keyGen.generateKey();
     inviteSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
+
+    SecretKey tfsk = keyGen.generateKey();
+    twoFactorSecretKey = Base64.getEncoder().encodeToString(tfsk.getEncoded());
   }
 
   /**
@@ -105,6 +109,28 @@ public class JwtUtils {
   }
 
   /**
+   * generates an 2fa token for the given username.
+   *
+   * @param userId the subject of the token
+   * @return a jwt for the user
+   * @throws JwtMissingPropertyException if parameters are invalid
+   **/
+  public String generate2faToken(final Long userId)
+      throws JwtMissingPropertyException {
+    if (userId <= 0) {
+      throw new JwtMissingPropertyException("2fa token generation call must include userId");
+    }
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(userId.toString())
+        .withIssuer("krisefikser")
+        .withIssuedAt(now)
+        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
+        .withClaim("role", "ROLE_2FA")
+        .sign(getKey(twoFactorSecretKey));
+  }
+
+  /**
    * validates a given token.
    *
    * @param token the jwt to be validated
@@ -130,6 +156,22 @@ public class JwtUtils {
    */
   public String validateTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
     String subject = validateToken(token, secretKey).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain a subject");
+      throw new JwtMissingPropertyException("Token does not contain a subject");
+    }
+    return subject;
+  }
+
+  /**
+   * validates and retrieves the user id from the given 2fa token.
+   *
+   * @param token the jwt to get user id from
+   * @return the user id
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validate2faTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
+    String subject = validateToken(token, twoFactorSecretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain a subject");
       throw new JwtMissingPropertyException("Token does not contain a subject");
@@ -211,7 +253,7 @@ public class JwtUtils {
    */
   public Date getExpirationDate(String token) {
     try {
-      return validateToken(token).getExpiresAt();
+      return validateToken(token, secretKey).getExpiresAt();
     } catch (JWTVerificationException e) {
       logger.error("Token is invalid: {}", e.getMessage());
       return null;
