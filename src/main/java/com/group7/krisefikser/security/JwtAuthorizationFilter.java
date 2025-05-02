@@ -39,7 +39,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     String path = request.getRequestURI();
     logger.info("JWTAuthorizationFilter called for URI: {}", path);
   
-    // 🔐 Bypass token validation for public endpoints
     if (path.startsWith("/api/auth/login") ||
         path.startsWith("/api/auth/register") ||
         path.startsWith("/api/auth/verify-email")) {
@@ -60,7 +59,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
   
     if (token == null) {
-      logger.warn("No token found in request");
       filterChain.doFilter(request, response);
       return;
     }

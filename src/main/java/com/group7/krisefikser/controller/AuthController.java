@@ -171,40 +171,39 @@ public class AuthController {
     }
   }
 
-/**
- * Endpoint for getting the current authenticated user.
- * This method returns the email and role of the currently authenticated user.
- * It uses the JWT cookie for authentication.
- * 
- * @param authentication the authentication object containing user details
- * @return a ResponseEntity containing the authenticated user response
- */
-  @Operation(
-    summary = "Get current authenticated user",
-    description = "Returns the email and role of the currently authenticated user using the JWT cookie."
-)
-@ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "User is authenticated",
-        content = @Content(mediaType = "application/json",
-            schema = @Schema(implementation = AuthenticatedUserResponse.class))),
-    @ApiResponse(responseCode = "401", description = "User is not authenticated",
-        content = @Content(mediaType = "application/json",
-            schema = @Schema(example = "\"Not logged in\"")))
-})
-@GetMapping("/me")
-public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-    if (authentication == null || !authentication.isAuthenticated()) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in");
-    }
+  /**
+   * Endpoint for getting the current authenticated user.
+   * This method returns the email and role of the currently authenticated user.
+   * It uses the JWT cookie for authentication.
+   * 
+   * @param authentication the authentication object containing user details
+   * @return a ResponseEntity containing the authenticated user response
+   */
+    @Operation(
+      summary = "Get current authenticated user",
+      description = "Returns the email and role of the currently authenticated user using the JWT cookie."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "User is authenticated",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthenticatedUserResponse.class))),
+      @ApiResponse(responseCode = "401", description = "User is not authenticated",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(example = "\"Not logged in\"")))
+  })
+  @GetMapping("/me")
+  public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+      if (authentication == null || !authentication.isAuthenticated()) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not logged in");
+      }
 
-    String email = authentication.getName();
-    String role = authentication.getAuthorities().stream()
-        .findFirst()
-        .map(GrantedAuthority::getAuthority)
-        .orElse("UNKNOWN");
+      String email = authentication.getName();
+      String role = authentication.getAuthorities().stream()
+          .findFirst()
+          .map(GrantedAuthority::getAuthority)
+          .orElse("UNKNOWN");
 
-    AuthenticatedUserResponse response = new AuthenticatedUserResponse(email, role);
-    return ResponseEntity.ok(response);
-}
-
+      AuthenticatedUserResponse response = new AuthenticatedUserResponse(email, role);
+      return ResponseEntity.ok(response);
+  }
 }
