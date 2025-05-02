@@ -2,13 +2,11 @@ package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
+import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
-import java.util.HashMap;
+import com.group7.krisefikser.repository.UserRepository;
 import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,20 +17,21 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class HouseholdService {
-  private final JdbcTemplate jdbcTemplate;
   private final JoinHouseholdRequestRepo joinRequestRepo;
+  private final UserRepository userRepository;
+  private final HouseholdRepository householdRepository;
 
   /**
    * Constructor for injecting dependencies.
    *
-   * @param jdbcTemplate the JdbcTemplate instance used for database operations
    * @param joinHouseholdRequestRepo the repository for managing join household requests
    */
   @Autowired
-  public HouseholdService(
-      JdbcTemplate jdbcTemplate, JoinHouseholdRequestRepo joinHouseholdRequestRepo) {
-    this.jdbcTemplate = jdbcTemplate;
+  public HouseholdService(JoinHouseholdRequestRepo joinHouseholdRequestRepo,
+                          UserRepository userRepository, HouseholdRepository householdRepository) {
     this.joinRequestRepo = joinHouseholdRequestRepo;
+    this.userRepository = userRepository;
+    this.householdRepository = householdRepository;
   }
 
   /**
@@ -44,23 +43,9 @@ public class HouseholdService {
    */
   @Transactional
   public Household createHousehold(Household household, Long userId) {
-    SimpleJdbcInsert householdInsert = new SimpleJdbcInsert(jdbcTemplate)
-        .withTableName("households")
-        .usingGeneratedKeyColumns("id");
-
-    Map<String, Object> params = new HashMap<>();
-    params.put("name", household.getName());
-    params.put("longitude", household.getLongitude());
-    params.put("latitude", household.getLatitude());
-
-    Number householdId = householdInsert.executeAndReturnKey(params);
-    household.setId(householdId.longValue());
-
-    jdbcTemplate.update(
-        "UPDATE users SET household_id = ? WHERE id = ?",
-        household.getId(), userId);
-
-    return household;
+    Household saved = householdRepository.save(household);
+    userRepository.updateUserHousehold(userId, saved.getId());
+    return saved;
   }
 
   /**
@@ -88,9 +73,7 @@ public class HouseholdService {
     JoinHouseholdRequest request = joinRequestRepo.findById(requestId);
 
     // Update user's household ID
-    jdbcTemplate.update(
-        "UPDATE users SET household_id = ? WHERE id = ?",
-        request.getHouseholdId(), request.getUserId());
+    userRepository.updateUserHousehold(request.getUserId(), request.getHouseholdId());
 
     // Delete the request after accepting
     joinRequestRepo.deleteById(requestId);
