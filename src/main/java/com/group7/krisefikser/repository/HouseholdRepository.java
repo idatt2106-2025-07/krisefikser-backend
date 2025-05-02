@@ -6,7 +6,6 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -22,16 +21,6 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class HouseholdRepository {
   private final JdbcTemplate jdbcTemplate;
-
-  /**
-   * Constructor for injecting the JdbcTemplate dependency.
-   *
-   * @param jdbcTemplate the JdbcTemplate instance used for database operations
-   */
-  @Autowired
-  public HouseholdRepository(JdbcTemplate jdbcTemplate) {
-    this.jdbcTemplate = jdbcTemplate;
-  }
 
   /**
    * Creates a new household in the database.
