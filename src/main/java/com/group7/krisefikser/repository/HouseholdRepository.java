@@ -1,12 +1,15 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.Household;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -25,6 +28,46 @@ public class HouseholdRepository {
   @Autowired
   public HouseholdRepository(JdbcTemplate jdbcTemplate) {
     this.jdbcTemplate = jdbcTemplate;
+  }
+
+  /**
+   * Creates a new household in the database.
+   * This method takes the name, longitude, and latitude of the household as parameters,
+   * and inserts a new record into the households table.
+   *
+   * @param name the name of the household
+   * @param longitude the longitude of the household
+   * @param latitude the latitude of the household
+   * @return the ID of the newly created household
+   */
+  public Long createHousehold(String name, double longitude, double latitude) {
+    KeyHolder keyHolder = new GeneratedKeyHolder();
+    jdbcTemplate.update(connection -> {
+      PreparedStatement ps = connection.prepareStatement(
+          "INSERT INTO households (name, longitude, latitude) VALUES (?, ?, ?)",
+          Statement.RETURN_GENERATED_KEYS
+      );
+      ps.setString(1, name);
+      ps.setDouble(2, longitude);
+      ps.setDouble(3, latitude);
+      return ps;
+    }, keyHolder);
+    return keyHolder.getKey().longValue();
+  }
+
+  /**
+   * Checks if a household with the given name already exists in the database.
+   * This method executes a SQL query to count the number of records
+   * with the specified name in the households table.
+   * If the count is greater than 0, it means the household exists.
+   *
+   * @param householdName the name of the household to check
+   * @return true if the household exists, false otherwise
+   */
+  public boolean existsByName(String householdName) {
+    String sql = "SELECT COUNT(*) FROM households WHERE name = ?";
+    Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);
+    return count != null && count > 0;
   }
 
   /**
