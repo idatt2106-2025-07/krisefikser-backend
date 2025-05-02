@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.RegisterAdminRequest;
 import com.group7.krisefikser.dto.request.TwoFactorLoginRequest;
 import com.group7.krisefikser.service.AdminService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class AdminController {
    * @return ResponseEntity indicating the result of the operation.
    */
   @PostMapping("/invite")
-  public ResponseEntity<String> invite(@RequestBody InviteAdminRequest request) {
+  public ResponseEntity<String> invite(@RequestBody @Valid InviteAdminRequest request) {
     logger.info("Inviting admin request");
     try {
       adminService.inviteAdmin(request);
@@ -55,7 +56,7 @@ public class AdminController {
    * @return ResponseEntity indicating the result of the operation.
    */
   @PostMapping("/register")
-  public ResponseEntity<String> register(@RequestBody RegisterAdminRequest request) {
+  public ResponseEntity<String> register(@RequestBody @Valid RegisterAdminRequest request) {
     logger.info("Registering admin request");
     try {
       adminService.registerAdmin(request);
@@ -68,7 +69,7 @@ public class AdminController {
   }
 
   @PostMapping("/2fa")
-  public ResponseEntity<String> TwoFactorAuthentication(@RequestBody TwoFactorLoginRequest request, HttpServletResponse response) {
+  public ResponseEntity<String> TwoFactorAuthentication(@RequestBody @Valid TwoFactorLoginRequest request, HttpServletResponse response) {
     logger.info("Two Factor Authentication request");
     try {
       adminService.verifyTwoFactor(request.getToken(), response);
