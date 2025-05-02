@@ -20,9 +20,9 @@ steps:
       - 'deploy'
       - 'krisefikser-backend'
       - '--image=europe-north2-docker.pkg.dev/$PROJECT_ID/krisefikser-backend/app:$COMMIT_SHA'
-      - '--region=europe-north2'  # Change to your preferred region
+      - '--region=europe-north2'
       - '--platform=managed'
-      - '--allow-unauthenticated'  # Adjust based on your security requirements
+      - '--allow-unauthenticated'
       - '--set-env-vars=SPRING_PROFILES_ACTIVE=prod'
       - '--set-secrets=MYSQL_URL=mysql-url:latest,MYSQL_USER=mysql-user:latest,MYSQL_PASSWORD=mysql-password:latest,SPRING_MAIL_HOST=spring-mail-host:latest,SPRING_MAIL_PORT=spring-mail-port:latest,SPRING_MAIL_USERNAME=spring-mail-username:latest,SPRING_MAIL_PASSWORD=spring-mail-password:latest'
       - '--cpu=1'
@@ -37,3 +37,5 @@ images:
 
 # Set timeout
 timeout: '1200s'
+
+logsBucket: 'gs://$PROJECT_ID-cloudbuild-logs'
