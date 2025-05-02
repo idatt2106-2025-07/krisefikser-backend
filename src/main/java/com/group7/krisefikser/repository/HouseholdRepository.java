@@ -17,13 +17,6 @@ import org.springframework.stereotype.Repository;
 public class HouseholdRepository {
   private final JdbcTemplate jdbcTemplate;
 
-  private final RowMapper<Household> rowMapper = (rs, rowNum) -> new Household(
-      rs.getLong("id"),
-      rs.getString("name"),
-      rs.getDouble("longitude"),
-      rs.getDouble("latitude")
-  );
-
   /**
    * Constructor for injecting the JdbcTemplate dependency.
    *
