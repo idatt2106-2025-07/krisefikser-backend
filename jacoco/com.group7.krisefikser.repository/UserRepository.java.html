@@ -112,5 +112,18 @@ public class UserRepository {
 <span class="nc" id="L112">      return Optional.empty();</span>
     }
   }
+
+  /**
+   * Updates a user's household association in the database.
+   * This method sets the household_id for a user with the specified user ID.
+   *
+   * @param userId the ID of the user whose household is being updated
+   * @param householdId the ID of the household to associate with the user
+   */
+  public void updateUserHousehold(Long userId, Long householdId) {
+<span class="nc" id="L124">    jdbcTemplate.update(</span>
+        &quot;UPDATE users SET household_id = ? WHERE id = ?&quot;,
+        householdId, userId);
+<span class="nc" id="L127">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

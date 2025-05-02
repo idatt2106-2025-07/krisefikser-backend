@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HouseholdRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.repository</a> &gt; <span class="el_source">HouseholdRepository.java</span></div><h1>HouseholdRepository.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.repository;
 
+import com.group7.krisefikser.model.Household;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -29,18 +33,18 @@ public class HouseholdRepository {
    * @return the ID of the newly created household
    */
   public Long createHousehold(String name, double longitude, double latitude) {
-<span class="fc" id="L32">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
-<span class="fc" id="L33">    jdbcTemplate.update(connection -&gt; {</span>
-<span class="fc" id="L34">      PreparedStatement ps = connection.prepareStatement(</span>
+<span class="fc" id="L36">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
+<span class="fc" id="L37">    jdbcTemplate.update(connection -&gt; {</span>
+<span class="fc" id="L38">      PreparedStatement ps = connection.prepareStatement(</span>
           &quot;INSERT INTO households (name, longitude, latitude) VALUES (?, ?, ?)&quot;,
           Statement.RETURN_GENERATED_KEYS
       );
-<span class="fc" id="L38">      ps.setString(1, name);</span>
-<span class="fc" id="L39">      ps.setDouble(2, longitude);</span>
-<span class="fc" id="L40">      ps.setDouble(3, latitude);</span>
-<span class="fc" id="L41">      return ps;</span>
+<span class="fc" id="L42">      ps.setString(1, name);</span>
+<span class="fc" id="L43">      ps.setDouble(2, longitude);</span>
+<span class="fc" id="L44">      ps.setDouble(3, latitude);</span>
+<span class="fc" id="L45">      return ps;</span>
     }, keyHolder);
-<span class="fc" id="L43">    return keyHolder.getKey().longValue();</span>
+<span class="fc" id="L47">    return keyHolder.getKey().longValue();</span>
   }
 
   /**
@@ -53,9 +57,31 @@ public class HouseholdRepository {
    * @return true if the household exists, false otherwise
    */
   public boolean existsByName(String householdName) {
-<span class="fc" id="L56">    String sql = &quot;SELECT COUNT(*) FROM households WHERE name = ?&quot;;</span>
-<span class="fc" id="L57">    Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);</span>
-<span class="pc bpc" id="L58" title="1 of 4 branches missed.">    return count != null &amp;&amp; count &gt; 0;</span>
+<span class="fc" id="L60">    String sql = &quot;SELECT COUNT(*) FROM households WHERE name = ?&quot;;</span>
+<span class="fc" id="L61">    Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);</span>
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">    return count != null &amp;&amp; count &gt; 0;</span>
+  }
+
+  /**
+   * Saves a new Household to the database.
+   *
+   * @param household the Household object to save
+   * @return the saved Household object with the generated ID
+   */
+  public Household save(Household household) {
+<span class="nc" id="L72">    SimpleJdbcInsert householdInsert = new SimpleJdbcInsert(jdbcTemplate)</span>
+<span class="nc" id="L73">        .withTableName(&quot;households&quot;)</span>
+<span class="nc" id="L74">        .usingGeneratedKeyColumns(&quot;id&quot;);</span>
+
+<span class="nc" id="L76">    Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L77">    params.put(&quot;name&quot;, household.getName());</span>
+<span class="nc" id="L78">    params.put(&quot;longitude&quot;, household.getLongitude());</span>
+<span class="nc" id="L79">    params.put(&quot;latitude&quot;, household.getLatitude());</span>
+
+<span class="nc" id="L81">    Number householdId = householdInsert.executeAndReturnKey(params);</span>
+<span class="nc" id="L82">    household.setId(householdId.longValue());</span>
+
+<span class="nc" id="L84">    return household;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
