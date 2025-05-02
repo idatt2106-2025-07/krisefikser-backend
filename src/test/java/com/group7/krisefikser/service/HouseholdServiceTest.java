@@ -2,7 +2,9 @@ package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
+import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
+import com.group7.krisefikser.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -17,33 +19,37 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class HouseholdServiceTest {
   @Mock
-  private JdbcTemplate jdbcTemplate;
-  @Mock
   private JoinHouseholdRequestRepo joinRequestRepo;
+  @Mock
+  private UserRepository userRepository;
+  @Mock
+  private HouseholdRepository householdRepository;
+
   @InjectMocks
   private HouseholdService householdService;
 
   @Test
   void createHousehold_shouldInsertHouseholdAndUpdateUser() {
+    // Arrange
     Household household = new Household();
     household.setName("Test");
     household.setLongitude(10.0);
     household.setLatitude(60.0);
     Long userId = 1L;
 
-    // Mock SimpleJdbcInsert behavior
-    // Simulate generated key
-    try (MockedConstruction<org.springframework.jdbc.core.simple.SimpleJdbcInsert> mocked =
-           mockConstruction(org.springframework.jdbc.core.simple.SimpleJdbcInsert.class, (mock, context) -> {
-             when(mock.withTableName(anyString())).thenReturn(mock);
-             when(mock.usingGeneratedKeyColumns(anyString())).thenReturn(mock);
-             when(mock.executeAndReturnKey(anyMap())).thenReturn(5L);
-           })) {
-      Household result = householdService.createHousehold(household, userId);
+    // Configure mock to return household with ID 5
+    when(householdRepository.save(any(Household.class))).thenAnswer(invocation -> {
+      Household savedHousehold = invocation.getArgument(0);
+      savedHousehold.setId(5L);
+      return savedHousehold;
+    });
 
-      assertEquals(5L, result.getId());
-      verify(jdbcTemplate).update("UPDATE users SET household_id = ? WHERE id = ?", 5L, userId);
-    }
+    // Act
+    Household result = householdService.createHousehold(household, userId);
+
+    // Assert
+    assertEquals(5L, result.getId());
+    verify(userRepository).updateUserHousehold(userId, 5L);
   }
 
   @Test
@@ -74,9 +80,10 @@ class HouseholdServiceTest {
 
     householdService.acceptJoinRequest(requestId);
 
-    verify(jdbcTemplate).update("UPDATE users SET household_id = ? WHERE id = ?", 2L, 3L);
+    verify(userRepository).updateUserHousehold(3L, 2L);
     verify(joinRequestRepo).deleteById(requestId);
   }
+
 
   @Test
   void declineJoinRequest_shouldDeleteRequest() {
