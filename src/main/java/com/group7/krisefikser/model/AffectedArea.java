@@ -1,5 +1,6 @@
 package com.group7.krisefikser.model;
 
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +19,7 @@ public class AffectedArea {
   private Double highDangerRadiusKm;
   private Double mediumDangerRadiusKm;
   private Double lowDangerRadiusKm;
-  private String notificationMessage;
+  private int severityLevel;
+  private String description;
+  private LocalDateTime startDate;
 }

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -13,10 +14,12 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository class for managing Household entities in the database.
- * Provides methods for saving and retrieving household information.
+ * This class is responsible for interacting with the database to perform CRUD operations
+ * related to households.
+ * It uses JdbcTemplate to execute SQL queries and manage database connections.
  */
 @Repository
+@RequiredArgsConstructor
 public class HouseholdRepository {
   private final JdbcTemplate jdbcTemplate;
 

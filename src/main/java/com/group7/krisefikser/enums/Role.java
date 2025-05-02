@@ -6,5 +6,5 @@ package com.group7.krisefikser.enums;
 public enum Role {
   ROLE_NORMAL,
   ROLE_ADMIN,
-  ROLE_SUPERADMIN
+  ROLE_SUPER_ADMIN
 }

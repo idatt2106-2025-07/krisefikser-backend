@@ -18,5 +18,7 @@ public class AffectedAreaResponse {
   private Double highDangerRadiusKm;
   private Double mediumDangerRadiusKm;
   private Double lowDangerRadiusKm;
-  private String notificationMessage;
+  private int severityLevel;
+  private String description;
+  private String startDate;
 }

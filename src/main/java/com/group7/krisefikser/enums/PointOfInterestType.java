@@ -13,7 +13,8 @@ public enum PointOfInterestType {
   FOOD_CENTRAL("food_central"),
   WATER_STATION("water_station"),
   DEFIBRILLATOR("defibrillator"),
-  HOSPITAL("hospital");
+  HOSPITAL("hospital"),
+  MEETING_PLACE("meeting_place");
 
   private final String type;
 
