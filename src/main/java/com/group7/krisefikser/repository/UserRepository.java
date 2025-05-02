@@ -89,4 +89,18 @@ public class UserRepository {
       return Optional.empty();
     }
   }
+
+  public boolean existAdminByUsername(String username) {
+    String sql =
+        "SELECT CASE "
+        + "WHEN EXISTS ( "
+        + "SELECT 1 FROM users WHERE users.name = ? AND users.role = 'ROLE_ADMIN' "
+        + ") THEN 'true' "
+        + "ELSE 'false' "
+        + "END AS finnes";
+    return jdbcTemplate.queryForObject(
+        sql,
+        new Object[]{username},
+        Boolean.class);
+  }
 }
