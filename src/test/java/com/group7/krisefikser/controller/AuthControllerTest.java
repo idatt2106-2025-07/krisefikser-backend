@@ -44,7 +44,7 @@ class AuthControllerTest {
     RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "password123");
     AuthResponse response = new AuthResponse("User registered successfully", new Date(), Role.ROLE_NORMAL);
 
-    Mockito.when(userService.registerUser(any(RegisterRequest.class), any(HttpServletResponse.class)))
+    Mockito.when(userService.registerUser(any(RegisterRequest.class)))
         .thenReturn(response);
 
     mockMvc.perform(post("/api/auth/register")
@@ -60,7 +60,7 @@ class AuthControllerTest {
   void registerUser_serviceThrowsException_returnsInternalServerError() throws Exception {
     RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "secret");
 
-    Mockito.when(userService.registerUser(any(RegisterRequest.class), any(HttpServletResponse.class)))
+    Mockito.when(userService.registerUser(any(RegisterRequest.class)))
         .thenThrow(new RuntimeException("Database error"));
 
     mockMvc.perform(post("/api/auth/register")

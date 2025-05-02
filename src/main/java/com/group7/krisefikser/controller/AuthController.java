@@ -42,7 +42,6 @@ public class AuthController {
    * It accepts a RegisterRequest object containing user details.
    *
    * @param request the registration request containing user details
-   * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
   @Operation(
@@ -60,10 +59,10 @@ public class AuthController {
   })
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> registerUser(
-      @Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
+      @Valid @RequestBody RegisterRequest request) {
     logger.info("Received register request for user: " + request.getEmail());
     try {
-      AuthResponse authResponse = userService.registerUser(request, response);
+      AuthResponse authResponse = userService.registerUser(request);
 
       logger.info("User registered successfully: " + request.getEmail());
       return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);

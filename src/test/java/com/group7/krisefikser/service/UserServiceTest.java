@@ -17,12 +17,8 @@ import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.PasswordUtil;
-
 import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,27 +115,23 @@ public class UserServiceTest {
     when(userRepository.save(any(User.class))).thenReturn(Optional.ofNullable(testUser));
 
     when(jwtUtils.generateVerificationToken(anyString())).thenReturn("verification-token");
-    when(jwtUtils.generateToken(anyLong(), any(Role.class))).thenReturn("auth-token");
-    when(jwtUtils.getExpirationDate(anyString())).thenReturn(new Date());
-    doNothing().when(jwtUtils).setJwtCookie(anyString(), any(HttpServletResponse.class));
     doNothing().when(emailService).sendTemplateMessage(anyString(), any(EmailTemplateType.class), anyMap());
 
     try (MockedStatic<PasswordUtil> passwordUtilMockedStatic = mockStatic(PasswordUtil.class)) {
       passwordUtilMockedStatic.when(() -> PasswordUtil.hashPassword(anyString())).thenReturn("hashedPassword");
 
       // Act
-      AuthResponse response = userService.registerUser(registerRequest, this.response);
+      AuthResponse response = userService.registerUser(registerRequest);
 
       // Assert
       assertNotNull(response);
       assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), response.getMessage());
-      assertNotNull(response.getExpiryDate());
+      assertNull(response.getExpiryDate());
       assertEquals(Role.ROLE_NORMAL, response.getRole());
 
       verify(userRepository, times(1)).save(any(User.class));
       verify(householdRepository, times(1)).createHousehold(anyString(), anyDouble(), anyDouble());
       verify(emailService, times(1)).sendTemplateMessage(anyString(), eq(EmailTemplateType.VERIFY_EMAIL), anyMap());
-      verify(jwtUtils, times(1)).setJwtCookie(anyString(), any(HttpServletResponse.class));
     }
   }
 
@@ -150,7 +142,7 @@ public class UserServiceTest {
     when(userRepository.findByEmail(any())).thenReturn(Optional.of(testUser));
 
     // Act
-    AuthResponse response = userService.registerUser(registerRequest, this.response);
+    AuthResponse response = userService.registerUser(registerRequest);
 
     // Assert
     assertNotNull(response);
@@ -172,7 +164,7 @@ public class UserServiceTest {
         .thenThrow(new RuntimeException("Database error"));
 
     // Act
-    AuthResponse response = userService.registerUser(registerRequest, this.response);
+    AuthResponse response = userService.registerUser(registerRequest);
 
     // Assert
     assertNotNull(response);
