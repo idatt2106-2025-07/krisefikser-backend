@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.logging.Logger;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +61,7 @@ public class AuthController {
   })
   @PostMapping("/register")
   public ResponseEntity<AuthResponse> registerUser(
-            @RequestBody RegisterRequest request, HttpServletResponse response) {
+      @Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
     logger.info("Received register request for user: " + request.getEmail());
     try {
       AuthResponse authResponse = userService.registerUser(request, response);
@@ -98,8 +100,8 @@ public class AuthController {
               schema = @Schema(implementation = AuthResponse.class)))
   })
   @PostMapping("/login")
-  public ResponseEntity<AuthResponse> loginUser(@RequestBody LoginRequest request,
-                                                HttpServletResponse response) {
+  public ResponseEntity<AuthResponse> loginUser(
+      @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
     logger.info("Received login request for user: " + request.getEmail());
     try {
       AuthResponse authResponse = userService.loginUser(request, response);
@@ -147,7 +149,7 @@ public class AuthController {
               schema = @Schema(implementation = AuthResponse.class)))
   })
   @GetMapping("/verify-email")
-  public ResponseEntity<AuthResponse> verifyEmail(@RequestParam String token) {
+  public ResponseEntity<AuthResponse> verifyEmail(@Valid @RequestParam String token) {
     logger.info("Received email verification request with token: " + token);
     try {
       AuthResponse authResponse = userService.verifyEmail(token);
