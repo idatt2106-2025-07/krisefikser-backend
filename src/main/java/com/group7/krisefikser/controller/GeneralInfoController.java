@@ -5,6 +5,7 @@ import com.group7.krisefikser.model.GeneralInfo;
 import com.group7.krisefikser.service.GeneralInfoService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/general-info")
@@ -26,8 +28,14 @@ public class GeneralInfoController {
   }
 
   @GetMapping("/{theme}")
-  public List<GeneralInfo> getGeneralInfoByTheme(@PathVariable Theme theme) {
-    return generalInfoService.getGeneralInfoByTheme(theme);
+  public List<GeneralInfo> getGeneralInfoByTheme(@PathVariable String theme) {
+    Theme parsedTheme;
+    try {
+      parsedTheme = Theme.valueOf(theme.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid theme: " + theme);
+    }
+    return generalInfoService.getGeneralInfoByTheme(parsedTheme);
   }
 
   @PostMapping("/admin/add")
