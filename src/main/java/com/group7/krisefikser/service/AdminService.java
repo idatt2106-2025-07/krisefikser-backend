@@ -3,15 +3,19 @@ package com.group7.krisefikser.service;
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
 import com.group7.krisefikser.dto.request.RegisterAdminRequest;
 import com.group7.krisefikser.enums.EmailTemplateType;
+import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.exception.UsernameGenerationException;
+import com.group7.krisefikser.model.User;
+import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.utils.PasswordUtil;
 import com.group7.krisefikser.utils.UuidUtils;
-import java.util.Base64;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for handling admin-related operations.
@@ -26,7 +30,9 @@ public class AdminService {
 
   private final JwtUtils jwtUtils;
 
-  //  private final UserRepository userRepository;
+  private final UserRepository userRepository;
+
+  private final HouseholdService householdService;
 
   /**
    * Invites an admin by generating a jwt invite token and sending an email with the invite link.
@@ -36,19 +42,20 @@ public class AdminService {
    */
   public void inviteAdmin(InviteAdminRequest request)
       throws JwtMissingPropertyException, UsernameGenerationException {
+
     String username = "admin" + UuidUtils.generateShortenedUuid();
 
-    //    for (int i = 0; i < 15; i++) {
-    //      if (userRepository.existUserByName(username)) {
-    //        username = "admin" + UuidUtils.generateShortenedUuid();
-    //      } else {
-    //        break;
-    //      }
-    //    }
-    //
-    //    if (userRepository.existUserByName(username)) {
-    //      throw new UsernameGenerationException("Failed to generate a unique username");
-    //    }
+    for (int i = 0; i < 15; i++) {
+      if (userRepository.existAdminByUsername(username)) {
+        username = "admin" + UuidUtils.generateShortenedUuid();
+      } else {
+        break;
+      }
+    }
+
+    if (userRepository.existAdminByUsername(username)) {
+      throw new UsernameGenerationException("Failed to generate a unique username");
+    }
 
     String inviteToken = jwtUtils.generateInviteToken(username);
 
@@ -67,7 +74,27 @@ public class AdminService {
    * @param request The request containing the invite token and other registration details.
    * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
    */
-  public void registerAdmin(RegisterAdminRequest request) throws JwtMissingPropertyException {
+  @Transactional
+  public void registerAdmin(RegisterAdminRequest request)
+      throws JwtMissingPropertyException, UsernameGenerationException {
     String username = jwtUtils.validateInviteTokenAndGetUsername(request.getToken());
+    User user = new User();
+    user.setEmail(request.getEmail());
+    user.setName(username);
+    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
+    user.setRole(Role.ROLE_ADMIN);
+
+    if (userRepository.existAdminByUsername(username)) {
+      throw new UsernameGenerationException("Username already taken");
+    }
+    Long householdId = householdService.createHouseholdForUser(username);
+    user.setHouseholdId(householdId);
+    userRepository.save(user);
+  }
+
+  public void verifyTwoFactor(String twoFactortoken, HttpServletResponse response) throws JwtMissingPropertyException {
+    String userId = jwtUtils.validate2faTokenAndGetUserId(twoFactortoken);
+    String token = jwtUtils.generateToken(Long.parseLong(userId), Role.ROLE_ADMIN);
+    jwtUtils.setJwtCookie(token, response);
   }
 }
