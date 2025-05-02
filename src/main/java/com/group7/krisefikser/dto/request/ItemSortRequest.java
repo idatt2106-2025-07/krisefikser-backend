@@ -1,5 +1,6 @@
 package com.group7.krisefikser.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemSortRequest {
+  @Pattern(regexp = "(?i)(name|calories)", message = "Sort by must be either 'name' or 'calories'")
   private String sortBy = "name";
+
+  @Pattern(regexp = "(?i)(asc|desc)", message = "Sort direction must be either 'asc' or 'desc'")
   private String sortDirection = "asc";
 }
