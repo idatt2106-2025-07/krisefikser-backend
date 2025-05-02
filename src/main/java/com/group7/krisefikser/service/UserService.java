@@ -59,7 +59,6 @@ public class UserService implements UserDetailsService {
    * It also sends a verification email to the user.
    *
    * @param request  the registration request containing user details
-   * @param response the HTTP response object
    * @return an AuthResponse object containing the result of the registration
    */
   @Transactional

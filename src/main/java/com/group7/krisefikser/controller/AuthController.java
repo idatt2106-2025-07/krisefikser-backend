@@ -42,7 +42,6 @@ public class AuthController {
    * It accepts a RegisterRequest object containing user details.
    *
    * @param request the registration request containing user details
-   * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
   @Operation(
