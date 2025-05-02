@@ -17,7 +17,8 @@ public enum AuthResponseMessage {
   INVALID_EMAIL_FORMAT("Invalid email format"),
   PASSWORD_TOO_WEAK("Password is too weak"),
   HOUSEHOLD_FAILURE("Household creation failed"),
-  EMAIL_NOT_VERIFIED("Please verify your email before logging in");
+  EMAIL_NOT_VERIFIED("Please verify your email before logging in"),
+  TWO_FACTOR_SENT("Two-factor authentication code sent");
 
 
 
