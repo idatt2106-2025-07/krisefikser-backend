@@ -63,7 +63,7 @@ public class UserService implements UserDetailsService {
    * @return an AuthResponse object containing the result of the registration
    */
   @Transactional
-  public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
+  public AuthResponse registerUser(RegisterRequest request) {
     User user = UserMapper.INSTANCE.registerRequestToUser(request);
     user.setRole(Role.ROLE_NORMAL);
     user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
@@ -105,11 +105,8 @@ public class UserService implements UserDetailsService {
       emailService.sendTemplateMessage(
           byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
 
-      String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
-      jwtUtils.setJwtCookie(token, response);
       return new AuthResponse(AuthResponseMessage
-          .USER_REGISTERED_SUCCESSFULLY.getMessage(),
-          jwtUtils.getExpirationDate(token), byEmail.get().getRole());
+          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());
     } catch (Exception e) {
       return new AuthResponse(AuthResponseMessage
           .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);
