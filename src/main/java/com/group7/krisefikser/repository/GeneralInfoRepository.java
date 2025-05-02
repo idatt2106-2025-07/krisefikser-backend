@@ -20,23 +20,13 @@ public class GeneralInfoRepository {
     return jdbcTemplate.query(sql, (rs, rowNum) -> {
       GeneralInfo info = new GeneralInfo();
       info.setId(rs.getLong("id"));
-      info.setTheme(Theme.valueOf(rs.getString("theme")));
+      String themeString = rs.getString("theme").toUpperCase();
+      Theme theme = Theme.valueOf(themeString);
+      info.setTheme(theme);
       info.setTitle(rs.getString("title"));
       info.setContent(rs.getString("content"));
       return info;
     });
-  }
-
-  public GeneralInfo getGeneralInfoById(Long id) {
-    String sql = "SELECT * FROM general_info WHERE id = ?";
-    return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-      GeneralInfo info = new GeneralInfo();
-      info.setId(rs.getLong("id"));
-      info.setTheme(Theme.valueOf(rs.getString("theme")));
-      info.setTitle(rs.getString("title"));
-      info.setContent(rs.getString("content"));
-      return info;
-    }, id);
   }
 
   public void addGeneralInfo(GeneralInfo info) {
@@ -54,29 +44,17 @@ public class GeneralInfoRepository {
     jdbcTemplate.update(sql, id);
   }
 
-  public List<GeneralInfo> getGeneralInfoByTheme(Theme theme) {
+  public List<GeneralInfo> getGeneralInfoByTheme(Theme themeSearched) {
     String sql = "SELECT * FROM general_info WHERE theme = ?";
     return jdbcTemplate.query(sql, (rs, rowNum) -> {
       GeneralInfo info = new GeneralInfo();
       info.setId(rs.getLong("id"));
-      info.setTheme(Theme.valueOf(rs.getString("theme")));
+      String themeString = rs.getString("theme").toUpperCase();
+      Theme theme = Theme.valueOf(themeString);
+      info.setTheme(theme);
       info.setTitle(rs.getString("title"));
       info.setContent(rs.getString("content"));
       return info;
-    }, theme.name());
+    }, themeSearched.name());
   }
-
-  public List<GeneralInfo> getGeneralInfoByTitle(String title) {
-    String sql = "SELECT * FROM general_info WHERE title = ?";
-    return jdbcTemplate.query(sql, (rs, rowNum) -> {
-      GeneralInfo info = new GeneralInfo();
-      info.setId(rs.getLong("id"));
-      info.setTheme(Theme.valueOf(rs.getString("theme")));
-      info.setTitle(rs.getString("title"));
-      info.setContent(rs.getString("content"));
-      return info;
-    }, title);
-  }
-
-
 }
