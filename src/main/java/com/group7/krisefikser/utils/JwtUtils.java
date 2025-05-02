@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Date;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import org.slf4j.Logger;
@@ -26,7 +27,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtils {
   private final String secretKey;
+  private final String verificationSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
+  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
 
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
@@ -39,6 +42,9 @@ public class JwtUtils {
     KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
     SecretKey sk = keyGen.generateKey();
     secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
+
+    SecretKey vsk = keyGen.generateKey();
+    verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());
   }
 
   /**
@@ -46,8 +52,8 @@ public class JwtUtils {
    *
    * @return The secret key as an Algorithm object.
    */
-  Algorithm getKey() {
-    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+  Algorithm getKey(String key) {
+    byte[] keyBytes = Base64.getDecoder().decode(key);
     return Algorithm.HMAC512(keyBytes);
   }
 
@@ -59,7 +65,7 @@ public class JwtUtils {
    * @return a jwt for the user
    * @throws JwtMissingPropertyException if parameters are invalid
    */
-  public String generateToken(final int userId, final Role role)
+  public String generateToken(final Long userId, final Role role)
       throws JwtMissingPropertyException {
     if (role == null || userId <= 0) {
       throw new JwtMissingPropertyException("Token generation call must include UserId and Role");
@@ -71,7 +77,24 @@ public class JwtUtils {
         .withIssuedAt(now)
         .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
         .withClaim("role", role.toString())
-        .sign(getKey());
+        .sign(getKey(secretKey));
+  }
+
+  /**
+   * generates a verification token for the given email.
+   * This token is used to verify the user's email address.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
+  public String generateVerificationToken(final String email) {
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(email)
+        .withIssuer("krisefikser")
+        .withIssuedAt(now)
+        .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+        .sign(getKey(verificationSecretKey));
   }
 
   /**
@@ -81,9 +104,9 @@ public class JwtUtils {
    * @return the decoded jwt
    * @throws JWTVerificationException if the verification failed
    */
-  private DecodedJWT validateToken(final String token) throws JWTVerificationException {
+  private DecodedJWT validateToken(final String token, String key) throws JWTVerificationException {
     try {
-      final JWTVerifier verifier = JWT.require(getKey()).build();
+      final JWTVerifier verifier = JWT.require(getKey(key)).build();
       return verifier.verify(token);
     } catch (final JWTVerificationException e) {
       logger.warn("token is invalid {}", e.getMessage());
@@ -99,7 +122,7 @@ public class JwtUtils {
    * @throws JwtMissingPropertyException if token doesn't contain a subject
    */
   public String validateTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
-    String subject = validateToken(token).getSubject();
+    String subject = validateToken(token, secretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain a subject");
       throw new JwtMissingPropertyException("Token does not contain a subject");
@@ -115,12 +138,29 @@ public class JwtUtils {
    * @throws JwtMissingPropertyException if token doesn't contain a role
    */
   public String validateTokenAndGetRole(final String token) throws JwtMissingPropertyException {
-    String role = validateToken(token).getClaim("role").asString();
+    String role = validateToken(token, secretKey).getClaim("role").asString();
     if (role == null) {
       logger.error("Token does not contain a role");
       throw new JwtMissingPropertyException("Token does not contain a role");
     }
     return role;
+  }
+
+  /**
+   * validates and retrieves the email from the given token.
+   * This token is used to verify the user's email address.
+   *
+   * @param token the jwt to get email from
+   * @return the email
+   */
+  public String validateVerificationTokenAndGetEmail(final String token)
+                              throws JwtMissingPropertyException {
+    String subject = validateToken(token, verificationSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain an email");
+      throw new JwtMissingPropertyException("Token does not contain an email");
+    }
+    return subject;
   }
 
   /**
@@ -152,6 +192,23 @@ public class JwtUtils {
     jwtCookie.setPath("/");
     jwtCookie.setMaxAge(0);
     response.addCookie(jwtCookie);
+  }
+
+  /**
+   * Retrieves the expiration date of a given JWT token.
+   * This method validates the token and returns its expiration date.
+   * If the token is invalid, it logs an error message and returns null.
+   *
+   * @param token The JWT token whose expiration date is to be retrieved.
+   * @return The expiration date of the token, or null if the token is invalid.
+   */
+  public Date getExpirationDate(String token) {
+    try {
+      return validateToken(token, secretKey).getExpiresAt();
+    } catch (JWTVerificationException e) {
+      logger.error("Token is invalid: {}", e.getMessage());
+      return null;
+    }
   }
 }
 

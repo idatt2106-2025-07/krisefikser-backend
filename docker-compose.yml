@@ -1,0 +1,22 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+    volumes:
+      - ./src:/app/src
+      - ~/.m2:/root/.m2
+    ports:
+      - "8080:8080"
+      - "5005:5005"
+    environment:
+        - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+        - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+        - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+        - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+    # Uses default dev profile from application.properties
+    entrypoint: [ "java", "-jar", "/app/app.jar",
+                  "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,
+                  server=y,suspend=n,address=*:5005'" ]

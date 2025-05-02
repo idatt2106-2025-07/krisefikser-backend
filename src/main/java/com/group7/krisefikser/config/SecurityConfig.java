@@ -57,18 +57,19 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-        .requestMatchers(HttpMethod.GET, "/api/affected-area",
-          "/api/point-of-interest", "/h2-console/**", "/swagger-ui/**",
-          "/v3/api-docs/**").permitAll()
-        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-        .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
-        .hasAnyRole("SUPER_ADMIN", "ADMIN")
-        .anyRequest().authenticated())
+                .requestMatchers(HttpMethod.GET, "/api/affected-area",
+                      "/api/point-of-interest", "/h2-console/**", "/swagger-ui/**",
+                      "/v3/api-docs/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/**", "h2-console/**").permitAll()
+                .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
+                  .hasAnyRole("SUPER_ADMIN", "ADMIN")
+                .anyRequest().authenticated())
         .headers(
           headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
       )
         .sessionManagement(session -> session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
 
     http.addFilterBefore(
             jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

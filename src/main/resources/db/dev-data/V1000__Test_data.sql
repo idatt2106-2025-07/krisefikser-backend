@@ -21,21 +21,21 @@ VALUES ('Bottled Water', 'L', 0, 'drink'),
 
 -- Insert users (references households)
 INSERT INTO users (email, name, household_id, password, role)
-VALUES ('admin@example.com', 'Alice Admin', 1, '$2b$12$SdWhhsz0kOz1/sv.PekCLe3FZTSBYsBbhEHHuP/g3rS9OC7.1uUB2', 'admin'),
-       ('user@example.com', 'Bob User', 1, '$2b$12$gPjM8ZKJlPsl4qynzZkhMusekGptDpjEpFeteOTOsdJR5i6of9Nye', 'normal'),
+VALUES ('admin@example.com', 'Alice Admin', 1, '$2b$12$SdWhhsz0kOz1/sv.PekCLe3FZTSBYsBbhEHHuP/g3rS9OC7.1uUB2', 'role_admin'),
+       ('user@example.com', 'Bob User', 1, '$2b$12$gPjM8ZKJlPsl4qynzZkhMusekGptDpjEpFeteOTOsdJR5i6of9Nye', 'role_normal'),
        ('superadmin@example.com', 'Carol Superadmin', 2, '$2b$12$ifTYfS447fcgS.KIYQKdgeS13xkrJwFMm1kZebFSapTHNhL4Jc7he',
-        'super_admin'),
+        'role_super_admin'),
        ('david@example.com', 'David Nolan', 1, '$2b$12$eyZGrA0HACsmJ/F5x1ryRuuK8vwrDujz2fw7mMToGpbgSo4uQITh5y',
-        'normal'),
+        'role_normal'),
        ('emily@example.com', 'Emily Harper', 3, '$2b$12$Gse24F6aQ2mfPi8.fURFdCuBDWx9d/YzAi8NV8M70LxaOq0hg5p1W',
-        'normal'),
-       ('john@example.com', 'John Doe', 2, '$2b$12$vlpwmP5fh4DZj8tJIQToZQHgSzHgs0pf.n53gUqFjtQb4B54aKSm8', 'normal'),
-       ('lucas@example.com', 'Lucas Reed', 4, '$2b$12$dzMdu7D9C8.XVuYsa2qzHFeIRuXtM0mf8Vq2oZQThs41v/ie0pA/C', 'normal'),
+        'role_normal'),
+       ('john@example.com', 'John Doe', 2, '$2b$12$vlpwmP5fh4DZj8tJIQToZQHgSzHgs0pf.n53gUqFjtQb4B54aKSm8', 'role_normal'),
+       ('lucas@example.com', 'Lucas Reed', 4, '$2b$12$dzMdu7D9C8.XVuYsa2qzHFeIRuXtM0mf8Vq2oZQThs41v/ie0pA/C', 'role_normal'),
        ('sarah@example.com', 'Sarah Williams', 5, '$2b$12$JlgqpuU/6eB6V44nGFlY6q7BLXXqLbrcXvTz9wm2nKXZSHfw8tKxy',
-        'normal'),
-       ('nina@example.com', 'Nina Scott', 3, '$2b$12$gAcm80tB8Lkx1qgykVve0O.TdQ3.tIGf3pAmn.DpSKhyPHe7eopby', 'normal'),
+        'role_normal'),
+       ('nina@example.com', 'Nina Scott', 3, '$2b$12$gAcm80tB8Lkx1qgykVve0O.TdQ3.tIGf3pAmn.DpSKhyPHe7eopby', 'role_normal'),
        ('michael@example.com', 'Michael King', 2, '$2b$12$y.eu5T/Rff8R3YoBrJlknSz5u2zVvH1pz/jtt6y2Q6jRVs8rZdVX2',
-        'normal');
+        'role_normal');
 
 -- Insert non-user members (references households)
 INSERT INTO non_user_members (name, type, household_id)
@@ -65,13 +65,14 @@ VALUES (10.76, 59.91, 'shelter', '08:00:00', '18:00:00', '+47 123 45 678', 'A sa
        (10.80, 59.90, 'defibrillator', NULL, NULL, NULL, 'Publicly accessible AED.'),
        (10.90, 59.95, 'food_central', '09:00:00', '20:00:00', '+47 987 65 432', 'Distribution point for food supplies.'),
        (10.85, 59.85, 'water_station', NULL, NULL, NULL, 'Source of clean drinking water.'),
-       (10.95, 60.05, 'hospital', '00:00:00', '23:59:59', '+47 555 12 121', 'Medical facility.');
+       (10.95, 60.05, 'hospital', '00:00:00', '23:59:59', '+47 555 12 121', 'Medical facility.'),
+       (10.70, 59.88, 'meeting_place', '10:00:00', '17:00:00', '+47 222 33 444', 'Community gathering point.');
 
 -- Insert affected areas (no foreign key dependencies)
-INSERT INTO affected_areas (longitude, latitude, danger_radius_km, severity_level, description, start_time)
-VALUES (10.77, 59.92, 1, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
-       (10.90, 59.95, 2, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
-       (10.85, 60.00, 3, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
+INSERT INTO affected_areas (longitude, latitude, high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km, severity_level, description, start_time)
+VALUES (10.77, 59.92, 1, 2, 3, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
+       (10.90, 59.95, 2, 4, 7, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
+       (10.85, 60.00, 3, 5.2, 5.7, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
 
 -- Insert join household request (references users and households)
 INSERT INTO join_household_requests (user_id, household_id)
