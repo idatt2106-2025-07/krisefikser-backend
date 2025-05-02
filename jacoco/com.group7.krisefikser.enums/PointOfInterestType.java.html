@@ -13,7 +13,8 @@ public enum PointOfInterestType {
 <span class="fc" id="L13">  FOOD_CENTRAL(&quot;food_central&quot;),</span>
 <span class="fc" id="L14">  WATER_STATION(&quot;water_station&quot;),</span>
 <span class="fc" id="L15">  DEFIBRILLATOR(&quot;defibrillator&quot;),</span>
-<span class="fc" id="L16">  HOSPITAL(&quot;hospital&quot;);</span>
+<span class="fc" id="L16">  HOSPITAL(&quot;hospital&quot;),</span>
+<span class="fc" id="L17">  MEETING_PLACE(&quot;meeting_place&quot;);</span>
 
   private final String type;
 
@@ -22,9 +23,9 @@ public enum PointOfInterestType {
    *
    * @param type The string representation of the point of interest type.
    */
-<span class="fc" id="L25">  PointOfInterestType(String type) {</span>
-<span class="fc" id="L26">    this.type = type;</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L26">  PointOfInterestType(String type) {</span>
+<span class="fc" id="L27">    this.type = type;</span>
+<span class="fc" id="L28">  }</span>
 
   /**
    * Method to convert a string to a PointOfInterestType enum.
@@ -35,10 +36,10 @@ public enum PointOfInterestType {
    * @return The corresponding PointOfInterestType enum.
    */
   public static PointOfInterestType fromString(String type) {
-<span class="fc" id="L38">    return Arrays.stream(PointOfInterestType.values())</span>
-<span class="fc" id="L39">            .filter(poiType -&gt; poiType.getType().equalsIgnoreCase(type))</span>
-<span class="fc" id="L40">            .findFirst()</span>
-<span class="fc" id="L41">            .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid type: &quot; + type));</span>
+<span class="fc" id="L39">    return Arrays.stream(PointOfInterestType.values())</span>
+<span class="fc" id="L40">            .filter(poiType -&gt; poiType.getType().equalsIgnoreCase(type))</span>
+<span class="fc" id="L41">            .findFirst()</span>
+<span class="fc" id="L42">            .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Invalid type: &quot; + type));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

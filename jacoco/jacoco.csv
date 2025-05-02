@@ -12,7 +12,7 @@ krisefikser,com.group7.krisefikser.mapper,AffectedAreaMapper,10,11,1,1,4,3,1,2,0
 krisefikser,com.group7.krisefikser.mapper,UserMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,AffectedAreaMapperImpl,4,98,4,4,2,26,4,3,0,3
 krisefikser,com.group7.krisefikser,KrisefikserApplication,5,3,0,0,2,1,1,1,1,1
-krisefikser,com.group7.krisefikser.enums,PointOfInterestType,0,68,0,0,0,13,0,5,0,5
+krisefikser,com.group7.krisefikser.enums,PointOfInterestType,0,75,0,0,0,14,0,5,0,5
 krisefikser,com.group7.krisefikser.enums,Role,0,21,0,0,0,4,0,1,0,1
 krisefikser,com.group7.krisefikser.enums,EmailTemplateType,0,33,0,0,0,6,0,1,0,1
 krisefikser,com.group7.krisefikser.enums,AuthResponseMessage,0,105,0,0,0,18,0,3,0,3
