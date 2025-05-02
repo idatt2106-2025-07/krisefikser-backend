@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Date;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -99,6 +101,54 @@ class AuthControllerTest {
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isInternalServerError())
         .andExpect(jsonPath("$.message").value(AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + "Authentication failed"))
+        .andExpect(jsonPath("$.expiryDate").doesNotExist())
+        .andExpect(jsonPath("$.role").doesNotExist());
+  }
+
+  @WithMockUser
+  @Test
+  void verifyEmail_validToken_returnsOkResponse() throws Exception {
+    String token = "valid-token";
+    AuthResponse response = new AuthResponse("User verified successfully", null, null);
+
+    Mockito.when(userService.verifyEmail(token)).thenReturn(response);
+
+    mockMvc.perform(get("/api/auth/verify-email")
+            .param("token", token))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.message").value("User verified successfully"))
+        .andExpect(jsonPath("$.expiryDate").doesNotExist())
+        .andExpect(jsonPath("$.role").doesNotExist());
+  }
+
+  @WithMockUser
+  @Test
+  void verifyEmail_userNotFound_returnsBadRequest() throws Exception {
+    String token = "valid-token";
+    AuthResponse response = new AuthResponse("User not found", null, null);
+
+    Mockito.when(userService.verifyEmail(token)).thenReturn(response);
+
+    mockMvc.perform(get("/api/auth/verify-email")
+            .param("token", token))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message").value("User not found"))
+        .andExpect(jsonPath("$.expiryDate").doesNotExist())
+        .andExpect(jsonPath("$.role").doesNotExist());
+  }
+
+  @WithMockUser
+  @Test
+  void verifyEmail_invalidToken_returnsInternalServerError() throws Exception {
+    String token = "invalid-token";
+
+    Mockito.when(userService.verifyEmail(token))
+        .thenThrow(new RuntimeException("Invalid token"));
+
+    mockMvc.perform(get("/api/auth/verify-email")
+            .param("token", token))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.message").value(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage() + "Invalid token"))
         .andExpect(jsonPath("$.expiryDate").doesNotExist())
         .andExpect(jsonPath("$.role").doesNotExist());
   }
