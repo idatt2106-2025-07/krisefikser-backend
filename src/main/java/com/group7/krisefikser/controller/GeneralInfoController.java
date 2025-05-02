@@ -28,6 +28,13 @@ public class GeneralInfoController {
   @Autowired
   private GeneralInfoService generalInfoService;
 
+  /**
+   * Endpoint to get all general information.
+   * This method retrieves all general information from the system.
+   * It returns a list of GeneralInfo objects.
+   *
+   * @return a list of GeneralInfo objects
+   */
   @GetMapping("/all")
   public List<GeneralInfo> getAllGeneralInfo() {
     return generalInfoService.getAllGeneralInfo();
@@ -57,7 +64,7 @@ public class GeneralInfoController {
    * This method adds a new GeneralInfo object to the system.
    * It accepts a GeneralInfo object in the request body.
    *
-   * @param info the GeneralInfo object to be added
+   * @param request the GeneralInfoRequest object containing the information to be added
    */
   @PostMapping("/admin/add")
   public void addGeneralInfo(@RequestBody GeneralInfoRequest request) {
@@ -69,7 +76,7 @@ public class GeneralInfoController {
    * This method updates an existing GeneralInfo object in the system.
    * It accepts a GeneralInfo object in the request body.
    *
-   * @param info the GeneralInfo object to be updated
+   * @param request the GeneralInfoRequest object containing the updated information
    */
   @PutMapping("/admin/update")
   public void updateGeneralInfo(@RequestBody GeneralInfoRequest request) {
@@ -81,7 +88,7 @@ public class GeneralInfoController {
    * This method deletes a GeneralInfo object from the system based on its ID.
    * It accepts the ID of the GeneralInfo object as a path variable.
    *
-   * @param id the ID of the GeneralInfo object to be deleted
+   * @param request the GeneralInfoRequest object containing the ID of the GeneralInfo to be deleted
    */
   @DeleteMapping("/admin/delete/{id}")
   public void deleteGeneralInfo(@PathVariable GeneralInfoRequest request) {

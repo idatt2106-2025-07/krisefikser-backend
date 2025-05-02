@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Model class representing general information in the system.
+ * It contains the ID, theme, title, and content of the general information.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
