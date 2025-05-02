@@ -1,8 +1,11 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.ItemRequest;
+import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.repository.ItemRepo;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -193,5 +196,66 @@ public class ItemService {
    */
   public boolean itemExists(int id) {
     return itemRepo.findById(id).isPresent();
+  }
+
+  /**
+   * Converts a list of Item entities to ItemResponse DTOs.
+   *
+   * @param items The list of Item entities to convert
+   * @return A list of corresponding ItemResponse objects
+   */
+  public List<ItemResponse> convertToItemResponses(List<Item> items) {
+    return items.stream()
+      .map(ItemResponse::fromEntity)
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Converts a list of type strings to a list of ItemType enums.
+   * Invalid type strings are ignored.
+   *
+   * @param typeStrings The list of type strings to convert
+   * @return A list of valid ItemType enums
+   */
+  public List<ItemType> convertToItemTypes(List<String> typeStrings) {
+    List<ItemType> itemTypes = new ArrayList<>();
+    if (typeStrings != null && !typeStrings.isEmpty()) {
+      for (String typeStr : typeStrings) {
+        try {
+          ItemType type = ItemType.fromString(typeStr);
+          itemTypes.add(type);
+        } catch (IllegalArgumentException e) {
+          // Skip invalid types
+        }
+      }
+    }
+    return itemTypes;
+  }
+
+  /**
+   * Adds a new item based on the provided ItemRequest.
+   * This method handles the conversion from DTO to entity and back to response DTO.
+   *
+   * @param itemRequest The request containing the item details
+   * @return The response DTO for the created item
+   */
+  public ItemResponse addItemFromRequest(ItemRequest itemRequest) {
+    Item item = itemRequest.toEntity();
+    Item createdItem = addItem(item);
+    return ItemResponse.fromEntity(createdItem);
+  }
+
+  /**
+   * Updates an existing item based on the provided ItemRequest.
+   * This method handles the conversion from DTO to entity and back to response DTO.
+   *
+   * @param id The ID of the item to update
+   * @param itemRequest The request containing the updated item details
+   * @return The response DTO for the updated item
+   */
+  public ItemResponse updateItemFromRequest(int id, ItemRequest itemRequest) {
+    Item item = itemRequest.toEntity(id);
+    Item updatedItem = updateItem(id, item);
+    return ItemResponse.fromEntity(updatedItem);
   }
 }
