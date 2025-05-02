@@ -9,7 +9,6 @@ import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,7 +68,7 @@ public class AdminController {
   }
 
   @PostMapping("/2fa")
-  public ResponseEntity<String> TwoFactorAuthentication(@RequestBody @Valid TwoFactorLoginRequest request, HttpServletResponse response) {
+  public ResponseEntity<String> twoFactorAuthentication(@RequestBody @Valid TwoFactorLoginRequest request, HttpServletResponse response) {
     logger.info("Two Factor Authentication request");
     try {
       adminService.verifyTwoFactor(request.getToken(), response);
