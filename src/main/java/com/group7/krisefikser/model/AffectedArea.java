@@ -16,7 +16,9 @@ public class AffectedArea {
   private Long id;
   private Double longitude;
   private Double latitude;
-  private Double dangerRadiusKm;
+  private Double highDangerRadiusKm;
+  private Double mediumDangerRadiusKm;
+  private Double lowDangerRadiusKm;
   private int severityLevel;
   private String description;
   private LocalDateTime startDate;

@@ -24,6 +24,7 @@ public class EmailTemplateService {
       case HOUSEHOLD_INVITE -> "Household Invite";
       case ADMIN_INVITE -> "Admin Invite";
       case ADMIN_VERIFICATION -> "Admin Verification";
+      case VERIFY_EMAIL -> "Email Verification";
     };
   }
 
@@ -46,6 +47,8 @@ public class EmailTemplateService {
           + params.get("inviteLink");
       case ADMIN_VERIFICATION -> "Your admin account has been verified. You can now log in.\n"
           + params.get("loginLink");
+      case VERIFY_EMAIL -> "Click the link below to verify your email address:\n"
+          + params.get("verificationLink");
     };
   }
 }
