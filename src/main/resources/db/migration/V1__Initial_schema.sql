@@ -68,7 +68,8 @@ CREATE TABLE points_of_interest
     'food_central',
     'water_station',
     'defibrillator',
-    'hospital'
+    'hospital',
+    'meeting_place'
 ) NOT NULL,
     opens_at TIME DEFAULT NULL,
     closes_at TIME DEFAULT NULL,
