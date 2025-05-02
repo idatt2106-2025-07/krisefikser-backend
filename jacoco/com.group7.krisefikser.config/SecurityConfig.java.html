@@ -55,23 +55,26 @@ public class SecurityConfig {
 <span class="fc" id="L55">    source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
 
 <span class="fc" id="L57">    http.cors(cors -&gt; cors.configurationSource(source))</span>
-<span class="fc" id="L58">            .csrf(AbstractHttpConfigurer::disable)</span>
-<span class="fc" id="L59">            .authorizeHttpRequests(authorize -&gt; authorize</span>
-<span class="fc" id="L60">                    .requestMatchers(HttpMethod.GET, &quot;/api/affected-area&quot;,</span>
-<span class="fc" id="L61">                            &quot;/api/point-of-interest&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
-<span class="fc" id="L62">                    .requestMatchers(HttpMethod.POST, &quot;/api/auth/**&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
-<span class="fc" id="L63">                    .requestMatchers(&quot;/api/point-of-interest/**&quot;, &quot;/api/affected-area/**&quot;)</span>
-<span class="fc" id="L64">                     .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
-<span class="fc" id="L65">                    .anyRequest().authenticated())</span>
-<span class="fc" id="L66">         .headers(</span>
-<span class="fc" id="L67">            headers -&gt; headers.frameOptions(frameOptionsConfig -&gt; frameOptionsConfig.sameOrigin())</span>
-        )
-<span class="fc" id="L69">            .sessionManagement(session -&gt; session</span>
-<span class="fc" id="L70">                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
-<span class="fc" id="L71">    http.addFilterBefore(</span>
-<span class="fc" id="L72">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L58">        .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L59">        .authorizeHttpRequests(authorize -&gt; authorize</span>
+<span class="fc" id="L60">        .requestMatchers(HttpMethod.GET, &quot;/api/affected-area&quot;,</span>
+<span class="fc" id="L61">          &quot;/api/point-of-interest&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
+<span class="fc" id="L62">        .requestMatchers(HttpMethod.POST, &quot;/api/auth/**&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
+<span class="fc" id="L63">        .requestMatchers(HttpMethod.DELETE, &quot;/api/items/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;SUPER_ADMIN&quot;)</span>
+<span class="fc" id="L64">        .requestMatchers(&quot;/api/point-of-interest/**&quot;, &quot;/api/affected-area/**&quot;)</span>
+<span class="fc" id="L65">        .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L66">        .anyRequest().authenticated())</span>
+<span class="fc" id="L67">        .headers(</span>
+<span class="fc" id="L68">          headers -&gt; headers.frameOptions(frameOptionsConfig -&gt; frameOptionsConfig.sameOrigin())</span>
+      )
+<span class="fc" id="L70">        .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L71">        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
 
-<span class="fc" id="L74">    return http.build();</span>
+
+<span class="fc" id="L74">    http.addFilterBefore(</span>
+<span class="fc" id="L75">            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+
+<span class="fc" id="L77">    return http.build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemRepo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.repository</a> &gt; <span class="el_source">ItemRepo.java</span></div><h1>ItemRepo.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.repository;
+
+import com.group7.krisefikser.enums.ItemType;
+import com.group7.krisefikser.model.Item;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+
+/**
+ * This class is a repository for managing items in the database.
+ * It provides methods to get, add, update, and delete items.
+ * It uses JdbcTemplate to interact with the database.
+ */
+@Repository
+public class ItemRepo {
+  private final JdbcTemplate jdbcTemplate;
+
+  /**
+   * RowMapper to map the result set to an Item object.
+   */
+<span class="fc" id="L30">  private final RowMapper&lt;Item&gt; itemRowMapper = (rs, rowNum) -&gt; {</span>
+<span class="fc" id="L31">    return new Item(</span>
+<span class="fc" id="L32">      rs.getInt(&quot;id&quot;),</span>
+<span class="fc" id="L33">      rs.getString(&quot;name&quot;),</span>
+<span class="fc" id="L34">      rs.getString(&quot;unit&quot;),</span>
+<span class="fc" id="L35">      rs.getInt(&quot;calories&quot;),</span>
+<span class="fc" id="L36">      ItemType.fromString(rs.getString(&quot;type&quot;))</span>
+    );
+  };
+
+  /**
+   * Constructor for ItemRepo.
+   *
+   * @param jdbcTemplate The JdbcTemplate used to interact with the database.
+   */
+  @Autowired
+<span class="fc" id="L46">  public ItemRepo(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L47">    this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L48">  }</span>
+
+  /**
+   * This method retrieves all items from the database.
+   *
+   * @return A list of Item objects.
+   */
+  public List&lt;Item&gt; getAllItems() {
+<span class="fc" id="L56">    String sql = &quot;SELECT id, name, unit, calories, type FROM items&quot;;</span>
+<span class="fc" id="L57">    return jdbcTemplate.query(sql, itemRowMapper);</span>
+  }
+
+  /**
+   * This method retrieves an item by its ID.
+   *
+   * @param id The ID of the item to retrieve.
+   * @return An Optional containing the Item object if found, or empty if not found.
+   */
+  public Optional&lt;Item&gt; findById(int id) {
+    try {
+<span class="fc" id="L68">      String sql = &quot;SELECT id, name, unit, calories, type FROM items WHERE id = ?&quot;;</span>
+<span class="fc" id="L69">      Item item = jdbcTemplate.queryForObject(sql, itemRowMapper, id);</span>
+<span class="fc" id="L70">      return Optional.ofNullable(item);</span>
+<span class="fc" id="L71">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L72">      return Optional.empty();</span>
+    }
+  }
+
+  /**
+   * This method retrieves items by their type.
+   *
+   * @param type The type of items to retrieve.
+   * @return A list of Item objects of the specified type.
+   */
+  public List&lt;Item&gt; findByType(ItemType type) {
+<span class="fc" id="L83">    String sql = &quot;SELECT id, name, unit, calories, type FROM items WHERE type = ?&quot;;</span>
+<span class="fc" id="L84">    return jdbcTemplate.query(sql, itemRowMapper, type.name().toLowerCase());</span>
+  }
+
+  /**
+   * Adds a new item to the database.
+   * This method inserts the item's details into the database and sets the generated ID
+   * on the provided item object.
+   *
+   * @param item The item to be added. It must contain the name, unit, calories, and type.
+   * @return The added item with the generated ID set.
+   */
+  public Item add(Item item) {
+<span class="fc" id="L96">    String sql = &quot;INSERT INTO items (name, unit, calories, type) VALUES (?, ?, ?, ?)&quot;;</span>
+<span class="fc" id="L97">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
+
+<span class="fc" id="L99">    jdbcTemplate.update(connection -&gt; {</span>
+<span class="fc" id="L100">      PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);</span>
+<span class="fc" id="L101">      ps.setString(1, item.getName());</span>
+<span class="fc" id="L102">      ps.setString(2, item.getUnit());</span>
+<span class="fc" id="L103">      ps.setInt(3, item.getCalories());</span>
+<span class="fc" id="L104">      ps.setString(4, item.getType().name().toLowerCase());</span>
+<span class="fc" id="L105">      return ps;</span>
+    }, keyHolder);
+
+<span class="fc" id="L108">    item.setId(keyHolder.getKey().intValue());</span>
+<span class="fc" id="L109">    return item;</span>
+  }
+
+  /**
+   * Updates an existing item in the database.
+   *
+   * @param item The item to be updated. It must contain the ID and the new details.
+   * @return The updated item.
+   */
+  public Item update(Item item) {
+<span class="fc" id="L119">    String sql = &quot;UPDATE items SET name = ?, unit = ?, calories = ?, type = ? WHERE id = ?&quot;;</span>
+<span class="fc" id="L120">    int rowsAffected = jdbcTemplate.update(sql,</span>
+<span class="fc" id="L121">        item.getName(),</span>
+<span class="fc" id="L122">        item.getUnit(),</span>
+<span class="fc" id="L123">        item.getCalories(),</span>
+<span class="fc" id="L124">        item.getType().name().toLowerCase(),</span>
+<span class="fc" id="L125">        item.getId());</span>
+
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">    if (rowsAffected == 0) {</span>
+<span class="nc" id="L128">      throw new EmptyResultDataAccessException(&quot;No item found with id: &quot; + item.getId(), 1);</span>
+    }
+<span class="fc" id="L130">    return item;</span>
+  }
+
+  /**
+   * Deletes an item from the database by its ID.
+   *
+   * @param id The ID of the item to be deleted.
+   * @return true if the item was deleted, false otherwise.
+   */
+  public boolean deleteById(int id) {
+<span class="fc" id="L140">    String sql = &quot;DELETE FROM items WHERE id = ?&quot;;</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">    return jdbcTemplate.update(sql, id) &gt; 0;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
