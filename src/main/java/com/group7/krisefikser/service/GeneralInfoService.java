@@ -80,5 +80,4 @@ public class GeneralInfoService {
     Long id = info.getId();
     generalInfoRepo.deleteGeneralInfo(id);
   }
-
 }
