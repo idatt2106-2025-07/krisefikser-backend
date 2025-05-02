@@ -37,9 +37,9 @@ import org.springframework.stereotype.Service;
 public class UserService implements UserDetailsService {
 
   private final UserRepository userRepo;
-  private final HouseholdRepository householdRepo;
   private final JwtUtils jwtUtils;
   private final EmailService emailService;
+  private final HouseholdService householdService;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -77,20 +77,7 @@ public class UserService implements UserDetailsService {
     // This is for when the user waits for the request to join a household to be accepted
     // This is a temporary solution, in the future the user should be able to create a household
     try {
-      int counter = 1;
-      String baseName = user.getName() + "'s household"
-          + UUID.randomUUID().toString().substring(0, 8);
-      String householdName = baseName;
-
-      while (householdRepo.existsByName(householdName)) {
-        counter++;
-        householdName = baseName + " (" + counter + ")";
-      }
-      // Right now we are creating a household with default values for longitude and latitude
-      // In the future, we might want to get these values from the user or use a geolocation service
-      double longitude = 0.0;
-      double latitude = 0.0;
-      householdId = householdRepo.createHousehold(householdName, longitude, latitude);
+      householdId = householdService.createHouseholdForUser(user.getName());
     } catch (Exception e) {
       return new AuthResponse(AuthResponseMessage
           .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);
@@ -138,6 +125,22 @@ public class UserService implements UserDetailsService {
 
     if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
       return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
+    }
+
+    if (user.getRole() == Role.ROLE_ADMIN) {
+      try {
+        String twoFactorToken = jwtUtils.generate2faToken(user.getId());
+        String twoFactorLink = "https://localhost:5173/verify?token=" + twoFactorToken;
+
+        emailService.sendTemplateMessage(
+            user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION, Map.of("loginLink", twoFactorLink));
+        return new AuthResponse(
+            AuthResponseMessage.TWO_FACTOR_SENT.getMessage(),
+            null, null);
+      } catch (Exception e) {
+        return new AuthResponse(AuthResponseMessage
+            .INVALID_EMAIL_FORMAT.getMessage() + e.getMessage(), null, null);
+      }
     }
 
     try {
