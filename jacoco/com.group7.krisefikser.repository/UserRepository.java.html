@@ -54,11 +54,12 @@ public class UserRepository {
 <span class="fc" id="L54">        String roleString = rs.getString(&quot;role&quot;).toUpperCase();</span>
 <span class="fc" id="L55">        Role role = Role.valueOf(roleString);</span>
 <span class="fc" id="L56">        user.setRole(role);</span>
-<span class="fc" id="L57">        return user;</span>
-<span class="fc" id="L58">      }, email).stream().findFirst();</span>
-<span class="nc" id="L59">    } catch (EmptyResultDataAccessException e) {</span>
-<span class="nc" id="L60">      logger.info(&quot;No user found with email: &quot; + email);</span>
-<span class="nc" id="L61">      return Optional.empty();</span>
+<span class="fc" id="L57">        user.setVerified(rs.getBoolean(&quot;verified&quot;));</span>
+<span class="fc" id="L58">        return user;</span>
+<span class="fc" id="L59">      }, email).stream().findFirst();</span>
+<span class="nc" id="L60">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L61">      logger.info(&quot;No user found with email: &quot; + email);</span>
+<span class="nc" id="L62">      return Optional.empty();</span>
     }
   }
 
@@ -73,20 +74,42 @@ public class UserRepository {
    * @return an Optional containing the saved user if successful, or an empty Optional if not
    */
   public Optional&lt;User&gt; save(User user) {
-<span class="pc bpc" id="L76" title="1 of 2 branches missed.">    if (user.getRole() == null) {</span>
-<span class="fc" id="L77">      user.setRole(Role.ROLE_NORMAL);</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">    if (user.getRole() == null) {</span>
+<span class="fc" id="L78">      user.setRole(Role.ROLE_NORMAL);</span>
     }
-<span class="fc" id="L79">    String query = &quot;INSERT INTO users &quot;</span>
+<span class="fc" id="L80">    String query = &quot;INSERT INTO users &quot;</span>
         + &quot;(email, name, household_id, password, role) &quot;
         + &quot;VALUES (?, ?, ?, ?, ?)&quot;;
     try {
-<span class="fc" id="L83">      jdbcTemplate.update(query, user.getEmail(), user.getName(),</span>
-<span class="fc" id="L84">          user.getHouseholdId(), user.getPassword(), user.getRole().toString());</span>
-<span class="fc" id="L85">      return findByEmail(user.getEmail());</span>
-<span class="fc" id="L86">    } catch (Exception e) {</span>
-<span class="fc" id="L87">      System.err.println(&quot;Failed to save user: &quot; + e.getMessage());</span>
-<span class="fc" id="L88">      e.printStackTrace();</span>
+<span class="fc" id="L84">      jdbcTemplate.update(query, user.getEmail(), user.getName(),</span>
+<span class="fc" id="L85">          user.getHouseholdId(), user.getPassword(), user.getRole().toString());</span>
+<span class="fc" id="L86">      return findByEmail(user.getEmail());</span>
+<span class="fc" id="L87">    } catch (Exception e) {</span>
+<span class="fc" id="L88">      logger.info(&quot;Failed to save user: &quot; + e.getMessage());</span>
 <span class="fc" id="L89">      return Optional.empty();</span>
+    }
+  }
+
+  /**
+   * Changes a user's verified status in the database.
+   * This method updates the verified status of a user
+   * based on their email address.
+   * If the update is successful, it returns an Optional
+   * containing the updated user.
+   *
+   * @param user the user whose verified status is to be changed
+   * @return an Optional containing the updated user if successful,
+   *         or an empty Optional if not
+   */
+  public Optional&lt;User&gt; setVerified(User user) {
+<span class="nc" id="L105">    String query = &quot;UPDATE users SET verified = ? WHERE email = ?&quot;;</span>
+    try {
+<span class="nc" id="L107">      jdbcTemplate.update(query, user.getVerified(), user.getEmail());</span>
+<span class="nc" id="L108">      return findByEmail(user.getEmail());</span>
+<span class="nc" id="L109">    } catch (Exception e) {</span>
+<span class="nc" id="L110">      logger.info(&quot;Failed to update verified: &quot; + e.getMessage());</span>
+<span class="nc" id="L111">      e.printStackTrace();</span>
+<span class="nc" id="L112">      return Optional.empty();</span>
     }
   }
 }

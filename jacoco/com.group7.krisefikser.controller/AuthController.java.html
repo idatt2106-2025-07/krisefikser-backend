@@ -5,14 +5,23 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -25,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final UserService userService;
-<span class="fc" id="L28">  private static final Logger logger = Logger.getLogger(AuthController.class.getName());</span>
+<span class="fc" id="L37">  private static final Logger logger = Logger.getLogger(AuthController.class.getName());</span>
 
   /**
    * Endpoint for user registration.
@@ -36,21 +45,34 @@ public class AuthController {
    * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
+  @Operation(
+      summary = &quot;Register a new user&quot;,
+      description = &quot;Registers a new user account using the provided email, name and password. &quot;
+          + &quot;A verification email is sent to the provided email address.&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;201&quot;, description = &quot;User registered successfully&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error while saving the user&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
   @PostMapping(&quot;/register&quot;)
   public ResponseEntity&lt;AuthResponse&gt; registerUser(
-      @RequestBody RegisterRequest request, HttpServletResponse response) {
-<span class="fc" id="L42">    logger.info(&quot;Received register request for user: &quot; + request.getEmail());</span>
+      @Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
+<span class="fc" id="L64">    logger.info(&quot;Received register request for user: &quot; + request.getEmail());</span>
     try {
-<span class="fc" id="L44">      AuthResponse authResponse = userService.registerUser(request, response);</span>
+<span class="fc" id="L66">      AuthResponse authResponse = userService.registerUser(request, response);</span>
 
-<span class="fc" id="L46">      logger.info(&quot;User registered successfully: &quot; + request.getEmail());</span>
-<span class="fc" id="L47">      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);</span>
+<span class="fc" id="L68">      logger.info(&quot;User registered successfully: &quot; + request.getEmail());</span>
+<span class="fc" id="L69">      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);</span>
 
-<span class="fc" id="L49">    } catch (Exception e) {</span>
-<span class="fc" id="L50">      logger.warning(&quot;Error registering user: &quot; + e.getMessage());</span>
-<span class="fc" id="L51">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L52">          new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()</span>
-<span class="fc" id="L53">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L71">    } catch (Exception e) {</span>
+<span class="fc" id="L72">      logger.warning(&quot;Error registering user: &quot; + e.getMessage());</span>
+<span class="fc" id="L73">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L74">          new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()</span>
+<span class="fc" id="L75">                  + e.getMessage(), null, null));</span>
     }
   }
 
@@ -63,21 +85,87 @@ public class AuthController {
    * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
+  @Operation(
+      summary = &quot;Log in a user&quot;,
+      description = &quot;Logs in a user using their email and password. &quot;
+          + &quot;If the credentials are valid and the user is verified, a JWT token is returned.&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;User logged in successfully&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error during login process&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
   @PostMapping(&quot;/login&quot;)
-  public ResponseEntity&lt;AuthResponse&gt; loginUser(@RequestBody LoginRequest request,
-                                                HttpServletResponse response) {
-<span class="fc" id="L69">    logger.info(&quot;Received login request for user: &quot; + request.getEmail());</span>
+  public ResponseEntity&lt;AuthResponse&gt; loginUser(
+      @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+<span class="fc" id="L104">    logger.info(&quot;Received login request for user: &quot; + request.getEmail());</span>
     try {
-<span class="fc" id="L71">      AuthResponse authResponse = userService.loginUser(request, response);</span>
+<span class="fc" id="L106">      AuthResponse authResponse = userService.loginUser(request, response);</span>
 
-<span class="fc" id="L73">      logger.info(&quot;User logged in successfully: &quot; + request.getEmail());</span>
-<span class="fc" id="L74">      return ResponseEntity.ok(authResponse);</span>
+<span class="fc" id="L108">      logger.info(&quot;User logged in successfully: &quot; + request.getEmail());</span>
+<span class="fc" id="L109">      return ResponseEntity.ok(authResponse);</span>
 
-<span class="fc" id="L76">    } catch (Exception e) {</span>
-<span class="fc" id="L77">      logger.warning(&quot;Error logging in user: &quot; + e.getMessage());</span>
-<span class="fc" id="L78">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L79">          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()</span>
-<span class="fc" id="L80">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L111">    } catch (Exception e) {</span>
+<span class="fc" id="L112">      logger.warning(&quot;Error logging in user: &quot; + e.getMessage());</span>
+<span class="fc" id="L113">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L114">          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()</span>
+<span class="fc" id="L115">                  + e.getMessage(), null, null));</span>
+    }
+  }
+
+  /**
+   * Endpoint for email verification.
+   * This method handles the verification of a user's email.
+   * It accepts a token as a request parameter.
+   *
+   * @param token the verification token
+   * @return a ResponseEntity containing the authentication response
+   */
+  @Operation(
+      summary = &quot;Verify user email&quot;,
+      description = &quot;Verifies a user's email address using a token sent &quot;
+          + &quot;to them via email after registration.&quot;,
+      parameters = @Parameter(
+          name = &quot;token&quot;,
+          description = &quot;Verification token received by email. &quot;
+              + &quot;Must match a token issued during registration.&quot;,
+          required = true,
+          schema = @Schema(type = &quot;string&quot;)
+      )
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;User verified successfully&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid or expired verification token&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error during email verification&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
+  @GetMapping(&quot;/verify-email&quot;)
+  public ResponseEntity&lt;AuthResponse&gt; verifyEmail(@Valid @RequestParam String token) {
+<span class="fc" id="L152">    logger.info(&quot;Received email verification request with token: &quot; + token);</span>
+    try {
+<span class="fc" id="L154">      AuthResponse authResponse = userService.verifyEmail(token);</span>
+
+<span class="fc bfc" id="L156" title="All 2 branches covered.">      if (authResponse.getMessage().equals(</span>
+<span class="fc" id="L157">          AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage())) {</span>
+<span class="fc" id="L158">        logger.info(&quot;User verified successfully with token: &quot; + token);</span>
+<span class="fc" id="L159">        return ResponseEntity.ok(authResponse);</span>
+      } else {
+<span class="fc" id="L161">        logger.warning(&quot;Error verifying user: &quot; + authResponse.getMessage());</span>
+<span class="fc" id="L162">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
+      }
+<span class="fc" id="L164">    } catch (Exception e) {</span>
+<span class="fc" id="L165">      logger.warning(&quot;Error verifying email: &quot; + e.getMessage());</span>
+<span class="fc" id="L166">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L167">          new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()</span>
+<span class="fc" id="L168">                  + e.getMessage(), null, null));</span>
     }
   }
 }

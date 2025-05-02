@@ -59,9 +59,9 @@ public class SecurityConfig {
 <span class="fc" id="L59">            .authorizeHttpRequests(authorize -&gt; authorize</span>
 <span class="fc" id="L60">                    .requestMatchers(HttpMethod.GET, &quot;/api/affected-area&quot;,</span>
 <span class="fc" id="L61">                            &quot;/api/point-of-interest&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
-<span class="fc" id="L62">                    .requestMatchers(HttpMethod.POST, &quot;/api/auth/**&quot;).permitAll()</span>
+<span class="fc" id="L62">                    .requestMatchers(HttpMethod.POST, &quot;/api/auth/**&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
 <span class="fc" id="L63">                    .requestMatchers(&quot;/api/point-of-interest/**&quot;, &quot;/api/affected-area/**&quot;)</span>
-<span class="fc" id="L64">                    .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L64">                     .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
 <span class="fc" id="L65">                    .anyRequest().authenticated())</span>
 <span class="fc" id="L66">         .headers(</span>
 <span class="fc" id="L67">            headers -&gt; headers.frameOptions(frameOptionsConfig -&gt; frameOptionsConfig.sameOrigin())</span>

@@ -43,13 +43,13 @@ public class UserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-<span class="nc" id="L46">    User user = userRepo.findByEmail(email)</span>
-<span class="nc" id="L47">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">    if (user == null) {</span>
+<span class="fc" id="L46">    User user = userRepo.findByEmail(email)</span>
+<span class="fc" id="L47">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">    if (user == null) {</span>
 <span class="nc" id="L49">      throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
     }
-<span class="nc" id="L51">    return new org.springframework.security.core.userdetails.User(</span>
-<span class="nc" id="L52">        user.getEmail(), user.getPassword(),</span>
+<span class="fc" id="L51">    return new org.springframework.security.core.userdetails.User(</span>
+<span class="fc" id="L52">        user.getEmail(), user.getPassword(),</span>
         new ArrayList&lt;&gt;());
   }
 
@@ -91,15 +91,15 @@ public class UserService implements UserDetailsService {
 <span class="fc" id="L91">      double longitude = 0.0;</span>
 <span class="fc" id="L92">      double latitude = 0.0;</span>
 <span class="fc" id="L93">      householdId = householdRepo.createHousehold(householdName, longitude, latitude);</span>
-<span class="nc" id="L94">    } catch (Exception e) {</span>
-<span class="nc" id="L95">      return new AuthResponse(AuthResponseMessage</span>
-<span class="nc" id="L96">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L94">    } catch (Exception e) {</span>
+<span class="fc" id="L95">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L96">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
 <span class="fc" id="L97">    }</span>
     try {
 <span class="fc" id="L99">      user.setHouseholdId(householdId);</span>
 <span class="fc" id="L100">      userRepo.save(user);</span>
 <span class="fc" id="L101">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
-<span class="fc" id="L102">      String emailVerificationToken = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());</span>
+<span class="fc" id="L102">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
 <span class="fc" id="L103">      String verificationLink = &quot;https://localhost:5173/verify?token=&quot; + emailVerificationToken;</span>
 <span class="fc" id="L104">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
 <span class="fc" id="L105">      emailService.sendTemplateMessage(</span>
@@ -123,36 +123,65 @@ public class UserService implements UserDetailsService {
    *
    * @param request the login request containing user credentials
    * @return an AuthResponse object containing the result of the login
-   * @throws JwtMissingPropertyException if there is an issue with the JWT token
    */
   public AuthResponse loginUser(LoginRequest request, HttpServletResponse response) {
-<span class="fc" id="L129">    String email = request.getEmail();</span>
+<span class="fc" id="L128">    String email = request.getEmail();</span>
 
-<span class="fc" id="L131">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc" id="L130">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 
-<span class="fc bfc" id="L133" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
-<span class="fc" id="L134">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
+<span class="fc" id="L133">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
     }
 
-<span class="fc" id="L137">    User user = userOpt.get();</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">    if (!userOpt.get().getVerified()) {</span>
+<span class="fc" id="L137">      return new AuthResponse(AuthResponseMessage.USER_NOT_VERIFIED.getMessage(), null, null);</span>
+    }
 
-<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
-<span class="fc" id="L140">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
+<span class="fc" id="L140">    User user = userOpt.get();</span>
+
+<span class="fc bfc" id="L142" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
+<span class="fc" id="L143">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
     }
 
     try {
-<span class="fc" id="L144">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
-<span class="fc" id="L145">      jwtUtils.setJwtCookie(token, response);</span>
-<span class="fc" id="L146">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
+<span class="fc" id="L147">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
+<span class="fc" id="L148">      jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L149">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
 
-<span class="fc" id="L148">      return new AuthResponse(</span>
-<span class="fc" id="L149">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
+<span class="fc" id="L151">      return new AuthResponse(</span>
+<span class="fc" id="L152">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
           expirationDate,
-<span class="fc" id="L151">          user.getRole()</span>
+<span class="fc" id="L154">          user.getRole()</span>
       );
-<span class="nc" id="L153">    } catch (Exception e) {</span>
-<span class="nc" id="L154">      return new AuthResponse(</span>
-<span class="nc" id="L155">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L156">    } catch (Exception e) {</span>
+<span class="fc" id="L157">      return new AuthResponse(</span>
+<span class="fc" id="L158">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
+    }
+  }
+
+  /**
+   * Verifies the user's email using a token.
+   * This method checks if the token is valid and updates the user's verification status.
+   *
+   * @param token the verification token
+   * @return an AuthResponse object containing the result of the verification
+   */
+  public AuthResponse verifyEmail(String token) {
+    try {
+<span class="fc" id="L171">      String email = jwtUtils.validateVerificationTokenAndGetEmail(token);</span>
+<span class="fc" id="L172">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+
+<span class="fc bfc" id="L174" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
+<span class="fc" id="L175">        User user = userOpt.get();</span>
+<span class="fc" id="L176">        user.setVerified(true);</span>
+<span class="fc" id="L177">        userRepo.setVerified(user);</span>
+<span class="fc" id="L178">        return new AuthResponse(</span>
+<span class="fc" id="L179">            AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage(), null, null);</span>
+      } else {
+<span class="fc" id="L181">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+      }
+<span class="fc" id="L183">    } catch (JwtMissingPropertyException e) {</span>
+<span class="fc" id="L184">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
     }
   }
 }
