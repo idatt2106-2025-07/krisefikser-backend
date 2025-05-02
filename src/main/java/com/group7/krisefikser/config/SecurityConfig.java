@@ -60,6 +60,7 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.GET, "/api/affected-area",
           "/api/point-of-interest", "/h2-console/**").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
+        .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
         .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
         .hasAnyRole("SUPER_ADMIN", "ADMIN")
         .anyRequest().authenticated())
