@@ -7,6 +7,12 @@ import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
@@ -29,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/households")
+@Tag(name = "Household Management", description = "APIs for household operations and membership")
 public class HouseholdController {
   private final HouseholdService householdService;
   private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());
@@ -49,6 +56,14 @@ public class HouseholdController {
    * @param householdRequest the request containing household details
    * @return the created household
    */
+  @Operation(summary = "Create a new household",
+      description = "Creates a new household and associates it with the authenticated user")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "201", description = "Household created successfully",
+      content = @Content(schema = @Schema(implementation = HouseholdResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+  })
   @PostMapping
   public ResponseEntity<HouseholdResponse> createHousehold(
       @Valid @RequestBody HouseholdRequest householdRequest) {
@@ -65,6 +80,14 @@ public class HouseholdController {
   /**
    * Endpoint to request to join a household.
    */
+  @Operation(summary = "Request to join a household",
+      description = "Creates a request for the authenticated user to join a specified household")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Join request created successfully",
+      content = @Content(schema = @Schema(implementation = JoinHouseholdRequest.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid household ID"),
+    @ApiResponse(responseCode = "404", description = "Household not found")
+  })
   @PostMapping("/join-request")
   public ResponseEntity<JoinHouseholdRequest> requestToJoin(
       @RequestBody HouseholdJoinRequest request) {
@@ -84,12 +107,23 @@ public class HouseholdController {
    * @param householdId the ID of the household
    * @return a ResponseEntity containing a list of JoinHouseholdRequest objects
    */
+  @Operation(summary = "Get all join requests for a household",
+      description = "Retrieves all pending join requests for a specific household")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200",
+      description = "List of join requests retrieved successfully"),
+    @ApiResponse(responseCode = "403",
+      description = "Forbidden - User not authorized for this household"),
+    @ApiResponse(responseCode = "404",
+      description = "Household not found")
+  })
   @GetMapping("/{householdId}/requests")
   public ResponseEntity<List<JoinHouseholdRequest>> getJoinRequests(
       @PathVariable Long householdId) {
-    logger.info("Retrieving requests for household ID: + " + householdId);
+    logger.info("Retrieving requests for household ID: " + householdId);
     return ResponseEntity.ok(householdService.getRequestsForHousehold(householdId));
   }
+
 
   /**
    * Endpoint to accept a join request and update the user's household association.
@@ -97,6 +131,14 @@ public class HouseholdController {
    * @param requestId the ID of the join request to accept
    * @return a ResponseEntity with no content
    */
+  @Operation(summary = "Accept a join request",
+      description = "Accepts a pending join request and updates the user's household association")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Join request accepted successfully"),
+    @ApiResponse(responseCode = "403",
+      description = "Forbidden - Not authorized to manage this household"),
+    @ApiResponse(responseCode = "404", description = "Join request not found")
+  })
   @PutMapping("/requests/{requestId}/accept")
   public ResponseEntity<Void> acceptJoinRequest(@PathVariable Long requestId) {
     householdService.acceptJoinRequest(requestId);
@@ -110,6 +152,14 @@ public class HouseholdController {
    * @param requestId the ID of the join request to decline
    * @return a ResponseEntity with no content
    */
+  @Operation(summary = "Decline a join request",
+      description = "Declines and removes a pending join request")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Join request declined successfully"),
+    @ApiResponse(responseCode = "403",
+      description = "Forbidden - Not authorized to manage this household"),
+    @ApiResponse(responseCode = "404", description = "Join request not found")
+  })
   @PutMapping("/requests/{requestId}/decline")
   public ResponseEntity<Void> declineJoinRequest(@PathVariable Long requestId) {
     householdService.declineJoinRequest(requestId);
