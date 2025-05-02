@@ -241,7 +241,7 @@ class ItemControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void deleteItem_shouldReturnNoContent_whenSuccessfulDeletion() throws Exception {
         // Mock the service method
         doNothing().when(itemService).deleteItem(1);
@@ -253,7 +253,7 @@ class ItemControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     void deleteItem_shouldReturnNotFound_whenItemDoesNotExist() throws Exception {
         // Mock the service to throw exception
         doThrow(new RuntimeException("Item not found with id: 99")).when(itemService).deleteItem(99);
