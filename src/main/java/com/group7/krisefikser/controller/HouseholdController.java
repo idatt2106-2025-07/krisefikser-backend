@@ -3,7 +3,9 @@ package com.group7.krisefikser.controller;
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
+import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
 import com.group7.krisefikser.mapper.HouseholdMapper;
+import com.group7.krisefikser.mapper.JoinRequestMapper;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
@@ -80,25 +82,25 @@ public class HouseholdController {
   /**
    * Endpoint to request to join a household.
    */
+  @PostMapping("/join-request")
   @Operation(summary = "Request to join a household",
       description = "Creates a request for the authenticated user to join a specified household")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Join request created successfully",
-      content = @Content(schema = @Schema(implementation = JoinHouseholdRequest.class))),
+      content = @Content(schema = @Schema(implementation = JoinHouseholdRequestResponse.class))),
     @ApiResponse(responseCode = "400", description = "Invalid household ID"),
     @ApiResponse(responseCode = "404", description = "Household not found")
   })
-  @PostMapping("/join-request")
-  public ResponseEntity<JoinHouseholdRequest> requestToJoin(
-      @RequestBody HouseholdJoinRequest request) {
+  public ResponseEntity<JoinHouseholdRequestResponse> requestToJoin(
+      @Valid @RequestBody HouseholdJoinRequest request) {
     String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
     Long userId = Long.parseLong(userIdStr);
-    logger.info("Requesting to join household:" + request.getHouseholdId()
-        + "for userId:" + userId);
+    logger.info("Requesting to join household: "
+        + request.getHouseholdId() + " for userId: " + userId);
 
-    JoinHouseholdRequest joinRequest =
-        householdService.requestToJoin(request.getHouseholdId(), userId);
-    return ResponseEntity.ok(joinRequest);
+    JoinHouseholdRequest joinRequest = householdService.requestToJoin(
+        request.getHouseholdId(), userId);
+    return ResponseEntity.ok(JoinRequestMapper.INSTANCE.joinRequestToResponse(joinRequest));
   }
 
   /**
@@ -107,23 +109,25 @@ public class HouseholdController {
    * @param householdId the ID of the household
    * @return a ResponseEntity containing a list of JoinHouseholdRequest objects
    */
+  @GetMapping("/{householdId}/requests")
   @Operation(summary = "Get all join requests for a household",
       description = "Retrieves all pending join requests for a specific household")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200",
-      description = "List of join requests retrieved successfully"),
-    @ApiResponse(responseCode = "403",
-      description = "Forbidden - User not authorized for this household"),
-    @ApiResponse(responseCode = "404",
-      description = "Household not found")
+    @ApiResponse(responseCode = "200", description = "List of join requests retrieved successfully",
+      content = @Content(schema = @Schema(implementation = JoinHouseholdRequestResponse.class))),
+    @ApiResponse(responseCode = "403", description =
+        "Forbidden - User not authorized for this household"),
+    @ApiResponse(responseCode = "404", description = "Household not found")
   })
-  @GetMapping("/{householdId}/requests")
-  public ResponseEntity<List<JoinHouseholdRequest>> getJoinRequests(
+  public ResponseEntity<List<JoinHouseholdRequestResponse>> getJoinRequests(
       @PathVariable Long householdId) {
     logger.info("Retrieving requests for household ID: " + householdId);
-    return ResponseEntity.ok(householdService.getRequestsForHousehold(householdId));
-  }
 
+    List<JoinHouseholdRequest> joinRequests =
+        householdService.getRequestsForHousehold(householdId);
+    return ResponseEntity.ok(JoinRequestMapper.INSTANCE
+        .joinRequestListToResponseList(joinRequests));
+  }
 
   /**
    * Endpoint to accept a join request and update the user's household association.
