@@ -11,14 +11,16 @@ services:
     volumes:
       - ./src:/app/src
       - ~/.m2:/root/.m2
+    environment:
+        - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+        - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+        - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+        - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+    # Uses default dev profile from application.properties
+    entrypoint: [ "java", "-jar", "/app/app.jar",
+                  "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,
+                  server=y,suspend=n,address=*:5005'" ]
 
     # Load environment variables from the .env file
     env_file:
       - .env
-
-    # JVM remote debugging enabled (attach on port 5005)
-    entrypoint:
-      - java
-      - "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
-      - -jar
-      - /app/app.jar
