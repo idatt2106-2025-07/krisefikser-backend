@@ -2,7 +2,9 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
 import com.group7.krisefikser.dto.request.RegisterAdminRequest;
+import com.group7.krisefikser.dto.request.TwoFactorLoginRequest;
 import com.group7.krisefikser.service.AdminService;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,19 @@ public class AdminController {
     } catch (Exception e) {
       logger.severe("Error registering admin: " + e.getMessage());
       return ResponseEntity.status(500).body("Error registering admin");
+    }
+  }
+
+  @PostMapping("/2fa")
+  public ResponseEntity<String> TwoFactorAuthentication(@RequestBody TwoFactorLoginRequest request, HttpServletResponse response) {
+    logger.info("Two Factor Authentication request");
+    try {
+      adminService.verifyTwoFactor(request.getToken(), response);
+      logger.info("Two Factor Authentication verified successfully");
+      return ResponseEntity.ok("Two Factor Authentication verified successfully");
+    } catch (Exception e) {
+      logger.severe("Error verifying Two Factor Authentication: " + e.getMessage());
+      return ResponseEntity.status(500).body("Error verifying Two Factor Authentication");
     }
   }
 }
