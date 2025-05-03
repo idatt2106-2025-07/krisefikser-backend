@@ -1,9 +1,13 @@
 package com.group7.krisefikser.repository;
 
+import com.group7.krisefikser.model.Household;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -56,5 +60,27 @@ public class HouseholdRepository {
     String sql = "SELECT COUNT(*) FROM households WHERE name = ?";
     Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);
     return count != null && count > 0;
+  }
+
+  /**
+   * Saves a new Household to the database.
+   *
+   * @param household the Household object to save
+   * @return the saved Household object with the generated ID
+   */
+  public Household save(Household household) {
+    SimpleJdbcInsert householdInsert = new SimpleJdbcInsert(jdbcTemplate)
+        .withTableName("households")
+        .usingGeneratedKeyColumns("id");
+
+    Map<String, Object> params = new HashMap<>();
+    params.put("name", household.getName());
+    params.put("longitude", household.getLongitude());
+    params.put("latitude", household.getLatitude());
+
+    Number householdId = householdInsert.executeAndReturnKey(params);
+    household.setId(householdId.longValue());
+
+    return household;
   }
 }
