@@ -59,6 +59,8 @@ public class GeneralInfoService {
    * and then calls the repository method to update it.
    *
    * @param generalInfoRequest the request object containing details of the general
+   *                            information to be updated
+   * @param id the ID of the general information to be updated
    */
   public void updateGeneralInfo(GeneralInfoRequest generalInfoRequest, Long id) {
     GeneralInfo info = GeneralInfoMapper
@@ -71,8 +73,7 @@ public class GeneralInfoService {
    * This method retrieves the ID from the GeneralInfoRequest
    * object and calls the repository method to delete it.
    *
-   * @param generalInfoRequest the request object containing the ID
-   *                           of the general information to be deleted
+   * @param id the ID of the general information to be deleted
    */
   public void deleteGeneralInfo(Long id) {
     generalInfoRepo.deleteGeneralInfo(id);
