@@ -61,6 +61,8 @@ public class GeneralInfoRepository {
    * This method modifies an existing record in the general_info table.
    *
    * @param info the GeneralInfo object containing updated details of the general information
+   *             to be updated
+   * @param id   the ID of the general information entry to be updated
    */
   public void updateGeneralInfo(GeneralInfo info, Long id) {
     String sql = "UPDATE general_info SET theme = ?, title = ?, content = ? WHERE id = ?";
