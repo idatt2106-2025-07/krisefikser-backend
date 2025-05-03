@@ -1,6 +1,8 @@
 package com.group7.krisefikser.dto.request;
 
 import com.group7.krisefikser.enums.Theme;
+import com.group7.krisefikser.validation.ValidEnum;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -12,7 +14,12 @@ import lombok.Data;
  */
 @Data
 public class GeneralInfoRequest {
+  @NotBlank
+  @ValidEnum(enumClass = Theme.class,
+      message = "Theme must be one of the following (case-insensitive): {enumClass}")
   private String theme;
+  @NotBlank(message = "Title is required")
   private String title;
+  @NotBlank(message = "Content is required")
   private String content;
 }
