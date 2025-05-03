@@ -44,6 +44,9 @@ class UserServiceTest {
   private EmailService emailService;
 
   @Mock
+  private HouseholdService householdService;
+
+  @Mock
   private HttpServletResponse httpServletResponse;
 
   @Mock
@@ -83,10 +86,6 @@ class UserServiceTest {
 
     when(userRepo.save(any(User.class))).thenReturn(Optional.of(savedUser));
 
-    // Mock household repository
-    when(householdRepo.existsByName(anyString())).thenReturn(false);
-    when(householdRepo.createHousehold(anyString(), anyDouble(), anyDouble())).thenReturn(123L);
-
     // Mock JWT utils
     String verificationToken = "verification-token";
     String authToken = "auth-token";
@@ -96,6 +95,7 @@ class UserServiceTest {
         .thenReturn(verificationToken)
         .thenReturn(authToken);
     when(jwtUtils.getExpirationDate(authToken)).thenReturn(expiryDate);
+    when(householdService.createHouseholdForUser(newUser.getName())).thenReturn(123L);
     doNothing().when(jwtUtils).setJwtCookie(eq(authToken), eq(httpServletResponse));
 
     // Mock email service
@@ -115,7 +115,6 @@ class UserServiceTest {
 
     // Verify calls
     verify(userRepo).save(any(User.class));
-    verify(householdRepo).createHousehold(anyString(), eq(0.0), eq(0.0));
     verify(jwtUtils).setJwtCookie(eq(authToken), eq(httpServletResponse));
     verify(emailService).sendTemplateMessage(
         eq("test@example.com"),

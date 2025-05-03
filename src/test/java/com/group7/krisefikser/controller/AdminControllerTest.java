@@ -34,7 +34,7 @@ class AdminControllerTest {
   private ObjectMapper objectMapper;
 
   @Test
-  @WithMockUser(roles = "SUPERADMIN")
+  @WithMockUser(roles = "SUPER_ADMIN")
   void invite_shouldReturnOk_whenServiceSucceeds() throws Exception {
     InviteAdminRequest request = new InviteAdminRequest();
     request.setEmail("admin@example.com");
@@ -49,7 +49,7 @@ class AdminControllerTest {
   }
 
   @Test
-  @WithMockUser(roles = "SUPERADMIN")
+  @WithMockUser(roles = "SUPER_ADMIN")
   void invite_shouldReturnInternalServerError_whenServiceThrowsException() throws Exception {
     InviteAdminRequest request = new InviteAdminRequest();
     request.setEmail("admin@example.com");
@@ -67,7 +67,7 @@ class AdminControllerTest {
   void register_shouldReturnOk_whenServiceSucceeds() throws Exception {
     RegisterAdminRequest request = new RegisterAdminRequest();
     request.setEmail("admin@example.com");
-    request.setPassword("password123");
+    request.setPassword("Password123*");
     request.setToken("token123");
 
     doNothing().when(adminService).registerAdmin(request);
@@ -83,7 +83,7 @@ class AdminControllerTest {
   void register_shouldReturnInternalServerError_whenServiceThrowsException() throws Exception {
     RegisterAdminRequest request = new RegisterAdminRequest();
     request.setEmail("admin@example.com");
-    request.setPassword("password123");
+    request.setPassword("Password123*");
     request.setToken("token123");
 
     doThrow(new IllegalArgumentException("Username in use")).when(adminService).registerAdmin(request);
