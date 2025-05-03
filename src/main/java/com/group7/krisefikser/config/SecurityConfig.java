@@ -55,20 +55,21 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/**", corsConfiguration);
 
     http.cors(cors -> cors.configurationSource(source))
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.GET, "/api/affected-area",
-                            "/api/point-of-interest", "/h2-console/**", "/api/auth/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
-                    .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                    .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
-                     .hasAnyRole("SUPER_ADMIN", "ADMIN")
-                    .anyRequest().authenticated())
-         .headers(
-            headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
-        )
-            .sessionManagement(session -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        .csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(authorize -> authorize
+        .requestMatchers(HttpMethod.GET, "/api/affected-area",
+          "/api/point-of-interest", "/h2-console/**", "/api/auth/**").permitAll()
+        .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
+        .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+        .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
+        .hasAnyRole("SUPER_ADMIN", "ADMIN")
+        .anyRequest().authenticated())
+        .headers(
+          headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
+      )
+        .sessionManagement(session -> session
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
 
     http.addFilterBefore(
             jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
