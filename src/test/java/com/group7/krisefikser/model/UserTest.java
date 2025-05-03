@@ -26,7 +26,8 @@ public class UserTest {
         "Test User",
         10L,
         "securepassword",
-        Role.ROLE_NORMAL
+        Role.ROLE_NORMAL,
+        false
     );
 
     assertEquals(1L, user.getId());
@@ -63,7 +64,8 @@ public class UserTest {
         "Test User",
         10L,
         "securepassword",
-        Role.ROLE_NORMAL
+        Role.ROLE_NORMAL,
+        false
     );
 
     String toStringResult = user.toString();

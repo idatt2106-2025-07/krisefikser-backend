@@ -54,6 +54,7 @@ public class UserRepository {
         String roleString = rs.getString("role").toUpperCase();
         Role role = Role.valueOf(roleString);
         user.setRole(role);
+        user.setVerified(rs.getBoolean("verified"));
         return user;
       }, email).stream().findFirst();
     } catch (EmptyResultDataAccessException e) {
@@ -84,7 +85,29 @@ public class UserRepository {
           user.getHouseholdId(), user.getPassword(), user.getRole().toString());
       return findByEmail(user.getEmail());
     } catch (Exception e) {
-      System.err.println("Failed to save user: " + e.getMessage());
+      logger.info("Failed to save user: " + e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Changes a user's verified status in the database.
+   * This method updates the verified status of a user
+   * based on their email address.
+   * If the update is successful, it returns an Optional
+   * containing the updated user.
+   *
+   * @param user the user whose verified status is to be changed
+   * @return an Optional containing the updated user if successful,
+   *         or an empty Optional if not
+   */
+  public Optional<User> setVerified(User user) {
+    String query = "UPDATE users SET verified = ? WHERE email = ?";
+    try {
+      jdbcTemplate.update(query, user.getVerified(), user.getEmail());
+      return findByEmail(user.getEmail());
+    } catch (Exception e) {
+      logger.info("Failed to update verified: " + e.getMessage());
       e.printStackTrace();
       return Optional.empty();
     }
@@ -111,5 +134,18 @@ public class UserRepository {
         sql,
         new Object[]{username},
         Boolean.class);
+  }
+
+  /**
+   * Updates a user's household association in the database.
+   * This method sets the household_id for a user with the specified user ID.
+   *
+   * @param userId the ID of the user whose household is being updated
+   * @param householdId the ID of the household to associate with the user
+   */
+  public void updateUserHousehold(Long userId, Long householdId) {
+    jdbcTemplate.update(
+        "UPDATE users SET household_id = ? WHERE id = ?",
+        householdId, userId);
   }
 }

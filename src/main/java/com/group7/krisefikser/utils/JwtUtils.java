@@ -29,14 +29,15 @@ public class JwtUtils {
   private final String secretKey;
   private final String inviteSecretKey;
   private final String twoFactorSecretKey;
+  private final String verificationSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
   private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);
-
+  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
 
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
   /**
-   * Constructor for JwtUtils, generates two secret keys.
+   * Constructor for JwtUtils, generates secret keys.
    *
    * @throws NoSuchAlgorithmException if the algorithm is not found
    */
@@ -51,6 +52,9 @@ public class JwtUtils {
 
     SecretKey tfsk = keyGen.generateKey();
     twoFactorSecretKey = Base64.getEncoder().encodeToString(tfsk.getEncoded());
+
+    SecretKey vsk = keyGen.generateKey();
+    verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());
   }
 
   /**
@@ -128,6 +132,23 @@ public class JwtUtils {
         .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
         .withClaim("role", "ROLE_2FA")
         .sign(getKey(twoFactorSecretKey));
+  }
+
+  /**
+   * generates a verification token for the given email.
+   * This token is used to verify the user's email address.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
+  public String generateVerificationToken(final String email) {
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(email)
+        .withIssuer("krisefikser")
+        .withIssuedAt(now)
+        .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+        .sign(getKey(verificationSecretKey));
   }
 
   /**
@@ -211,6 +232,23 @@ public class JwtUtils {
       throw new JwtMissingPropertyException("Token does not contain a subject");
     }
     return username;
+  }
+
+  /**
+   * validates and retrieves the email from the given token.
+   * This token is used to verify the user's email address.
+   *
+   * @param token the jwt to get email from
+   * @return the email
+   */
+  public String validateVerificationTokenAndGetEmail(final String token)
+                              throws JwtMissingPropertyException {
+    String subject = validateToken(token, verificationSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain an email");
+      throw new JwtMissingPropertyException("Token does not contain an email");
+    }
+    return subject;
   }
 
   /**

@@ -37,9 +37,8 @@ class PointOfInterestRepoTest {
   @Test
   void getAllPointsOfInterest() {
     List<PointOfInterest> pointsOfInterest = pointOfInterestRepo.getAllPointsOfInterest();
-
     assertNotNull(pointsOfInterest);
-    assertEquals(5, pointsOfInterest.size());
+    assertEquals(6, pointsOfInterest.size());
     assertEquals(1, pointsOfInterest.get(0).getId());
     assertEquals(10.76, pointsOfInterest.get(0).getLongitude());
     assertEquals(59.91, pointsOfInterest.get(0).getLatitude());
@@ -190,7 +189,7 @@ class PointOfInterestRepoTest {
             nonExistingId,
             63.5000,
             10.5000,
-            PointOfInterestType.SHELTER,
+            PointOfInterestType.MEETING_PLACE,
             LocalTime.of(8, 0),
             LocalTime.of(20, 0),
             "98765432",
@@ -202,6 +201,6 @@ class PointOfInterestRepoTest {
 
     String selectAllSql = "SELECT COUNT(*) FROM points_of_interest";
     Integer totalCount = jdbcTemplate.queryForObject(selectAllSql, Integer.class);
-    assertEquals(5, totalCount);
+    assertEquals(6, totalCount);
   }
 }

@@ -79,9 +79,18 @@ public class SecurityConfig {
                 "/api/point-of-interest/**")
             .hasAnyRole("SUPER_ADMIN", "ADMIN")
 
+            .requestMatchers(HttpMethod.DELETE,
+                "/api/items/**")
+            .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
             .requestMatchers(HttpMethod.POST,
                 "/api/admin/invite")
             .hasRole("SUPER_ADMIN")
+
+            .requestMatchers(
+                "/api/point-of-interest/**",
+                "/api/affected-area/**")
+            .hasAnyRole("SUPER_ADMIN", "ADMIN")
 
             .anyRequest().authenticated())
         .headers(

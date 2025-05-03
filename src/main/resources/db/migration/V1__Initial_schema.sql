@@ -17,6 +17,7 @@ CREATE TABLE users
     'role_admin',
     'role_super_admin'
 ) NOT NULL DEFAULT 'normal',
+    verified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (household_id) REFERENCES households(id),
     INDEX (household_id)
 );
@@ -68,7 +69,8 @@ CREATE TABLE points_of_interest
     'food_central',
     'water_station',
     'defibrillator',
-    'hospital'
+    'hospital',
+    'meeting_place'
 ) NOT NULL,
     opens_at TIME DEFAULT NULL,
     closes_at TIME DEFAULT NULL,
@@ -80,7 +82,9 @@ CREATE TABLE affected_areas
     id                      INT PRIMARY KEY AUTO_INCREMENT,
     longitude               DOUBLE NOT NULL,
     latitude                DOUBLE NOT NULL,
-    danger_radius_km          INT NOT NULL,
+    high_danger_radius_km          DOUBLE NOT NULL,
+    medium_danger_radius_km        DOUBLE NOT NULL,
+    low_danger_radius_km           DOUBLE NOT NULL,
     severity_level        INT NOT NULL CHECK (severity_level >= 1 AND severity_level <= 3),
     description    TEXT   NOT NULL,
     start_time TIMESTAMP NOT NULL

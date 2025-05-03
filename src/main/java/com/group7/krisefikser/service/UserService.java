@@ -59,11 +59,10 @@ public class UserService implements UserDetailsService {
    * It also sends a verification email to the user.
    *
    * @param request  the registration request containing user details
-   * @param response the HTTP response object
    * @return an AuthResponse object containing the result of the registration
    */
   @Transactional
-  public AuthResponse registerUser(RegisterRequest request, HttpServletResponse response) {
+  public AuthResponse registerUser(RegisterRequest request) {
     User user = UserMapper.INSTANCE.registerRequestToUser(request);
     user.setRole(Role.ROLE_NORMAL);
     user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
@@ -86,17 +85,14 @@ public class UserService implements UserDetailsService {
       user.setHouseholdId(householdId);
       userRepo.save(user);
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
-      String emailVerificationToken = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
+      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());
       String verificationLink = "https://localhost:5173/verify?token=" + emailVerificationToken;
       Map<String, String> params = Map.of("verificationLink", verificationLink);
       emailService.sendTemplateMessage(
           byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
 
-      String token = jwtUtils.generateToken(byEmail.get().getId(), user.getRole());
-      jwtUtils.setJwtCookie(token, response);
       return new AuthResponse(AuthResponseMessage
-          .USER_REGISTERED_SUCCESSFULLY.getMessage(),
-          jwtUtils.getExpirationDate(token), byEmail.get().getRole());
+          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());
     } catch (Exception e) {
       return new AuthResponse(AuthResponseMessage
           .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);
@@ -110,7 +106,6 @@ public class UserService implements UserDetailsService {
    *
    * @param request the login request containing user credentials
    * @return an AuthResponse object containing the result of the login
-   * @throws JwtMissingPropertyException if there is an issue with the JWT token
    */
   public AuthResponse loginUser(LoginRequest request, HttpServletResponse response) {
     String email = request.getEmail();
@@ -119,6 +114,10 @@ public class UserService implements UserDetailsService {
 
     if (userOpt.isEmpty()) {
       return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
+    }
+
+    if (!userOpt.get().getVerified()) {
+      return new AuthResponse(AuthResponseMessage.USER_NOT_VERIFIED.getMessage(), null, null);
     }
 
     User user = userOpt.get();
@@ -157,6 +156,32 @@ public class UserService implements UserDetailsService {
     } catch (Exception e) {
       return new AuthResponse(
           AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);
+    }
+  }
+
+  /**
+   * Verifies the user's email using a token.
+   * This method checks if the token is valid and updates the user's verification status.
+   *
+   * @param token the verification token
+   * @return an AuthResponse object containing the result of the verification
+   */
+  public AuthResponse verifyEmail(String token) {
+    try {
+      String email = jwtUtils.validateVerificationTokenAndGetEmail(token);
+      Optional<User> userOpt = userRepo.findByEmail(email);
+
+      if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        user.setVerified(true);
+        userRepo.setVerified(user);
+        return new AuthResponse(
+            AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage(), null, null);
+      } else {
+        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
+      }
+    } catch (JwtMissingPropertyException e) {
+      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);
     }
   }
 }

@@ -18,7 +18,11 @@ public enum AuthResponseMessage {
   PASSWORD_TOO_WEAK("Password is too weak"),
   HOUSEHOLD_FAILURE("Household creation failed"),
   EMAIL_NOT_VERIFIED("Please verify your email before logging in"),
-  TWO_FACTOR_SENT("Two-factor authentication code sent");
+  TWO_FACTOR_SENT("Two-factor authentication code sent"),
+  USER_NOT_VERIFIED("Please verify your email before logging in"),
+  USER_VERIFIED_SUCCESSFULLY("User verified successfully"),
+  INVALID_TOKEN("Invalid token"),
+  EMAIL_VERIFICATION_ERROR("Error verifying email: ");
 
 
 
