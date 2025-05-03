@@ -1,0 +1,39 @@
+steps:
+  # Build the container image using the production Dockerfile
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build',
+      '-f', 'Dockerfile.prod',
+      '-t', 'europe-north2-docker.pkg.dev/$PROJECT_ID/krisefikser-backend/app:$COMMIT_SHA',
+      '.'
+    ]
+
+  # Push the container image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'europe-north2-docker.pkg.dev/$PROJECT_ID/krisefikser-backend/app:$COMMIT_SHA']
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'krisefikser-backend'
+      - '--image=europe-north2-docker.pkg.dev/$PROJECT_ID/krisefikser-backend/app:$COMMIT_SHA'
+      - '--region=europe-north2'  # Change to your preferred region
+      - '--platform=managed'
+      - '--allow-unauthenticated'  # Adjust based on your security requirements
+      - '--set-env-vars=SPRING_PROFILES_ACTIVE=prod'
+      - '--set-secrets=MYSQL_URL=mysql-url:latest,MYSQL_USER=mysql-user:latest,MYSQL_PASSWORD=mysql-password:latest,SPRING_MAIL_HOST=spring-mail-host:latest,SPRING_MAIL_PORT=spring-mail-port:latest,SPRING_MAIL_USERNAME=spring-mail-username:latest,SPRING_MAIL_PASSWORD=spring-mail-password:latest'
+      - '--cpu=1'
+      - '--memory=1Gi'
+      - '--min-instances=0'
+      - '--max-instances=10'
+      - '--port=8080'
+
+# Store images in Artifact Registry
+images:
+  - 'europe-north2-docker.pkg.dev/$PROJECT_ID/krisefikser-backend/app:$COMMIT_SHA'
+
+# Set timeout
+timeout: '1200s'

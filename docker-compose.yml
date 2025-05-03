@@ -5,6 +5,9 @@ services:
   backend:
     build:
       context: .
+      # This configuration uses Dockerfile.dev for local development.
+      # For production builds, Dockerfile.prod is used in cloudbuild.yaml.
+      dockerfile: Dockerfile.dev
     volumes:
       - ./src:/app/src
       - ~/.m2:/root/.m2
