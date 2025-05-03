@@ -13,8 +13,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +40,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class GeneralInfoController {
   @Autowired
   private GeneralInfoService generalInfoService;
+  private static final Logger logger = Logger.getLogger(GeneralInfoController.class.getName());
 
   /**
    * Endpoint to get all general information.
@@ -59,8 +64,16 @@ public class GeneralInfoController {
       }
   )
   @GetMapping("/all")
-  public List<GeneralInfo> getAllGeneralInfo() {
-    return generalInfoService.getAllGeneralInfo();
+  public ResponseEntity<List<GeneralInfo>> getAllGeneralInfo() {
+    logger.info("Received request to get all general information");
+    try {
+      generalInfoService.getAllGeneralInfo();
+      logger.info("Successfully retrieved all general information");
+      return new ResponseEntity<>(generalInfoService.getAllGeneralInfo(), HttpStatus.OK);
+    } catch (Exception e) {
+      logger.severe("Error retrieving all general information: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    }
   }
 
   /**
@@ -80,14 +93,27 @@ public class GeneralInfoController {
           content = @Content)
   })
   @GetMapping("/{theme}")
-  public List<GeneralInfo> getGeneralInfoByTheme(@Valid @PathVariable String theme) {
-    Theme parsedTheme;
+  public ResponseEntity<List<GeneralInfo>> getGeneralInfoByTheme(
+      @Valid @PathVariable String theme) {
+    logger.info("Received request to get general information by theme: " + theme);
     try {
-      parsedTheme = Theme.valueOf(theme.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid theme: " + theme);
+      Theme parsedTheme;
+      try {
+        parsedTheme = Theme.valueOf(theme.toUpperCase());
+      } catch (IllegalArgumentException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid theme: " + theme);
+      }
+      generalInfoService.getGeneralInfoByTheme(parsedTheme);
+      logger.info("Successfully retrieved general information for theme: " + theme);
+      return new ResponseEntity<>(
+          generalInfoService.getGeneralInfoByTheme(parsedTheme), HttpStatus.OK);
+    } catch (ResponseStatusException e) {
+      logger.warning("Error retrieving general information by theme: " + e.getMessage());
+      return ResponseEntity.status(e.getStatusCode()).body(null);
+    } catch (Exception e) {
+      logger.severe("Unexpected error: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
-    return generalInfoService.getGeneralInfoByTheme(parsedTheme);
   }
 
   /**
@@ -134,8 +160,16 @@ public class GeneralInfoController {
       }
   )
   @PostMapping("/admin/add")
-  public void addGeneralInfo(@Valid @RequestBody GeneralInfoRequest request) {
-    generalInfoService.addGeneralInfo(request);
+  public ResponseEntity<Void> addGeneralInfo(@Valid @RequestBody GeneralInfoRequest request) {
+    logger.info("Received request to add general information");
+    try {
+      generalInfoService.addGeneralInfo(request);
+      logger.info("Successfully added general information");
+      return ResponseEntity.status(HttpStatus.CREATED).build();
+    } catch (Exception e) {
+      logger.severe("Error adding general information: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**
@@ -170,9 +204,17 @@ public class GeneralInfoController {
       }
   )
   @PutMapping("/admin/update/{id}")
-  public void updateGeneralInfo(@Valid @RequestBody GeneralInfoRequest request,
+  public ResponseEntity<Void> updateGeneralInfo(@Valid @RequestBody GeneralInfoRequest request,
                                 @PathVariable Long id) {
-    generalInfoService.updateGeneralInfo(request, id);
+    logger.info("Received request to update general information with ID: " + id);
+    try {
+      generalInfoService.updateGeneralInfo(request, id);
+      logger.info("Successfully updated general information with ID: " + id);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      logger.severe("Error updating general information: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**
@@ -199,7 +241,15 @@ public class GeneralInfoController {
       }
   )
   @DeleteMapping("/admin/delete/{id}")
-  public void deleteGeneralInfo(@PathVariable Long id) {
-    generalInfoService.deleteGeneralInfo(id);
+  public ResponseEntity<Void> deleteGeneralInfo(@PathVariable Long id) {
+    logger.info("Received request to delete general information with ID: " + id);
+    try {
+      generalInfoService.deleteGeneralInfo(id);
+      logger.info("Successfully deleted general information with ID: " + id);
+      return ResponseEntity.noContent().build();
+    } catch (Exception e) {
+      logger.severe("Error deleting general information: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 }
