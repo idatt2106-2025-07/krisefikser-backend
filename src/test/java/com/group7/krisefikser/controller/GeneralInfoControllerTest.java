@@ -84,7 +84,7 @@ class GeneralInfoControllerTest {
     mockMvc.perform(post("/api/general-info/admin/add")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk());
+        .andExpect(status().isCreated());
 
     Mockito.verify(generalInfoService).addGeneralInfo(any(GeneralInfoRequest.class));
   }
@@ -109,7 +109,7 @@ class GeneralInfoControllerTest {
   @WithMockUser(roles = "ADMIN")
   void deleteGeneralInfo_shouldCallServiceWithId() throws Exception {
     mockMvc.perform(delete("/api/general-info/admin/delete/5"))
-        .andExpect(status().isOk());
+        .andExpect(status().isNoContent());
 
     Mockito.verify(generalInfoService).deleteGeneralInfo(5L);
   }
