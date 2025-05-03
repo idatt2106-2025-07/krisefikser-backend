@@ -77,10 +77,11 @@ public class GeneralInfoController {
    * It accepts a GeneralInfo object in the request body.
    *
    * @param request the GeneralInfoRequest object containing the updated information
+   * @param id the ID of the GeneralInfo object to be updated
    */
-  @PutMapping("/admin/update")
-  public void updateGeneralInfo(@RequestBody GeneralInfoRequest request) {
-    generalInfoService.updateGeneralInfo(request);
+  @PutMapping("/admin/update/{id}")
+  public void updateGeneralInfo(@RequestBody GeneralInfoRequest request, @PathVariable Long id) {
+    generalInfoService.updateGeneralInfo(request, id);
   }
 
   /**
@@ -88,10 +89,10 @@ public class GeneralInfoController {
    * This method deletes a GeneralInfo object from the system based on its ID.
    * It accepts the ID of the GeneralInfo object as a path variable.
    *
-   * @param request the GeneralInfoRequest object containing the ID of the GeneralInfo to be deleted
+   * @param id the ID of the GeneralInfo object to be deleted
    */
   @DeleteMapping("/admin/delete/{id}")
-  public void deleteGeneralInfo(@PathVariable GeneralInfoRequest request) {
-    generalInfoService.deleteGeneralInfo(request);
+  public void deleteGeneralInfo(@PathVariable Long id) {
+    generalInfoService.deleteGeneralInfo(id);
   }
 }
