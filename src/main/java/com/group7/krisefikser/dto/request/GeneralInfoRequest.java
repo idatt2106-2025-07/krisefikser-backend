@@ -12,8 +12,7 @@ import lombok.Data;
  */
 @Data
 public class GeneralInfoRequest {
-  private Long id;
-  private Theme theme;
+  private String theme;
   private String title;
   private String content;
 }
