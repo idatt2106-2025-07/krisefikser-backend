@@ -25,6 +25,7 @@ steps:
       - '--allow-unauthenticated'
       - '--set-env-vars=SPRING_PROFILES_ACTIVE=prod'
       - '--set-secrets=MYSQL_URL=mysql-url:latest,MYSQL_USER=mysql-user:latest,MYSQL_PASSWORD=mysql-password:latest,SPRING_MAIL_HOST=spring-mail-host:latest,SPRING_MAIL_PORT=spring-mail-port:latest,SPRING_MAIL_USERNAME=spring-mail-username:latest,SPRING_MAIL_PASSWORD=spring-mail-password:latest'
+      - '--add-cloudsql-instances=$PROJECT_ID:europe-north2:YOUR_MYSQL_INSTANCE_NAME'
       - '--cpu=1'
       - '--memory=1Gi'
       - '--min-instances=0'
