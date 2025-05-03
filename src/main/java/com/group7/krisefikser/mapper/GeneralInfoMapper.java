@@ -34,6 +34,7 @@ public interface GeneralInfoMapper {
       throw new RuntimeException("Invalid theme: " + theme);
     }
   }
+
   /**
    * Converts a GeneralInfoRequest object to a GeneralInfo object.
    * This method maps the fields of GeneralInfoRequest to the corresponding fields of GeneralInfo.
