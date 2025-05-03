@@ -30,7 +30,7 @@ steps:
       - '--allow-unauthenticated'
       - '--set-env-vars=SPRING_PROFILES_ACTIVE=prod'
       - '--set-secrets=MYSQL_URL=mysql-url:latest,MYSQL_USER=mysql-user:latest,MYSQL_PASSWORD=mysql-password:latest,SPRING_MAIL_HOST=spring-mail-host:latest,SPRING_MAIL_PORT=spring-mail-port:latest,SPRING_MAIL_USERNAME=spring-mail-username:latest,SPRING_MAIL_PASSWORD=spring-mail-password:latest,CLOUDSQL_INSTANCE=cloudsql-instance:latest'
-      - '--add-cloudsql-instances=$(CLOUDSQL_INSTANCE)'
+      - '--add-cloudsql-instances=Krisefikser:europe-north2:krisefikser'
       - '--cpu=1'
       - '--memory=1Gi'
       - '--min-instances=0'
