@@ -90,6 +90,15 @@ public class UserRepository {
     }
   }
 
+  /**
+   * Checks the existence of an admin by their username.
+   * This method queries the database for an admin with the specified username.
+   * If an admin is found, it returns a true.
+   * If no admin is found, it returns false.
+   *
+   * @param username the username of the admin to be found
+   * @return a bool if found
+   */
   public boolean existAdminByUsername(String username) {
     String sql =
         "SELECT CASE "

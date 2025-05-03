@@ -67,8 +67,17 @@ public class AdminController {
     }
   }
 
+  /**
+   * Endpoint to handle two-factor authentication for admin login.
+   * This endpoint will accept a request containing the token for two-factor authentication.
+   *
+   * @param request The request containing the token for two-factor authentication.
+   * @param response The HTTP response object.
+   * @return ResponseEntity indicating the result of the operation.
+   */
   @PostMapping("/2fa")
-  public ResponseEntity<String> twoFactorAuthentication(@RequestBody @Valid TwoFactorLoginRequest request, HttpServletResponse response) {
+  public ResponseEntity<String> twoFactorAuthentication(
+      @RequestBody @Valid TwoFactorLoginRequest request, HttpServletResponse response) {
     logger.info("Two Factor Authentication request");
     try {
       adminService.verifyTwoFactor(request.getToken(), response);

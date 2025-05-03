@@ -170,7 +170,8 @@ public class JwtUtils {
    * @return the user id
    * @throws JwtMissingPropertyException if token doesn't contain a subject
    */
-  public String validate2faTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
+  public String validate2faTokenAndGetUserId(final String token)
+      throws JwtMissingPropertyException {
     String subject = validateToken(token, twoFactorSecretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain a subject");

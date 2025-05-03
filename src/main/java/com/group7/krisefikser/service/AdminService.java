@@ -92,8 +92,16 @@ public class AdminService {
     userRepository.save(user);
   }
 
-  public void verifyTwoFactor(String twoFactortoken, HttpServletResponse response) throws JwtMissingPropertyException {
-    String userId = jwtUtils.validate2faTokenAndGetUserId(twoFactortoken);
+  /**
+   * Verifies the two-factor authentication token and generates a JWT token for the admin.
+   *
+   * @param twoFactorToken The two-factor authentication token.
+   * @param response      The HTTP response object to set the JWT cookie.
+   * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
+   */
+  public void verifyTwoFactor(String twoFactorToken, HttpServletResponse response)
+      throws JwtMissingPropertyException {
+    String userId = jwtUtils.validate2faTokenAndGetUserId(twoFactorToken);
     String token = jwtUtils.generateToken(Long.parseLong(userId), Role.ROLE_ADMIN);
     jwtUtils.setJwtCookie(token, response);
   }

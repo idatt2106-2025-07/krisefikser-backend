@@ -133,7 +133,8 @@ public class UserService implements UserDetailsService {
         String twoFactorLink = "https://localhost:5173/verify?token=" + twoFactorToken;
 
         emailService.sendTemplateMessage(
-            user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION, Map.of("loginLink", twoFactorLink));
+            user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,
+            Map.of("loginLink", twoFactorLink));
         return new AuthResponse(
             AuthResponseMessage.TWO_FACTOR_SENT.getMessage(),
             null, null);

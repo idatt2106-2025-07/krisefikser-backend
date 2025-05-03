@@ -62,7 +62,10 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.GET,
                 "/api/affected-area",
                 "/api/point-of-interest",
-                "/h2-console/**")
+                "/h2-console/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/token")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
