@@ -59,7 +59,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.GET, "/api/affected-area",
           "/api/point-of-interest", "/h2-console/**", 
-                         "api/general-info/**").permitAll()
+                         "/api/general-info/**").permitAll()
         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
         .requestMatchers(HttpMethod.PUT, "/api/general-info/**").permitAll()
         .requestMatchers(HttpMethod.DELETE, "/api/general-info/**").permitAll()
