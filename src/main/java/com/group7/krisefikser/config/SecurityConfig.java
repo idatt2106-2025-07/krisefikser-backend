@@ -62,6 +62,8 @@ public class SecurityConfig {
                         "/h2-console/**",
                         "api/general-info/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
+                    .requestMatchers(HttpMethod.PUT, "/api/general-info/**").permitAll()
+                    .requestMatchers(HttpMethod.DELETE, "/api/general-info/**").permitAll()
                     .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**",
                         "/api/general-info/admin/**")
                      .hasAnyRole("SUPER_ADMIN", "ADMIN")
