@@ -60,10 +60,10 @@ public class GeneralInfoService {
    *
    * @param generalInfoRequest the request object containing details of the general
    */
-  public void updateGeneralInfo(GeneralInfoRequest generalInfoRequest) {
+  public void updateGeneralInfo(GeneralInfoRequest generalInfoRequest, Long id) {
     GeneralInfo info = GeneralInfoMapper
         .INSTANCE.generalInfoRequestToGeneralInfo(generalInfoRequest);
-    generalInfoRepo.updateGeneralInfo(info);
+    generalInfoRepo.updateGeneralInfo(info, id);
   }
 
   /**
@@ -74,10 +74,7 @@ public class GeneralInfoService {
    * @param generalInfoRequest the request object containing the ID
    *                           of the general information to be deleted
    */
-  public void deleteGeneralInfo(GeneralInfoRequest generalInfoRequest) {
-    GeneralInfo info = GeneralInfoMapper
-        .INSTANCE.generalInfoRequestToGeneralInfo(generalInfoRequest);
-    Long id = info.getId();
+  public void deleteGeneralInfo(Long id) {
     generalInfoRepo.deleteGeneralInfo(id);
   }
 }

@@ -62,10 +62,10 @@ public class GeneralInfoRepository {
    *
    * @param info the GeneralInfo object containing updated details of the general information
    */
-  public void updateGeneralInfo(GeneralInfo info) {
+  public void updateGeneralInfo(GeneralInfo info, Long id) {
     String sql = "UPDATE general_info SET theme = ?, title = ?, content = ? WHERE id = ?";
     jdbcTemplate.update(sql, info.getTheme().name(),
-        info.getTitle(), info.getContent(), info.getId());
+        info.getTitle(), info.getContent(), id);
   }
 
   /**
