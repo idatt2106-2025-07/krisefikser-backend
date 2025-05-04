@@ -1,6 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
 import com.group7.krisefikser.mapper.GeneralInfoMapper;
 import com.group7.krisefikser.model.GeneralInfo;
@@ -37,7 +38,7 @@ class GeneralInfoServiceTest {
 
     when(generalInfoRepo.getAllGeneralInfo()).thenReturn(List.of(info));
 
-    List<GeneralInfo> result = generalInfoService.getAllGeneralInfo();
+    List<GeneralInfoResponse> result = generalInfoService.getAllGeneralInfo();
     assertEquals(1, result.size());
     assertEquals("Test Title", result.get(0).getTitle());
   }
@@ -48,7 +49,7 @@ class GeneralInfoServiceTest {
 
     when(generalInfoRepo.getGeneralInfoByTheme(theme)).thenReturn(Collections.emptyList());
 
-    List<GeneralInfo> result = generalInfoService.getGeneralInfoByTheme(theme);
+    List<GeneralInfoResponse> result = generalInfoService.getGeneralInfoByTheme(theme);
     assertTrue(result.isEmpty());
   }
 
@@ -59,7 +60,7 @@ class GeneralInfoServiceTest {
     request.setTitle("Title");
     request.setContent("Content");
 
-    GeneralInfo mapped = GeneralInfoMapper.INSTANCE.generalInfoRequestToGeneralInfo(request);
+    GeneralInfo mapped = GeneralInfoMapper.INSTANCE.RequestToGeneralInfo(request);
 
     // Spy on the mapper since it's static
     GeneralInfoService service = new GeneralInfoService(generalInfoRepo);

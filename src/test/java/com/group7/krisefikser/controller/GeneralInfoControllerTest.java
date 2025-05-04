@@ -2,6 +2,7 @@ package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.dto.request.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
 import com.group7.krisefikser.model.GeneralInfo;
 import com.group7.krisefikser.service.GeneralInfoService;
@@ -9,14 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -31,7 +32,7 @@ class GeneralInfoControllerTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
+  @MockitoBean
   private GeneralInfoService generalInfoService;
 
   @Autowired
@@ -45,7 +46,11 @@ class GeneralInfoControllerTest {
     info.setTitle("Test");
     info.setContent("Content");
 
-    Mockito.when(generalInfoService.getAllGeneralInfo()).thenReturn(List.of(info));
+    List<GeneralInfoResponse> response = Collections.singletonList(
+        new GeneralInfoResponse(info.getId().toString(),
+            info.getTheme().name(), info.getTitle(), info.getContent()));
+
+    Mockito.when(generalInfoService.getAllGeneralInfo()).thenReturn(response);
 
     mockMvc.perform(get("/api/general-info/all"))
         .andExpect(status().isOk())
@@ -54,17 +59,19 @@ class GeneralInfoControllerTest {
 
   @Test
   void getGeneralInfoByTheme_shouldReturnList() throws Exception {
-    GeneralInfo info = new GeneralInfo();
-    info.setTheme(Theme.AFTER_CRISIS);
-    info.setTitle("Title");
-    info.setContent("Content");
+    GeneralInfoResponse response = new GeneralInfoResponse();
+    response.setTheme("AFTER_CRISIS");
+    response.setTitle("Title");
+    response.setContent("Content");
 
     Mockito.when(generalInfoService.getGeneralInfoByTheme(Theme.AFTER_CRISIS))
-        .thenReturn(List.of(info));
+        .thenReturn(List.of(response));
 
     mockMvc.perform(get("/api/general-info/after_crisis"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].theme").value("AFTER_CRISIS"));
+        .andExpect(jsonPath("$[0].theme").value("AFTER_CRISIS"))
+        .andExpect(jsonPath("$[0].title").value("Title"))
+        .andExpect(jsonPath("$[0].content").value("Content"));
   }
 
   @Test
