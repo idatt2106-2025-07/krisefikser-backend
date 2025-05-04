@@ -50,10 +50,15 @@ public class GeneralInfoRepository {
    * This method inserts a new record into the general_info table.
    *
    * @param info the GeneralInfo object containing details of the general information to be added
+   * @return the added GeneralInfo object with the generated ID
    */
-  public void addGeneralInfo(GeneralInfo info) {
+  public GeneralInfo addGeneralInfo(GeneralInfo info) {
     String sql = "INSERT INTO general_info (theme, title, content) VALUES (?, ?, ?)";
-    jdbcTemplate.update(sql, info.getTheme().name(), info.getTitle(), info.getContent());
+    jdbcTemplate.update(sql, info.getTheme().name(),
+        info.getTitle(), info.getContent());
+    Long id = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+    info.setId(id);
+    return info;
   }
 
   /**
@@ -63,11 +68,14 @@ public class GeneralInfoRepository {
    * @param info the GeneralInfo object containing updated details of the general information
    *             to be updated
    * @param id   the ID of the general information entry to be updated
+   * @return the updated GeneralInfo object
    */
-  public void updateGeneralInfo(GeneralInfo info, Long id) {
+  public GeneralInfo updateGeneralInfo(GeneralInfo info, Long id) {
     String sql = "UPDATE general_info SET theme = ?, title = ?, content = ? WHERE id = ?";
     jdbcTemplate.update(sql, info.getTheme().name(),
         info.getTitle(), info.getContent(), id);
+    info.setId(id);
+    return info;
   }
 
   /**
