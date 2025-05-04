@@ -1,6 +1,7 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
 import com.group7.krisefikser.model.GeneralInfo;
 import com.group7.krisefikser.service.GeneralInfoService;
@@ -62,7 +63,7 @@ public class GeneralInfoController {
       }
   )
   @GetMapping("/all")
-  public ResponseEntity<List<GeneralInfo>> getAllGeneralInfo() {
+  public ResponseEntity<List<GeneralInfoResponse>> getAllGeneralInfo() {
     logger.info("Received request to get all general information");
     try {
       generalInfoService.getAllGeneralInfo();
@@ -91,7 +92,7 @@ public class GeneralInfoController {
           content = @Content)
   })
   @GetMapping("/{theme}")
-  public ResponseEntity<List<GeneralInfo>> getGeneralInfoByTheme(
+  public ResponseEntity<List<GeneralInfoResponse>> getGeneralInfoByTheme(
       @Valid @PathVariable String theme) {
     logger.info("Received request to get general information by theme: " + theme);
     try {
@@ -158,12 +159,13 @@ public class GeneralInfoController {
       }
   )
   @PostMapping("/admin/add")
-  public ResponseEntity<Void> addGeneralInfo(@Valid @RequestBody GeneralInfoRequest request) {
+  public ResponseEntity<GeneralInfoResponse> addGeneralInfo(
+      @Valid @RequestBody GeneralInfoRequest request) {
     logger.info("Received request to add general information");
     try {
-      generalInfoService.addGeneralInfo(request);
+      GeneralInfoResponse response = generalInfoService.addGeneralInfo(request);
       logger.info("Successfully added general information");
-      return ResponseEntity.status(HttpStatus.CREATED).build();
+      return ResponseEntity.status(HttpStatus.CREATED).body(response);
     } catch (Exception e) {
       logger.severe("Error adding general information: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -202,13 +204,14 @@ public class GeneralInfoController {
       }
   )
   @PutMapping("/admin/update/{id}")
-  public ResponseEntity<Void> updateGeneralInfo(@Valid @RequestBody GeneralInfoRequest request,
+  public ResponseEntity<GeneralInfoResponse> updateGeneralInfo(
+      @Valid @RequestBody GeneralInfoRequest request,
                                 @PathVariable Long id) {
     logger.info("Received request to update general information with ID: " + id);
     try {
-      generalInfoService.updateGeneralInfo(request, id);
+      GeneralInfoResponse response = generalInfoService.updateGeneralInfo(request, id);
       logger.info("Successfully updated general information with ID: " + id);
-      return ResponseEntity.ok().build();
+      return ResponseEntity.ok(response);
     } catch (Exception e) {
       logger.severe("Error updating general information: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
