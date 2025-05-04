@@ -1,6 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
 import com.group7.krisefikser.mapper.GeneralInfoMapper;
 import com.group7.krisefikser.model.GeneralInfo;
@@ -21,8 +22,9 @@ import org.springframework.stereotype.Service;
 public class GeneralInfoService {
   private final GeneralInfoRepository generalInfoRepo;
 
-  public List<GeneralInfo> getAllGeneralInfo() {
-    return generalInfoRepo.getAllGeneralInfo();
+  public List<GeneralInfoResponse> getAllGeneralInfo() {
+    return GeneralInfoMapper
+        .INSTANCE.generalInfoToResponseList(generalInfoRepo.getAllGeneralInfo());
   }
 
   /**
@@ -33,8 +35,9 @@ public class GeneralInfoService {
    * @param theme the theme to filter the general information
    * @return a list of GeneralInfo objects containing details of the general information
    */
-  public List<GeneralInfo> getGeneralInfoByTheme(Theme theme) {
-    return generalInfoRepo.getGeneralInfoByTheme(theme);
+  public List<GeneralInfoResponse> getGeneralInfoByTheme(Theme theme) {
+    return GeneralInfoMapper
+        .INSTANCE.generalInfoToResponseList(generalInfoRepo.getGeneralInfoByTheme(theme));
   }
 
   /**
@@ -46,10 +49,12 @@ public class GeneralInfoService {
    * @param generalInfoRequest the request object containing details of the general
    *                           information to be added
    */
-  public void addGeneralInfo(GeneralInfoRequest generalInfoRequest) {
+  public GeneralInfoResponse addGeneralInfo(GeneralInfoRequest generalInfoRequest) {
     GeneralInfo info = GeneralInfoMapper
-        .INSTANCE.generalInfoRequestToGeneralInfo(generalInfoRequest);
-    generalInfoRepo.addGeneralInfo(info);
+        .INSTANCE.RequestToGeneralInfo(generalInfoRequest);
+    GeneralInfo savedInfo = generalInfoRepo.addGeneralInfo(info);
+    return GeneralInfoMapper
+        .INSTANCE.generalInfoToResponse(savedInfo);
   }
 
   /**
@@ -62,10 +67,12 @@ public class GeneralInfoService {
    *                            information to be updated
    * @param id the ID of the general information to be updated
    */
-  public void updateGeneralInfo(GeneralInfoRequest generalInfoRequest, Long id) {
+  public GeneralInfoResponse updateGeneralInfo(GeneralInfoRequest generalInfoRequest, Long id) {
     GeneralInfo info = GeneralInfoMapper
-        .INSTANCE.generalInfoRequestToGeneralInfo(generalInfoRequest);
-    generalInfoRepo.updateGeneralInfo(info, id);
+        .INSTANCE.RequestToGeneralInfo(generalInfoRequest);
+    GeneralInfo updatedInfo = generalInfoRepo.updateGeneralInfo(info, id);
+    return GeneralInfoMapper
+        .INSTANCE.generalInfoToResponse(updatedInfo);
   }
 
   /**
