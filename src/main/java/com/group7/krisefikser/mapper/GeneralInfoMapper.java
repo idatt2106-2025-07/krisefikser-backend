@@ -1,12 +1,15 @@
 package com.group7.krisefikser.mapper;
 
 import com.group7.krisefikser.dto.request.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
 import com.group7.krisefikser.model.GeneralInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * Mapper interface for converting between GeneralInfoRequest and GeneralInfo objects.
@@ -45,5 +48,14 @@ public interface GeneralInfoMapper {
   @Mapping(source = "theme", target = "theme", qualifiedByName = "stringToTheme")
   @Mapping(source = "title", target = "title")
   @Mapping(source = "content", target = "content")
-  GeneralInfo generalInfoRequestToGeneralInfo(GeneralInfoRequest generalInfoRequest);
+  GeneralInfo RequestToGeneralInfo(GeneralInfoRequest generalInfoRequest);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "theme", target = "theme")
+  @Mapping(source = "title", target = "title")
+  @Mapping(source = "content", target = "content")
+  List<GeneralInfoResponse> generalInfoToResponseList(List<GeneralInfo> generalInfoList);
+
+
+  GeneralInfoResponse generalInfoToResponse(GeneralInfo generalInfo);
 }
