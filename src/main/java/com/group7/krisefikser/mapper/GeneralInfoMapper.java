@@ -4,12 +4,11 @@ import com.group7.krisefikser.dto.request.GeneralInfoRequest;
 import com.group7.krisefikser.dto.response.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
 import com.group7.krisefikser.model.GeneralInfo;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * Mapper interface for converting between GeneralInfoRequest and GeneralInfo objects.
@@ -48,14 +47,27 @@ public interface GeneralInfoMapper {
   @Mapping(source = "theme", target = "theme", qualifiedByName = "stringToTheme")
   @Mapping(source = "title", target = "title")
   @Mapping(source = "content", target = "content")
-  GeneralInfo RequestToGeneralInfo(GeneralInfoRequest generalInfoRequest);
+  GeneralInfo requestToGeneralInfo(GeneralInfoRequest generalInfoRequest);
 
+  /**
+   * Converts a list of GeneralInfo objects to a list of GeneralInfoResponse objects.
+   * This method maps the fields of GeneralInfo to the corresponding fields of GeneralInfoResponse.
+   *
+   * @param generalInfoList the list of GeneralInfo objects to convert
+   * @return the list of converted GeneralInfoResponse objects
+   */
   @Mapping(source = "id", target = "id")
   @Mapping(source = "theme", target = "theme")
   @Mapping(source = "title", target = "title")
   @Mapping(source = "content", target = "content")
   List<GeneralInfoResponse> generalInfoToResponseList(List<GeneralInfo> generalInfoList);
 
-
+  /**
+   * Converts a GeneralInfo object to a GeneralInfoResponse object.
+   * This method maps the fields of GeneralInfo to the corresponding fields of GeneralInfoResponse.
+   *
+   * @param generalInfo the GeneralInfo object to convert
+   * @return the converted GeneralInfoResponse object
+   */
   GeneralInfoResponse generalInfoToResponse(GeneralInfo generalInfo);
 }

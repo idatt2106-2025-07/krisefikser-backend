@@ -51,7 +51,7 @@ public class GeneralInfoService {
    */
   public GeneralInfoResponse addGeneralInfo(GeneralInfoRequest generalInfoRequest) {
     GeneralInfo info = GeneralInfoMapper
-        .INSTANCE.RequestToGeneralInfo(generalInfoRequest);
+        .INSTANCE.requestToGeneralInfo(generalInfoRequest);
     GeneralInfo savedInfo = generalInfoRepo.addGeneralInfo(info);
     return GeneralInfoMapper
         .INSTANCE.generalInfoToResponse(savedInfo);
@@ -69,7 +69,7 @@ public class GeneralInfoService {
    */
   public GeneralInfoResponse updateGeneralInfo(GeneralInfoRequest generalInfoRequest, Long id) {
     GeneralInfo info = GeneralInfoMapper
-        .INSTANCE.RequestToGeneralInfo(generalInfoRequest);
+        .INSTANCE.requestToGeneralInfo(generalInfoRequest);
     GeneralInfo updatedInfo = generalInfoRepo.updateGeneralInfo(info, id);
     return GeneralInfoMapper
         .INSTANCE.generalInfoToResponse(updatedInfo);

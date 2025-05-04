@@ -60,9 +60,6 @@ class GeneralInfoServiceTest {
     request.setTitle("Title");
     request.setContent("Content");
 
-    GeneralInfo mapped = GeneralInfoMapper.INSTANCE.RequestToGeneralInfo(request);
-
-    // Spy on the mapper since it's static
     GeneralInfoService service = new GeneralInfoService(generalInfoRepo);
     service.addGeneralInfo(request);
 
