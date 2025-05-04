@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneralInfoMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.mapper</a> &gt; <span class="el_source">GeneralInfoMapper.java</span></div><h1>GeneralInfoMapper.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.mapper;
+
+import com.group7.krisefikser.dto.request.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.GeneralInfoResponse;
+import com.group7.krisefikser.enums.Theme;
+import com.group7.krisefikser.model.GeneralInfo;
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
+
+/**
+ * Mapper interface for converting between GeneralInfoRequest and GeneralInfo objects.
+ * This interface uses MapStruct to generate the implementation at compile time.
+ */
+@Mapper
+public interface GeneralInfoMapper {
+<span class="fc" id="L19">  GeneralInfoMapper INSTANCE = Mappers.getMapper(GeneralInfoMapper.class);</span>
+
+  /**
+   * Custom mapper method to convert String to Theme enum.
+   * This method handles the conversion of a string
+   * to the corresponding Theme enum value.
+   * If the string does not match any enum value,
+   * it throws a RuntimeException.
+   *
+   * @param theme the theme string to convert
+   * @return the corresponding Theme enum value
+   */
+  @Named(&quot;stringToTheme&quot;)
+  default Theme stringToTheme(String theme) {
+    try {
+<span class="fc" id="L34">      return Theme.valueOf(theme.toUpperCase());</span>
+<span class="nc" id="L35">    } catch (IllegalArgumentException | NullPointerException e) {</span>
+<span class="nc" id="L36">      throw new RuntimeException(&quot;Invalid theme: &quot; + theme);</span>
+    }
+  }
+
+  /**
+   * Converts a GeneralInfoRequest object to a GeneralInfo object.
+   * This method maps the fields of GeneralInfoRequest to the corresponding fields of GeneralInfo.
+   *
+   * @param generalInfoRequest the GeneralInfoRequest object to convert
+   * @return the converted GeneralInfo object
+   */
+  @Mapping(source = &quot;theme&quot;, target = &quot;theme&quot;, qualifiedByName = &quot;stringToTheme&quot;)
+  @Mapping(source = &quot;title&quot;, target = &quot;title&quot;)
+  @Mapping(source = &quot;content&quot;, target = &quot;content&quot;)
+  GeneralInfo requestToGeneralInfo(GeneralInfoRequest generalInfoRequest);
+
+  /**
+   * Converts a list of GeneralInfo objects to a list of GeneralInfoResponse objects.
+   * This method maps the fields of GeneralInfo to the corresponding fields of GeneralInfoResponse.
+   *
+   * @param generalInfoList the list of GeneralInfo objects to convert
+   * @return the list of converted GeneralInfoResponse objects
+   */
+  @Mapping(source = &quot;id&quot;, target = &quot;id&quot;)
+  @Mapping(source = &quot;theme&quot;, target = &quot;theme&quot;)
+  @Mapping(source = &quot;title&quot;, target = &quot;title&quot;)
+  @Mapping(source = &quot;content&quot;, target = &quot;content&quot;)
+  List&lt;GeneralInfoResponse&gt; generalInfoToResponseList(List&lt;GeneralInfo&gt; generalInfoList);
+
+  /**
+   * Converts a GeneralInfo object to a GeneralInfoResponse object.
+   * This method maps the fields of GeneralInfo to the corresponding fields of GeneralInfoResponse.
+   *
+   * @param generalInfo the GeneralInfo object to convert
+   * @return the converted GeneralInfoResponse object
+   */
+  GeneralInfoResponse generalInfoToResponse(GeneralInfo generalInfo);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
