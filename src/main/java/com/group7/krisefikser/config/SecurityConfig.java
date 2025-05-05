@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -57,23 +58,46 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-        .requestMatchers(HttpMethod.GET, "/api/affected-area",
-          "/api/point-of-interest", "/h2-console/**", 
-                         "/api/general-info/**", "/api/auth/**").permitAll()
-        .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
-        .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-        .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**", 
-                         "/api/general-info/admin/**")
-        .hasAnyRole("SUPER_ADMIN", "ADMIN")
-        .anyRequest().authenticated())
-        .headers(
-          headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
-      )
-        .sessionManagement(session -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                               
+            .requestMatchers(HttpMethod.GET,
+                "/api/affected-area",
+                "/api/point-of-interest",
+                "/h2-console/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/api/general-info/**", 
+                "/api/auth/**")
+            .permitAll()
 
+            .requestMatchers(HttpMethod.POST,
+                "/api/auth/**",
+                "/api/admin/register",
+                "/api/admin/2fa",
+                "/h2-console/**")
+            .permitAll()
+
+            .requestMatchers(HttpMethod.DELETE,
+                "/api/items/**")
+            .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+            .requestMatchers(HttpMethod.POST,
+                "/api/admin/invite")
+            .hasRole("SUPER_ADMIN")
+
+            .requestMatchers(
+                "/api/point-of-interest/**",
+                "/api/affected-area/**",
+                "/api/general-info/admin/**")
+            .hasAnyRole("SUPER_ADMIN", "ADMIN")
+
+            .anyRequest().authenticated())
+        .headers(
+            headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+        )
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     http.addFilterBefore(
-            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

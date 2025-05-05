@@ -107,6 +107,13 @@ public class AuthController {
     try {
       AuthResponse authResponse = userService.loginUser(request, response);
 
+      if (!authResponse.getMessage().equals(AuthResponseMessage
+          .USER_LOGGED_IN_SUCCESSFULLY.getMessage())
+          && !authResponse.getMessage().equals(AuthResponseMessage.TWO_FACTOR_SENT.getMessage())) {
+        logger.warning("Invalid credentials for user: " + request.getEmail());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);
+      }
+
       logger.info("User logged in successfully: " + request.getEmail());
       return ResponseEntity.ok(authResponse);
 
