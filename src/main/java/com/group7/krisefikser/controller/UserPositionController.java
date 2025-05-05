@@ -121,13 +121,21 @@ public class UserPositionController {
       summary = "Get positions of household members",
       description = "Retrieves the current positions of all members in the user's household.",
       responses = {
-          @ApiResponse(responseCode = "200",
+          @ApiResponse(
+              responseCode = "200",
               description = "Successfully retrieved household member positions",
-              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                  schema = @Schema(implementation = HouseholdMemberPositionResponse[].class))),
-          @ApiResponse(responseCode = "500",
+              content = @Content(
+                  mediaType = MediaType.APPLICATION_JSON_VALUE,
+                  array = @io.swagger.v3.oas.annotations.media.ArraySchema(
+                      schema = @Schema(implementation = HouseholdMemberPositionResponse.class)
+                  )
+              )
+          ),
+          @ApiResponse(
+              responseCode = "500",
               description = "Internal server error",
-              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+          )
       }
   )
   @GetMapping("/household")
