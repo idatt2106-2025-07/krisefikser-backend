@@ -26,9 +26,7 @@ class FlywayMigrationTest {
     Integer tablesCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA()",
             Integer.class);
-
     assertTrue(tablesCount > 1, "Database should contain multiple tables");
-
   }
 
   @Test

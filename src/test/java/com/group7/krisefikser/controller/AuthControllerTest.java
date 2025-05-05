@@ -75,7 +75,7 @@ class AuthControllerTest {
   @Test
   void loginUser_validRequest_returnsOkResponse() throws Exception {
     LoginRequest request = new LoginRequest("john@example.com", "password123");
-    AuthResponse response = new AuthResponse("Login successful", new Date(), Role.ROLE_NORMAL);
+    AuthResponse response = new AuthResponse("User logged in successfully", new Date(), Role.ROLE_NORMAL);
 
     Mockito.when(userService.loginUser(any(LoginRequest.class), any(HttpServletResponse.class)))
         .thenReturn(response);
@@ -84,7 +84,7 @@ class AuthControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Login successful"))
+        .andExpect(jsonPath("$.message").value("User logged in successfully"))
         .andExpect(jsonPath("$.expiryDate").exists())
         .andExpect(jsonPath("$.role").value("ROLE_NORMAL"));
   }
@@ -151,5 +151,19 @@ class AuthControllerTest {
         .andExpect(jsonPath("$.message").value(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage() + "Invalid token"))
         .andExpect(jsonPath("$.expiryDate").doesNotExist())
         .andExpect(jsonPath("$.role").doesNotExist());
+  }
+
+  @WithMockUser(username = "johndoe@test.com")
+  @Test
+  void getCurrentUserEmail_authenticated_returnsEmail() throws Exception {
+    mockMvc.perform(get("/api/auth/me"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("johndoe@test.com"));
+  }
+
+  @Test
+  void getCurrentUserEmail_unauthenticated_returnsNoContent() throws Exception {
+    mockMvc.perform(get("/api/auth/me"))
+        .andExpect(status().isNoContent());
   }
 }
