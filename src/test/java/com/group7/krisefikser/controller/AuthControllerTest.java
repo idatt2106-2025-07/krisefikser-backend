@@ -152,4 +152,18 @@ class AuthControllerTest {
         .andExpect(jsonPath("$.expiryDate").doesNotExist())
         .andExpect(jsonPath("$.role").doesNotExist());
   }
+
+  @WithMockUser(username = "johndoe@test.com")
+  @Test
+  void getCurrentUserEmail_authenticated_returnsEmail() throws Exception {
+    mockMvc.perform(get("/api/auth/me"))
+        .andExpect(status().isOk())
+        .andExpect(content().string("johndoe@test.com"));
+  }
+
+  @Test
+  void getCurrentUserEmail_unauthenticated_returnsNoContent() throws Exception {
+    mockMvc.perform(get("/api/auth/me"))
+        .andExpect(status().isNoContent());
+  }
 }
