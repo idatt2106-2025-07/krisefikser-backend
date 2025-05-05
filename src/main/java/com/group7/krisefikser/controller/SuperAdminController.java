@@ -1,6 +1,7 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.response.SuperAdminResponse;
+import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.service.SuperAdminService;
 import com.group7.krisefikser.service.UserService;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,7 @@ import java.util.logging.Logger;
 @RequestMapping("/api/super-admin")
 public class SuperAdminController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SuperAdminController.class);
-
+  private static final Logger logger = Logger.getLogger(SuperAdminController.class.getName());
   private final SuperAdminService superAdminService;
 
   public SuperAdminController(SuperAdminService superAdminService) {
@@ -24,12 +24,12 @@ public class SuperAdminController {
   }
 
   @GetMapping("/admins")
-  public ResponseEntity<List<SuperAdminResponse>> getAllAdmins() {
+  public ResponseEntity<List<User>> getAllAdmins() {
     return ResponseEntity.ok(superAdminService.getAllAdmins());
   }
 
   @DeleteMapping("/admins/{adminId}")
-  public ResponseEntity<Void> deleteAdmin(@PathVariable String adminId) {
+  public ResponseEntity<Void> deleteAdmin(@PathVariable Long adminId) {
     logger.info("Trying to delete admin with ID: " + adminId);
     try {
       superAdminService.deleteAdmin(adminId);
