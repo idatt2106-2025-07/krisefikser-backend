@@ -17,6 +17,9 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -166,5 +169,30 @@ public class AuthController {
           new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()
                   + e.getMessage(), null, null));
     }
+  }
+
+  /**
+   * Endpoint for getting the current user's email.
+   * This method retrieves the email of the currently authenticated user.
+   *
+   * @return a ResponseEntity containing the user's email or no content if not authenticated
+   */
+  @Operation(
+      summary = "Get current user email",
+      description = "Returns the email of the currently authenticated user,"
+       + "or no content if not authenticated."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Authenticated – returns email"),
+      @ApiResponse(responseCode = "204", description = "Not authenticated – no content")
+  })
+  @GetMapping("/me")
+  public ResponseEntity<String> getCurrentUserEmail() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth != null && auth.isAuthenticated()
+         && !(auth instanceof AnonymousAuthenticationToken)) {
+      return ResponseEntity.ok(auth.getName());
+    }
+    return ResponseEntity.noContent().build();
   }
 }
