@@ -2,6 +2,9 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.model.User;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,5 +150,55 @@ public class UserRepository {
     jdbcTemplate.update(
         "UPDATE users SET household_id = ? WHERE id = ?",
         householdId, userId);
+  }
+
+  public void deleteById(Long id) {
+    String sql = "DELETE FROM users WHERE id = ?";
+    jdbcTemplate.update(sql, id);
+  }
+
+  private User mapRowToUser(ResultSet rs) throws SQLException {
+    User user = new User();
+    user.setId(rs.getLong("id"));
+    user.setEmail(rs.getString("email"));
+    user.setName(rs.getString("name"));
+    user.setHouseholdId(rs.getLong("household_id"));
+    user.setPassword(rs.getString("password"));
+    String roleString = rs.getString("role").toUpperCase();
+    Role role = Role.valueOf(roleString);
+    user.setRole(role);
+    user.setVerified(rs.getBoolean("verified"));
+    return user;
+  }
+
+  /**
+   * Finds a user by their ID.
+   * This method queries the database for a user with the specified ID.
+   * If a user is found, it returns an Optional containing the user.
+   * If no user is found, it returns an empty Optional.
+   *
+   * @param id the ID of the user to be found
+   * @return an Optional containing the user if found, or an empty Optional if not found
+   */
+  public Optional<User> findById(Long id) {
+    String sql = "SELECT * FROM users WHERE id = ?";
+    try {
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+          mapRowToUser(rs), id));
+    } catch (EmptyResultDataAccessException e) {
+      logger.info("No user found with ID: " + id);
+      return Optional.empty();
+    }
+  }
+
+  public List<User> findByRole(Role role) {
+    String sql = "SELECT * FROM users WHERE role = ?";
+    try {
+      return Optional.of(jdbcTemplate.query(sql, (rs, rowNum) ->
+          mapRowToUser(rs), role.toString())).orElse(List.of());
+    } catch (EmptyResultDataAccessException e) {
+      logger.info("No users found with role: " + role);
+      return List.of();
+    }
   }
 }
