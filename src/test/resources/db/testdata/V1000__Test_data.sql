@@ -89,3 +89,14 @@ INSERT INTO general_info (theme, title, content) VALUES
      ('DURING_CRISIS', 'Shelter in Place', 'If advised, stay indoors and away from windows. Use your emergency kit.'),
      ('AFTER_CRISIS', 'Check for Injuries', 'Administer first aid if needed and call emergency services for serious injuries.'),
      ('AFTER_CRISIS', 'Report Damages', 'Contact your insurance provider and local authorities to report damage or unsafe conditions.');
+
+--insert user positions
+INSERT INTO user_position (user_id, longitude, latitude) VALUES
+    (1, 10.75, 59.91),
+    (2, 10.80, 59.90),
+    (3, 10.85, 59.95),
+    (4, 10.90, 60.00),
+    (5, 10.95, 60.05),
+    (6, 11.00, 60.10),
+    (7, 11.05, 60.15),
+    (8, 11.10, 60.20);
