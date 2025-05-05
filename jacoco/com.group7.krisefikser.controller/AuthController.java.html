@@ -107,14 +107,21 @@ public class AuthController {
     try {
 <span class="fc" id="L108">      AuthResponse authResponse = userService.loginUser(request, response);</span>
 
-<span class="fc" id="L110">      logger.info(&quot;User logged in successfully: &quot; + request.getEmail());</span>
-<span class="fc" id="L111">      return ResponseEntity.ok(authResponse);</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">      if (!authResponse.getMessage().equals(AuthResponseMessage</span>
+<span class="fc" id="L111">          .USER_LOGGED_IN_SUCCESSFULLY.getMessage())</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">          &amp;&amp; !authResponse.getMessage().equals(AuthResponseMessage.TWO_FACTOR_SENT.getMessage())) {</span>
+<span class="nc" id="L113">        logger.warning(&quot;Invalid credentials for user: &quot; + request.getEmail());</span>
+<span class="nc" id="L114">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);</span>
+      }
 
-<span class="fc" id="L113">    } catch (Exception e) {</span>
-<span class="fc" id="L114">      logger.warning(&quot;Error logging in user: &quot; + e.getMessage());</span>
-<span class="fc" id="L115">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L116">          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()</span>
-<span class="fc" id="L117">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L117">      logger.info(&quot;User logged in successfully: &quot; + request.getEmail());</span>
+<span class="fc" id="L118">      return ResponseEntity.ok(authResponse);</span>
+
+<span class="fc" id="L120">    } catch (Exception e) {</span>
+<span class="fc" id="L121">      logger.warning(&quot;Error logging in user: &quot; + e.getMessage());</span>
+<span class="fc" id="L122">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L123">          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()</span>
+<span class="fc" id="L124">                  + e.getMessage(), null, null));</span>
     }
   }
 
@@ -151,23 +158,23 @@ public class AuthController {
   })
   @GetMapping(&quot;/verify-email&quot;)
   public ResponseEntity&lt;AuthResponse&gt; verifyEmail(@Valid @RequestParam String token) {
-<span class="fc" id="L154">    logger.info(&quot;Received email verification request with token: &quot; + token);</span>
+<span class="fc" id="L161">    logger.info(&quot;Received email verification request with token: &quot; + token);</span>
     try {
-<span class="fc" id="L156">      AuthResponse authResponse = userService.verifyEmail(token);</span>
+<span class="fc" id="L163">      AuthResponse authResponse = userService.verifyEmail(token);</span>
 
-<span class="fc bfc" id="L158" title="All 2 branches covered.">      if (authResponse.getMessage().equals(</span>
-<span class="fc" id="L159">          AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage())) {</span>
-<span class="fc" id="L160">        logger.info(&quot;User verified successfully with token: &quot; + token);</span>
-<span class="fc" id="L161">        return ResponseEntity.ok(authResponse);</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">      if (authResponse.getMessage().equals(</span>
+<span class="fc" id="L166">          AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage())) {</span>
+<span class="fc" id="L167">        logger.info(&quot;User verified successfully with token: &quot; + token);</span>
+<span class="fc" id="L168">        return ResponseEntity.ok(authResponse);</span>
       } else {
-<span class="fc" id="L163">        logger.warning(&quot;Error verifying user: &quot; + authResponse.getMessage());</span>
-<span class="fc" id="L164">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
+<span class="fc" id="L170">        logger.warning(&quot;Error verifying user: &quot; + authResponse.getMessage());</span>
+<span class="fc" id="L171">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
       }
-<span class="fc" id="L166">    } catch (Exception e) {</span>
-<span class="fc" id="L167">      logger.warning(&quot;Error verifying email: &quot; + e.getMessage());</span>
-<span class="fc" id="L168">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L169">          new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()</span>
-<span class="fc" id="L170">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L173">    } catch (Exception e) {</span>
+<span class="fc" id="L174">      logger.warning(&quot;Error verifying email: &quot; + e.getMessage());</span>
+<span class="fc" id="L175">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L176">          new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()</span>
+<span class="fc" id="L177">                  + e.getMessage(), null, null));</span>
     }
   }
 
@@ -188,12 +195,12 @@ public class AuthController {
   })
   @GetMapping(&quot;/me&quot;)
   public ResponseEntity&lt;String&gt; getCurrentUserEmail() {
-<span class="fc" id="L191">    Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="pc bpc" id="L192" title="2 of 6 branches missed.">    if (auth != null &amp;&amp; auth.isAuthenticated()</span>
+<span class="fc" id="L198">    Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="pc bpc" id="L199" title="2 of 6 branches missed.">    if (auth != null &amp;&amp; auth.isAuthenticated()</span>
          &amp;&amp; !(auth instanceof AnonymousAuthenticationToken)) {
-<span class="fc" id="L194">      return ResponseEntity.ok(auth.getName());</span>
+<span class="fc" id="L201">      return ResponseEntity.ok(auth.getName());</span>
     }
-<span class="fc" id="L196">    return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L203">    return ResponseEntity.noContent().build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

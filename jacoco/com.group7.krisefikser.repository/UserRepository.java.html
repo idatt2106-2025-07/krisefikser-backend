@@ -114,6 +114,29 @@ public class UserRepository {
   }
 
   /**
+   * Checks the existence of an admin by their username.
+   * This method queries the database for an admin with the specified username.
+   * If an admin is found, it returns a true.
+   * If no admin is found, it returns false.
+   *
+   * @param username the username of the admin to be found
+   * @return a bool if found
+   */
+  public boolean existAdminByUsername(String username) {
+<span class="nc" id="L126">    String sql =</span>
+        &quot;SELECT CASE &quot;
+        + &quot;WHEN EXISTS ( &quot;
+        + &quot;SELECT 1 FROM users WHERE users.name = ? AND users.role = 'ROLE_ADMIN' &quot;
+        + &quot;) THEN 'true' &quot;
+        + &quot;ELSE 'false' &quot;
+        + &quot;END AS finnes&quot;;
+<span class="nc" id="L133">    return jdbcTemplate.queryForObject(</span>
+        sql,
+        new Object[]{username},
+        Boolean.class);
+  }
+
+  /**
    * Updates a user's household association in the database.
    * This method sets the household_id for a user with the specified user ID.
    *
@@ -121,9 +144,9 @@ public class UserRepository {
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
-<span class="nc" id="L124">    jdbcTemplate.update(</span>
+<span class="nc" id="L147">    jdbcTemplate.update(</span>
         &quot;UPDATE users SET household_id = ? WHERE id = ?&quot;,
         householdId, userId);
-<span class="nc" id="L127">  }</span>
+<span class="nc" id="L150">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
