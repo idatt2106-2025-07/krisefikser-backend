@@ -99,7 +99,7 @@ public class UserService implements UserDetailsService {
 <span class="fc" id="L99">      userRepo.save(user);</span>
 <span class="fc" id="L100">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
 <span class="fc" id="L101">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
-<span class="fc" id="L102">      String verificationLink = &quot;https://localhost:5173/verify?token=&quot; + emailVerificationToken;</span>
+<span class="fc" id="L102">      String verificationLink = &quot;http://localhost:5173/verify-email?token=&quot; + emailVerificationToken;</span>
 <span class="fc" id="L103">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
 <span class="fc" id="L104">      emailService.sendTemplateMessage(</span>
 <span class="fc" id="L105">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>

@@ -59,7 +59,7 @@ public class SecurityConfig {
 <span class="fc" id="L59">        .authorizeHttpRequests(authorize -&gt; authorize</span>
 <span class="fc" id="L60">        .requestMatchers(HttpMethod.GET, &quot;/api/affected-area&quot;,</span>
           &quot;/api/point-of-interest&quot;, &quot;/h2-console/**&quot;, 
-<span class="fc" id="L62">                         &quot;/api/general-info/**&quot;).permitAll()</span>
+<span class="fc" id="L62">                         &quot;/api/general-info/**&quot;, &quot;/api/auth/**&quot;).permitAll()</span>
 <span class="fc" id="L63">        .requestMatchers(HttpMethod.POST, &quot;/api/auth/**&quot;, &quot;/h2-console/**&quot;).permitAll()</span>
 <span class="fc" id="L64">        .requestMatchers(HttpMethod.DELETE, &quot;/api/items/**&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;SUPER_ADMIN&quot;)</span>
 <span class="fc" id="L65">        .requestMatchers(&quot;/api/point-of-interest/**&quot;, &quot;/api/affected-area/**&quot;, </span>
