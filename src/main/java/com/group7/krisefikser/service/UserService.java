@@ -87,7 +87,7 @@ public class UserService implements UserDetailsService {
       userRepo.save(user);
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
       String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());
-      String verificationLink = "https://localhost:5173/verify?token=" + emailVerificationToken;
+      String verificationLink = "http://localhost:5173/verify-email?token=" + emailVerificationToken;
       Map<String, String> params = Map.of("verificationLink", verificationLink);
       emailService.sendTemplateMessage(
           byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);

@@ -58,14 +58,15 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-
+                               
             .requestMatchers(HttpMethod.GET,
                 "/api/affected-area",
                 "/api/point-of-interest",
                 "/h2-console/**",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/api/auth/verify-email")
+                "/api/general-info/**", 
+                "/api/auth/**")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
@@ -89,7 +90,8 @@ public class SecurityConfig {
 
             .requestMatchers(
                 "/api/point-of-interest/**",
-                "/api/affected-area/**")
+                "/api/affected-area/**",
+                "/api/general-info/admin/**")
             .hasAnyRole("SUPER_ADMIN", "ADMIN")
 
             .anyRequest().authenticated())
