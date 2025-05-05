@@ -3,13 +3,11 @@ package com.group7.krisefikser.service;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.repository.HouseholdRepository;
-import com.group7.krisefikser.utils.UuidUtils;
-import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
 import com.group7.krisefikser.repository.UserRepository;
+import com.group7.krisefikser.utils.UuidUtils;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
