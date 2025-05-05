@@ -5,12 +5,19 @@ import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.mapper.EmergencyGroupMapper;
 import com.group7.krisefikser.model.EmergencyGroup;
+import com.group7.krisefikser.model.EmergencyGroupInvitation;
+import com.group7.krisefikser.model.Household;
+import com.group7.krisefikser.repository.EmergencyGroupInvitationsRepo;
 import com.group7.krisefikser.repository.EmergencyGroupRepo;
+import com.group7.krisefikser.repository.HouseholdRepository;
+import com.group7.krisefikser.repository.UserRepository;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for handling operations related to emergency groups.
@@ -21,6 +28,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmergencyGroupService {
   private final EmergencyGroupRepo emergencyGroupRepo;
+  private final EmergencyGroupInvitationsRepo emergencyGroupInvitationsRepo;
+  private final UserRepository userRepository;
+  private final HouseholdRepository householdRepository;
 
   /**
    * Retrieves the EmergencyGroup object with the specified ID from the repository.
@@ -49,8 +59,85 @@ public class EmergencyGroupService {
               .emergencyGroupRequestToEntity(request);
       emergencyGroupRepo.addEmergencyGroup(group);
       return EmergencyGroupMapper.INSTANCE.emergencyGroupToResponse(group);
-    } catch (DataIntegrityViolationException  e) {
+    } catch (DataIntegrityViolationException e) {
       throw new IllegalArgumentException("Failed to add emergency group. Name already taken.");
     }
+  }
+
+  /**
+   * Invites a household to an emergency group by its name.
+   *
+   * @param householdName the name of the household to invite
+   */
+  public void inviteHouseholdByName(String householdName) {
+    long userId = Long.parseLong(SecurityContextHolder.getContext()
+            .getAuthentication().getName());
+
+    Household householdToInvite = householdRepository.getHouseholdByName(householdName)
+            .orElseThrow(() -> new NoSuchElementException(
+                    "Household with name '" + householdName + "' not found.")
+            );
+    Long oldGroupId = householdToInvite.getEmergencyGroupId();
+    if (oldGroupId != null && oldGroupId == getGroupIdByUserId(userId)) {
+      throw new IllegalArgumentException("The household is already in the group.");
+    }
+
+    if (emergencyGroupInvitationsRepo.isInvitedToGroup(
+            householdToInvite.getId(),
+            getGroupIdByUserId(userId)
+    )) {
+      throw new IllegalArgumentException("Household is already invited to this group.");
+    }
+
+    emergencyGroupInvitationsRepo.addEmergencyGroupInvitation(new EmergencyGroupInvitation(
+                    null,
+                    householdToInvite.getId(),
+                    getGroupIdByUserId(userId),
+                    null
+            )
+    );
+
+  }
+
+  /**
+   * Retrieves the ID of the group associated with the users household.
+   *
+   * @param userId the ID of the user
+   * @return the ID of the group associated with the user's household
+   */
+  private long getGroupIdByUserId(Long userId) {
+    long householdId = userRepository.findById(userId).orElseThrow(
+            () -> new NoSuchElementException("User not found.")
+    ).getHouseholdId();
+
+    return householdRepository.getHouseholdById(householdId)
+            .orElseThrow(() -> new NoSuchElementException("The requesting user"
+                    + "is not part of a household."))
+            .getId();
+  }
+
+  /**
+   * Answers an emergency group invitation by accepting or declining it.
+   *
+   * @param groupId the ID of the emergency group
+   * @param accept  true to accept the invitation, false to decline
+   */
+  @Transactional
+  public void answerEmergencyGroupInvitation(Long groupId, boolean accept) {
+    long userId = Long.parseLong(SecurityContextHolder.getContext()
+            .getAuthentication().getName());
+    long householdId = userRepository.findById(userId)
+            .orElseThrow(() -> new NoSuchElementException("User not found."))
+            .getHouseholdId();
+
+    if (!emergencyGroupInvitationsRepo.isInvitedToGroup(householdId, groupId)) {
+      throw new IllegalArgumentException("Household is not invited to this group.");
+    }
+
+    if (accept) {
+      householdRepository.addHouseholdToGroup(householdId, groupId);
+    }
+
+    emergencyGroupInvitationsRepo.deleteEmergencyGroupInvitation(householdId, groupId);
   }
 }
