@@ -46,6 +46,9 @@ public class UserServiceTest {
   private EmailService emailService;
 
   @Mock
+  private HouseholdService householdService;
+
+  @Mock
   private HttpServletResponse response;
 
   @InjectMocks
@@ -107,8 +110,7 @@ public class UserServiceTest {
         .thenReturn(Optional.empty()) // First call (user doesn't exist check)
         .thenReturn(Optional.of(testUser)); // Second call (after saving)
 
-    when(householdRepository.existsByName(anyString())).thenReturn(false);
-    when(householdRepository.createHousehold(anyString(), anyDouble(), anyDouble())).thenReturn(1L);
+    when(householdService.createHouseholdForUser(registerRequest.getName())).thenReturn(1L);
 
     testUser.setVerified(false); // The newly created user should not be verified
 
@@ -130,7 +132,7 @@ public class UserServiceTest {
       assertEquals(Role.ROLE_NORMAL, response.getRole());
 
       verify(userRepository, times(1)).save(any(User.class));
-      verify(householdRepository, times(1)).createHousehold(anyString(), anyDouble(), anyDouble());
+      verify(householdService, times(1)).createHouseholdForUser(registerRequest.getName());
       verify(emailService, times(1)).sendTemplateMessage(anyString(), eq(EmailTemplateType.VERIFY_EMAIL), anyMap());
     }
   }
@@ -159,8 +161,7 @@ public class UserServiceTest {
     // Arrange
     // Use lenient() to avoid strict stubbing issues
     lenient().when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
-    when(householdRepository.existsByName(anyString())).thenReturn(false);
-    when(householdRepository.createHousehold(anyString(), anyDouble(), anyDouble()))
+    when(householdService.createHouseholdForUser(registerRequest.getName()))
         .thenThrow(new RuntimeException("Database error"));
 
     // Act
