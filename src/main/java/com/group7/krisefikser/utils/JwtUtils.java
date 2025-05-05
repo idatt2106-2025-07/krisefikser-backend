@@ -57,8 +57,8 @@ public class JwtUtils {
     SecretKey vsk = keyGen.generateKey();
     verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());
 
-    SecretKey isk = keyGen.generateKey();
-    invitationSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
+    SecretKey invSk = keyGen.generateKey();
+    invitationSecretKey = Base64.getEncoder().encodeToString(invSk.getEncoded());
   }
 
   /**
