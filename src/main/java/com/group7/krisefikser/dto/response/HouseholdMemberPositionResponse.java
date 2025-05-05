@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 public class HouseholdMemberPositionResponse {
-  private String latitude;
-  private String longitude;
+  private double latitude;
+  private double longitude;
   private String name;
 }
