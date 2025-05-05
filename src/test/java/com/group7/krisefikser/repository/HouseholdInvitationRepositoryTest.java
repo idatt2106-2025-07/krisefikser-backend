@@ -9,9 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,9 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class HouseholdInvitationRepositoryTest {
   @Autowired
   private HouseholdInvitationRepository invitationRepository;
-
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
 
   private HouseholdInvitation testInvitation1;
   private HouseholdInvitation testInvitation2;

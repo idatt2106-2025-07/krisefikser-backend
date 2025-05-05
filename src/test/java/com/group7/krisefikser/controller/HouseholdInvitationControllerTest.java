@@ -1,13 +1,11 @@
 package com.group7.krisefikser.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.HouseholdInvitation;
 import com.group7.krisefikser.model.InvitationRequest;
 import com.group7.krisefikser.service.HouseholdInvitationService;
