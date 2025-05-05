@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
+
 /**
  * REST controller for managing household invitations.
  * Provides endpoints for creating and accepting invitations.
@@ -51,6 +52,14 @@ public class HouseholdInvitationController {
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
     @ApiResponse(responseCode = "500", description = "Internal server error")
   })
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "JSON object containing the email of the person to invite",
+      required = true,
+      content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(implementation = InvitationRequest.class)
+       )
+  )
   public ResponseEntity<?> createInvitation(@RequestBody InvitationRequest request) {
     String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
     Long userId = Long.parseLong(userIdStr);
@@ -67,8 +76,19 @@ public class HouseholdInvitationController {
    * @return A ResponseEntity containing the invitation details if valid.
    */
   @GetMapping("/verify")
-  @Operation(summary = "Verify a household invitation",
-      description = "Verifies if an invitation token is valid and returns invitation details")
+  @Operation(
+      summary = "Verify a household invitation",
+      description = "Verifies if an invitation token is valid and returns invitation details",
+      parameters = {
+        @io.swagger.v3.oas.annotations.Parameter(
+          name = "token",
+          description = "The invitation token to verify",
+          required = true,
+          schema = @Schema(type = "string"),
+          in = io.swagger.v3.oas.annotations.enums.ParameterIn.QUERY
+          )
+      }
+  )
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Invitation is valid"),
     @ApiResponse(responseCode = "404", description = "Invitation not found or expired")
@@ -86,13 +106,27 @@ public class HouseholdInvitationController {
    * @throws JwtMissingPropertyException if the token is missing required properties.
    */
   @PostMapping("/accept")
-  @Operation(summary = "Accept a household invitation",
-      description = "Accepts an invitation using the provided token")
+  @Operation(
+      summary = "Accept a household invitation",
+      description = "Accepts an invitation using the provided token"
+  )
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Invitation accepted successfully"),
     @ApiResponse(responseCode = "400", description = "Missing or invalid token"),
     @ApiResponse(responseCode = "404", description = "Invitation not found or expired")
   })
+  @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = "JSON object containing the invitation token",
+      required = true,
+       content = @Content(
+      mediaType = "application/json",
+      schema = @Schema(
+        type = "object",
+        example = "{\"token\": \"invitation-token-value\"}",
+        requiredProperties = {"token"}
+      )
+      )
+  )
   public ResponseEntity<?> acceptInvitation(@RequestBody Map<String, String> requestBody)
       throws JwtMissingPropertyException {
     String token = requestBody.get("token");
