@@ -27,9 +27,9 @@ public class HouseholdRepository {
    * This method takes the name, longitude, and latitude of the household as parameters,
    * and inserts a new record into the households table.
    *
-   * @param name the name of the household
+   * @param name      the name of the household
    * @param longitude the longitude of the household
-   * @param latitude the latitude of the household
+   * @param latitude  the latitude of the household
    * @return the ID of the newly created household
    */
   public Long createHousehold(String name, double longitude, double latitude) {
@@ -82,5 +82,17 @@ public class HouseholdRepository {
     household.setId(householdId.longValue());
 
     return household;
+  }
+
+  /**
+   * Updates the household ID of a user in the database.
+   * This method is used to associate a user with a specific household.
+   *
+   * @param householdId the ID of the household to associate with the user
+   * @param userId      the ID of the user to update
+   */
+  public void addUserToHousehold(Long householdId, Long userId) {
+    String sql = "UPDATE users SET household_id = ? WHERE id = ?";
+    jdbcTemplate.update(sql, householdId, userId);
   }
 }
