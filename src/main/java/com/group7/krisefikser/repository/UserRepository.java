@@ -153,8 +153,8 @@ public class UserRepository {
   }
 
   public void deleteById(Long id) {
-    String sql = "DELETE FROM users WHERE id = ?";
-    jdbcTemplate.update(sql, id);
+    jdbcTemplate.update("DELETE FROM join_household_requests WHERE user_id = ?", id);
+    jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
   }
 
   private User mapRowToUser(ResultSet rs) throws SQLException {
