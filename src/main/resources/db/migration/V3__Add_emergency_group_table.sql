@@ -8,7 +8,8 @@ ALTER TABLE households
 add column emergency_group_id INT DEFAULT NULL;
 
 ALTER TABLE households
-ADD CONSTRAINT fk_emergency_group FOREIGN KEY (emergency_group_id) REFERENCES emergency_groups(id);
+ADD CONSTRAINT fk_emergency_group FOREIGN KEY (emergency_group_id) REFERENCES emergency_groups(id)
+ON DELETE SET NULL;
 
 ALTER TABLE storage_items
 add column is_shared BOOLEAN DEFAULT FALSE;
@@ -18,6 +19,6 @@ CREATE TABLE emergency_group_invitations (
     household_id INT NOT NULL,
     emergency_group_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (household_id) REFERENCES households(id),
-    FOREIGN KEY (emergency_group_id) REFERENCES emergency_groups(id)
+    FOREIGN KEY (household_id) REFERENCES households(id) ON DELETE CASCADE,
+    FOREIGN KEY (emergency_group_id) REFERENCES emergency_groups(id) ON DELETE SET NULL
 );
