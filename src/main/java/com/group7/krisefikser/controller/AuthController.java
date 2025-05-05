@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -194,5 +196,33 @@ public class AuthController {
       return ResponseEntity.ok(auth.getName());
     }
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Endpoint for logging out a user.
+   * This method clears the JWT cookie to log out the current user.
+   *
+   * @param response the HTTP response object
+   * @return a ResponseEntity indicating the logout status
+   * @throws NoSuchAlgorithmException if an error occurs while setting the JWT cookie
+   * @see JwtUtils#setLogOutJwtCookie(HttpServletResponse)
+   */
+  @Operation(
+      summary = "Log out a user",
+      description = "Clears the JWT cookie to log out the current user."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "User logged out successfully")
+  })
+  @PostMapping("/logout")
+  public ResponseEntity<Void> logout(HttpServletResponse response) {
+    try {
+      JwtUtils jwtUtils = new JwtUtils();
+      jwtUtils.setLogOutJwtCookie(response);
+      return ResponseEntity.ok().build();
+    } catch (NoSuchAlgorithmException e) {
+      logger.warning("Error during logout: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 }
