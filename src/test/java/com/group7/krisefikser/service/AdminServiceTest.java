@@ -94,7 +94,7 @@ class AdminServiceTest {
     request.setEmail(email);
     request.setPassword(password);
 
-    when(jwtUtils.validateInviteTokenAndGetUsername(token)).thenReturn(username);
+    when(jwtUtils.validateInviteAdminTokenAndGetUsername(token)).thenReturn(username);
     when(userRepository.existAdminByUsername(username)).thenReturn(false);
     when(householdService.createHouseholdForUser(username)).thenReturn(householdId);
 
@@ -117,7 +117,7 @@ class AdminServiceTest {
     request.setEmail("admin@example.com");
     request.setPassword("securePassword");
 
-    when(jwtUtils.validateInviteTokenAndGetUsername(request.getToken())).thenReturn(username);
+    when(jwtUtils.validateInviteAdminTokenAndGetUsername(request.getToken())).thenReturn(username);
     when(userRepository.existAdminByUsername(username)).thenReturn(true);
 
     UsernameGenerationException exception = assertThrows(UsernameGenerationException.class, () ->

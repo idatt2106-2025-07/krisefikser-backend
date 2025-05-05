@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtils {
   private final String secretKey;
-  private final String inviteSecretKey;
+  private final String inviteAdminSecretKey;
   private final String twoFactorSecretKey;
   private final String verificationSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
@@ -48,7 +48,7 @@ public class JwtUtils {
     secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
 
     SecretKey isk = keyGen.generateKey();
-    inviteSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
+    inviteAdminSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
 
     SecretKey tfsk = keyGen.generateKey();
     twoFactorSecretKey = Base64.getEncoder().encodeToString(tfsk.getEncoded());
@@ -109,7 +109,7 @@ public class JwtUtils {
         .withIssuedAt(now)
         .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
         .withClaim("role", "ROLE_INVITE")
-        .sign(getKey(inviteSecretKey));
+        .sign(getKey(inviteAdminSecretKey));
   }
 
   /**
@@ -224,9 +224,9 @@ public class JwtUtils {
    * @return the username
    * @throws JwtMissingPropertyException if token doesn't contain a subject
    */
-  public String validateInviteTokenAndGetUsername(final String token)
+  public String validateInviteAdminTokenAndGetUsername(final String token)
       throws JwtMissingPropertyException {
-    String username = validateToken(token, inviteSecretKey).getSubject();
+    String username = validateToken(token, inviteAdminSecretKey).getSubject();
     if (username == null) {
       logger.error("Token does not contain a subject");
       throw new JwtMissingPropertyException("Token does not contain a subject");

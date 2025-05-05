@@ -77,7 +77,7 @@ public class AdminService {
   @Transactional
   public void registerAdmin(RegisterAdminRequest request)
       throws JwtMissingPropertyException, UsernameGenerationException {
-    String username = jwtUtils.validateInviteTokenAndGetUsername(request.getToken());
+    String username = jwtUtils.validateInviteAdminTokenAndGetUsername(request.getToken());
     User user = new User();
     user.setEmail(request.getEmail());
     user.setName(username);
