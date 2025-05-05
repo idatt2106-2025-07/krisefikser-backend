@@ -15,11 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InvitationRequest {
-  @NotNull
-  private Long householdId;
-
-  @NotNull
-  private Long invitedByUserId;
 
   @NotBlank
   @Email
