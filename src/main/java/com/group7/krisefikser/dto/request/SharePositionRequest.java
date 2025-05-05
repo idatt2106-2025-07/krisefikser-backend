@@ -5,6 +5,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * DTO for sharing position request.
+ * Contains latitude and longitude fields with validation constraints.
+ */
 @Data
 public class SharePositionRequest {
   @NotNull(message = "Latitude is required")
