@@ -58,10 +58,13 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(HttpMethod.GET, "/api/affected-area",
-          "/api/point-of-interest", "/h2-console/**", "/api/auth/**").permitAll()
+          "/api/point-of-interest", "/h2-console/**", 
+                         "/api/general-info/**").permitAll()
+
         .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
         .requestMatchers(HttpMethod.DELETE, "/api/items/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-        .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
+        .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**", 
+                         "/api/general-info/admin/**")
         .hasAnyRole("SUPER_ADMIN", "ADMIN")
         .anyRequest().authenticated())
         .headers(
@@ -69,7 +72,6 @@ public class SecurityConfig {
       )
         .sessionManagement(session -> session
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
 
     http.addFilterBefore(
             jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
