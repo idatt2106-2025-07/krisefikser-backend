@@ -62,7 +62,7 @@ public class HouseholdRepository {
    */
   public boolean existsByName(String householdName) {
     String sql = "SELECT COUNT(*) FROM households WHERE name = ?";
-    Integer count = jdbcTemplate.queryForObject(sql, Integer.class);
+    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, householdName);
     return count != null && count > 0;
   }
 
