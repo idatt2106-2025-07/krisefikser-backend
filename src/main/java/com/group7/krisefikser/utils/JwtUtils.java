@@ -30,10 +30,10 @@ public class JwtUtils {
   private final String inviteAdminSecretKey;
   private final String twoFactorSecretKey;
   private final String verificationSecretKey;
+  private final String resetPasswordSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
   private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);
   private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
-
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
   /**
@@ -55,6 +55,9 @@ public class JwtUtils {
 
     SecretKey vsk = keyGen.generateKey();
     verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());
+
+    SecretKey rsk = keyGen.generateKey();
+    resetPasswordSecretKey = Base64.getEncoder().encodeToString(rsk.getEncoded());
   }
 
   /**
@@ -151,6 +154,18 @@ public class JwtUtils {
         .sign(getKey(verificationSecretKey));
   }
 
+
+  public String generateResetPasswordToken(final String email) {
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(email)
+        .withIssuer("krisefikser")
+        .withIssuedAt(now)
+        .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+        .sign(getKey(resetPasswordSecretKey));
+
+  }
+
   /**
    * validates a given token.
    *
@@ -244,6 +259,16 @@ public class JwtUtils {
   public String validateVerificationTokenAndGetEmail(final String token)
                               throws JwtMissingPropertyException {
     String subject = validateToken(token, verificationSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain an email");
+      throw new JwtMissingPropertyException("Token does not contain an email");
+    }
+    return subject;
+  }
+
+  public String validateResetPasswordTokenAndGetEmail(final String token)
+                              throws JwtMissingPropertyException {
+    String subject = validateToken(token, resetPasswordSecretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain an email");
       throw new JwtMissingPropertyException("Token does not contain an email");
