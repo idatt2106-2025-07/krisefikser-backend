@@ -4,9 +4,15 @@ import com.group7.krisefikser.dto.request.SharePositionRequest;
 import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
 import com.group7.krisefikser.service.UserPositionService;
 import com.group7.krisefikser.utils.ValidationUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -16,8 +22,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * Controller class for handling requests related to user positions.
+ * This class provides endpoints to share and stop sharing position.
+ */
 @Controller
 @RequestMapping("/api/position")
+@Tag(name = "User Position", description = "Endpoints for sharing and managing user positions")
 @RequiredArgsConstructor
 public class UserPositionController {
 
@@ -25,6 +36,33 @@ public class UserPositionController {
 
   private static final Logger logger = Logger.getLogger(UserPositionController.class.getName());
 
+  /**
+   * Endpoint to share a user's position.
+   * This endpoint will accept a request containing the user's position details.
+   *
+   * @param request The request containing the user's position details.
+   * @param bindingResult The result of the validation
+   * @return ResponseEntity indicating the result of the operation.
+   */
+  @Operation(
+      summary = "Share user's position",
+      description = "Allows a user to share their current geographic position (latitude and longitude).",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          required = true,
+          description = "User's position including latitude and longitude",
+          content = @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = SharePositionRequest.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Position shared successfully"),
+          @ApiResponse(responseCode = "400", description = "Invalid latitude or longitude values",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "500", description = "Internal server error",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+      }
+  )
   @PostMapping("/share")
   public ResponseEntity<?> sharePosition(
       @RequestBody @Valid SharePositionRequest request, BindingResult bindingResult) {
@@ -44,6 +82,21 @@ public class UserPositionController {
     }
   }
 
+  /**
+   * Endpoint to delete a user's position.
+   * This endpoint will stop sharing the user's position.
+   *
+   * @return ResponseEntity indicating the result of the operation.
+   */
+  @Operation(
+      summary = "Stop sharing user's position",
+      description = "Deletes the user's shared position, effectively stopping the location sharing.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Stopped sharing position successfully"),
+          @ApiResponse(responseCode = "500", description = "Internal server error",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+      }
+  )
   @DeleteMapping("/delete")
   public ResponseEntity<?> stopSharingPosition() {
     logger.info("Received request to stop sharing position");
@@ -52,12 +105,31 @@ public class UserPositionController {
       userPositionService.deleteUserPosition();
       logger.info("Stopped sharing position successfully");
       return ResponseEntity.ok("Stopped sharing position successfully");
-      } catch (Exception e) {
+    } catch (Exception e) {
       logger.severe("Error stopping sharing position: " + e.getMessage());
       return ResponseEntity.status(500).body("Error stopping sharing position");
     }
   }
 
+  /**
+   * Endpoint to get the position of household members.
+   * This endpoint will return the positions of all household members.
+   *
+   * @return ResponseEntity containing the positions of household members.
+   */
+  @Operation(
+      summary = "Get positions of household members",
+      description = "Retrieves the current positions of all members in the user's household.",
+      responses = {
+          @ApiResponse(responseCode = "200",
+              description = "Successfully retrieved household member positions",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                  schema = @Schema(implementation = HouseholdMemberPositionResponse[].class))),
+          @ApiResponse(responseCode = "500",
+              description = "Internal server error",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+      }
+  )
   @GetMapping("/household")
   public ResponseEntity<?> getHouseholdPosition() {
     logger.info("Received request to get household position");
