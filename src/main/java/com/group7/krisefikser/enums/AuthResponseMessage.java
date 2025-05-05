@@ -23,8 +23,9 @@ public enum AuthResponseMessage {
   USER_VERIFIED_SUCCESSFULLY("User verified successfully"),
   INVALID_TOKEN("Invalid token"),
   EMAIL_VERIFICATION_ERROR("Error verifying email: "),
-  USER_ACCOUNT_BLOCKED("User account is blocked");
-
+  USER_ACCOUNT_BLOCKED("User account is blocked"),
+  PASSWORD_RESET_LINK_SENT("Password reset link sent to email"),
+  PASSWORD_RESET_LINK_REJECTED("Password reset link rejected");
 
 
   private final String message;
