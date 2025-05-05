@@ -7,10 +7,10 @@ import com.group7.krisefikser.utils.ValidationUtils;
 import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +41,20 @@ public class UserPositionController {
     } catch (Exception e) {
       logger.severe("Error sharing position: " + e.getMessage());
       return ResponseEntity.status(500).body("Error sharing position");
+    }
+  }
+
+  @DeleteMapping("/delete")
+  public ResponseEntity<?> stopSharingPosition() {
+    logger.info("Received request to stop sharing position");
+
+    try {
+      userPositionService.deleteUserPosition();
+      logger.info("Stopped sharing position successfully");
+      return ResponseEntity.ok("Stopped sharing position successfully");
+      } catch (Exception e) {
+      logger.severe("Error stopping sharing position: " + e.getMessage());
+      return ResponseEntity.status(500).body("Error stopping sharing position");
     }
   }
 
