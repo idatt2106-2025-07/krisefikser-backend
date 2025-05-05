@@ -1,21 +1,26 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
+import com.group7.krisefikser.dto.request.InvitationReplyRequest;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.service.EmergencyGroupService;
+import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -99,6 +104,71 @@ public class EmergencyGroupController {
     } catch (Exception e) {
       logger.error("An error occurred while adding the emergency group: {}", e.getMessage());
       return ResponseEntity.status(500).body("An error occurred while adding the emergency group.");
+    }
+  }
+
+  /**
+   * Invites a household to an emergency group by its name.
+   *
+   * @param householdName the name of the household to invite.
+   * @return a response entity indicating the result of the operation
+   */
+  @PostMapping("/invite/{householdName}")
+  public ResponseEntity<Object> inviteHouseholdByName(@PathVariable String householdName) {
+    logger.info("Inviting household with name: {}", householdName);
+    try {
+      emergencyGroupService.inviteHouseholdByName(householdName);
+      logger.info("Household {} invited successfully.", householdName);
+      return ResponseEntity.ok("Household invited successfully.");
+    } catch (NoSuchElementException e) {
+      logger.error("Household with name {} not found.", householdName);
+      return ResponseEntity.status(404).body(new ErrorResponse("Household not found."));
+    } catch (IllegalArgumentException e) {
+      logger.error("Failed to invite household: {}", e.getMessage());
+      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
+    } catch (Exception e) {
+      logger.error("An unexpected error occurred while inviting the household: {}", e.getMessage());
+      return ResponseEntity.status(500).body(new ErrorResponse(
+              "An unexpected error occurred while inviting the household."
+      ));
+    }
+  }
+
+  /**
+   * Answers the invitation to an emergency group.
+   * This method allows a user to accept or decline an invitation
+   * to join an emergency group.
+   *
+   * @param groupId       the ID of the group to answer the invitation for
+   * @param request       the request object containing the user's response
+   * @param bindingResult the binding result for validation errors
+   * @return a response entity indicating the result of the operation
+   */
+  @PatchMapping("/answer-invitation/{groupId}")
+  public ResponseEntity<Object> answerInvitation(
+          @PathVariable Long groupId,
+          @Valid @RequestBody InvitationReplyRequest request,
+          BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      logger.error("Validation failed: {}", bindingResult.getAllErrors());
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
+    try {
+      emergencyGroupService.answerEmergencyGroupInvitation(groupId, request.getIsAccept());
+      logger.info("Invitation answered successfully.");
+      return ResponseEntity.ok("Invitation answered successfully.");
+    } catch (NoSuchElementException e) {
+      logger.error("Emergency group with ID {} not found.", groupId);
+      return ResponseEntity.status(404).body(new ErrorResponse("Emergency group not found."));
+    } catch (IllegalArgumentException e) {
+      logger.error("Failed to answer invitation: {}", e.getMessage());
+      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
+    } catch (Exception e) {
+      logger.error("An unexpected error occurred while answering the invitation: {}",
+              e.getMessage());
+      return ResponseEntity.status(500).body(new ErrorResponse(
+              "An unexpected error occurred while answering the invitation."
+      ));
     }
   }
 }
