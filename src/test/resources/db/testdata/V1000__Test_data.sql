@@ -89,3 +89,11 @@ INSERT INTO general_info (theme, title, content) VALUES
      ('DURING_CRISIS', 'Shelter in Place', 'If advised, stay indoors and away from windows. Use your emergency kit.'),
      ('AFTER_CRISIS', 'Check for Injuries', 'Administer first aid if needed and call emergency services for serious injuries.'),
      ('AFTER_CRISIS', 'Report Damages', 'Contact your insurance provider and local authorities to report damage or unsafe conditions.');
+
+-- Insert emergency groups (no foreign key dependencies)
+INSERT INTO emergency_groups (name)
+VALUES ('Group A'),
+       ('Group B'),
+       ('Group C'),
+       ('Group D'),
+       ('Group E');
