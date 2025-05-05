@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 public class JwtUtils {
   private final String secretKey;
   private final String verificationSecretKey;
+  private final String invitationSecretKey;
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
   private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
 
@@ -45,6 +46,9 @@ public class JwtUtils {
 
     SecretKey vsk = keyGen.generateKey();
     verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());
+
+    SecretKey isk = keyGen.generateKey();
+    invitationSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
   }
 
   /**
@@ -61,7 +65,7 @@ public class JwtUtils {
    * generates a json web token based on the userID and role parameters.
    *
    * @param userId the subject of the token
-   * @param role the authority of the token
+   * @param role   the authority of the token
    * @return a jwt for the user
    * @throws JwtMissingPropertyException if parameters are invalid
    */
@@ -72,12 +76,12 @@ public class JwtUtils {
     }
     final Instant now = Instant.now();
     return JWT.create()
-        .withSubject(String.valueOf(userId))
-        .withIssuer("krisefikser")
-        .withIssuedAt(now)
-        .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
-        .withClaim("role", role.toString())
-        .sign(getKey(secretKey));
+      .withSubject(String.valueOf(userId))
+      .withIssuer("krisefikser")
+      .withIssuedAt(now)
+      .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
+      .withClaim("role", role.toString())
+      .sign(getKey(secretKey));
   }
 
   /**
@@ -90,11 +94,47 @@ public class JwtUtils {
   public String generateVerificationToken(final String email) {
     final Instant now = Instant.now();
     return JWT.create()
-        .withSubject(email)
-        .withIssuer("krisefikser")
-        .withIssuedAt(now)
-        .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
-        .sign(getKey(verificationSecretKey));
+      .withSubject(email)
+      .withIssuer("krisefikser")
+      .withIssuedAt(now)
+      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+      .sign(getKey(verificationSecretKey));
+  }
+
+  /**
+   * generates an invitation token for the given email.
+   * This token is used to invite a user to a household.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
+  public String generateInvitationToken(final String email) {
+    final Instant now = Instant.now();
+    return JWT.create()
+      .withSubject(email)
+      .withIssuer("krisefikser")
+      .withIssuedAt(now)
+      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+      .sign(getKey(invitationSecretKey));
+  }
+
+  /**
+   * Validates an invitation token and retrieves the email from it.
+   * This method checks if the token is valid and not expired.
+   *
+   * @param token the invitation token to validate
+   * @return the email address associated with the invitation
+   * @throws JwtMissingPropertyException if token doesn't contain an email
+   * @throws JWTVerificationException if the token is invalid or expired
+   */
+  public String validateInvitationTokenAndGetEmail(final String token)
+      throws JwtMissingPropertyException {
+    String subject = validateToken(token, invitationSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Invitation token does not contain an email");
+      throw new JwtMissingPropertyException("Invitation token does not contain an email");
+    }
+    return subject;
   }
 
   /**
@@ -154,7 +194,7 @@ public class JwtUtils {
    * @return the email
    */
   public String validateVerificationTokenAndGetEmail(final String token)
-                              throws JwtMissingPropertyException {
+      throws JwtMissingPropertyException {
     String subject = validateToken(token, verificationSecretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain an email");
