@@ -1,14 +1,17 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.SharePositionRequest;
+import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
 import com.group7.krisefikser.service.UserPositionService;
 import com.group7.krisefikser.utils.ValidationUtils;
 import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class UserPositionController {
 
-  private final UserPositionService positionService;
+  private final UserPositionService userPositionService;
 
   private static final Logger logger = Logger.getLogger(UserPositionController.class.getName());
 
@@ -32,12 +35,27 @@ public class UserPositionController {
     }
 
     try {
-      positionService.sharePosition(request);
+      userPositionService.sharePosition(request);
       logger.info("Position shared successfully");
       return ResponseEntity.ok("Position shared successfully");
     } catch (Exception e) {
       logger.severe("Error sharing position: " + e.getMessage());
       return ResponseEntity.status(500).body("Error sharing position");
+    }
+  }
+
+  @GetMapping("/household")
+  public ResponseEntity<?> getHouseholdPosition() {
+    logger.info("Received request to get household position");
+
+    try {
+      HouseholdMemberPositionResponse[] householdMemberPositionResponses =
+          userPositionService.getHouseholdPositions();
+      logger.info("Household positions retrieved successfully");
+      return ResponseEntity.ok(householdMemberPositionResponses);
+    } catch (Exception e) {
+      logger.severe("Error retrieving household positions: " + e.getMessage());
+      return ResponseEntity.status(500).body("Error retrieving household positions");
     }
   }
 }
