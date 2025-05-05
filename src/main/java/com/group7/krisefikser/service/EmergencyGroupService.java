@@ -11,7 +11,9 @@ import com.group7.krisefikser.repository.EmergencyGroupInvitationsRepo;
 import com.group7.krisefikser.repository.EmergencyGroupRepo;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
+
 import java.util.NoSuchElementException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -53,11 +55,17 @@ public class EmergencyGroupService {
    * @param request the EmergencyGroup object to add
    * @return the EmergencyGroupResponse object representing the added group
    */
+  @Transactional
   public EmergencyGroupResponse addEmergencyGroup(EmergencyGroupRequest request) {
     try {
       EmergencyGroup group = EmergencyGroupMapper.INSTANCE
               .emergencyGroupRequestToEntity(request);
       emergencyGroupRepo.addEmergencyGroup(group);
+      getHouseholdIdForCurrentUser();
+      householdRepository.addHouseholdToGroup(
+              getHouseholdIdForCurrentUser(),
+              group.getId()
+      );
       return EmergencyGroupMapper.INSTANCE.emergencyGroupToResponse(group);
     } catch (DataIntegrityViolationException e) {
       throw new IllegalArgumentException("Failed to add emergency group. Name already taken.");
@@ -70,21 +78,18 @@ public class EmergencyGroupService {
    * @param householdName the name of the household to invite
    */
   public void inviteHouseholdByName(String householdName) {
-    long userId = Long.parseLong(SecurityContextHolder.getContext()
-            .getAuthentication().getName());
-
     Household householdToInvite = householdRepository.getHouseholdByName(householdName)
             .orElseThrow(() -> new NoSuchElementException(
                     "Household with name '" + householdName + "' not found.")
             );
     Long oldGroupId = householdToInvite.getEmergencyGroupId();
-    if (oldGroupId != null && oldGroupId == getGroupIdByUserId(userId)) {
+    if (oldGroupId != null && oldGroupId == getGroupIdForCurrentUser()) {
       throw new IllegalArgumentException("The household is already in the group.");
     }
 
     if (emergencyGroupInvitationsRepo.isInvitedToGroup(
             householdToInvite.getId(),
-            getGroupIdByUserId(userId)
+            getGroupIdForCurrentUser()
     )) {
       throw new IllegalArgumentException("Household is already invited to this group.");
     }
@@ -92,7 +97,7 @@ public class EmergencyGroupService {
     emergencyGroupInvitationsRepo.addEmergencyGroupInvitation(new EmergencyGroupInvitation(
                     null,
                     householdToInvite.getId(),
-                    getGroupIdByUserId(userId),
+                    getGroupIdForCurrentUser(),
                     null
             )
     );
@@ -100,15 +105,12 @@ public class EmergencyGroupService {
   }
 
   /**
-   * Retrieves the ID of the group associated with the users household.
+   * Retrieves the ID of the group associated with the current users household.
    *
-   * @param userId the ID of the user
    * @return the ID of the group associated with the user's household
    */
-  private long getGroupIdByUserId(Long userId) {
-    long householdId = userRepository.findById(userId).orElseThrow(
-            () -> new NoSuchElementException("User not found.")
-    ).getHouseholdId();
+  private long getGroupIdForCurrentUser() {
+    long householdId = getHouseholdIdForCurrentUser();
 
     return householdRepository.getHouseholdById(householdId)
             .orElseThrow(() -> new NoSuchElementException("The requesting user"
@@ -124,12 +126,7 @@ public class EmergencyGroupService {
    */
   @Transactional
   public void answerEmergencyGroupInvitation(Long groupId, boolean accept) {
-    long userId = Long.parseLong(SecurityContextHolder.getContext()
-            .getAuthentication().getName());
-    long householdId = userRepository.findById(userId)
-            .orElseThrow(() -> new NoSuchElementException("User not found."))
-            .getHouseholdId();
-
+    long householdId = getHouseholdIdForCurrentUser();
     if (!emergencyGroupInvitationsRepo.isInvitedToGroup(householdId, groupId)) {
       throw new IllegalArgumentException("Household is not invited to this group.");
     }
@@ -139,5 +136,18 @@ public class EmergencyGroupService {
     }
 
     emergencyGroupInvitationsRepo.deleteEmergencyGroupInvitation(householdId, groupId);
+  }
+
+  /**
+   * Retrieves the ID of the household associated with the current user.
+   *
+   * @return the ID of the household associated with the current user
+   */
+  private long getHouseholdIdForCurrentUser() {
+    long userId = Long.parseLong(SecurityContextHolder.getContext()
+            .getAuthentication().getName());
+    return userRepository.findById(userId)
+            .orElseThrow(() -> new NoSuchElementException("User not found."))
+            .getHouseholdId();
   }
 }

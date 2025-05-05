@@ -107,12 +107,21 @@ class EmergencyGroupServiceTest {
 
   @Test
   void addEmergencyGroup_Success() {
+    Authentication authentication = mock(Authentication.class);
+    SecurityContext securityContext = mock(SecurityContext.class);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+    when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("100");
+
     doAnswer(invocation -> {
       EmergencyGroup group = invocation.getArgument(0);
       group.setId(1L);
       group.setCreatedAt(createdAt);
       return null;
     }).when(emergencyGroupRepo).addEmergencyGroup(any(EmergencyGroup.class));
+    doNothing().when(householdRepository).addHouseholdToGroup(anyLong(), anyLong());
+
+    when(userRepository.findById(100L)).thenReturn(Optional.of(testUser));
 
     EmergencyGroupResponse response = emergencyGroupService.addEmergencyGroup(testEmergencyGroupRequest);
 
@@ -154,12 +163,6 @@ class EmergencyGroupServiceTest {
 
   @Test
   void inviteHouseholdByName_householdNotFound() {
-    Authentication authentication = mock(Authentication.class);
-    SecurityContext securityContext = mock(SecurityContext.class);
-    when(securityContext.getAuthentication()).thenReturn(authentication);
-    SecurityContextHolder.setContext(securityContext);
-    when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("100");
-
     when(householdRepository.getHouseholdByName("NonExistentHousehold")).thenReturn(Optional.empty());
 
     assertThrows(NoSuchElementException.class, () -> emergencyGroupService.inviteHouseholdByName("NonExistentHousehold"));
