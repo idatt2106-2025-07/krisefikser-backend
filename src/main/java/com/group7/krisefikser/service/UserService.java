@@ -128,14 +128,14 @@ public class UserService implements UserDetailsService {
           .USER_ACCOUNT_BLOCKED.getMessage(), null, null);
     }
 
+    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
+      loginAttemptService.loginFailed(user.getEmail());
+      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
+    }
+
+    loginAttemptService.loginSucceeded(user.getEmail());
+
     if (user.getRole() == Role.ROLE_ADMIN) {
-      if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
-        loginAttemptService.loginFailed(user.getEmail());
-        return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
-      }
-
-      loginAttemptService.loginSucceeded(user.getEmail());
-
       try {
         String twoFactorToken = jwtUtils.generate2faToken(user.getId());
         String twoFactorLink = "https://localhost:5173/verify?token=" + twoFactorToken;
@@ -150,10 +150,6 @@ public class UserService implements UserDetailsService {
         return new AuthResponse(AuthResponseMessage
             .INVALID_EMAIL_FORMAT.getMessage() + e.getMessage(), null, null);
       }
-    }
-
-    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {
-      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);
     }
 
     try {
