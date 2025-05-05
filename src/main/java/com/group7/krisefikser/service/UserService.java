@@ -193,4 +193,19 @@ public class UserService implements UserDetailsService {
       return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);
     }
   }
+
+  public AuthResponse sendResetPasswordLink(String email) {
+    Optional<User> userOpt = userRepo.findByEmail(email);
+    if (userOpt.isPresent()) {
+      User user = userOpt.get();
+      String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());
+      String resetLink = "http://localhost:5173/reset-password?token=" + resetToken;
+      Map<String, String> params = Map.of("resetLink", resetLink);
+      emailService.sendTemplateMessage(
+          user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);
+      return new AuthResponse(AuthResponseMessage.PASSWORD_RESET_LINK_SENT.getMessage(), null, null);
+    } else {
+      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
+    }
+  }
 }
