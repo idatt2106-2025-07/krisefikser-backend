@@ -42,4 +42,9 @@ public class UserPositionService {
     return UserPositionMapper.INSTANCE.userPositionArrayToHouseholdMemberPositionResponseArray(
             userPositions);
   }
+
+  public void deleteUserPosition() {
+    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    positionRepository.deleteUserPosition(Long.parseLong(userId));
+  }
 }
