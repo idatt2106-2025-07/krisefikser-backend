@@ -75,10 +75,6 @@ public class SecurityConfig {
                 "/h2-console/**")
             .permitAll()
 
-            .requestMatchers(
-                "/api/point-of-interest/**")
-            .hasAnyRole("SUPER_ADMIN", "ADMIN")
-
             .requestMatchers(HttpMethod.DELETE,
                 "/api/items/**")
             .hasAnyRole("ADMIN", "SUPER_ADMIN")
