@@ -46,6 +46,9 @@ public class UserServiceTest {
   private EmailService emailService;
 
   @Mock
+  private LoginAttemptService loginAttemptService;
+
+  @Mock
   private HouseholdService householdService;
 
   @Mock
