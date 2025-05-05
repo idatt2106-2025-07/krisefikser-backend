@@ -26,7 +26,7 @@ class FlywayMigrationTest {
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA()",
             Integer.class);
 
-    assertEquals(10, tablesCount);
+    assertEquals(11, tablesCount);
   }
 
   @Test
