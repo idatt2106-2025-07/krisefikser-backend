@@ -6,6 +6,3 @@ CREATE TABLE user_position (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX (user_id)
 );
-
-ALTER TABLE users
-    ADD COLUMN share_position BOOLEAN NOT NULL DEFAULT FALSE;
