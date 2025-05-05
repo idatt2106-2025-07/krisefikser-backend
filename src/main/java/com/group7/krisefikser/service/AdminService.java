@@ -90,6 +90,8 @@ public class AdminService {
     Long householdId = householdService.createHouseholdForUser(username);
     user.setHouseholdId(householdId);
     userRepository.save(user);
+    user.setVerified(true);
+    userRepository.setVerified(user);
   }
 
   /**
