@@ -2,6 +2,7 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.UserPosition;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -40,5 +41,19 @@ public class UserPositionRepository {
         sql,
         new Object[] {userId},
         Boolean.class);
+  }
+
+  public UserPosition[] getHouseholdPositions(Long userId) {
+    String sql =
+        "SELECT *, users.name FROM user_position "
+        + "JOIN users ON user_position.user_id = users.id "
+        + "WHERE users.household_id = "
+        + "(SELECT household_id FROM users WHERE id = ?) "
+        + "AND users.id != ?";
+
+    return jdbcTemplate.query(
+        sql,
+        new Object[] {userId, userId},
+        new BeanPropertyRowMapper<>(UserPosition.class)).toArray(new UserPosition[0]);
   }
 }
