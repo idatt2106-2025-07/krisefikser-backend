@@ -66,6 +66,7 @@ class LoginAttemptServiceTest {
     loginAttemptService.loginFailed(username);
     loginAttemptService.loginFailed(username);
     loginAttemptService.loginFailed(username);
+    loginAttemptService.loginFailed(username);
 
     boolean blocked = loginAttemptService.isBlocked(username);
     assertThat(blocked).isTrue();
