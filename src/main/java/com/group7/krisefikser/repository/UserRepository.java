@@ -2,6 +2,8 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.model.User;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +46,44 @@ public class UserRepository {
   public Optional<User> findByEmail(String email) {
     String sql = "SELECT * FROM users WHERE email = ?";
     try {
-      return jdbcTemplate.query(sql, (rs, rowNum) -> {
-        User user = new User();
-        user.setId(rs.getLong("id"));
-        user.setEmail(rs.getString("email"));
-        user.setName(rs.getString("name"));
-        user.setHouseholdId(rs.getLong("household_id"));
-        user.setPassword(rs.getString("password"));
-        String roleString = rs.getString("role").toUpperCase();
-        Role role = Role.valueOf(roleString);
-        user.setRole(role);
-        user.setVerified(rs.getBoolean("verified"));
-        return user;
-      }, email).stream().findFirst();
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+        mapRowToUser(rs), email));
     } catch (EmptyResultDataAccessException e) {
       logger.info("No user found with email: " + email);
+      return Optional.empty();
+    }
+  }
+
+  private User mapRowToUser(ResultSet rs) throws SQLException {
+    User user = new User();
+    user.setId(rs.getLong("id"));
+    user.setEmail(rs.getString("email"));
+    user.setName(rs.getString("name"));
+    user.setHouseholdId(rs.getLong("household_id"));
+    user.setPassword(rs.getString("password"));
+    String roleString = rs.getString("role").toUpperCase();
+    Role role = Role.valueOf(roleString);
+    user.setRole(role);
+    user.setVerified(rs.getBoolean("verified"));
+    return user;
+  }
+
+  /**
+   * Finds a user by their ID.
+   * This method queries the database for a user with the specified ID.
+   * If a user is found, it returns an Optional containing the user.
+   * If no user is found, it returns an empty Optional.
+   *
+   * @param id the ID of the user to be found
+   * @return an Optional containing the user if found, or an empty Optional if not found
+   */
+  public Optional<User> findById(Long id) {
+    String sql = "SELECT * FROM users WHERE id = ?";
+    try {
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+        mapRowToUser(rs), id));
+    } catch (EmptyResultDataAccessException e) {
+      logger.info("No user found with ID: " + id);
       return Optional.empty();
     }
   }
@@ -98,8 +123,7 @@ public class UserRepository {
    * containing the updated user.
    *
    * @param user the user whose verified status is to be changed
-   * @return an Optional containing the updated user if successful,
-   *         or an empty Optional if not
+   * @return an Optional containing the updated user if successful, or an empty Optional if not
    */
   public Optional<User> setVerified(User user) {
     String query = "UPDATE users SET verified = ? WHERE email = ?";
@@ -117,7 +141,7 @@ public class UserRepository {
    * Updates a user's household association in the database.
    * This method sets the household_id for a user with the specified user ID.
    *
-   * @param userId the ID of the user whose household is being updated
+   * @param userId      the ID of the user whose household is being updated
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
