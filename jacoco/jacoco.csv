@@ -9,7 +9,7 @@ krisefikser,com.group7.krisefikser.repository,ItemRepo,9,187,2,2,1,41,2,9,0,9
 krisefikser,com.group7.krisefikser.repository,JoinHouseholdRequestRepo,0,102,0,0,0,20,0,7,0,7
 krisefikser,com.group7.krisefikser.repository,HouseholdRepository,48,61,1,3,10,11,2,4,1,3
 krisefikser,com.group7.krisefikser.controller,AffectedAreaController,0,177,0,4,0,46,0,7,0,5
-krisefikser,com.group7.krisefikser.controller,AuthController,0,136,0,2,0,32,0,5,0,4
+krisefikser,com.group7.krisefikser.controller,AuthController,0,154,2,6,0,36,2,7,0,5
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,121,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,ItemController,72,200,3,3,18,51,3,10,0,10
 krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0,4,8,54,0,8,0,6
