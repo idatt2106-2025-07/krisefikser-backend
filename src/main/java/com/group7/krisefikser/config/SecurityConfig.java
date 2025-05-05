@@ -65,7 +65,7 @@ public class SecurityConfig {
                 "/h2-console/**",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/token")
+                "/api/auth/verify-email")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
