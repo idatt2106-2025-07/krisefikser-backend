@@ -2,13 +2,25 @@
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Main application class for the Krisefikser application.
  * This class serves as the entry point for the Spring Boot application.
  */
 @SpringBootApplication
-<span class="fc" id="L11">public class KrisefikserApplication {</span>
+<span class="fc" id="L13">public class KrisefikserApplication {</span>
+
+  /**
+   * Bean for RestTemplate, used for making HTTP requests.
+   *
+   * @return a new instance of RestTemplate
+   */
+  @Bean
+  public RestTemplate restTemplate() {
+<span class="fc" id="L22">    return new RestTemplate();</span>
+  }
 
   /**
    * Main method to run the Spring Boot application.
@@ -16,7 +28,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
    * @param args command line arguments
    */
   public static void main(String[] args) {
-<span class="nc" id="L19">    SpringApplication.run(KrisefikserApplication.class, args);</span>
-<span class="nc" id="L20">  }</span>
+<span class="nc" id="L31">    SpringApplication.run(KrisefikserApplication.class, args);</span>
+<span class="nc" id="L32">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

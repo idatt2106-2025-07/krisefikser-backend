@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HcaptchaController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller</a> &gt; <span class="el_source">HcaptchaController.java</span></div><h1>HcaptchaController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller;
+
+import com.group7.krisefikser.dto.request.HcaptchaRequest;
+import com.group7.krisefikser.dto.response.HcaptchaVerificationResponse;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * Controller for handling hCaptcha verification requests.
+ * It verifies the hCaptcha token sent from the client by making a request to the hCaptcha API.
+ * The controller is mapped to the &quot;/api/hcaptcha&quot; endpoint.
+ * It contains a single POST endpoint &quot;/verify&quot; that accepts a JSON request body
+ * with the hCaptcha token and returns the verification response.
+ * The controller uses Spring's
+ * RestTemplate to make the API call to hCaptcha's verification endpoint.
+ * The hCaptcha secret key is injected from the application properties.
+ */
+@RestController
+@RequestMapping(&quot;/api/hcaptcha&quot;)
+public class HcaptchaController {
+
+
+  private final RestTemplate restTemplate;
+
+  /**
+   * Constructor for HcaptchaController.
+   * It initializes the RestTemplate used for making HTTP requests.
+   *
+   * @param restTemplate the RestTemplate to be used
+   */
+<span class="fc" id="L44">  public HcaptchaController(RestTemplate restTemplate) {</span>
+
+<span class="fc" id="L46">    this.restTemplate = restTemplate;</span>
+
+<span class="fc" id="L48">  }</span>
+
+  @Value(&quot;${hcaptcha.secret}&quot;)
+  private String hcaptchaSecret;
+
+  /**
+   * Endpoint to verify the hCaptcha token.
+   * It accepts a POST request with the hCaptcha token in the request body.
+   * The token is then sent to the hCaptcha API for verification.
+   *
+   * @param request the request containing the hCaptcha token
+   * @return the response from the hCaptcha API
+   */
+  @PostMapping(&quot;/verify&quot;)
+  public ResponseEntity&lt;?&gt; verify(@RequestBody HcaptchaRequest request) {
+<span class="fc" id="L63">    String token = request.getToken();</span>
+<span class="fc" id="L64">    final String url = &quot;https://hcaptcha.com/siteverify&quot;;</span>
+
+<span class="fc" id="L66">    HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L67">    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);</span>
+
+<span class="fc" id="L69">    MultiValueMap&lt;String, String&gt; body = new LinkedMultiValueMap&lt;&gt;();</span>
+<span class="fc" id="L70">    body.add(&quot;secret&quot;, hcaptchaSecret);</span>
+<span class="fc" id="L71">    body.add(&quot;response&quot;, token);</span>
+
+<span class="fc" id="L73">    HttpEntity&lt;MultiValueMap&lt;String, String&gt;&gt; entity = new HttpEntity&lt;&gt;(body, headers);</span>
+
+<span class="fc" id="L75">    ResponseEntity&lt;HcaptchaVerificationResponse&gt; response =</span>
+<span class="fc" id="L76">        restTemplate.exchange(url, HttpMethod.POST, entity, HcaptchaVerificationResponse.class);</span>
+
+<span class="fc" id="L78">    HcaptchaVerificationResponse result = response.getBody();</span>
+
+<span class="fc" id="L80">    HcaptchaVerificationResponse failure = HcaptchaVerificationResponse.builder()</span>
+<span class="fc" id="L81">        .success(false)</span>
+<span class="fc" id="L82">        .errorCodes(List.of(&quot;verification-failed&quot;))</span>
+<span class="fc" id="L83">        .build();</span>
+
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">    if (result != null &amp;&amp; result.isSuccess()) {</span>
+<span class="fc" id="L86">      return ResponseEntity.ok(result);</span>
+    } else {
+<span class="fc" id="L88">      return ResponseEntity</span>
+<span class="fc" id="L89">      .status(HttpStatus.BAD_REQUEST)</span>
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">      .body(result != null ? result : failure);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

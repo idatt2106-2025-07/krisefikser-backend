@@ -23,6 +23,7 @@ krisefikser,com.group7.krisefikser.controller,HouseholdInvitationController,84,8
 krisefikser,com.group7.krisefikser.controller,AdminController,9,88,3,3,3,25,3,4,0,4
 krisefikser,com.group7.krisefikser.controller,UserPositionController,36,70,1,1,10,23,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0,4,8,54,0,8,0,6
+krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2,3,0,2
 krisefikser,com.group7.krisefikser.controller,StorageItemController,156,278,2,2,46,76,3,12,1,12
 krisefikser,com.group7.krisefikser.controller,AuthController,16,160,5,7,3,38,4,7,0,5
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,121,0,0,15,30,0,7,0,7
@@ -41,7 +42,7 @@ krisefikser,com.group7.krisefikser.mapper,JoinRequestMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,AffectedAreaMapperImpl,4,106,4,4,2,28,4,3,0,3
 krisefikser,com.group7.krisefikser.mapper,JoinRequestMapperImpl,4,50,2,4,2,13,2,4,0,3
 krisefikser,com.group7.krisefikser.mapper,GeneralInfoMapper,7,9,0,0,2,2,0,2,0,2
-krisefikser,com.group7.krisefikser,KrisefikserApplication,5,3,0,0,2,1,1,1,1,1
+krisefikser,com.group7.krisefikser,KrisefikserApplication,5,7,0,0,2,2,1,2,1,2
 krisefikser,com.group7.krisefikser.enums,EmailTemplateType,0,33,0,0,0,6,0,1,0,1
 krisefikser,com.group7.krisefikser.enums,ItemType,2,34,1,1,1,8,1,2,0,2
 krisefikser,com.group7.krisefikser.enums,PointOfInterestType,0,75,0,0,0,14,0,5,0,5
@@ -63,7 +64,7 @@ krisefikser,com.group7.krisefikser.service,UserService,114,284,9,13,27,59,10,10,
 krisefikser,com.group7.krisefikser.service,LoginAttemptService,5,50,0,2,4,14,0,6,0,5
 krisefikser,com.group7.krisefikser.service,HouseholdInvitationService,18,93,0,0,2,21,3,3,3,3
 krisefikser,com.group7.krisefikser.service,EmergencyGroupService,16,193,4,6,2,52,3,13,0,11
-krisefikser,com.group7.krisefikser.config,SecurityConfig,0,200,0,0,0,30,0,6,0,6
+krisefikser,com.group7.krisefikser.config,SecurityConfig,0,205,0,0,0,30,0,6,0,6
 krisefikser,com.group7.krisefikser.dto.request,ItemRequest,0,30,0,0,0,9,0,2,0,2
 krisefikser,com.group7.krisefikser.dto.request,StorageItemRequest,18,0,0,0,5,0,1,0,1,0
 krisefikser,com.group7.krisefikser.validation,EnumValidator,0,28,0,2,0,10,0,4,0,3
