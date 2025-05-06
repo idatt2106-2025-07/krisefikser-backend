@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.model.HouseholdInvitation;
-import com.group7.krisefikser.model.InvitationRequest;
+import com.group7.krisefikser.dto.request.InvitationRequest;
 import com.group7.krisefikser.service.HouseholdInvitationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
