@@ -166,4 +166,16 @@ class AuthControllerTest {
     mockMvc.perform(get("/api/auth/me"))
         .andExpect(status().isNoContent());
   }
+
+  @WithMockUser
+  @Test
+  void logout_clearsJwtCookieAndReturnsOk() throws Exception {
+    mockMvc.perform(post("/api/auth/logout"))
+        .andExpect(status().isOk())
+        .andExpect(cookie().exists("JWT"))
+        .andExpect(cookie().maxAge("JWT", 0))
+        .andExpect(cookie().httpOnly("JWT", true))
+        .andExpect(cookie().secure("JWT", true))
+        .andExpect(cookie().path("JWT", "/"));
+  }
 }
