@@ -1,7 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.response.SuperAdminResponse;
+import com.group7.krisefikser.dto.response.AdminResponse;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.UsernameGenerationException;
@@ -96,7 +96,7 @@ public class SuperAdminServiceTest {
 
     when(userRepository.findByRole(Role.ROLE_ADMIN)).thenReturn(List.of(admin));
 
-    List<SuperAdminResponse> result = superAdminService.getAllAdmins();
+    List<AdminResponse> result = superAdminService.getAllAdmins();
 
     assertEquals(1, result.size());
     assertEquals("admin@test.com", result.get(0).getEmail());
