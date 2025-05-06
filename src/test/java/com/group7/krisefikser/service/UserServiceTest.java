@@ -416,10 +416,11 @@ public class UserServiceTest {
   }
 
   @Test
-  void sendResetPasswordLink_ShouldDoNothing_WhenUserNotFound() {
+  void sendResetPasswordLink_ShouldThrowException_WhenUserNotFound() {
     when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
 
-    userService.sendResetPasswordLink("unknown@example.com");
+    assertThrows(UsernameNotFoundException.class,
+        () -> userService.sendResetPasswordLink("unknown@example.com"));
 
     verify(emailService, never()).sendTemplateMessage(any(), any(), any());
   }
