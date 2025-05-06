@@ -209,7 +209,7 @@ public class UserService implements UserDetailsService {
         User user = userOpt.get();
         String newPassword = request.getNewPassword();
 
-        if (user.getRole() == Role.ROLE_ADMIN && PasswordUtil.isStrongPassword(newPassword)) {
+        if (user.getRole() == Role.ROLE_ADMIN && !PasswordUtil.isStrongPassword(newPassword)) {
           return new AuthResponse(AuthResponseMessage
               .PASSWORD_TOO_WEAK.getMessage(), null, null);
         }
