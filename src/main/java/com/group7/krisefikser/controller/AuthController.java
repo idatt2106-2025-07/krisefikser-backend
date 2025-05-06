@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final UserService userService;
+  private final JwtUtils jwtUtils;
   private static final Logger logger = Logger.getLogger(AuthController.class.getName());
 
   /**
@@ -217,10 +218,9 @@ public class AuthController {
   @PostMapping("/logout")
   public ResponseEntity<Void> logout(HttpServletResponse response) {
     try {
-      JwtUtils jwtUtils = new JwtUtils();
       jwtUtils.setLogOutJwtCookie(response);
       return ResponseEntity.ok().build();
-    } catch (NoSuchAlgorithmException e) {
+    } catch (Exception e) {
       logger.warning("Error during logout: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
