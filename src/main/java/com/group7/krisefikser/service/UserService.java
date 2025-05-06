@@ -36,7 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-@Value("${app.frontend.url}")
+  @Value("${app.frontend.url}")
 
   private String frontendUrl;
 
