@@ -27,24 +27,42 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtils {
   private final String secretKey;
+  private final String inviteAdminSecretKey;
+  private final String twoFactorSecretKey;
   private final String verificationSecretKey;
-  private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
-  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
+  private final String resetPasswordSecretKey;
+  private final String invitationSecretKey;
 
+  private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
+  private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);
+  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
   /**
-   * Constructor for JwtUtils, generates a secret key.
+   * Constructor for JwtUtils, generates secret keys.
    *
    * @throws NoSuchAlgorithmException if the algorithm is not found
    */
   public JwtUtils() throws NoSuchAlgorithmException {
     KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+
     SecretKey sk = keyGen.generateKey();
     secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
 
+    SecretKey isk = keyGen.generateKey();
+    inviteAdminSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());
+
+    SecretKey tfsk = keyGen.generateKey();
+    twoFactorSecretKey = Base64.getEncoder().encodeToString(tfsk.getEncoded());
+
     SecretKey vsk = keyGen.generateKey();
     verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());
+
+    SecretKey rsk = keyGen.generateKey();
+    resetPasswordSecretKey = Base64.getEncoder().encodeToString(rsk.getEncoded());
+    
+    SecretKey invSk = keyGen.generateKey();
+    invitationSecretKey = Base64.getEncoder().encodeToString(invSk.getEncoded());
   }
 
   /**
@@ -61,7 +79,7 @@ public class JwtUtils {
    * generates a json web token based on the userID and role parameters.
    *
    * @param userId the subject of the token
-   * @param role the authority of the token
+   * @param role   the authority of the token
    * @return a jwt for the user
    * @throws JwtMissingPropertyException if parameters are invalid
    */
@@ -72,12 +90,56 @@ public class JwtUtils {
     }
     final Instant now = Instant.now();
     return JWT.create()
-        .withSubject(String.valueOf(userId))
+      .withSubject(String.valueOf(userId))
+      .withIssuer("krisefikser")
+      .withIssuedAt(now)
+      .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
+      .withClaim("role", role.toString())
+      .sign(getKey(secretKey));
+  }
+
+  /**
+   * generates an invitation token for the given username.
+   *
+   * @param username the subject of the token
+   * @return a jwt for the user
+   * @throws JwtMissingPropertyException if parameters are invalid
+  **/
+  public String generateInviteToken(final String username)
+      throws JwtMissingPropertyException {
+    if (username == null || username.isEmpty()) {
+      throw new JwtMissingPropertyException("Invite token generation call must include username");
+    }
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(username)
         .withIssuer("krisefikser")
         .withIssuedAt(now)
-        .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))
-        .withClaim("role", role.toString())
-        .sign(getKey(secretKey));
+        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
+        .withClaim("role", "ROLE_INVITE")
+        .sign(getKey(inviteAdminSecretKey));
+  }
+
+  /**
+   * generates an 2fa token for the given username.
+   *
+   * @param userId the subject of the token
+   * @return a jwt for the user
+   * @throws JwtMissingPropertyException if parameters are invalid
+   **/
+  public String generate2faToken(final Long userId)
+      throws JwtMissingPropertyException {
+    if (userId <= 0) {
+      throw new JwtMissingPropertyException("2fa token generation call must include userId");
+    }
+    final Instant now = Instant.now();
+    return JWT.create()
+        .withSubject(userId.toString())
+        .withIssuer("krisefikser")
+        .withIssuedAt(now)
+        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
+        .withClaim("role", "ROLE_2FA")
+        .sign(getKey(twoFactorSecretKey));
   }
 
   /**
@@ -90,11 +152,64 @@ public class JwtUtils {
   public String generateVerificationToken(final String email) {
     final Instant now = Instant.now();
     return JWT.create()
+      .withSubject(email)
+      .withIssuer("krisefikser")
+      .withIssuedAt(now)
+      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+      .sign(getKey(verificationSecretKey));
+  }
+
+  /**
+   * generates an invitation token for the given email.
+   * This token is used to invite a user to a household.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
+  public String generateInvitationToken(final String email) {
+    final Instant now = Instant.now();
+    return JWT.create()
+      .withSubject(email)
+      .withIssuer("krisefikser")
+      .withIssuedAt(now)
+      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+      .sign(getKey(invitationSecretKey));
+  }
+
+  /**
+   * Validates an invitation token and retrieves the email from it.
+   * This method checks if the token is valid and not expired.
+   *
+   * @param token the invitation token to validate
+   * @return the email address associated with the invitation
+   * @throws JwtMissingPropertyException if token doesn't contain an email
+   * @throws JWTVerificationException if the token is invalid or expired
+   */
+  public String validateInvitationTokenAndGetEmail(final String token)
+      throws JwtMissingPropertyException {
+    String subject = validateToken(token, invitationSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Invitation token does not contain an email");
+      throw new JwtMissingPropertyException("Invitation token does not contain an email");
+    }
+    return subject;
+  }
+
+  /**
+    * generates a reset password token for the given email.
+   * This token is used to reset the user's password.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
+  public String generateResetPasswordToken(final String email) {
+    final Instant now = Instant.now();
+    return JWT.create()
         .withSubject(email)
         .withIssuer("krisefikser")
         .withIssuedAt(now)
         .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
-        .sign(getKey(verificationSecretKey));
+        .sign(getKey(resetPasswordSecretKey));
   }
 
   /**
@@ -131,6 +246,23 @@ public class JwtUtils {
   }
 
   /**
+   * validates and retrieves the user id from the given 2fa token.
+   *
+   * @param token the jwt to get user id from
+   * @return the user id
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validate2faTokenAndGetUserId(final String token)
+      throws JwtMissingPropertyException {
+    String subject = validateToken(token, twoFactorSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain a subject");
+      throw new JwtMissingPropertyException("Token does not contain a subject");
+    }
+    return subject;
+  }
+
+  /**
    * validates and retrieves the role from the given token.
    *
    * @param token the jwt to get role from
@@ -147,6 +279,23 @@ public class JwtUtils {
   }
 
   /**
+   * validates and retrieves the username from the given invite token.
+   *
+   * @param token the jwt to get username from
+   * @return the username
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validateInviteAdminTokenAndGetUsername(final String token)
+      throws JwtMissingPropertyException {
+    String username = validateToken(token, inviteAdminSecretKey).getSubject();
+    if (username == null) {
+      logger.error("Token does not contain a subject");
+      throw new JwtMissingPropertyException("Token does not contain a subject");
+    }
+    return username;
+  }
+
+  /**
    * validates and retrieves the email from the given token.
    * This token is used to verify the user's email address.
    *
@@ -154,8 +303,26 @@ public class JwtUtils {
    * @return the email
    */
   public String validateVerificationTokenAndGetEmail(final String token)
-                              throws JwtMissingPropertyException {
+      throws JwtMissingPropertyException {
     String subject = validateToken(token, verificationSecretKey).getSubject();
+    if (subject == null) {
+      logger.error("Token does not contain an email");
+      throw new JwtMissingPropertyException("Token does not contain an email");
+    }
+    return subject;
+  }
+
+  /**
+   * validates and retrieves the email from the given token.
+   * This token is used to reset the user's password.
+   *
+   * @param token the jwt to get email from
+   * @return the email
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validateResetPasswordTokenAndGetEmail(final String token)
+                              throws JwtMissingPropertyException {
+    String subject = validateToken(token, resetPasswordSecretKey).getSubject();
     if (subject == null) {
       logger.error("Token does not contain an email");
       throw new JwtMissingPropertyException("Token does not contain an email");

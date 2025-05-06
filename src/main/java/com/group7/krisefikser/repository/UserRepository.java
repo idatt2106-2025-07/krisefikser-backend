@@ -2,6 +2,9 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.model.User;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,21 +47,44 @@ public class UserRepository {
   public Optional<User> findByEmail(String email) {
     String sql = "SELECT * FROM users WHERE email = ?";
     try {
-      return jdbcTemplate.query(sql, (rs, rowNum) -> {
-        User user = new User();
-        user.setId(rs.getLong("id"));
-        user.setEmail(rs.getString("email"));
-        user.setName(rs.getString("name"));
-        user.setHouseholdId(rs.getLong("household_id"));
-        user.setPassword(rs.getString("password"));
-        String roleString = rs.getString("role").toUpperCase();
-        Role role = Role.valueOf(roleString);
-        user.setRole(role);
-        user.setVerified(rs.getBoolean("verified"));
-        return user;
-      }, email).stream().findFirst();
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+              mapRowToUser(rs), email));
     } catch (EmptyResultDataAccessException e) {
       logger.info("No user found with email: " + email);
+      return Optional.empty();
+    }
+  }
+
+  private User mapRowToUser(ResultSet rs) throws SQLException {
+    User user = new User();
+    user.setId(rs.getLong("id"));
+    user.setEmail(rs.getString("email"));
+    user.setName(rs.getString("name"));
+    user.setHouseholdId(rs.getLong("household_id"));
+    user.setPassword(rs.getString("password"));
+    String roleString = rs.getString("role").toUpperCase();
+    Role role = Role.valueOf(roleString);
+    user.setRole(role);
+    user.setVerified(rs.getBoolean("verified"));
+    return user;
+  }
+
+  /**
+   * Finds a user by their ID.
+   * This method queries the database for a user with the specified ID.
+   * If a user is found, it returns an Optional containing the user.
+   * If no user is found, it returns an empty Optional.
+   *
+   * @param id the ID of the user to be found
+   * @return an Optional containing the user if found, or an empty Optional if not found
+   */
+  public Optional<User> findById(Long id) {
+    String sql = "SELECT * FROM users WHERE id = ?";
+    try {
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+              mapRowToUser(rs), id));
+    } catch (EmptyResultDataAccessException e) {
+      logger.info("No user found with ID: " + id);
       return Optional.empty();
     }
   }
@@ -78,11 +104,11 @@ public class UserRepository {
       user.setRole(Role.ROLE_NORMAL);
     }
     String query = "INSERT INTO users "
-        + "(email, name, household_id, password, role) "
-        + "VALUES (?, ?, ?, ?, ?)";
+            + "(email, name, household_id, password, role) "
+            + "VALUES (?, ?, ?, ?, ?)";
     try {
       jdbcTemplate.update(query, user.getEmail(), user.getName(),
-          user.getHouseholdId(), user.getPassword(), user.getRole().toString());
+              user.getHouseholdId(), user.getPassword(), user.getRole().toString());
       return findByEmail(user.getEmail());
     } catch (Exception e) {
       logger.info("Failed to save user: " + e.getMessage());
@@ -99,7 +125,7 @@ public class UserRepository {
    *
    * @param user the user whose verified status is to be changed
    * @return an Optional containing the updated user if successful,
-   *         or an empty Optional if not
+   *      or an empty Optional if not
    */
   public Optional<User> setVerified(User user) {
     String query = "UPDATE users SET verified = ? WHERE email = ?";
@@ -114,15 +140,85 @@ public class UserRepository {
   }
 
   /**
+   * Checks the existence of an admin by their username.
+   * This method queries the database for an admin with the specified username.
+   * If an admin is found, it returns a true.
+   * If no admin is found, it returns false.
+   *
+   * @param username the username of the admin to be found
+   * @return a bool if found
+   */
+  public boolean existAdminByUsername(String username) {
+    String sql =
+        "SELECT CASE "
+        + "WHEN EXISTS ( "
+        + "SELECT 1 FROM users WHERE users.name = ? AND users.role = 'ROLE_ADMIN' "
+        + ") THEN 'true' "
+        + "ELSE 'false' "
+        + "END AS finnes";
+    return jdbcTemplate.queryForObject(
+        sql,
+        new Object[]{username},
+        Boolean.class);
+  }
+
+  /**
    * Updates a user's household association in the database.
    * This method sets the household_id for a user with the specified user ID.
    *
-   * @param userId the ID of the user whose household is being updated
+   * @param userId      the ID of the user whose household is being updated
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
     jdbcTemplate.update(
-        "UPDATE users SET household_id = ? WHERE id = ?",
-        householdId, userId);
+            "UPDATE users SET household_id = ? WHERE id = ?",
+            householdId, userId);
+  }
+
+  /**
+   * Deletes a user from the database by their ID.
+   * This method removes the user from the users table
+   * and also deletes any associated records
+   * from the join_household_requests table.
+   *
+   * @param id the ID of the user to be deleted
+   */
+  public void deleteById(Long id) {
+    jdbcTemplate.update("DELETE FROM join_household_requests WHERE user_id = ?", id);
+    jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
+  }
+
+  /**
+   * Finds users by their role.
+   * This method queries the database for users with the specified role.
+   * If users are found, it returns a list of users.
+   * If no users are found, it returns an empty list.
+   *
+   * @param role the role of the users to be found
+   * @return a list of users with the specified role, or an empty list if none are found
+   */
+  public List<User> findByRole(Role role) {
+    String sql = "SELECT * FROM users WHERE role = ?";
+    try {
+      return jdbcTemplate.query(sql, (rs, rowNum) ->
+          mapRowToUser(rs), role.toString());
+    } catch (EmptyResultDataAccessException e) {
+      logger.info("No users found with role: " + role);
+      return List.of();
+    }
+  }
+
+  /**
+   * Updates a user's password in the database.
+   * This method sets the password for a user with the specified email.
+   * It is used for updating the password
+   * when a user requests a password reset.
+   *
+   * @param email the email address of the user whose password is being updated
+   * @param hashedPassword the new hashed password to be set
+   */
+  public void updatePasswordByEmail(String email, String hashedPassword) {
+    String sql = "UPDATE users SET password = ? WHERE email = ?";
+    jdbcTemplate.update(sql, hashedPassword, email);
   }
 }

@@ -34,6 +34,7 @@ class AffectedAreaRepoTest {
   @BeforeEach
   void setUp() {
     testArea1 = new AffectedArea();
+    testArea1.setName("Name 1");
     testArea1.setLongitude(11.5);
     testArea1.setLatitude(63.5);
     testArea1.setHighDangerRadiusKm(6.0);
@@ -44,6 +45,7 @@ class AffectedAreaRepoTest {
     testArea1.setStartDate(LocalDateTime.now().minusDays(2));
 
     testArea2 = new AffectedArea();
+    testArea2.setName("Name 2");
     testArea2.setLongitude(12.0);
     testArea2.setLatitude(64.0);
     testArea2.setHighDangerRadiusKm(7.0);
@@ -107,6 +109,7 @@ class AffectedAreaRepoTest {
 
     AffectedArea updatedArea = new AffectedArea();
     updatedArea.setId(testArea1.getId());
+    updatedArea.setName("Name");
     updatedArea.setLongitude(12.5);
     updatedArea.setLatitude(64.5);
     updatedArea.setHighDangerRadiusKm(7.0);
@@ -122,6 +125,7 @@ class AffectedAreaRepoTest {
     List<Map<String, Object>> results = jdbcTemplate.queryForList("SELECT * FROM affected_areas WHERE id = ?", updatedArea.getId());
     assertEquals(1, results.size());
     Map<String, Object> retrievedArea = results.get(0);
+    assertEquals(updatedArea.getName(), retrievedArea.get("name"));
     assertEquals(updatedArea.getLongitude(), (Double) retrievedArea.get("longitude"), 0.001);
     assertEquals(updatedArea.getLatitude(), (Double) retrievedArea.get("latitude"), 0.001);
     assertEquals(updatedArea.getHighDangerRadiusKm(), (Double) retrievedArea.get("high_danger_radius_km"), 0.001);

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AffectedAreaRequest {
+  @NotNull(message = "Name cannot be null")
+  @NotBlank(message = "Name cannot be blank")
+  private String name;
+
   @NotNull(message = "Longitude cannot be null")
   @DecimalMin(value = "-180.0", message = "Longitude must be between -180.0 and 180.0")
   @DecimalMax(value = "180.0", message = "Longitude must be between -180.0 and 180.0")
@@ -49,7 +54,7 @@ public class AffectedAreaRequest {
 
   @NotNull(message = "Start date cannot be null")
   @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?"
-      + "(Z|[+-]\\d{2}:\\d{2})?$",
+          + "(Z|[+-]\\d{2}:\\d{2})?$",
           message = "Start date must be in ISO format (yyyy-MM-ddTHH:mm:ss[.nnn][Z/+HH:MM])")
   private String startDate;
 }

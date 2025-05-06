@@ -44,6 +44,7 @@ public interface AffectedAreaMapper {
    * @return the mapped affected area DTO
    */
   @Mapping(target = "id", source = "id")
+  @Mapping(target = "name", source = "name")
   @Mapping(target = "longitude", source = "longitude")
   @Mapping(target = "latitude", source = "latitude")
   @Mapping(target = "highDangerRadiusKm", source = "highDangerRadiusKm")
@@ -60,6 +61,7 @@ public interface AffectedAreaMapper {
    * @param affectedAreaRequest the AffectedArea DTO to map
    * @return the mapped affected area entity
    */
+  @Mapping(target = "name", source = "name")
   @Mapping(target = "longitude", source = "longitude")
   @Mapping(target = "latitude", source = "latitude")
   @Mapping(target = "highDangerRadiusKm", source = "highDangerRadiusKm")

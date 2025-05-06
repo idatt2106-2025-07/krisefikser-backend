@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AffectedAreaResponse {
   private Long id;
+  private String name;
   private Double longitude;
   private Double latitude;
   private Double highDangerRadiusKm;
