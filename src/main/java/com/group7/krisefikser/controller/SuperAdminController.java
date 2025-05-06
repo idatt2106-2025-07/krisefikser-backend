@@ -9,6 +9,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.logging.Logger;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -20,9 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.logging.Logger;
-
 /**
  * Controller class for handling requests related to super admin operations.
  * This class provides endpoints to invite admins,
@@ -31,15 +32,12 @@ import java.util.logging.Logger;
  * and send reset password emails to admins.
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/super-admin")
 public class SuperAdminController {
 
   private static final Logger logger = Logger.getLogger(SuperAdminController.class.getName());
   private final SuperAdminService superAdminService;
-
-  public SuperAdminController(SuperAdminService superAdminService) {
-    this.superAdminService = superAdminService;
-  }
 
   /**
    * Endpoint to invite an admin.
