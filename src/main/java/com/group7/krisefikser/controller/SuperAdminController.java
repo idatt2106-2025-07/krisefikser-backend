@@ -1,7 +1,7 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.response.SuperAdminResponse;
+import com.group7.krisefikser.dto.response.AdminResponse;
 import com.group7.krisefikser.service.SuperAdminService;
 import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,7 +110,7 @@ public class SuperAdminController {
               description = "List of admins retrieved successfully",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = SuperAdminResponse.class)
+                  schema = @Schema(implementation = AdminResponse.class)
               )
           ),
           @ApiResponse(
@@ -121,10 +121,10 @@ public class SuperAdminController {
       }
   )
   @GetMapping("/admins")
-  public ResponseEntity<List<SuperAdminResponse>> getAllAdmins() {
+  public ResponseEntity<List<AdminResponse>> getAllAdmins() {
     logger.info("Fetching all admins");
     try {
-      List<SuperAdminResponse> admins = superAdminService.getAllAdmins();
+      List<AdminResponse> admins = superAdminService.getAllAdmins();
       logger.info("Fetched " + admins.size() + " admins successfully.");
       return new ResponseEntity<>(admins, HttpStatus.OK);
     } catch (Exception e) {
