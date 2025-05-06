@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StorageItemService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service</a> &gt; <span class="el_source">StorageItemService.java</span></div><h1>StorageItemService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service;
+
+import com.group7.krisefikser.dto.request.StorageItemRequest;
+import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
+import com.group7.krisefikser.dto.response.ItemResponse;
+import com.group7.krisefikser.dto.response.StorageItemResponse;
+import com.group7.krisefikser.enums.ItemType;
+import com.group7.krisefikser.model.Item;
+import com.group7.krisefikser.model.StorageItem;
+import com.group7.krisefikser.repository.ItemRepo;
+import com.group7.krisefikser.repository.StorageItemRepo;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+/**
+ * This class is a service for managing storage items.
+ * It provides methods to get, add, update, delete, sort and filter storage items.
+ * It uses StorageItemRepo to interact with the database.
+ */
+@Service
+@RequiredArgsConstructor
+public class StorageItemService {
+  private final StorageItemRepo storageItemRepo;
+  private final ItemRepo itemRepo;
+<span class="fc" id="L32">  private static final Logger logger = Logger.getLogger(StorageItemService.class.getName());</span>
+
+
+  /**
+   * Retrieves all storage items for a specific household from the repository.
+   *
+   * @param householdId The ID of the household to retrieve storage items for.
+   * @return A list of all storage items available for the specified household.
+   */
+  public List&lt;StorageItem&gt; getAllStorageItems(int householdId) {
+<span class="fc" id="L42">    return storageItemRepo.getAllStorageItems(householdId);</span>
+  }
+
+  /**
+   * Retrieves storage items by their item ID for a specific household.
+   *
+   * @param itemId The item ID of the storage items to retrieve.
+   * @param householdId The ID of the household the storage items belong to.
+   * @return A list of storage items of the specified item.
+   */
+  public List&lt;StorageItem&gt; getStorageItemsByItemId(int itemId, int householdId) {
+<span class="fc" id="L53">    return storageItemRepo.findByItemId(itemId, householdId);</span>
+  }
+
+  /**
+   * Adds a new storage item to the repository after validating it.
+   * This method ensures that the item meets all validation criteria
+   * before delegating the addition to the repository.
+   *
+   * @param storageItem The storage item to be added.
+   * @return The added storage item with its generated ID.
+   */
+  public StorageItem addStorageItem(StorageItem storageItem) {
+<span class="fc" id="L65">    validateStorageItem(storageItem);</span>
+
+    // Ensure the referenced item exists
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (!itemExists(storageItem.getItemId())) {</span>
+<span class="fc" id="L69">      throw new RuntimeException(&quot;Item not found with id: &quot; + storageItem.getItemId());</span>
+    }
+
+<span class="fc" id="L72">    return storageItemRepo.add(storageItem);</span>
+  }
+
+  /**
+   * Updates an existing storage item in the repository after validating it.
+   * This method ensures that the item meets all validation criteria
+   * before delegating the update to the repository.
+   *
+   * @param id          The ID of the storage item to be updated.
+   * @param householdId The ID of the household the storage item belongs to.
+   * @param storageItem The updated storage item details.
+   * @return The updated storage item.
+   */
+  public StorageItem updateStorageItem(int id, int householdId, StorageItem storageItem) {
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (!storageItemExists(id, householdId)) {</span>
+<span class="nc" id="L87">      throw new RuntimeException(&quot;Storage item not found with id: &quot; + id</span>
+        + &quot; in household: &quot; + householdId);
+    }
+
+<span class="fc" id="L91">    validateStorageItem(storageItem);</span>
+
+    // Ensure the referenced item exists
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (!itemExists(storageItem.getItemId())) {</span>
+<span class="nc" id="L95">      throw new RuntimeException(&quot;Item not found with id: &quot; + storageItem.getItemId());</span>
+    }
+
+    // Ensure household ID is not changed
+<span class="fc" id="L99">    storageItem.setId(id);</span>
+<span class="fc" id="L100">    storageItem.setHouseholdId(householdId);</span>
+<span class="fc" id="L101">    return storageItemRepo.update(storageItem);</span>
+  }
+
+  /**
+   * Deletes a storage item from the repository by its ID.
+   *
+   * @param id          The ID of the storage item to be deleted.
+   * @param householdId The ID of the household the storage item belongs to.
+   */
+  public void deleteStorageItem(int id, int householdId) {
+<span class="fc bfc" id="L111" title="All 2 branches covered.">    if (!storageItemExists(id, householdId)) {</span>
+<span class="fc" id="L112">      throw new RuntimeException(&quot;Storage item not found with id: &quot; + id</span>
+        + &quot; in household: &quot; + householdId);
+    }
+
+<span class="fc" id="L116">    storageItemRepo.deleteById(id, householdId);</span>
+<span class="fc" id="L117">  }</span>
+
+  /**
+   * Retrieves storage items that are about to expire for a specific household.
+   *
+   * @param days        The number of days within which items will expire.
+   * @param householdId The ID of the household to retrieve expiring items for.
+   * @return A list of storage items that will expire within the specified number of days.
+   */
+  public List&lt;StorageItem&gt; getExpiringStorageItems(int days, int householdId) {
+<span class="fc" id="L127">    return storageItemRepo.findExpiringItems(days, householdId);</span>
+  }
+
+  /**
+   * Validates the storage item properties before adding or updating it.
+   * This method checks if the expiration date, quantity, household ID, and item ID are valid.
+   *
+   * @param storageItem The storage item to be validated.
+   */
+  private void validateStorageItem(StorageItem storageItem) {
+    // Expiration date validation
+<span class="fc bfc" id="L138" title="All 2 branches covered.">    if (storageItem.getExpirationDate() == null) {</span>
+<span class="fc" id="L139">      throw new IllegalArgumentException(&quot;Expiration date cannot be null&quot;);</span>
+    }
+
+    // Quantity validation
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">    if (storageItem.getQuantity() &lt; 0) {</span>
+<span class="nc" id="L144">      throw new IllegalArgumentException(&quot;Quantity cannot be negative&quot;);</span>
+    }
+
+    // Household ID validation
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">    if (storageItem.getHouseholdId() &lt;= 0) {</span>
+<span class="nc" id="L149">      throw new IllegalArgumentException(&quot;Invalid household ID&quot;);</span>
+    }
+
+    // Item ID validation
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">    if (storageItem.getItemId() &lt;= 0) {</span>
+<span class="nc" id="L154">      throw new IllegalArgumentException(&quot;Invalid item ID&quot;);</span>
+    }
+<span class="fc" id="L156">  }</span>
+
+  /**
+   * Checks if a storage item exists in the repository by its ID for a specific household.
+   *
+   * @param id          The ID of the storage item to check.
+   * @param householdId The ID of the household the storage item belongs to.
+   * @return true if the storage item exists, false otherwise.
+   */
+  public boolean storageItemExists(int id, int householdId) {
+<span class="fc" id="L166">    return storageItemRepo.findById(id, householdId).isPresent();</span>
+  }
+
+  /**
+   * Checks if an item exists in the repository by its ID.
+   *
+   * @param id The ID of the item to check.
+   * @return true if the item exists, false otherwise.
+   */
+  private boolean itemExists(int id) {
+<span class="fc" id="L176">    return itemRepo.findById(id).isPresent();</span>
+  }
+
+  /**
+   * Converts a single StorageItem entity to a StorageItemResponse DTO with item details.
+   *
+   * @param storageItem The StorageItem entity
+   * @return A StorageItemResponse with item details
+   */
+  public StorageItemResponse convertToStorageItemResponse(StorageItem storageItem) {
+    try {
+<span class="fc" id="L187">      Item item = itemRepo.findById(storageItem.getItemId()).orElse(null);</span>
+<span class="fc" id="L188">      ItemResponse itemResponse = null;</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">      if (item != null) {</span>
+<span class="fc" id="L190">        itemResponse = ItemResponse.fromEntity(item);</span>
+      }
+<span class="fc" id="L192">      return StorageItemResponse.fromEntityWithItem(storageItem, itemResponse);</span>
+<span class="nc" id="L193">    } catch (Exception e) {</span>
+<span class="nc" id="L194">      return StorageItemResponse.fromEntity(storageItem);</span>
+    }
+  }
+
+  /**
+   * Converts a list of StorageItem entities to StorageItemResponse DTOs.
+   *
+   * @param storageItems The list of StorageItem entities
+   * @return A list of StorageItemResponse DTOs
+   */
+  public List&lt;StorageItemResponse&gt; convertToStorageItemResponses(List&lt;StorageItem&gt; storageItems) {
+<span class="nc" id="L205">    return storageItems.stream()</span>
+<span class="nc" id="L206">      .map(this::convertToStorageItemResponse)</span>
+<span class="nc" id="L207">      .collect(Collectors.toList());</span>
+  }
+
+  /**
+   * Adds a new storage item based on the provided request DTO.
+   *
+   * @param householdId The household ID to assign to the new storage item
+   * @param request The request containing the storage item details
+   * @return The response DTO for the created storage item
+   */
+  public StorageItemResponse addStorageItemFromRequest(int householdId,
+                                                       StorageItemRequest request) {
+<span class="nc" id="L219">    StorageItem storageItem = request.toEntity();</span>
+<span class="nc" id="L220">    storageItem.setHouseholdId(householdId);</span>
+<span class="nc" id="L221">    StorageItem createdStorageItem = addStorageItem(storageItem);</span>
+<span class="nc" id="L222">    return convertToStorageItemResponse(createdStorageItem);</span>
+  }
+
+  /**
+   * Updates an existing storage item based on the provided request DTO.
+   *
+   * @param id The ID of the storage item to update
+   * @param householdId The household ID the storage item belongs to
+   * @param request The request containing the updated storage item details
+   * @return The response DTO for the updated storage item
+   */
+  public StorageItemResponse updateStorageItemFromRequest(int id, int householdId,
+                                                          StorageItemRequest request) {
+<span class="nc" id="L235">    StorageItem storageItem = request.toEntity();</span>
+<span class="nc" id="L236">    storageItem.setId(id);</span>
+<span class="nc" id="L237">    storageItem.setHouseholdId(householdId);</span>
+<span class="nc" id="L238">    StorageItem updatedStorageItem = updateStorageItem(id, householdId, storageItem);</span>
+<span class="nc" id="L239">    return convertToStorageItemResponse(updatedStorageItem);</span>
+  }
+
+  /**
+   * Aggregates storage items by item ID for a specific household.
+   *
+   * @param householdId The ID of the household
+   * @return A list of aggregated storage item responses
+   */
+  public List&lt;AggregatedStorageItemResponse&gt; getAggregatedStorageItems(int householdId) {
+<span class="fc" id="L249">    return getAggregatedStorageItems(householdId, null, null);</span>
+  }
+
+  /**
+   * Aggregates storage items by item ID for a specific household,
+   * with optional sorting.
+   *
+   * @param householdId The ID of the household
+   * @param sortBy The field to sort by (e.g., &quot;quantity&quot;, &quot;expirationDate&quot;, &quot;name&quot;)
+   * @param sortDirection The direction of sorting (e.g., &quot;asc&quot; or &quot;desc&quot;)
+   * @return A list of aggregated storage item responses
+   */
+  public List&lt;AggregatedStorageItemResponse&gt; getAggregatedStorageItems(
+      int householdId,
+      String sortBy,
+      String sortDirection) {
+
+    // Get all storage items for the household
+<span class="fc" id="L267">    List&lt;StorageItem&gt; allItems = storageItemRepo.getAllStorageItems(householdId);</span>
+
+    // Group items by itemId
+<span class="fc" id="L270">    Map&lt;Integer, List&lt;StorageItem&gt;&gt; groupedByItemId = allItems.stream()</span>
+<span class="fc" id="L271">         .collect(Collectors.groupingBy(StorageItem::getItemId));</span>
+
+    // Create aggregated responses
+<span class="fc" id="L274">    List&lt;AggregatedStorageItemResponse&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L276" title="All 2 branches covered.">    for (Map.Entry&lt;Integer, List&lt;StorageItem&gt;&gt; entry : groupedByItemId.entrySet()) {</span>
+<span class="fc" id="L277">      int itemId = entry.getKey();</span>
+<span class="fc" id="L278">      List&lt;StorageItem&gt; items = entry.getValue();</span>
+
+      // Calculate total quantity
+<span class="fc" id="L281">      int totalQuantity = items.stream()</span>
+<span class="fc" id="L282">          .mapToInt(StorageItem::getQuantity)</span>
+<span class="fc" id="L283">          .sum();</span>
+
+      // Find earliest expiration date
+<span class="fc" id="L286">      LocalDateTime earliestDate = items.stream()</span>
+<span class="fc" id="L287">          .map(StorageItem::getExpirationDate)</span>
+<span class="fc" id="L288">          .min(LocalDateTime::compareTo)</span>
+<span class="fc" id="L289">          .orElse(null);</span>
+
+      // Get item details
+<span class="fc" id="L292">      Item item = null;</span>
+      try {
+<span class="fc" id="L294">        item = itemRepo.findById(itemId).orElse(null);</span>
+<span class="nc" id="L295">      } catch (Exception e) {</span>
+        // Log error but continue processing
+<span class="nc" id="L297">        logger.warning(&quot;Could not fetch item with ID &quot; + itemId + &quot;: &quot; + e.getMessage());</span>
+<span class="fc" id="L298">      }</span>
+
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">      ItemResponse itemResponse = item != null ? ItemResponse.fromEntity(item) : null;</span>
+
+      // Create the aggregated response
+<span class="fc" id="L303">      AggregatedStorageItemResponse aggregated = new AggregatedStorageItemResponse(</span>
+          itemId,
+          itemResponse,
+          totalQuantity,
+          earliestDate,
+          householdId
+      );
+
+<span class="fc" id="L311">      result.add(aggregated);</span>
+<span class="fc" id="L312">    }</span>
+
+    // Apply sorting if provided
+<span class="pc bpc" id="L315" title="3 of 4 branches missed.">    if (sortBy != null &amp;&amp; !sortBy.isEmpty()) {</span>
+<span class="nc" id="L316">      Comparator&lt;AggregatedStorageItemResponse&gt; comparator =</span>
+<span class="nc" id="L317">          createAggregatedComparator(sortBy, sortDirection);</span>
+<span class="nc" id="L318">      result.sort(comparator);</span>
+    }
+
+<span class="fc" id="L321">    return result;</span>
+  }
+
+  /**
+   * Creates a comparator for sorting aggregated storage items.
+   *
+   * @param sortBy The field to sort by
+   * @param sortDirection The direction of sorting
+   * @return A comparator for sorting aggregated storage items
+   */
+  private Comparator&lt;AggregatedStorageItemResponse&gt; createAggregatedComparator(
+      String sortBy, String sortDirection) {
+<span class="pc bpc" id="L333" title="3 of 4 branches missed.">    Comparator&lt;AggregatedStorageItemResponse&gt; comparator = switch (sortBy.toLowerCase()) {</span>
+<span class="fc" id="L334">      case &quot;quantity&quot; -&gt; Comparator.comparing(AggregatedStorageItemResponse::getTotalQuantity);</span>
+<span class="nc" id="L335">      case &quot;expirationdate&quot; -&gt; Comparator.comparing(</span>
+        AggregatedStorageItemResponse::getEarliestExpirationDate,
+<span class="nc" id="L337">        Comparator.nullsLast(Comparator.naturalOrder())</span>
+      );
+<span class="nc" id="L339">      case &quot;name&quot; -&gt; Comparator.comparing(</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">        response -&gt; response.getItem() != null ? response.getItem().getName() : &quot;&quot;,</span>
+        String.CASE_INSENSITIVE_ORDER
+      );
+<span class="pc" id="L343">      default -&gt; Comparator.comparing(AggregatedStorageItemResponse::getItemId);</span>
+    };
+
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">    return &quot;desc&quot;.equalsIgnoreCase(sortDirection) ? comparator.reversed() : comparator;</span>
+  }
+
+  /**
+   * Aggregates storage items by item ID for a specific household,
+   * with optional filtering and sorting.
+   *
+   * @param householdId The ID of the household
+   * @param itemTypes The item types to filter by
+   * @param sortBy The field to sort by
+   * @param sortDirection The direction of sorting
+   * @return A list of filtered and sorted aggregated storage item responses
+   */
+  public List&lt;AggregatedStorageItemResponse&gt; getFilteredAndSortedAggregatedItems(
+      int householdId,
+      List&lt;ItemType&gt; itemTypes,
+      String sortBy,
+      String sortDirection) {
+
+    // Get aggregated items
+<span class="fc" id="L366">    List&lt;AggregatedStorageItemResponse&gt; aggregatedItems =</span>
+<span class="fc" id="L367">        getAggregatedStorageItems(householdId, null, null);</span>
+
+    // Apply filtering if types are provided
+<span class="fc" id="L370">    List&lt;AggregatedStorageItemResponse&gt; filteredItems = aggregatedItems;</span>
+<span class="pc bpc" id="L371" title="2 of 4 branches missed.">    if (itemTypes != null &amp;&amp; !itemTypes.isEmpty()) {</span>
+<span class="fc" id="L372">      filteredItems = aggregatedItems.stream()</span>
+<span class="fc" id="L373">        .filter(aggregated -&gt;</span>
+<span class="pc bpc" id="L374" title="1 of 2 branches missed.">          aggregated.getItem() != null</span>
+            &amp;&amp;
+<span class="fc bfc" id="L376" title="All 2 branches covered.">            itemTypes.contains(aggregated.getItem().getType()))</span>
+<span class="fc" id="L377">        .collect(Collectors.toList());</span>
+    }
+
+    // Apply sorting if provided
+<span class="pc bpc" id="L381" title="2 of 4 branches missed.">    if (sortBy != null &amp;&amp; !sortBy.isEmpty()) {</span>
+<span class="fc" id="L382">      Comparator&lt;AggregatedStorageItemResponse&gt; comparator =</span>
+<span class="fc" id="L383">          createAggregatedComparator(sortBy, sortDirection);</span>
+<span class="fc" id="L384">      filteredItems.sort(comparator);</span>
+    }
+
+<span class="fc" id="L387">    return filteredItems;</span>
+  }
+
+  /**
+   * Searches for aggregated storage items by item name and/or type.
+   *
+   * @param householdId The ID of the household
+   * @param searchTerm The search term to match against item names (can be null)
+   * @param itemTypes The item types to filter by (can be null or empty)
+   * @param sortBy The field to sort by (can be null)
+   * @param sortDirection The direction of sorting (can be null)
+   * @return A list of matching aggregated storage item responses
+   */
+  public List&lt;AggregatedStorageItemResponse&gt; searchAggregatedStorageItems(
+      int householdId,
+      String searchTerm,
+      List&lt;ItemType&gt; itemTypes,
+      String sortBy,
+      String sortDirection) {
+
+    // Get all aggregated items for this household
+<span class="fc" id="L408">    List&lt;AggregatedStorageItemResponse&gt; allItems = getAggregatedStorageItems(householdId);</span>
+
+    // Apply filtering based on search term and item types
+<span class="fc" id="L411">    List&lt;AggregatedStorageItemResponse&gt; filteredItems = allItems.stream()</span>
+<span class="fc" id="L412">        .filter(item -&gt; {</span>
+<span class="fc" id="L413">          boolean matchesSearchTerm = true;</span>
+<span class="fc" id="L414">          boolean matchesItemType = true;</span>
+
+          // Filter by search term if provided (case-insensitive partial match)
+<span class="pc bpc" id="L417" title="3 of 6 branches missed.">          if (searchTerm != null &amp;&amp; !searchTerm.trim().isEmpty() &amp;&amp; item.getItem() != null) {</span>
+<span class="fc" id="L418">            matchesSearchTerm = item.getItem().getName().toLowerCase()</span>
+<span class="fc" id="L419">              .contains(searchTerm.toLowerCase().trim());</span>
+          }
+
+          // Filter by item types if provided
+<span class="pc bpc" id="L423" title="3 of 6 branches missed.">          if (itemTypes != null &amp;&amp; !itemTypes.isEmpty() &amp;&amp; item.getItem() != null) {</span>
+<span class="fc" id="L424">            matchesItemType = itemTypes.contains(item.getItem().getType());</span>
+          }
+
+<span class="fc bfc" id="L427" title="All 4 branches covered.">          return matchesSearchTerm &amp;&amp; matchesItemType;</span>
+        })
+<span class="fc" id="L429">        .collect(Collectors.toList());</span>
+
+    // Apply sorting if provided
+<span class="pc bpc" id="L432" title="3 of 4 branches missed.">    if (sortBy != null &amp;&amp; !sortBy.isEmpty()) {</span>
+<span class="nc" id="L433">      Comparator&lt;AggregatedStorageItemResponse&gt; comparator =</span>
+<span class="nc" id="L434">          createAggregatedComparator(sortBy, sortDirection);</span>
+<span class="nc" id="L435">      filteredItems.sort(comparator);</span>
+    }
+<span class="fc" id="L437">    return filteredItems;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
