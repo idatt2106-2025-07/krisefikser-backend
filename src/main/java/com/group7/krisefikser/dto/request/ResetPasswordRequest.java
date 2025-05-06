@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResetPasswordRequest {
+  @NotBlank(message = "token is required")
   private String token;
   @Email(message = "Invalid email format")
   @NotNull(message = "Email is required")
