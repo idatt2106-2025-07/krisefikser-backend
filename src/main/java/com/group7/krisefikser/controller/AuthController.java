@@ -239,7 +239,7 @@ public class AuthController {
   public ResponseEntity<Object> sendNewPasswordLink(
       @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
     String email = resetPasswordRequest.getEmail();
-    logger.info("Trying to send new password link to: " + resetPasswordRequest.getEmail());
+    logger.info("Trying to send new password link to: " + email);
     try {
       userService.sendResetPasswordLink(email);
       logger.info("New password link sent to: " + email);
