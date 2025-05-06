@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
+import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.model.EmergencyGroup;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -50,6 +52,7 @@ class EmergencyGroupServiceTest {
   private EmergencyGroup testEmergencyGroup;
   private EmergencyGroupRequest testEmergencyGroupRequest;
   private Date createdAt;
+  private LocalDateTime createdAtDateTime;
   private User testUser;
   private Household testHousehold;
   private Household householdToInvite;
@@ -57,6 +60,7 @@ class EmergencyGroupServiceTest {
   @BeforeEach
   void setUp() {
     createdAt = Date.valueOf(LocalDateTime.now().toLocalDate());
+    createdAtDateTime = LocalDateTime.now();
 
     testEmergencyGroup = new EmergencyGroup();
     testEmergencyGroup.setId(1L);
@@ -272,5 +276,77 @@ class EmergencyGroupServiceTest {
 
     verify(householdRepository, never()).addHouseholdToGroup(anyLong(), anyLong());
     verify(emergencyGroupInvitationsRepo, never()).deleteEmergencyGroupInvitation(anyLong(), anyLong());
+  }
+
+  @Test
+  void getEmergencyGroupInvitationsForCurrentUser_shouldReturnListOfInvitations_whenInvitationsExist() {
+    SecurityContext securityContext = mock(SecurityContext.class);
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.setContext(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn(String.valueOf(testUser.getId()));
+    when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+
+
+    EmergencyGroupInvitation invitation1 = new EmergencyGroupInvitation();
+    invitation1.setId(1L);
+    invitation1.setHouseholdId(testHousehold.getId());
+    invitation1.setGroupId(10L);
+    invitation1.setCreatedAt(createdAtDateTime);
+
+    EmergencyGroupInvitation invitation2 = new EmergencyGroupInvitation();
+    invitation2.setId(2L);
+    invitation2.setHouseholdId(testHousehold.getId());
+    invitation2.setGroupId(11L);
+    invitation2.setCreatedAt(createdAtDateTime);
+
+    List<EmergencyGroupInvitation> invitations = List.of(invitation1, invitation2);
+    when(emergencyGroupInvitationsRepo.getInvitationsByHouseholdId(testHousehold.getId())).thenReturn(invitations);
+
+    EmergencyGroup group1 = new EmergencyGroup();
+    group1.setId(10L);
+    group1.setName("First Responders");
+    when(emergencyGroupRepo.getEmergencyGroupById(10L)).thenReturn(group1);
+
+    EmergencyGroup group2 = new EmergencyGroup();
+    group2.setId(11L);
+    group2.setName("Medical Team");
+    when(emergencyGroupRepo.getEmergencyGroupById(11L)).thenReturn(group2);
+
+    List<EmergencyGroupInvitationResponse> responses = emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser();
+
+    assertNotNull(responses);
+    assertEquals(2, responses.size());
+
+    EmergencyGroupInvitationResponse response1 = responses.get(0);
+    assertEquals(1L, response1.getId());
+    assertEquals(testHousehold.getId(), response1.getHouseholdId());
+    assertEquals(10L, response1.getGroupId());
+    assertEquals(createdAtDateTime.toString(), response1.getCreatedAt());
+    assertEquals("First Responders", response1.getGroupName());
+
+    EmergencyGroupInvitationResponse response2 = responses.get(1);
+    assertEquals(2L, response2.getId());
+    assertEquals(testHousehold.getId(), response2.getHouseholdId());
+    assertEquals(11L, response2.getGroupId());
+    assertEquals(createdAtDateTime.toString(), response2.getCreatedAt());
+    assertEquals("Medical Team", response2.getGroupName());
+  }
+
+  @Test
+  void getEmergencyGroupInvitationsForCurrentUser_shouldReturnEmptyList_whenNoInvitationsExist() {
+   SecurityContext securityContext = mock(SecurityContext.class);
+    Authentication authentication = mock(Authentication.class);
+    SecurityContextHolder.setContext(securityContext);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn(String.valueOf(testUser.getId()));
+    when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+
+    when(emergencyGroupInvitationsRepo.getInvitationsByHouseholdId(testHousehold.getId())).thenReturn(List.of());
+
+    List<EmergencyGroupInvitationResponse> responses = emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser();
+
+    assertNotNull(responses);
+    assertTrue(responses.isEmpty());
   }
 }

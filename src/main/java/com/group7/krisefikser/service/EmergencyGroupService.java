@@ -2,6 +2,7 @@ package com.group7.krisefikser.service;
 
 
 import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
+import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.mapper.EmergencyGroupMapper;
 import com.group7.krisefikser.model.EmergencyGroup;
@@ -11,9 +12,8 @@ import com.group7.krisefikser.repository.EmergencyGroupInvitationsRepo;
 import com.group7.krisefikser.repository.EmergencyGroupRepo;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
-
+import java.util.List;
 import java.util.NoSuchElementException;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -150,4 +150,26 @@ public class EmergencyGroupService {
             .orElseThrow(() -> new NoSuchElementException("User not found."))
             .getHouseholdId();
   }
+
+  /**
+   * Retrieves all emergency group invitations for the current user's household.
+   *
+   * @return a list of EmergencyGroupInvitationResponse objects
+   */
+  public List<EmergencyGroupInvitationResponse> getEmergencyGroupInvitationsForCurrentUser() {
+    long householdId = getHouseholdIdForCurrentUser();
+    List<EmergencyGroupInvitation> invitations = emergencyGroupInvitationsRepo
+            .getInvitationsByHouseholdId(householdId);
+
+    return invitations.stream()
+            .map(invitation -> new EmergencyGroupInvitationResponse(
+                    invitation.getId(),
+                    invitation.getHouseholdId(),
+                    invitation.getGroupId(),
+                    invitation.getCreatedAt().toString(),
+                    emergencyGroupRepo.getEmergencyGroupById(invitation.getGroupId()).getName()
+            ))
+            .toList();
+  }
+
 }
