@@ -1,6 +1,7 @@
 package com.group7.krisefikser.mapper;
 
 import com.group7.krisefikser.dto.request.SharePositionRequest;
+import com.group7.krisefikser.dto.response.GroupMemberPositionResponse;
 import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
 import com.group7.krisefikser.model.UserPosition;
 import org.mapstruct.Mapper;
@@ -45,5 +46,26 @@ public interface UserPositionMapper {
    * @return the converted array of HouseholdMemberPositionResponse
    */
   HouseholdMemberPositionResponse[] userPositionArrayToHouseholdMemberPositionResponseArray(
+      UserPosition[] userPositions);
+
+  /**
+   * Converts a UserPosition to a GroupMemberPositionResponse.
+   *
+   * @param userPosition the UserPosition to convert
+   * @return the converted GroupMemberPositionResponse
+   */
+  @Mapping(source = "latitude", target = "latitude")
+  @Mapping(source = "longitude", target = "longitude")
+  @Mapping(source = "name", target = "name")
+  GroupMemberPositionResponse userPositionToGroupMemberPositionResponse(
+      UserPosition userPosition);
+
+  /**
+   * Converts an array of UserPosition to an array of GroupMemberPositionResponse.
+   *
+   * @param userPositions the array of UserPosition to convert
+   * @return the converted array of GroupMemberPositionResponse
+   */
+  GroupMemberPositionResponse[] userPositionArrayToGroupMemberPositionResponseArray(
       UserPosition[] userPositions);
 }
