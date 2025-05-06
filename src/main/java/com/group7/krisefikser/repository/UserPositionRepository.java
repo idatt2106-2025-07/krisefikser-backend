@@ -76,7 +76,7 @@ public class UserPositionRepository {
    */
   public UserPosition[] getHouseholdPositions(Long userId) {
     String sql =
-        "SELECT *, users.name FROM user_position "
+        "SELECT user_position.*, users.name FROM user_position "
         + "JOIN users ON user_position.user_id = users.id "
         + "WHERE users.household_id = "
         + "(SELECT household_id FROM users WHERE id = ?) "
@@ -96,12 +96,12 @@ public class UserPositionRepository {
    */
   public UserPosition[] getGroupPositions(Long userId) {
     String sql =
-        "SELECT *, users.name FROM user_position "
+        "SELECT user_position.*, users.name FROM user_position "
         + "JOIN users ON user_position.user_id = users.id "
-        + "JOIN household ON users.household_id = household.id "
-        + "WHERE household.group_id = "
-          + "(SELECT group_id FROM household "
-          + "JOIN users ON users.household_id = household.id "
+        + "JOIN households ON users.household_id = households.id "
+        + "WHERE households.emergency_group_id = "
+          + "(SELECT emergency_group_id FROM households "
+          + "JOIN users ON users.household_id = households.id "
           + "WHERE users.id = ?) "
         + "AND users.id != ?";
 
