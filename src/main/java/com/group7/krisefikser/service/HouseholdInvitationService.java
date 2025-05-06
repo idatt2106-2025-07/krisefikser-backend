@@ -71,7 +71,7 @@ public class HouseholdInvitationService {
       HouseholdInvitation invitation = invitationRepository.findByToken(token)
           .orElseThrow(() -> new RuntimeException("Invitation not found in database"));
 
-      householdRepository.addUserToHousehold(invitation.getHouseholdId(), userId);
+      userRepository.updateUserHousehold(userId, invitation.getHouseholdId());
 
       invitationRepository.delete(invitation.getId());
 
