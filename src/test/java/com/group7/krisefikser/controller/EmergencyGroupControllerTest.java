@@ -158,7 +158,7 @@ class EmergencyGroupControllerTest {
   @WithMockUser
   void inviteHouseholdByName_NotFound() throws Exception {
     String householdName = "NonExistent Household";
-    Mockito.doThrow(new NoSuchElementException("Household not found")).when(emergencyGroupService).inviteHouseholdByName(householdName);
+    Mockito.doThrow(new NoSuchElementException("Household not found.")).when(emergencyGroupService).inviteHouseholdByName(householdName);
 
     mockMvc.perform(MockMvcRequestBuilders.post("/api/emergency-groups/invite/{householdName}", householdName))
             .andExpect(MockMvcResultMatchers.status().isNotFound())
