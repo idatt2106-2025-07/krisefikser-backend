@@ -5,7 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Represents a household entity with basic details such as name, location, and ID.
+ * Represents a household entity with basic details such as name, location, ID
+ * and emergency group id.
  * This class is used to model a household in the system.
  * Annotations:
  * - @Data: Generates getters, setters, toString, equals, and hashCode methods.
@@ -20,4 +21,5 @@ public class Household {
   private String name;
   private Double longitude;
   private Double latitude;
+  private Long emergencyGroupId;
 }

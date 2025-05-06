@@ -5,8 +5,9 @@ import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
 import com.group7.krisefikser.repository.UserRepository;
+import com.group7.krisefikser.utils.UuidUtils;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,22 +17,37 @@ import org.springframework.transaction.annotation.Transactional;
  * and managing household memberships.
  */
 @Service
+@RequiredArgsConstructor
 public class HouseholdService {
   private final JoinHouseholdRequestRepo joinRequestRepo;
   private final UserRepository userRepository;
   private final HouseholdRepository householdRepository;
 
+
   /**
-   * Constructor for injecting dependencies.
+   * Creates a household for the user with a unique name.
+   * The household name is generated based on the user's name and a UUID.
+   * If a household with the same name already exists, it appends a counter to the name.
    *
-   * @param joinHouseholdRequestRepo the repository for managing join household requests
+   * @param userName The name of the user for whom the household is being created.
+   * @return The ID of the created household.
    */
-  @Autowired
-  public HouseholdService(JoinHouseholdRequestRepo joinHouseholdRequestRepo,
-                          UserRepository userRepository, HouseholdRepository householdRepository) {
-    this.joinRequestRepo = joinHouseholdRequestRepo;
-    this.userRepository = userRepository;
-    this.householdRepository = householdRepository;
+  public Long createHouseholdForUser(String userName) {
+    Long householdId;
+    int counter = 1;
+    String baseName = userName + "'s household"
+        + UuidUtils.generateShortenedUuid();
+    String householdName = baseName;
+
+    while (householdRepository.existsByName(householdName)) {
+      counter++;
+      householdName = baseName + " (" + counter + ")";
+    }
+    // Right now we are creating a household with default values for longitude and latitude
+    // In the future, we might want to get these values from the user or use a geolocation service
+    double longitude = 0.0;
+    double latitude = 0.0;
+    return householdRepository.createHousehold(householdName, longitude, latitude);
   }
 
   /**
