@@ -207,6 +207,9 @@ public class SuperAdminController {
       superAdminService.sendResetPasswordEmailToAdmin(email);
       logger.info("New password link sent to: " + email);
       return ResponseEntity.ok("New password link sent to: " + email);
+    } catch (IllegalArgumentException e) {
+      logger.warning("Invalid email format: " + e.getMessage());
+      return ResponseEntity.badRequest().body("Invalid email format");
     } catch (Exception e) {
       logger.severe("Error sending new password link to " + email + ": " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
