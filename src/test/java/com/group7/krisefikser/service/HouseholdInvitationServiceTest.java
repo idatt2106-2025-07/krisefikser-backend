@@ -116,7 +116,7 @@ class HouseholdInvitationServiceTest {
 
     verify(jwtUtils).validateInvitationTokenAndGetEmail(token);
 
-    verify(householdRepository).addUserToHousehold(householdId, userId);
+    verify(userRepository).updateUserHousehold(userId, householdId);
 
     verify(invitationRepository).delete(invitation.getId());
   }
@@ -132,7 +132,7 @@ class HouseholdInvitationServiceTest {
     assertEquals("Invitation not found in database", exception.getMessage());
     verify(jwtUtils).validateInvitationTokenAndGetEmail(token);
     verify(invitationRepository).findByToken(token);
-    verify(householdRepository, never()).addUserToHousehold(any(), any());
+    verify(userRepository, never()).updateUserHousehold(any(), any());
   }
 
   @Test
@@ -146,7 +146,7 @@ class HouseholdInvitationServiceTest {
     assertEquals("Invalid or expired invitation token", exception.getMessage());
     verify(jwtUtils).validateInvitationTokenAndGetEmail(token);
     verify(invitationRepository, never()).findByToken(anyString());
-    verify(householdRepository, never()).addUserToHousehold(any(), any());
+    verify(userRepository, never()).updateUserHousehold(any(), any());
   }
 
   @Test
@@ -160,6 +160,6 @@ class HouseholdInvitationServiceTest {
     assertEquals("Invalid or expired invitation token", exception.getMessage());
     verify(jwtUtils).validateInvitationTokenAndGetEmail(token);
     verify(invitationRepository, never()).findByToken(anyString());
-    verify(householdRepository, never()).addUserToHousehold(any(), any());
+    verify(userRepository, never()).updateUserHousehold(any(), any());
   }
 }
