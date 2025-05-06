@@ -1,12 +1,9 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
   backend:
     build:
       context: .
-      # This configuration uses Dockerfile.dev for local development.
-      # For production builds, Dockerfile.prod is used in cloudbuild.yaml.
       dockerfile: Dockerfile.dev
     volumes:
       - ./src:/app/src
@@ -15,11 +12,20 @@ services:
       - "8080:8080"
       - "5005:5005"
     environment:
-        - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
-        - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
-        - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
-        - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
-    # Uses default dev profile from application.properties
-    entrypoint: [ "java", "-jar", "/app/app.jar",
-                  "-Dspring-boot.run.jvmArguments='-agentlib:jdwp=transport=dt_socket,
-                  server=y,suspend=n,address=*:5005'" ]
+      - SPRING_MAIL_HOST=${SPRING_MAIL_HOST}
+      - SPRING_MAIL_PORT=${SPRING_MAIL_PORT}
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - HCAPTCHA_SECRET=${HCAPTCHA_SECRET}
+      - HCAPTCHA_SITEKEY=${HCAPTCHA_SITEKEY}
+    entrypoint: [ 
+      "java", 
+      "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", 
+      "-jar", 
+      "/app/app.jar" 
+    ]
+    networks:
+      - devnet
+
+networks:
+  devnet:
