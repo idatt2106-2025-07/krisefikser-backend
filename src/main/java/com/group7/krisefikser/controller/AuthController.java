@@ -282,6 +282,7 @@ public class AuthController {
    * Endpoint for sending a new password link.
    * This method sends a new password link to the user's email.
    * It accepts a ResetPasswordRequest object containing the email.
+   * The link contains a token used to reset the password.
    *
    * @param resetPasswordRequest the request containing the email
    * @return a ResponseEntity indicating the result of the operation
