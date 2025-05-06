@@ -1,4 +1,4 @@
-package com.group7.krisefikser.model;
+package com.group7.krisefikser.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
