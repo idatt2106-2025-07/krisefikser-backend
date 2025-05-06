@@ -81,15 +81,15 @@ public class SecurityConfig {
                 "/api/items/**")
             .hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-            .requestMatchers(HttpMethod.POST,
-                "/api/admin/invite")
-            .hasRole("SUPER_ADMIN")
-
             .requestMatchers(
                 "/api/point-of-interest/**",
                 "/api/affected-area/**",
                 "/api/general-info/admin/**")
             .hasAnyRole("SUPER_ADMIN", "ADMIN")
+
+            .requestMatchers(
+                "/api/super-admin/**"
+            ).hasRole("SUPER_ADMIN")
 
             .anyRequest().authenticated())
         .headers(

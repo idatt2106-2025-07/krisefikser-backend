@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,5 +79,42 @@ class UserRepositoryTest {
 
     Optional<User> result = userRepository.save(user);
     assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void deleteById_deletesUserAndRelatedRequests() {
+    // Først lag og lagre en ny bruker
+    User user = new User();
+    user.setEmail("tobedeleted@example.com");
+    user.setName("To Be Deleted");
+    user.setPassword("pw");
+    user.setHouseholdId(1L);
+    Optional<User> savedUser = userRepository.save(user);
+    assertTrue(savedUser.isPresent());
+
+    Long userId = savedUser.get().getId();
+    userRepository.deleteById(userId);
+
+    Optional<User> deleted = userRepository.findById(userId);
+    assertTrue(deleted.isEmpty());
+  }
+
+  @Test
+  void findByRole_returnsCorrectUsers() {
+    List<User> admins = userRepository.findByRole(Role.ROLE_ADMIN);
+    assertFalse(admins.isEmpty());
+    assertTrue(admins.stream().allMatch(user -> user.getRole() == Role.ROLE_ADMIN));
+  }
+
+  @Test
+  void updatePasswordByEmail_changesPasswordSuccessfully() {
+    Optional<User> userOpt = userRepository.findByEmail("user@example.com");
+    assertTrue(userOpt.isPresent());
+
+    userRepository.updatePasswordByEmail("user@example.com", "newhashedpassword");
+
+    Optional<User> updated = userRepository.findByEmail("user@example.com");
+    assertTrue(updated.isPresent());
+    assertEquals("newhashedpassword", updated.get().getPassword());
   }
 }

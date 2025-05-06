@@ -38,36 +38,6 @@ class AdminControllerTest {
   private ObjectMapper objectMapper;
 
   @Test
-  @WithMockUser(roles = "SUPER_ADMIN")
-  void invite_shouldReturnOk_whenServiceSucceeds() throws Exception {
-    InviteAdminRequest request = new InviteAdminRequest();
-    request.setEmail("admin@example.com");
-
-    doNothing().when(adminService).inviteAdmin(request);
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/admin/invite")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isOk())
-        .andExpect(content().string("Admin invited successfully"));
-  }
-
-  @Test
-  @WithMockUser(roles = "SUPER_ADMIN")
-  void invite_shouldReturnInternalServerError_whenServiceThrowsException() throws Exception {
-    InviteAdminRequest request = new InviteAdminRequest();
-    request.setEmail("admin@example.com");
-
-    doThrow(new IllegalArgumentException("Email already in use")).when(adminService).inviteAdmin(request);
-
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/admin/invite")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
-        .andExpect(status().isInternalServerError())
-        .andExpect(content().string("Error inviting admin"));
-  }
-
-  @Test
   void register_shouldReturnOk_whenServiceSucceeds() throws Exception {
     RegisterAdminRequest request = new RegisterAdminRequest();
     request.setEmail("admin@example.com");

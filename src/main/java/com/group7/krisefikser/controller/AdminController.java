@@ -36,63 +36,6 @@ public class AdminController {
   private static final Logger logger = Logger.getLogger(AdminController.class.getName());
 
   /**
-   * Endpoint to invite an admin.
-   * This endpoint will accept a request containing the email of the admin to be invited.
-   *
-   * @param request The request containing the email of the admin to be invited.
-   * @return ResponseEntity indicating the result of the operation.
-   */
-  @Operation(
-      summary = "Invite an admin",
-      description = "Sends an invitation to a new admin by email. "
-          + "The system generates an invite token and sends it as a link to the specified email.",
-      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-          description = "InviteAdminRequest containing a valid email address",
-          required = true,
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = InviteAdminRequest.class)
-          )
-      ),
-      responses = {
-          @ApiResponse(
-              responseCode = "200",
-              description = "Admin invited successfully",
-              content = @Content(mediaType = "application/json",
-                  schema = @Schema(implementation = String.class))
-          ),
-          @ApiResponse(
-              responseCode = "400",
-              description = "Validation failed for the email format",
-              content = @Content(mediaType = "application/json")
-          ),
-          @ApiResponse(
-              responseCode = "500",
-              description = "Internal server error",
-              content = @Content(mediaType = "application/json")
-          )
-      }
-  )
-  @PostMapping("/invite")
-  public ResponseEntity<Object> invite(@RequestBody @Valid InviteAdminRequest request,
-                                       BindingResult bindingResult) {
-    logger.info("Inviting admin request");
-
-    if (bindingResult.hasErrors()) {
-      return ValidationUtils.handleValidationErrors(bindingResult);
-    }
-
-    try {
-      adminService.inviteAdmin(request);
-      logger.info("Admin invited successfully");
-      return ResponseEntity.ok("Admin invited successfully");
-    } catch (Exception e) {
-      logger.severe("Error inviting admin: " + e.getMessage());
-      return ResponseEntity.status(500).body("Error inviting admin");
-    }
-  }
-
-  /**
    * Endpoint to register an admin.
    * This endpoint will accept a request containing the invite token and other registration details.
    *

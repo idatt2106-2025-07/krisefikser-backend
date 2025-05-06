@@ -37,49 +37,7 @@ class AdminServiceTest {
   @Mock
   private HouseholdService householdService;
 
-  @Test
-  void inviteAdmin_shouldSendEmailWithCorrectLink_whenUsernameIsUnique() throws Exception {
-    String email = "admin@example.com";
-    String fakeToken = "fake.jwt.token";
-    String fakeUuid = "abcd1234";
-    String expectedUsername = "admin" + fakeUuid;
 
-    InviteAdminRequest request = new InviteAdminRequest();
-    request.setEmail(email);
-
-    try (MockedStatic<UuidUtils> mockedUuid = mockStatic(UuidUtils.class)) {
-      mockedUuid.when(UuidUtils::generateShortenedUuid).thenReturn(fakeUuid);
-      when(userRepository.existAdminByUsername(expectedUsername)).thenReturn(false);
-      when(jwtUtils.generateInviteToken(expectedUsername)).thenReturn(fakeToken);
-
-      adminService.inviteAdmin(request);
-
-      verify(emailService).sendTemplateMessage(
-          eq(email),
-          eq(EmailTemplateType.ADMIN_INVITE),
-          eq(Map.of("inviteLink", "https://localhost:5173/invite?token=" + fakeToken))
-      );
-    }
-  }
-
-  @Test
-  void inviteAdmin_shouldThrowUsernameGenerationException_whenUsernameIsNotUniqueAfterRetries() {
-    String email = "admin@example.com";
-    InviteAdminRequest request = new InviteAdminRequest();
-    request.setEmail(email);
-
-    try (MockedStatic<UuidUtils> mockedUuid = mockStatic(UuidUtils.class)) {
-      mockedUuid.when(UuidUtils::generateShortenedUuid).thenReturn("conflict");
-
-      when(userRepository.existAdminByUsername("adminconflict")).thenReturn(true);
-
-      UsernameGenerationException exception = assertThrows(UsernameGenerationException.class, () -> {
-        adminService.inviteAdmin(request);
-      });
-
-      assertEquals("Failed to generate a unique username", exception.getMessage());
-    }
-  }
 
   @Test
   void registerAdmin_shouldSaveAdmin_whenValidTokenAndUniqueUsername() throws Exception {
