@@ -246,8 +246,9 @@ public class UserService implements UserDetailsService {
     } else {
       throw new UsernameNotFoundException("User not found with email: " + email);
     }
-    
-  /** 
+  }
+
+  /**
    * Gets the current authenticated user's ID from the security context.
    *
    * @return the ID of the authenticated user

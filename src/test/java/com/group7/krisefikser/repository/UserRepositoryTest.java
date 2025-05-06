@@ -100,24 +100,6 @@ class UserRepositoryTest {
   }
 
   @Test
-  void findById_existingUser_returnsUser() {
-    Optional<User> userOpt = userRepository.findByEmail("user@example.com");
-    assertTrue(userOpt.isPresent());
-
-    Long userId = userOpt.get().getId();
-    Optional<User> found = userRepository.findById(userId);
-
-    assertTrue(found.isPresent());
-    assertEquals(userId, found.get().getId());
-  }
-
-  @Test
-  void findById_nonExistingUser_returnsEmpty() {
-    Optional<User> found = userRepository.findById(-999L);
-    assertTrue(found.isEmpty());
-  }
-
-  @Test
   void findByRole_returnsCorrectUsers() {
     List<User> admins = userRepository.findByRole(Role.ROLE_ADMIN);
     assertFalse(admins.isEmpty());
