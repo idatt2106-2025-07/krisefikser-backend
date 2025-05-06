@@ -3,6 +3,7 @@ package com.group7.krisefikser.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
 import com.group7.krisefikser.dto.request.InvitationReplyRequest;
+import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.service.EmergencyGroupService;
@@ -18,12 +19,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 import java.util.NoSuchElementException;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -290,5 +290,77 @@ class EmergencyGroupControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.message").isNotEmpty());
 
     Mockito.verify(emergencyGroupService, Mockito.never()).answerEmergencyGroupInvitation(Mockito.anyLong(), Mockito.anyBoolean());
+  }
+
+  @Test
+  @WithMockUser()
+  void getInvitations_shouldReturnOkAndListOfInvitations_whenInvitationsExist() throws Exception {
+    LocalDateTime createdAt1 = LocalDateTime.now();
+    EmergencyGroupInvitationResponse invitationResponse1 = new EmergencyGroupInvitationResponse(
+            1L,
+            200L,
+            10L,
+            createdAt1.toString(),
+            "Fire Department"
+    );
+
+    LocalDateTime createdAt2 = LocalDateTime.now().plusDays(1);
+    EmergencyGroupInvitationResponse invitationResponse2 = new EmergencyGroupInvitationResponse(
+            2L,
+            200L,
+            11L,
+            createdAt2.toString(),
+            "Medical Team"
+    );
+
+    List<EmergencyGroupInvitationResponse> invitations = List.of(invitationResponse1, invitationResponse2);
+    when(emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser()).thenReturn(invitations);
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/emergency-groups/invitations")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(1))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].householdId").value(200))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].groupId").value(10))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].groupName").value("Fire Department"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].id").value(2))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].householdId").value(200))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].groupId").value(11))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[1].groupName").value("Medical Team"));
+  }
+
+  @Test
+  @WithMockUser()
+  void getInvitations_shouldReturnOkAndEmptyList_whenNoInvitationsExist() throws Exception {
+    when(emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser()).thenReturn(List.of());
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/emergency-groups/invitations")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+            .andExpect(MockMvcResultMatchers.jsonPath("$").isEmpty());
+  }
+
+  @Test
+  @WithMockUser()
+  void getInvitations_shouldReturnInternalServerError_whenServiceThrowsException() throws Exception {
+    when(emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser()).thenThrow(new RuntimeException("Database error"));
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/emergency-groups/invitations")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message")
+                    .value("An unexpected error occurred while retrieving invitations."));
+  }
+
+  @Test
+  void getInvitations_shouldReturnUnauthorized_whenUserIsNotAuthenticated() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/emergency-groups/invitations")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.status().isForbidden());
   }
 }

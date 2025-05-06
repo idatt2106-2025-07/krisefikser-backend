@@ -2,6 +2,7 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
 import com.group7.krisefikser.dto.request.InvitationReplyRequest;
+import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.service.EmergencyGroupService;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -168,6 +170,29 @@ public class EmergencyGroupController {
               e.getMessage());
       return ResponseEntity.status(500).body(new ErrorResponse(
               "An unexpected error occurred while answering the invitation."
+      ));
+    }
+  }
+
+  /**
+   * Retrieves the list of invitations for the current user's household.
+   *
+   * @return a response entity containing the list of invitations
+   */
+  @GetMapping("/invitations")
+  public ResponseEntity<Object> getInvitations() {
+    logger.info("Retrieving group invitations for the current users household.");
+
+    try {
+      List<EmergencyGroupInvitationResponse> invitations =
+              emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser();
+      logger.info("Retrieved invitations successfully.");
+      return ResponseEntity.ok(invitations);
+    } catch (Exception e) {
+      logger.error("An unexpected error occurred while retrieving invitations: {}",
+              e.getMessage());
+      return ResponseEntity.status(500).body(new ErrorResponse(
+              "An unexpected error occurred while retrieving invitations."
       ));
     }
   }
