@@ -23,6 +23,8 @@ jobs:
         run: mvn -B clean verify
 
       - name: Generate JaCoCo and Javadoc
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           mvn jacoco:report
           mvn javadoc:javadoc
