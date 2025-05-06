@@ -2,22 +2,18 @@ package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.response.SuperAdminResponse;
+import com.group7.krisefikser.dto.response.AdminResponse;
 import com.group7.krisefikser.service.SuperAdminService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
 import java.util.List;
-
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -69,8 +65,8 @@ public class SuperAdminControllerTest {
   @Test
   @WithMockUser(roles = "SUPER_ADMIN")
   void getAllAdmins_ShouldReturnListOfAdmins_WhenServiceReturnsAdmins() throws Exception {
-    SuperAdminResponse admin1 = new SuperAdminResponse("admin1@test.com");
-    SuperAdminResponse admin2 = new SuperAdminResponse("admin2@test.com");
+    AdminResponse admin1 = new AdminResponse(1L, "admin1@test.com");
+    AdminResponse admin2 = new AdminResponse(2L, "admin2@test.com");
 
     when(superAdminService.getAllAdmins()).thenReturn(List.of(admin1, admin2));
 
