@@ -36,4 +36,18 @@ public class PasswordUtil {
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     return encoder.matches(password, hashedPassword);
   }
+
+  /**
+   * Checks if a password is strong.
+   * A strong password is defined as one that contains at least one lowercase letter,
+   * one uppercase letter, one digit, and is at least 8 characters long.
+   *
+   * @param password the password to check
+   * @return true if the password is strong, false otherwise
+   */
+  public static boolean isStrongPassword(String password) {
+    return password != null && password.matches(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+
+  }
 }
