@@ -25,7 +25,7 @@ krisefikser,com.group7.krisefikser.controller,UserPositionController,36,70,1,1,1
 krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0,4,8,54,0,8,0,6
 krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2,3,0,2
 krisefikser,com.group7.krisefikser.controller,StorageItemController,156,278,2,2,46,76,3,12,1,12
-krisefikser,com.group7.krisefikser.controller,AuthController,26,167,5,7,6,40,4,8,0,6
+krisefikser,com.group7.krisefikser.controller,AuthController,110,167,7,7,27,40,7,8,2,6
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,116,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,SuperAdminController,13,113,1,1,4,30,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,HouseholdController,0,102,0,0,0,29,0,7,0,7
