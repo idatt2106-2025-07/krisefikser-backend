@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AffectedArea {
   private Long id;
+  private String name;
   private Double longitude;
   private Double latitude;
   private Double highDangerRadiusKm;
