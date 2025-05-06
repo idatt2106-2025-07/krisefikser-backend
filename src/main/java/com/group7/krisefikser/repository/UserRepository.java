@@ -220,8 +220,8 @@ public class UserRepository {
   public List<User> findByRole(Role role) {
     String sql = "SELECT * FROM users WHERE role = ?";
     try {
-      return Optional.of(jdbcTemplate.query(sql, (rs, rowNum) ->
-          mapRowToUser(rs), role.toString())).orElse(List.of());
+      return jdbcTemplate.query(sql, (rs, rowNum) ->
+          mapRowToUser(rs), role.toString());
     } catch (EmptyResultDataAccessException e) {
       logger.info("No users found with role: " + role);
       return List.of();
