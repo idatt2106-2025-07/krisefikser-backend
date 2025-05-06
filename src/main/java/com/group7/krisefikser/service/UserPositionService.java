@@ -1,6 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.SharePositionRequest;
+import com.group7.krisefikser.dto.response.GroupMemberPositionResponse;
 import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
 import com.group7.krisefikser.mapper.UserPositionMapper;
 import com.group7.krisefikser.model.UserPosition;
@@ -63,6 +64,20 @@ public class UserPositionService {
         .getHouseholdPositions(Long.parseLong(userId));
     return UserPositionMapper.INSTANCE.userPositionArrayToHouseholdMemberPositionResponseArray(
             userPositions);
+  }
+
+  /**
+   * Retrieves the emergency group member positions of the user.
+   *
+   * @return An array of HouseholdMemberPositionResponse
+   *        containing the positions of household members.
+   */
+  public GroupMemberPositionResponse[] getGroupPositions() {
+    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    UserPosition[] userPositions = userPositionRepository
+        .getGroupPositions(Long.parseLong(userId));
+    return UserPositionMapper.INSTANCE.userPositionArrayToGroupMemberPositionResponseArray(
+        userPositions);
   }
 
   /**
