@@ -83,16 +83,4 @@ public class HouseholdRepository {
 
     return household;
   }
-
-  /**
-   * Updates the household ID of a user in the database.
-   * This method is used to associate a user with a specific household.
-   *
-   * @param householdId the ID of the household to associate with the user
-   * @param userId      the ID of the user to update
-   */
-  public void addUserToHousehold(Long householdId, Long userId) {
-    String sql = "UPDATE users SET household_id = ? WHERE id = ?";
-    jdbcTemplate.update(sql, householdId, userId);
-  }
 }
