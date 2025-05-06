@@ -1,6 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.SharePositionRequest;
+import com.group7.krisefikser.dto.response.GroupMemberPositionResponse;
 import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
 import com.group7.krisefikser.model.UserPosition;
 import com.group7.krisefikser.repository.UserPositionRepository;
@@ -99,5 +100,39 @@ class UserPositionServiceTest {
   void deleteUserPosition_shouldCallRepository() {
     userPositionService.deleteUserPosition();
     verify(userPositionRepository).deleteUserPosition(42L);
+  }
+
+  @Test
+  void getGroupPositions_shouldReturnMappedResponses() {
+    // Setup test data
+    UserPosition[] userPositions = new UserPosition[2];
+    userPositions[0] = new UserPosition();
+    userPositions[0].setLatitude(10.0);
+    userPositions[0].setLongitude(20.0);
+    userPositions[0].setUserId(43L);
+    userPositions[0].setName("Group Member 1");
+
+    userPositions[1] = new UserPosition();
+    userPositions[1].setLatitude(30.0);
+    userPositions[1].setLongitude(40.0);
+    userPositions[1].setUserId(44L);
+    userPositions[1].setName("Group Member 2");
+
+    // Mock repository call
+    when(userPositionRepository.getGroupPositions(42L)).thenReturn(userPositions);
+
+    // Call service method
+    GroupMemberPositionResponse[] responses = userPositionService.getGroupPositions();
+
+    // Verify results
+    assertNotNull(responses);
+    assertEquals(2, responses.length);
+    assertEquals(10.0, responses[0].getLatitude());
+    assertEquals(30.0, responses[1].getLatitude());
+    assertEquals("Group Member 1", responses[0].getName());
+    assertEquals("Group Member 2", responses[1].getName());
+
+    // Verify repository was called with correct user ID
+    verify(userPositionRepository).getGroupPositions(42L);
   }
 }

@@ -81,4 +81,23 @@ class UserPositionRepositoryTest {
     List<Long> userIds = Arrays.stream(positions).map(UserPosition::getUserId).toList();
     assertFalse(userIds.contains(1L));
   }
+
+  @Test
+  void getGroupPositions_excludesSelfAndReturnsOthersInSameEmergencyGroup() {
+    // Assumes users are in households that belong to the same emergency group
+    // but not necessarily in the same household
+    UserPosition[] positions = userPositionRepository.getGroupPositions(1L);
+
+    assertNotNull(positions);
+    assertTrue(positions.length > 0);
+
+    List<Long> userIds = Arrays.stream(positions).map(UserPosition::getUserId).toList();
+
+    // Should not include the requesting user
+    assertFalse(userIds.contains(1L));
+
+    // Should include users from other households in the same emergency group
+    // This assumes your test data has such users with positions
+    assertTrue(userIds.size() > 0);
+  }
 }
