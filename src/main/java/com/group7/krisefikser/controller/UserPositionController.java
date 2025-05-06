@@ -46,7 +46,8 @@ public class UserPositionController {
    */
   @Operation(
       summary = "Share user's position",
-      description = "Allows a user to share their current geographic position (latitude and longitude).",
+      description = "Allows a user to share their current geographic position "
+          + "(latitude and longitude).",
       requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
           required = true,
           description = "User's position including latitude and longitude",
@@ -90,7 +91,8 @@ public class UserPositionController {
    */
   @Operation(
       summary = "Stop sharing user's position",
-      description = "Deletes the user's shared position, effectively stopping the location sharing.",
+      description = "Deletes the user's shared position, "
+          + "effectively stopping the location sharing.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Stopped sharing position successfully"),
           @ApiResponse(responseCode = "500", description = "Internal server error",
