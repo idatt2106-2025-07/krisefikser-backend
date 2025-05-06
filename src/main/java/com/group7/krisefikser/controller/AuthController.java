@@ -237,7 +237,7 @@ public class AuthController {
    */
   @PostMapping("/new-password-link")
   public ResponseEntity<Object> sendNewPasswordLink(
-      @RequestBody ResetPasswordRequest resetPasswordRequest) {
+      @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
     String email = resetPasswordRequest.getEmail();
     logger.info("Trying to send new password link to: " + resetPasswordRequest.getEmail());
     try {
