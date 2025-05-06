@@ -205,13 +205,26 @@ public class AuthController {
   }
 
   /**
-   * Endpoint for refreshing the JWT token.
-   * This method generates a new JWT token for the authenticated user.
-   * It accepts the old token as a request parameter.
+   * Endpoint for resetting the password.
+   * This method handles the password reset process.
+   * It accepts a ResetPasswordRequest object containing the email and new password.
    *
-   * @param resetPasswordRequest the request containing the old token
-   * @return a ResponseEntity containing the authentication response
+   * @param resetPasswordRequest the request containing the email
+   *                             and new password
    */
+  @Operation(
+      summary = "Reset password",
+      description = "Resets a user's password using a valid token and new password. "
+          + "Typically used after clicking a reset link sent to email."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Password reset successfully",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Server error during password reset",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
   @PostMapping("/reset-password")
   public ResponseEntity<AuthResponse> resetPassword(
       @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
@@ -235,6 +248,17 @@ public class AuthController {
    * @param resetPasswordRequest the request containing the email
    * @return a ResponseEntity indicating the result of the operation
    */
+  @Operation(
+      summary = "Send reset password link",
+      description = "Sends a reset password link to the user's email if the user exists. "
+          + "The link contains a token used to reset the password."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Reset link sent successfully",
+          content = @Content(mediaType = "application/json")),
+      @ApiResponse(responseCode = "500", description = "Server error when sending reset link",
+          content = @Content(mediaType = "application/json"))
+  })
   @PostMapping("/new-password-link")
   public ResponseEntity<Object> sendNewPasswordLink(
       @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
