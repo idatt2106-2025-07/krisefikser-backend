@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserPositionRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.repository</a> &gt; <span class="el_source">UserPositionRepository.java</span></div><h1>UserPositionRepository.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.repository;
+
+import com.group7.krisefikser.model.UserPosition;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository class for managing user positions in the database.
+ * Provides methods to update, add, delete, and check user positions.
+ */
+@Repository
+@RequiredArgsConstructor
+public class UserPositionRepository {
+
+  private final JdbcTemplate jdbcTemplate;
+
+  /**
+   * Updates the user's position in the database.
+   *
+   * @param userPosition The UserPosition object containing the updated position details.
+   */
+  public void updateUserPosition(UserPosition userPosition) {
+<span class="fc" id="L25">    String sql = &quot;UPDATE user_position SET latitude = ?, longitude = ? WHERE user_id = ?&quot;;</span>
+<span class="fc" id="L26">    jdbcTemplate.update(</span>
+<span class="fc" id="L27">        sql, userPosition.getLatitude(), userPosition.getLongitude(), userPosition.getUserId());</span>
+<span class="fc" id="L28">  }</span>
+
+  /**
+   * Adds a new user position to the database.
+   *
+   * @param userPosition The UserPosition object containing the position details.
+   */
+  public void addUserPosition(UserPosition userPosition) {
+<span class="fc" id="L36">    String sql = &quot;INSERT INTO user_position (latitude, longitude, user_id) VALUES (?, ?, ?)&quot;;</span>
+<span class="fc" id="L37">    jdbcTemplate.update(</span>
+<span class="fc" id="L38">        sql, userPosition.getLatitude(), userPosition.getLongitude(), userPosition.getUserId());</span>
+<span class="fc" id="L39">  }</span>
+
+  /**
+   * Deletes the user's position from the database.
+   *
+   * @param userId The ID of the user whose position is to be deleted.
+   */
+  public void deleteUserPosition(Long userId) {
+<span class="fc" id="L47">    String sql = &quot;DELETE FROM user_position WHERE user_id = ?&quot;;</span>
+<span class="fc" id="L48">    jdbcTemplate.update(sql, userId);</span>
+<span class="fc" id="L49">  }</span>
+
+  /**
+   * Checks if the user is sharing their position.
+   *
+   * @param userId The ID of the user to check.
+   * @return true if the user is sharing their position, false otherwise.
+   */
+  public boolean isSharingPosition(Long userId) {
+<span class="fc" id="L58">    String sql =</span>
+        &quot;SELECT CASE &quot;
+            + &quot;WHEN EXISTS ( &quot;
+            + &quot;SELECT 1 FROM user_position WHERE user_id = ? &quot;
+            + &quot;) THEN 'true' &quot;
+            + &quot;ELSE 'false' &quot;
+            + &quot;END AS finnes&quot;;
+<span class="fc" id="L65">    return jdbcTemplate.queryForObject(</span>
+        sql,
+        new Object[] {userId},
+        Boolean.class);
+  }
+
+  /**
+   * Retrieves the positions of all household members except the user themselves.
+   *
+   * @param userId The ID of the user whose household positions are to be retrieved.
+   * @return An array of UserPosition objects containing the positions of household members.
+   */
+  public UserPosition[] getHouseholdPositions(Long userId) {
+<span class="fc" id="L78">    String sql =</span>
+        &quot;SELECT user_position.*, users.name FROM user_position &quot;
+        + &quot;JOIN users ON user_position.user_id = users.id &quot;
+        + &quot;WHERE users.household_id = &quot;
+        + &quot;(SELECT household_id FROM users WHERE id = ?) &quot;
+        + &quot;AND users.id != ?&quot;;
+
+<span class="fc" id="L85">    return jdbcTemplate.query(</span>
+        sql,
+        new Object[] {userId, userId},
+<span class="fc" id="L88">        new BeanPropertyRowMapper&lt;&gt;(UserPosition.class)).toArray(new UserPosition[0]);</span>
+  }
+
+  /**
+   * Retrieves the positions of all household members except the user themselves.
+   *
+   * @param userId The ID of the user whose household positions are to be retrieved.
+   * @return An array of UserPosition objects containing the positions of household members.
+   */
+  public UserPosition[] getGroupPositions(Long userId) {
+<span class="fc" id="L98">    String sql =</span>
+        &quot;SELECT user_position.*, users.name FROM user_position &quot;
+        + &quot;JOIN users ON user_position.user_id = users.id &quot;
+        + &quot;JOIN households ON users.household_id = households.id &quot;
+        + &quot;WHERE households.emergency_group_id = &quot;
+          + &quot;(SELECT emergency_group_id FROM households &quot;
+          + &quot;JOIN users ON users.household_id = households.id &quot;
+          + &quot;WHERE users.id = ?) &quot;
+        + &quot;AND users.id != ?&quot;;
+
+<span class="fc" id="L108">    return jdbcTemplate.query(</span>
+        sql,
+        new Object[] {userId, userId},
+<span class="fc" id="L111">        new BeanPropertyRowMapper&lt;&gt;(UserPosition.class)).toArray(new UserPosition[0]);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
