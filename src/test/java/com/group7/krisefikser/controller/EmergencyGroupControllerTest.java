@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,8 +39,6 @@ class EmergencyGroupControllerTest {
 
   @Autowired
   private ObjectMapper objectMapper;
-  private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-
   @MockitoBean
   private EmergencyGroupService emergencyGroupService;
 
@@ -85,26 +82,6 @@ class EmergencyGroupControllerTest {
     mockMvc.perform(get("/api/emergency-groups/{id}", groupId))
             .andExpect(status().isInternalServerError())
             .andExpect(content().string("An error occurred while retrieving the emergency group."));
-  }
-
-  @Test
-  @WithMockUser
-  void addEmergencyGroup_validRequest_returnsCreatedAndEmergencyGroupResponseWithDate() throws Exception {
-    // Arrange
-    EmergencyGroupRequest request = new EmergencyGroupRequest();
-    request.setName("Group Beta");
-    request.setCreatedAt(LocalDateTime.now().format(formatter));
-    Date creationDate = new Date();
-    EmergencyGroupResponse mockResponse = new EmergencyGroupResponse(2L, "Group Beta", creationDate.toString());
-    when(emergencyGroupService.addEmergencyGroup(any(EmergencyGroupRequest.class))).thenReturn(mockResponse);
-
-    // Act & Assert
-    mockMvc.perform(post("/api/emergency-groups")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(mockResponse)));
   }
 
   @Test

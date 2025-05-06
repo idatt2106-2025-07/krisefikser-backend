@@ -3,12 +3,8 @@ package com.group7.krisefikser.mapper;
 import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.model.EmergencyGroup;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -37,25 +33,5 @@ public interface EmergencyGroupMapper {
    * @return the mapped EmergencyGroup entity
    */
   @Mapping(target = "name", source = "name")
-  @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "stringToSqlDate")
   EmergencyGroup emergencyGroupRequestToEntity(EmergencyGroupRequest emergencyGroupRequest);
-
-  /**
-   * Converts a string date in the format "yyyy-MM-dd" to a LocalDate object.
-   *
-   * @param dateString the string date to convert.
-   * @return the LocalDate object, or null if the string is null or empty,
-   */
-  @Named("stringToSqlDate")
-  default LocalDate stringToSqlDate(String dateString) {
-    if (dateString == null || dateString.trim().isEmpty()) {
-      return null;
-    }
-
-    try {
-      return LocalDate.parse(dateString, DateTimeFormatter.ISO_DATE);
-    } catch (DateTimeParseException e) {
-      return null;
-    }
-  }
 }

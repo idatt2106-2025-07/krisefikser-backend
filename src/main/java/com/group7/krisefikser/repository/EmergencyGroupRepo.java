@@ -37,22 +37,12 @@ public class EmergencyGroupRepo {
     KeyHolder keyHolder = new GeneratedKeyHolder();
     String sql;
 
-    if (emergencyGroup.getCreatedAt() != null) {
-      sql = "INSERT INTO emergency_groups (name, created_at) VALUES (?, ?)";
-      jdbcTemplate.update(connection -> {
-        PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, emergencyGroup.getName());
-        ps.setDate(2, emergencyGroup.getCreatedAt());
-        return ps;
-      }, keyHolder);
-    } else {
-      sql = "INSERT INTO emergency_groups (name) VALUES (?)";
-      jdbcTemplate.update(connection -> {
-        PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        ps.setString(1, emergencyGroup.getName());
-        return ps;
-      }, keyHolder);
-    }
+    sql = "INSERT INTO emergency_groups (name) VALUES (?)";
+    jdbcTemplate.update(connection -> {
+      PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      ps.setString(1, emergencyGroup.getName());
+      return ps;
+    }, keyHolder);
 
     Number key = (Number) keyHolder.getKeyList().get(0).get("id");
     if (key != null) {

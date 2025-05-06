@@ -2,7 +2,6 @@ package com.group7.krisefikser.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,8 +16,4 @@ public class EmergencyGroupRequest {
   @NotNull(message = "Name cannot be null")
   @NotBlank(message = "Name cannot be blank")
   private String name;
-
-  @Pattern(regexp = "^(\\d{4}-\\d{2}-\\d{2}.*)?$",
-          message = "Date must be on yyyy-MM-dd format")
-  private String createdAt;
 }
