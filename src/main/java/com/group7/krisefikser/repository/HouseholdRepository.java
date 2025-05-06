@@ -2,10 +2,14 @@ package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.model.Household;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -27,17 +31,17 @@ public class HouseholdRepository {
    * This method takes the name, longitude, and latitude of the household as parameters,
    * and inserts a new record into the households table.
    *
-   * @param name the name of the household
+   * @param name      the name of the household
    * @param longitude the longitude of the household
-   * @param latitude the latitude of the household
+   * @param latitude  the latitude of the household
    * @return the ID of the newly created household
    */
   public Long createHousehold(String name, double longitude, double latitude) {
     KeyHolder keyHolder = new GeneratedKeyHolder();
     jdbcTemplate.update(connection -> {
       PreparedStatement ps = connection.prepareStatement(
-          "INSERT INTO households (name, longitude, latitude) VALUES (?, ?, ?)",
-          Statement.RETURN_GENERATED_KEYS
+              "INSERT INTO households (name, longitude, latitude) VALUES (?, ?, ?)",
+              Statement.RETURN_GENERATED_KEYS
       );
       ps.setString(1, name);
       ps.setDouble(2, longitude);
@@ -58,7 +62,7 @@ public class HouseholdRepository {
    */
   public boolean existsByName(String householdName) {
     String sql = "SELECT COUNT(*) FROM households WHERE name = ?";
-    Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);
+    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, householdName);
     return count != null && count > 0;
   }
 
@@ -70,8 +74,8 @@ public class HouseholdRepository {
    */
   public Household save(Household household) {
     SimpleJdbcInsert householdInsert = new SimpleJdbcInsert(jdbcTemplate)
-        .withTableName("households")
-        .usingGeneratedKeyColumns("id");
+            .withTableName("households")
+            .usingGeneratedKeyColumns("id");
 
     Map<String, Object> params = new HashMap<>();
     params.put("name", household.getName());
@@ -82,5 +86,59 @@ public class HouseholdRepository {
     household.setId(householdId.longValue());
 
     return household;
+  }
+
+  /**
+   * Retrieves a Household by its name from the database.
+   *
+   * @param name the name of the household to retrieve
+   * @return the Household object with the specified name
+   */
+  public Optional<Household> getHouseholdByName(String name) {
+    String sql = "SELECT * FROM households WHERE name = ?";
+    try {
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+        mapRowToHousehold(rs), name));
+    } catch (EmptyResultDataAccessException e) {
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Retrieves a Household by its ID from the database.
+   *
+   * @param id the ID of the household to retrieve
+   * @return the Household object with the specified ID
+   */
+  public Optional<Household> getHouseholdById(Long id) {
+    String sql = "SELECT * FROM households WHERE id = ?";
+    try {
+      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
+              mapRowToHousehold(rs), id));
+    } catch (EmptyResultDataAccessException e) {
+      return Optional.empty();
+    }
+  }
+
+  private Household mapRowToHousehold(ResultSet rs) throws SQLException {
+    Household household = new Household();
+    household.setId(rs.getLong("id"));
+    household.setName(rs.getString("name"));
+    household.setLongitude(rs.getDouble("longitude"));
+    household.setLatitude(rs.getDouble("latitude"));
+    household.setEmergencyGroupId(rs.getLong("emergency_group_id"));
+    return household;
+  }
+
+  /**
+   * Updates the household ID of a user in the database.
+   * This method is used to associate a user with a specific household.
+   *
+   * @param householdId  the ID of the household to associate with the user
+   * @param groupId      the ID of the group to associate with the user
+   */
+  public void addHouseholdToGroup(long householdId, long groupId) {
+    String sql = "UPDATE households SET emergency_group_id = ? WHERE id = ?";
+    jdbcTemplate.update(sql, groupId, householdId);
   }
 }

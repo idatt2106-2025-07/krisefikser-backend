@@ -1,11 +1,12 @@
 package com.group7.krisefikser.repository;
 
+import com.group7.krisefikser.model.Household;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,5 +39,53 @@ class HouseholdRepositoryTest {
   @Test
   void existsByName_nonExistingHousehold_returnsFalse() {
     assertFalse(householdRepository.existsByName("Nonexistent Household"));
+  }
+
+  @Test
+  void getHouseholdByName_existingHousehold_returnsHousehold() {
+    Optional<Household> householdOptional = householdRepository.getHouseholdByName("The Smiths");
+    assertTrue(householdOptional.isPresent());
+    Household household = householdOptional.get();
+    assertEquals("The Smiths", household.getName());
+    assertEquals(1L, household.getId());
+    assertEquals(10.75, household.getLongitude());
+    assertEquals(59.91, household.getLatitude());
+  }
+
+  @Test
+  void getHouseholdByName_nonExistingHousehold_throwsException() {
+    String name = "Nonexistent Household";
+    Optional<Household> householdOptional = householdRepository.getHouseholdByName(name);
+    assertFalse(householdOptional.isPresent());
+  }
+
+  @Test
+  void getHouseholdById_existingHousehold_returnsHousehold() {
+    Optional<Household> householdOptional = householdRepository.getHouseholdById(1L);
+    assertTrue(householdOptional.isPresent());
+    Household household = householdOptional.get();
+    assertEquals("The Smiths", household.getName());
+    assertEquals(1L, household.getId());
+    assertEquals(10.75, household.getLongitude());
+    assertEquals(59.91, household.getLatitude());
+  }
+
+  @Test
+  void getHouseholdById_nonExistingHousehold_returnsEmpty() {
+    Optional<Household> householdOptional = householdRepository.getHouseholdById(999L);
+    assertFalse(householdOptional.isPresent());
+  }
+
+  @Test
+  void addHouseholdToGroup_validInput_updatesHousehold() {
+    long householdId = 1L;
+    long groupId = 2L;
+
+    householdRepository.addHouseholdToGroup(householdId, groupId);
+
+    Optional<Household> householdOptional = householdRepository.getHouseholdById(householdId);
+    assertTrue(householdOptional.isPresent());
+    Household household = householdOptional.get();
+    assertEquals(groupId, household.getEmergencyGroupId());
   }
 }
