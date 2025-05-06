@@ -1,12 +1,12 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.response.SuperAdminResponse;
+import com.group7.krisefikser.dto.response.AdminResponse;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.exception.UsernameGenerationException;
-import com.group7.krisefikser.mapper.SuperAdminMapper;
+import com.group7.krisefikser.mapper.AdminMapper;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
@@ -75,14 +75,14 @@ public class SuperAdminService {
    *
    * @return a list of SuperAdminResponse objects containing details of the admins
    */
-  public List<SuperAdminResponse> getAllAdmins() {
+  public List<AdminResponse> getAllAdmins() {
     try {
       List<User> admins = userRepository.findByRole(Role.ROLE_ADMIN);
       if (admins.isEmpty()) {
         throw new IllegalArgumentException("No admins found");
       }
-      return SuperAdminMapper
-          .INSTANCE.userToSuperAdminResponse(admins);
+      return AdminMapper
+          .INSTANCE.userToAdminResponse(admins);
     } catch (Exception e) {
       throw new RuntimeException("Error fetching admins: " + e.getMessage());
     }
