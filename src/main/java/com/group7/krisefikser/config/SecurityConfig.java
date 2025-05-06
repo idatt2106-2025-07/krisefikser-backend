@@ -74,7 +74,7 @@ public class SecurityConfig {
                 "/api/admin/register",
                 "/api/admin/2fa",
                 "/h2-console/**",
-                "/api/hcaptcha/verify")
+                "/api/hcaptcha/**")
             .permitAll()
 
             .requestMatchers(HttpMethod.DELETE,
