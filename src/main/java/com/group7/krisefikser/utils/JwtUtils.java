@@ -155,6 +155,13 @@ public class JwtUtils {
   }
 
 
+  /**
+    * generates a reset password token for the given email.
+   * This token is used to reset the user's password.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
   public String generateResetPasswordToken(final String email) {
     final Instant now = Instant.now();
     return JWT.create()
@@ -266,6 +273,14 @@ public class JwtUtils {
     return subject;
   }
 
+  /**
+   * validates and retrieves the email from the given token.
+   * This token is used to reset the user's password.
+   *
+   * @param token the jwt to get email from
+   * @return the email
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
   public String validateResetPasswordTokenAndGetEmail(final String token)
                               throws JwtMissingPropertyException {
     String subject = validateToken(token, resetPasswordSecretKey).getSubject();
