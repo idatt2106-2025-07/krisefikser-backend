@@ -353,13 +353,13 @@ public class JwtUtils {
    * @param response The HttpServletResponse object to which the cookie will be added.
    */
   public void setLogOutJwtCookie(HttpServletResponse response) {
-<span class="nc" id="L356">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, null);</span>
-<span class="nc" id="L357">    jwtCookie.setHttpOnly(true);</span>
-<span class="nc" id="L358">    jwtCookie.setSecure(true);</span>
-<span class="nc" id="L359">    jwtCookie.setPath(&quot;/&quot;);</span>
-<span class="nc" id="L360">    jwtCookie.setMaxAge(0);</span>
-<span class="nc" id="L361">    response.addCookie(jwtCookie);</span>
-<span class="nc" id="L362">  }</span>
+<span class="fc" id="L356">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, null);</span>
+<span class="fc" id="L357">    jwtCookie.setHttpOnly(true);</span>
+<span class="fc" id="L358">    jwtCookie.setSecure(true);</span>
+<span class="fc" id="L359">    jwtCookie.setPath(&quot;/&quot;);</span>
+<span class="fc" id="L360">    jwtCookie.setMaxAge(0);</span>
+<span class="fc" id="L361">    response.addCookie(jwtCookie);</span>
+<span class="fc" id="L362">  }</span>
 
   /**
    * Retrieves the expiration date of a given JWT token.
