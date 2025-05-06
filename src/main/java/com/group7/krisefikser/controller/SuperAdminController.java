@@ -12,11 +12,24 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.logging.Logger;
 
+/**
+ * Controller class for handling requests related to super admin operations.
+ * This class provides endpoints to invite admins,
+ * retrieve all admins,
+ * delete admins,
+ * and send reset password emails to admins.
+ */
 @RestController
 @RequestMapping("/api/super-admin")
 public class SuperAdminController {
@@ -85,6 +98,12 @@ public class SuperAdminController {
     }
   }
 
+  /**
+   * Endpoint to retrieve all admins.
+   * This endpoint fetches the list of all admins from the system.
+   *
+   * @return ResponseEntity containing the list of admins.
+   */
   @GetMapping("/admins")
   public ResponseEntity<List<SuperAdminResponse>> getAllAdmins() {
     logger.info("Fetching all admins");
@@ -98,6 +117,13 @@ public class SuperAdminController {
     }
   }
 
+  /**
+   * Endpoint to delete an admin.
+   * This endpoint will accept the ID of the admin to be deleted.
+   *
+   * @param adminId The ID of the admin to be deleted.
+   * @return ResponseEntity indicating the result of the operation.
+   */
   @DeleteMapping("/delete/{adminId}")
   public ResponseEntity<Void> deleteAdmin(@PathVariable Long adminId) {
     logger.info("Trying to delete admin with ID: " + adminId);
@@ -111,8 +137,16 @@ public class SuperAdminController {
     }
   }
 
+  /**
+   * Endpoint to send a new password link to an admin.
+   * This endpoint will accept the email of the admin
+   * to whom the new password link will be sent.
+   *
+   * @param email The email of the admin to whom the new password link will be sent.
+   * @return ResponseEntity indicating the result of the operation.
+   */
   @PostMapping("/admins/new-password-link")
-  public ResponseEntity<Object> sendNewPasswordLink(@RequestParam String email) {
+  public ResponseEntity<Object> sendNewPasswordLink(@RequestBody String email) {
     logger.info("Trying to send new password link to: " + email);
     try {
       superAdminService.sendResetPasswordEmailToAdmin(email);
@@ -123,5 +157,4 @@ public class SuperAdminController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
-
 }
