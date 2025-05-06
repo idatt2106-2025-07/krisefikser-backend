@@ -2,7 +2,10 @@ package com.group7.krisefikser.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * DTO class for the hCaptcha verification response.
@@ -10,6 +13,9 @@ import lombok.Data;
  * hostname, and any error codes returned by the hCaptcha API.
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class HcaptchaVerificationResponse {
   private boolean success;
 

@@ -2,10 +2,12 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.HcaptchaRequest;
 import com.group7.krisefikser.dto.response.HcaptchaVerificationResponse;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
@@ -30,6 +32,21 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/hcaptcha")
 public class HcaptchaController {
 
+
+  private final RestTemplate restTemplate;
+
+  /**
+   * Constructor for HcaptchaController.
+   * It initializes the RestTemplate used for making HTTP requests.
+   *
+   * @param restTemplate the RestTemplate to be used
+   */
+  public HcaptchaController(RestTemplate restTemplate) {
+
+    this.restTemplate = restTemplate;
+
+  }
+
   @Value("${hcaptcha.secret}")
   private String hcaptchaSecret;
 
@@ -42,11 +59,10 @@ public class HcaptchaController {
    * @return the response from the hCaptcha API
    */
   @PostMapping("/verify")
-public ResponseEntity<?> verify(@RequestBody HcaptchaRequest request) {
+  public ResponseEntity<?> verify(@RequestBody HcaptchaRequest request) {
     String token = request.getToken();
     final String url = "https://hcaptcha.com/siteverify";
 
-    final RestTemplate restTemplate = new RestTemplate();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -57,7 +73,21 @@ public ResponseEntity<?> verify(@RequestBody HcaptchaRequest request) {
     HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
 
     ResponseEntity<HcaptchaVerificationResponse> response =
-            restTemplate.exchange(url, HttpMethod.POST, entity, HcaptchaVerificationResponse.class);
-    return ResponseEntity.ok(response.getBody());
+        restTemplate.exchange(url, HttpMethod.POST, entity, HcaptchaVerificationResponse.class);
+
+    HcaptchaVerificationResponse result = response.getBody();
+
+    HcaptchaVerificationResponse failure = HcaptchaVerificationResponse.builder()
+        .success(false)
+        .errorCodes(List.of("verification-failed"))
+        .build();
+
+    if (result != null && result.isSuccess()) {
+      return ResponseEntity.ok(result);
+    } else {
+      return ResponseEntity
+      .status(HttpStatus.BAD_REQUEST)
+      .body(result != null ? result : failure);
+    }
   }
 }
