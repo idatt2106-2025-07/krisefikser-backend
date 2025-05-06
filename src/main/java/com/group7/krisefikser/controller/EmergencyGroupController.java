@@ -263,7 +263,8 @@ public class EmergencyGroupController {
             @ApiResponse(responseCode = "200",
                     description = "Invitations retrieved successfully",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = EmergencyGroupInvitationResponse.class))),
+                            schema = @Schema(implementation =
+                                    EmergencyGroupInvitationResponse.class))),
             @ApiResponse(responseCode = "500",
                     description = "Internal server error",
                     content = @Content(mediaType = "application/json",
