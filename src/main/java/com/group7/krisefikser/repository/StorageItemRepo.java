@@ -31,11 +31,12 @@ public class StorageItemRepo {
    */
   private final RowMapper<StorageItem> storageItemRowMapper = (rs, rowNum) -> {
     return new StorageItem(
-      rs.getInt("id"),
-      rs.getTimestamp("expiration_date").toLocalDateTime(),
-      rs.getInt("quantity"),
-      rs.getInt("household_id"),
-      rs.getInt("item_id")
+            rs.getInt("id"),
+            rs.getTimestamp("expiration_date").toLocalDateTime(),
+            rs.getInt("quantity"),
+            rs.getInt("household_id"),
+            rs.getInt("item_id"),
+            rs.getBoolean("is_shared")
     );
   };
 
@@ -57,7 +58,7 @@ public class StorageItemRepo {
    */
   public List<StorageItem> getAllStorageItems(int householdId) {
     String sql = "SELECT id, expiration_date, quantity, household_id, "
-        + "item_id FROM storage_items WHERE household_id = ?";
+            + "item_id, is_shared FROM storage_items WHERE household_id = ?";
     return jdbcTemplate.query(sql, storageItemRowMapper, householdId);
   }
 
@@ -71,9 +72,9 @@ public class StorageItemRepo {
   public Optional<StorageItem> findById(int id, int householdId) {
     try {
       String sql = "SELECT id, expiration_date, quantity, household_id, "
-          + "item_id FROM storage_items WHERE id = ? AND household_id = ?";
+              + "item_id, is_shared FROM storage_items WHERE id = ? AND household_id = ?";
       StorageItem storageItem = jdbcTemplate.queryForObject(sql,
-          storageItemRowMapper, id, householdId);
+              storageItemRowMapper, id, householdId);
       return Optional.ofNullable(storageItem);
     } catch (EmptyResultDataAccessException e) {
       return Optional.empty();
@@ -88,8 +89,9 @@ public class StorageItemRepo {
    * @return A list of StorageItem objects of the specified item.
    */
   public List<StorageItem> findByItemId(int itemId, int householdId) {
-    String sql = "SELECT id, expiration_date, quantity, household_id, item_id FROM storage_items "
-        + "WHERE item_id = ? AND household_id = ?";
+    String sql = "SELECT id, expiration_date, quantity, household_id, item_id, is_shared "
+            + "FROM storage_items "
+            + "WHERE item_id = ? AND household_id = ?";
     return jdbcTemplate.query(sql, storageItemRowMapper, itemId, householdId);
   }
 
@@ -104,7 +106,7 @@ public class StorageItemRepo {
    */
   public StorageItem add(StorageItem storageItem) {
     String sql = "INSERT INTO storage_items (expiration_date, quantity, "
-        + "household_id, item_id) VALUES (?, ?, ?, ?)";
+            + "household_id, item_id) VALUES (?, ?, ?, ?)";
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
     jdbcTemplate.update(connection -> {
@@ -127,22 +129,22 @@ public class StorageItemRepo {
    * @param storageItem The storage item to be updated. It must contain the ID and the new details.
    * @return The updated storage item.
    * @throws EmptyResultDataAccessException if no storage item is found with the
-   *        given ID in the specified household.
+   *                                        given ID in the specified household.
    */
   public StorageItem update(StorageItem storageItem) {
     String sql = "UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ? "
-        + "WHERE id = ? AND household_id = ?";
+            + "WHERE id = ? AND household_id = ?";
     int rowsAffected = jdbcTemplate.update(sql,
-        Timestamp.valueOf(storageItem.getExpirationDate()),
-        storageItem.getQuantity(),
-        storageItem.getItemId(),
-        storageItem.getId(),
-        storageItem.getHouseholdId());
+            Timestamp.valueOf(storageItem.getExpirationDate()),
+            storageItem.getQuantity(),
+            storageItem.getItemId(),
+            storageItem.getId(),
+            storageItem.getHouseholdId());
 
     if (rowsAffected == 0) {
       throw new EmptyResultDataAccessException(
-        "No storage item found with id: " + storageItem.getId()
-          + " in household: " + storageItem.getHouseholdId(), 1);
+              "No storage item found with id: " + storageItem.getId()
+                      + " in household: " + storageItem.getHouseholdId(), 1);
     }
     return storageItem;
   }
@@ -183,22 +185,23 @@ public class StorageItemRepo {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime futureDate = now.plusDays(days);
 
-    String sql = "SELECT id, expiration_date, quantity, household_id, item_id FROM storage_items "
-        + "WHERE expiration_date <= ? "
-        + "AND expiration_date >= ? "
-        + "AND household_id = ?";
+    String sql = "SELECT id, expiration_date, quantity, household_id, item_id, is_shared "
+            + "FROM storage_items "
+            + "WHERE expiration_date <= ? "
+            + "AND expiration_date >= ? "
+            + "AND household_id = ?";
 
     return jdbcTemplate.query(sql, storageItemRowMapper,
-      Timestamp.valueOf(futureDate),
-      Timestamp.valueOf(now),
-      householdId);
+            Timestamp.valueOf(futureDate),
+            Timestamp.valueOf(now),
+            householdId);
   }
 
   /**
    * Retrieves storage items by item type for a specific household.
    * Uses a JOIN query to filter at the database level.
    *
-   * @param householdId The household ID of the storage items to retrieve.
+   * @param householdId     The household ID of the storage items to retrieve.
    * @param itemTypeStrings The types of items to filter by (lowercase strings).
    * @return A list of StorageItem objects matching the criteria.
    */
@@ -209,11 +212,12 @@ public class StorageItemRepo {
 
     String placeholders = String.join(",", Collections.nCopies(itemTypeStrings.size(), "?"));
 
-    String sql = "SELECT si.id, si.expiration_date, si.quantity, si.household_id, si.item_id "
-          + "FROM storage_items si "
-          + "JOIN items i ON si.item_id = i.id "
-          + "WHERE si.household_id = ? "
-          + "AND i.type IN (" + placeholders + ")";
+    String sql = "SELECT si.id, si.expiration_date, si.quantity, si.household_id, si.item_id, "
+            + "si.is_shared "
+            + "FROM storage_items si "
+            + "JOIN items i ON si.item_id = i.id "
+            + "WHERE si.household_id = ? "
+            + "AND i.type IN (" + placeholders + ")";
 
     Object[] params = new Object[itemTypeStrings.size() + 1];
     params[0] = householdId;

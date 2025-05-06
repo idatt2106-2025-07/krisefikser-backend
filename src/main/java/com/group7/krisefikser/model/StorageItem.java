@@ -18,4 +18,5 @@ public class StorageItem {
   private int quantity;
   private int householdId;
   private int itemId;
+  private boolean isShared;
 }

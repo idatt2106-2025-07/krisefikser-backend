@@ -122,6 +122,7 @@ class StorageItemRepoTest {
     assertEquals(5, addedItem.getQuantity());
     assertEquals(1, addedItem.getHouseholdId());
     assertEquals(1, addedItem.getItemId());
+    assertFalse(addedItem.isShared());
     assertNotNull(addedItem.getExpirationDate());
 
     // Verify the item was actually added to the database
@@ -157,6 +158,7 @@ class StorageItemRepoTest {
     assertEquals(10, updatedItem.getQuantity());
     assertEquals(addedItem.getHouseholdId(), updatedItem.getHouseholdId());
     assertEquals(addedItem.getItemId(), updatedItem.getItemId());
+    assertFalse(updatedItem.isShared());
 
     // Verify the change in the database
     Optional<StorageItem> retrievedItem = storageItemRepo.findById(updatedItem.getId(), updatedItem.getHouseholdId());

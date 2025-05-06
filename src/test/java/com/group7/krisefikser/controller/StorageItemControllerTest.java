@@ -78,8 +78,8 @@ class StorageItemControllerTest {
 
     // Create mock responses
     List<StorageItemResponse> mockResponses = Arrays.asList(
-      createStorageItemResponse(1, 101, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(10), "Water"),
-      createStorageItemResponse(2, 102, MOCK_HOUSEHOLD_ID, 3, LocalDateTime.now().plusDays(5), "Bread")
+      createStorageItemResponse(1, 101, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(10), "Water", true ),
+      createStorageItemResponse(2, 102, MOCK_HOUSEHOLD_ID, 3, LocalDateTime.now().plusDays(5), "Bread", false)
     );
 
     // Mock the service methods
@@ -87,7 +87,7 @@ class StorageItemControllerTest {
     when(storageItemService.convertToStorageItemResponses(mockItems)).thenReturn(mockResponses);
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household")
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andReturn();
@@ -110,7 +110,7 @@ class StorageItemControllerTest {
     when(storageItemService.convertToStorageItemResponses(Collections.emptyList())).thenReturn(Collections.emptyList());
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household")
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andReturn();
@@ -132,8 +132,8 @@ class StorageItemControllerTest {
 
     // Create mock responses
     List<StorageItemResponse> mockResponses = Arrays.asList(
-      createStorageItemResponse(1, 101, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(3), "Water"),
-      createStorageItemResponse(2, 102, MOCK_HOUSEHOLD_ID, 3, LocalDateTime.now().plusDays(5), "Bread")
+      createStorageItemResponse(1, 101, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(3), "Water", true),
+      createStorageItemResponse(2, 102, MOCK_HOUSEHOLD_ID, 3, LocalDateTime.now().plusDays(5), "Bread", false)
     );
 
     // Mock the service methods
@@ -141,7 +141,7 @@ class StorageItemControllerTest {
     when(storageItemService.convertToStorageItemResponses(mockItems)).thenReturn(mockResponses);
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items/expiring")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household/expiring")
         .param("days", "7")
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
@@ -165,8 +165,8 @@ class StorageItemControllerTest {
 
     // Create mock responses
     List<StorageItemResponse> mockResponses = Arrays.asList(
-      createStorageItemResponse(1, itemId, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(10), "Water"),
-      createStorageItemResponse(2, itemId, MOCK_HOUSEHOLD_ID, 3, LocalDateTime.now().plusDays(5), "Water")
+      createStorageItemResponse(1, itemId, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(10), "Water", true),
+      createStorageItemResponse(2, itemId, MOCK_HOUSEHOLD_ID, 3, LocalDateTime.now().plusDays(5), "Water", false)
     );
 
     // Mock the service methods
@@ -174,7 +174,7 @@ class StorageItemControllerTest {
     when(storageItemService.convertToStorageItemResponses(mockItems)).thenReturn(mockResponses);
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items/by-item/" + itemId)
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household/by-item/" + itemId)
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andReturn();
@@ -200,7 +200,7 @@ class StorageItemControllerTest {
     when(storageItemService.getAggregatedStorageItems(MOCK_HOUSEHOLD_ID)).thenReturn(mockResponses);
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items/aggregated")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household/aggregated")
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
       .andReturn();
@@ -232,7 +232,7 @@ class StorageItemControllerTest {
     sortRequest.setSortDirection("desc");
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items/aggregated/sort")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household/aggregated/sort")
         .param("sortBy", "quantity")
         .param("sortDirection", "desc")
         .contentType(MediaType.APPLICATION_JSON))
@@ -265,7 +265,7 @@ class StorageItemControllerTest {
     )).thenReturn(mockResponses);
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items/aggregated/filter-by-type")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household/aggregated/filter-by-type")
         .param("types", "DRINK")
         .contentType(MediaType.APPLICATION_JSON))
       .andExpect(status().isOk())
@@ -298,7 +298,7 @@ class StorageItemControllerTest {
     )).thenReturn(mockResponses);
 
     // Perform the request
-    MvcResult result = mockMvc.perform(get("/api/storage-items/aggregated/filter-and-sort")
+    MvcResult result = mockMvc.perform(get("/api/storage-items/household/aggregated/filter-and-sort")
         .param("types", "FOOD")
         .param("sortBy", "expirationDate")
         .param("sortDirection", "asc")
@@ -325,7 +325,7 @@ class StorageItemControllerTest {
 
     // Create response object
     StorageItemResponse response = createStorageItemResponse(1, 101, MOCK_HOUSEHOLD_ID, 5,
-      LocalDateTime.now().plusDays(10), "Water");
+      LocalDateTime.now().plusDays(10), "Water", true);
 
     // Mock the service method
     when(storageItemService.addStorageItemFromRequest(eq(MOCK_HOUSEHOLD_ID), any(StorageItemRequest.class)))
@@ -361,7 +361,7 @@ class StorageItemControllerTest {
 
     // Create response object
     StorageItemResponse response = createStorageItemResponse(storageItemId, 101, MOCK_HOUSEHOLD_ID, 10,
-      LocalDateTime.now().plusDays(15), "Water");
+      LocalDateTime.now().plusDays(15), "Water", true);
 
     // Mock the service method
     when(storageItemService.updateStorageItemFromRequest(eq(storageItemId), eq(MOCK_HOUSEHOLD_ID), any(StorageItemRequest.class)))
@@ -444,7 +444,8 @@ class StorageItemControllerTest {
   }
 
   private StorageItemResponse createStorageItemResponse(int id, int itemId, int householdId, int quantity,
-                                                        LocalDateTime expirationDate, String itemName) {
+                                                        LocalDateTime expirationDate, String itemName,
+                                                        boolean is_shared) {
     ItemResponse itemResponse = new ItemResponse();
     itemResponse.setId(itemId);
     itemResponse.setName(itemName);
@@ -458,6 +459,7 @@ class StorageItemControllerTest {
     response.setHouseholdId(householdId);
     response.setQuantity(quantity);
     response.setExpirationDate(expirationDate);
+    response.setShared(is_shared);
     response.setItem(itemResponse);
 
     return response;
