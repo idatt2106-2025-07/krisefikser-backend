@@ -1,6 +1,6 @@
 package com.group7.krisefikser.mapper;
 
-import com.group7.krisefikser.dto.response.SuperAdminResponse;
+import com.group7.krisefikser.dto.response.AdminResponse;
 import com.group7.krisefikser.model.User;
 import java.util.List;
 import org.mapstruct.Mapper;
@@ -12,8 +12,8 @@ import org.mapstruct.factory.Mappers;
  * This interface uses MapStruct to generate the implementation at compile time.
  */
 @Mapper
-public interface SuperAdminMapper {
-  SuperAdminMapper INSTANCE = Mappers.getMapper(SuperAdminMapper.class);
+public interface AdminMapper {
+  AdminMapper INSTANCE = Mappers.getMapper(AdminMapper.class);
 
   /**
    * Converts a User entity to a SuperAdminResponse DTO.
@@ -24,5 +24,5 @@ public interface SuperAdminMapper {
    * @return the converted SuperAdminResponse DTO
    */
   @Mapping(source = "email", target = "email")
-  List<SuperAdminResponse> userToSuperAdminResponse(List<User> superAdmins);
+  List<AdminResponse> userToAdminResponse(List<User> superAdmins);
 }
