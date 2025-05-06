@@ -29,16 +29,14 @@ public class StorageItemRepo {
   /**
    * RowMapper to map the result set to a StorageItem object.
    */
-  private final RowMapper<StorageItem> storageItemRowMapper = (rs, rowNum) -> {
-    return new StorageItem(
-            rs.getInt("id"),
-            rs.getTimestamp("expiration_date").toLocalDateTime(),
-            rs.getInt("quantity"),
-            rs.getInt("household_id"),
-            rs.getInt("item_id"),
-            rs.getBoolean("is_shared")
-    );
-  };
+  private final RowMapper<StorageItem> storageItemRowMapper = (rs, rowNum) -> new StorageItem(
+          rs.getInt("id"),
+          rs.getTimestamp("expiration_date").toLocalDateTime(),
+          rs.getInt("quantity"),
+          rs.getInt("household_id"),
+          rs.getInt("item_id"),
+          rs.getBoolean("is_shared")
+  );
 
   /**
    * Constructor for StorageItemRepo.
@@ -60,6 +58,21 @@ public class StorageItemRepo {
     String sql = "SELECT id, expiration_date, quantity, household_id, "
             + "item_id, is_shared FROM storage_items WHERE household_id = ?";
     return jdbcTemplate.query(sql, storageItemRowMapper, householdId);
+  }
+
+  /**
+   * This method retrieves all shared storage items for a specific emergency group from the
+   * database.
+   *
+   * @param emergencyGroupId The ID of the emergency group to retrieve storage items for
+   * @return A list of StorageItem objects.
+   */
+  public List<StorageItem> getAllSharedStorageItemsInGroup(long emergencyGroupId) {
+    String sql = "SELECT si.id, si.expiration_date, si.quantity, si.household_id, "
+            + "si.item_id, si.is_shared FROM storage_items si "
+            + "JOIN households h ON si.household_id = h.id "
+            + "WHERE h.emergency_group_id = ? AND si.is_shared = TRUE";
+    return jdbcTemplate.query(sql, storageItemRowMapper, emergencyGroupId);
   }
 
   /**

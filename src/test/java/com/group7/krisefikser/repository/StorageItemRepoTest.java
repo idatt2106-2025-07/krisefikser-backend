@@ -45,6 +45,28 @@ class StorageItemRepoTest {
     }
   }
 
+  @Test
+  void getAllSharedStorageItemsInGroup_valid_returnsItems() {
+    long groupId = 1L;
+    List<StorageItem> items = storageItemRepo.getAllSharedStorageItemsInGroup(groupId);
+
+    assertNotNull(items);
+    assertEquals(4, items.size());
+
+    for (StorageItem item : items) {
+      assertTrue(item.isShared());
+    }
+  }
+
+  @Test
+  void getAllSharedStorageItemsInGroup_invalid_returnsEmpty() {
+    long groupId = 999L;
+    List<StorageItem> items = storageItemRepo.getAllSharedStorageItemsInGroup(groupId);
+
+    assertNotNull(items);
+    assertTrue(items.isEmpty());
+  }
+
   /**
    * This method tests the findById method in the StorageItemRepo class.
    * It retrieves a storage item based on its id and household id from the database
