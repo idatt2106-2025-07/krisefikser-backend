@@ -11,13 +11,19 @@ import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.UuidUtils;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+/**
+ * Service class for handling super admin-related operations.
+ * This class provides methods for inviting admins,
+ * retrieving all admins,
+ * deleting admins,
+ * and sending reset password emails to admins.
+ */
 @Service
 @RequiredArgsConstructor
 public class SuperAdminService {
@@ -61,6 +67,14 @@ public class SuperAdminService {
     );
   }
 
+  /**
+   * Retrieves all admins from the repository.
+   * This method fetches the list of admins
+   * from the user repository
+   * and maps them to SuperAdminResponse objects.
+   *
+   * @return a list of SuperAdminResponse objects containing details of the admins
+   */
   public List<SuperAdminResponse> getAllAdmins() {
     try {
       List<User> admins = userRepository.findByRole(Role.ROLE_ADMIN);
@@ -74,6 +88,15 @@ public class SuperAdminService {
     }
   }
 
+  /**
+   * Deletes an admin by their ID.
+   * This method checks if the user exists
+   * and if they have the admin role before deleting them.
+   * If the user is not found or does not have the admin role,
+   * an exception is thrown.
+   *
+   * @param adminId the ID of the admin to be deleted
+   */
   public void deleteAdmin(Long adminId) {
     try {
       Optional<User> user = userRepository.findById(adminId);
@@ -90,6 +113,15 @@ public class SuperAdminService {
     }
   }
 
+  /**
+   * Sends a reset password email to an admin.
+   * This method checks if the user exists
+   * and if they have the admin role before sending the email.
+   * If the user is not found or does not have the admin role,
+   * an exception is thrown.
+   *
+   * @param email the email of the admin to send the reset password email to
+   */
   public void sendResetPasswordEmailToAdmin(String email) {
     try {
       Optional<User> user = userRepository.findByEmail(email);
