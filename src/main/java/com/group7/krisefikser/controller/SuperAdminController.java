@@ -101,6 +101,25 @@ public class SuperAdminController {
    *
    * @return ResponseEntity containing the list of admins.
    */
+  @Operation(
+      summary = "Get all admins",
+      description = "Retrieves a list of all admins currently registered in the system.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "List of admins retrieved successfully",
+              content = @Content(
+                  mediaType = "application/json",
+                  schema = @Schema(implementation = SuperAdminResponse.class)
+              )
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error while retrieving admins",
+              content = @Content(mediaType = "application/json")
+          )
+      }
+  )
   @GetMapping("/admins")
   public ResponseEntity<List<SuperAdminResponse>> getAllAdmins() {
     logger.info("Fetching all admins");
@@ -121,6 +140,21 @@ public class SuperAdminController {
    * @param adminId The ID of the admin to be deleted.
    * @return ResponseEntity indicating the result of the operation.
    */
+  @Operation(
+      summary = "Delete an admin",
+      description = "Deletes an admin based on the provided admin ID.",
+      responses = {
+          @ApiResponse(
+              responseCode = "204",
+              description = "Admin deleted successfully"
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error while deleting admin",
+              content = @Content(mediaType = "application/json")
+          )
+      }
+  )
   @DeleteMapping("/delete/{adminId}")
   public ResponseEntity<Void> deleteAdmin(@PathVariable Long adminId) {
     logger.info("Trying to delete admin with ID: " + adminId);
@@ -142,6 +176,30 @@ public class SuperAdminController {
    * @param email The email of the admin to whom the new password link will be sent.
    * @return ResponseEntity indicating the result of the operation.
    */
+  @Operation(
+      summary = "Send new password link to admin",
+      description = "Sends a password reset link to the admin's email address.",
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = "The email of the admin to send the reset link to",
+          required = true,
+          content = @Content(
+              mediaType = "application/json",
+              schema = @Schema(implementation = String.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Password reset link sent successfully",
+              content = @Content(mediaType = "application/json")
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error while sending reset link",
+              content = @Content(mediaType = "application/json")
+          )
+      }
+  )
   @PostMapping("/admins/new-password-link")
   public ResponseEntity<Object> sendNewPasswordLink(@RequestBody String email) {
     logger.info("Trying to send new password link to: " + email);
