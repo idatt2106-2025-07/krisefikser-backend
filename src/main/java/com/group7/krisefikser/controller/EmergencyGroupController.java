@@ -94,6 +94,29 @@ public class EmergencyGroupController {
    * @param request the EmergencyGroup object to add
    * @return the EmergencyGroupResponse object representing the added group
    */
+  @Operation(
+          summary = "Add Emergency Group",
+          description = "Add a new emergency group.",
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = "Emergency group request object",
+                  content = @Content(mediaType = "application/json",
+                          schema = @Schema(implementation = EmergencyGroupRequest.class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = "201",
+                    description = "Emergency group added successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = EmergencyGroupResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request, invalid data in the request",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+          }
+  )
   @PostMapping
   public ResponseEntity<Object> addEmergencyGroup(@RequestBody EmergencyGroupRequest request) {
     try {
@@ -115,6 +138,30 @@ public class EmergencyGroupController {
    * @param householdName the name of the household to invite.
    * @return a response entity indicating the result of the operation
    */
+  @Operation(
+          summary = "Invite Household to Emergency Group",
+          description = "Invite a household to an emergency group by its name.",
+          parameters = {
+            @Parameter(name = "householdName", description = "Name of the household to invite")
+          },
+          responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Household invited successfully",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404",
+                    description = "Household not found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+          }
+  )
   @PostMapping("/invite/{householdName}")
   public ResponseEntity<Object> inviteHouseholdByName(@PathVariable String householdName) {
     logger.info("Inviting household with name: {}", householdName);
@@ -124,7 +171,7 @@ public class EmergencyGroupController {
       return ResponseEntity.ok("Household invited successfully.");
     } catch (NoSuchElementException e) {
       logger.error("Household with name {} not found.", householdName);
-      return ResponseEntity.status(404).body(new ErrorResponse("Household not found."));
+      return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage()));
     } catch (IllegalArgumentException e) {
       logger.error("Failed to invite household: {}", e.getMessage());
       return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
@@ -146,6 +193,36 @@ public class EmergencyGroupController {
    * @param bindingResult the binding result for validation errors
    * @return a response entity indicating the result of the operation
    */
+  @Operation(
+          summary = "Answer Emergency Group Invitation",
+          description = "Answer an invitation to join an emergency group.",
+          parameters = {
+            @Parameter(name = "groupId", description =
+                    "ID of the emergency group to answer the invitation for")
+          },
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = "Invitation reply request object",
+                  content = @Content(mediaType = "application/json",
+                          schema = @Schema(implementation = InvitationReplyRequest.class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Invitation answered successfully",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404",
+                    description = "Emergency group not found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad request, invalid response",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+          }
+  )
   @PatchMapping("/answer-invitation/{groupId}")
   public ResponseEntity<Object> answerInvitation(
           @PathVariable Long groupId,
@@ -179,6 +256,20 @@ public class EmergencyGroupController {
    *
    * @return a response entity containing the list of invitations
    */
+  @Operation(
+          summary = "Get Invitations",
+          description = "Retrieve the list of invitations for the current user's household.",
+          responses = {
+            @ApiResponse(responseCode = "200",
+                    description = "Invitations retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = EmergencyGroupInvitationResponse.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+          }
+  )
   @GetMapping("/invitations")
   public ResponseEntity<Object> getInvitations() {
     logger.info("Retrieving group invitations for the current users household.");
