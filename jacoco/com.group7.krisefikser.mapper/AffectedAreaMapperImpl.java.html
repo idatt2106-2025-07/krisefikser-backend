@@ -8,7 +8,7 @@ import javax.annotation.processing.Generated;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2025-05-06T10:07:15+0000&quot;,
+    date = &quot;2025-05-06T10:08:08+0000&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Eclipse Adoptium)&quot;
 )
 <span class="fc" id="L14">public class AffectedAreaMapperImpl implements AffectedAreaMapper {</span>
@@ -22,40 +22,42 @@ import javax.annotation.processing.Generated;
 <span class="fc" id="L22">        AffectedAreaResponse affectedAreaResponse = new AffectedAreaResponse();</span>
 
 <span class="fc" id="L24">        affectedAreaResponse.setId( affectedArea.getId() );</span>
-<span class="fc" id="L25">        affectedAreaResponse.setLongitude( affectedArea.getLongitude() );</span>
-<span class="fc" id="L26">        affectedAreaResponse.setLatitude( affectedArea.getLatitude() );</span>
-<span class="fc" id="L27">        affectedAreaResponse.setHighDangerRadiusKm( affectedArea.getHighDangerRadiusKm() );</span>
-<span class="fc" id="L28">        affectedAreaResponse.setMediumDangerRadiusKm( affectedArea.getMediumDangerRadiusKm() );</span>
-<span class="fc" id="L29">        affectedAreaResponse.setLowDangerRadiusKm( affectedArea.getLowDangerRadiusKm() );</span>
-<span class="fc" id="L30">        affectedAreaResponse.setSeverityLevel( affectedArea.getSeverityLevel() );</span>
-<span class="fc" id="L31">        affectedAreaResponse.setDescription( affectedArea.getDescription() );</span>
-<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if ( affectedArea.getStartDate() != null ) {</span>
-<span class="fc" id="L33">            affectedAreaResponse.setStartDate( DateTimeFormatter.ISO_LOCAL_DATE_TIME.format( affectedArea.getStartDate() ) );</span>
+<span class="fc" id="L25">        affectedAreaResponse.setName( affectedArea.getName() );</span>
+<span class="fc" id="L26">        affectedAreaResponse.setLongitude( affectedArea.getLongitude() );</span>
+<span class="fc" id="L27">        affectedAreaResponse.setLatitude( affectedArea.getLatitude() );</span>
+<span class="fc" id="L28">        affectedAreaResponse.setHighDangerRadiusKm( affectedArea.getHighDangerRadiusKm() );</span>
+<span class="fc" id="L29">        affectedAreaResponse.setMediumDangerRadiusKm( affectedArea.getMediumDangerRadiusKm() );</span>
+<span class="fc" id="L30">        affectedAreaResponse.setLowDangerRadiusKm( affectedArea.getLowDangerRadiusKm() );</span>
+<span class="fc" id="L31">        affectedAreaResponse.setSeverityLevel( affectedArea.getSeverityLevel() );</span>
+<span class="fc" id="L32">        affectedAreaResponse.setDescription( affectedArea.getDescription() );</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">        if ( affectedArea.getStartDate() != null ) {</span>
+<span class="fc" id="L34">            affectedAreaResponse.setStartDate( DateTimeFormatter.ISO_LOCAL_DATE_TIME.format( affectedArea.getStartDate() ) );</span>
         }
 
-<span class="fc" id="L36">        return affectedAreaResponse;</span>
+<span class="fc" id="L37">        return affectedAreaResponse;</span>
     }
 
     @Override
     public AffectedArea requestToAffectedArea(AffectedAreaRequest affectedAreaRequest) {
-<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if ( affectedAreaRequest == null ) {</span>
-<span class="nc" id="L42">            return null;</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if ( affectedAreaRequest == null ) {</span>
+<span class="nc" id="L43">            return null;</span>
         }
 
-<span class="fc" id="L45">        AffectedArea affectedArea = new AffectedArea();</span>
+<span class="fc" id="L46">        AffectedArea affectedArea = new AffectedArea();</span>
 
-<span class="fc" id="L47">        affectedArea.setLongitude( affectedAreaRequest.getLongitude() );</span>
-<span class="fc" id="L48">        affectedArea.setLatitude( affectedAreaRequest.getLatitude() );</span>
-<span class="fc" id="L49">        affectedArea.setHighDangerRadiusKm( affectedAreaRequest.getHighDangerRadiusKm() );</span>
-<span class="fc" id="L50">        affectedArea.setMediumDangerRadiusKm( affectedAreaRequest.getMediumDangerRadiusKm() );</span>
-<span class="fc" id="L51">        affectedArea.setLowDangerRadiusKm( affectedAreaRequest.getLowDangerRadiusKm() );</span>
-<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if ( affectedAreaRequest.getSeverityLevel() != null ) {</span>
-<span class="fc" id="L53">            affectedArea.setSeverityLevel( affectedAreaRequest.getSeverityLevel() );</span>
+<span class="fc" id="L48">        affectedArea.setName( affectedAreaRequest.getName() );</span>
+<span class="fc" id="L49">        affectedArea.setLongitude( affectedAreaRequest.getLongitude() );</span>
+<span class="fc" id="L50">        affectedArea.setLatitude( affectedAreaRequest.getLatitude() );</span>
+<span class="fc" id="L51">        affectedArea.setHighDangerRadiusKm( affectedAreaRequest.getHighDangerRadiusKm() );</span>
+<span class="fc" id="L52">        affectedArea.setMediumDangerRadiusKm( affectedAreaRequest.getMediumDangerRadiusKm() );</span>
+<span class="fc" id="L53">        affectedArea.setLowDangerRadiusKm( affectedAreaRequest.getLowDangerRadiusKm() );</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( affectedAreaRequest.getSeverityLevel() != null ) {</span>
+<span class="fc" id="L55">            affectedArea.setSeverityLevel( affectedAreaRequest.getSeverityLevel() );</span>
         }
-<span class="fc" id="L55">        affectedArea.setDescription( affectedAreaRequest.getDescription() );</span>
-<span class="fc" id="L56">        affectedArea.setStartDate( stringToDateTime( affectedAreaRequest.getStartDate() ) );</span>
+<span class="fc" id="L57">        affectedArea.setDescription( affectedAreaRequest.getDescription() );</span>
+<span class="fc" id="L58">        affectedArea.setStartDate( stringToDateTime( affectedAreaRequest.getStartDate() ) );</span>
 
-<span class="fc" id="L58">        return affectedArea;</span>
+<span class="fc" id="L60">        return affectedArea;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
