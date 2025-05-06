@@ -1,6 +1,7 @@
 package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.SharePositionRequest;
+import com.group7.krisefikser.dto.response.GroupMemberPositionResponse;
 import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
 import com.group7.krisefikser.service.UserPositionService;
 import com.group7.krisefikser.utils.ValidationUtils;
@@ -152,6 +153,48 @@ public class UserPositionController {
     } catch (Exception e) {
       logger.severe("Error retrieving household positions: " + e.getMessage());
       return ResponseEntity.status(500).body("Error retrieving household positions");
+    }
+  }
+
+  /**
+   * Endpoint to get the position of group members.
+   * This endpoint will return the positions of all group members.
+   *
+   * @return ResponseEntity containing the positions of group members.
+   */
+  @Operation(
+      summary = "Get positions of group members",
+      description = "Retrieves the current positions of all members in the user's group.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Successfully retrieved group member positions",
+              content = @Content(
+                  mediaType = MediaType.APPLICATION_JSON_VALUE,
+                  array = @io.swagger.v3.oas.annotations.media.ArraySchema(
+                      schema = @Schema(implementation = GroupMemberPositionResponse.class)
+                  )
+              )
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error",
+              content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+          )
+      }
+  )
+  @GetMapping("/group")
+  public ResponseEntity<?> getGroupPosition() {
+    logger.info("Received request to get group position");
+
+    try {
+      GroupMemberPositionResponse[] groupMemberPositionResponses =
+          userPositionService.getGroupPositions();
+      logger.info("Group positions retrieved successfully");
+      return ResponseEntity.ok(groupMemberPositionResponses);
+    } catch (Exception e) {
+      logger.severe("Error retrieving group positions: " + e.getMessage());
+      return ResponseEntity.status(500).body("Error retrieving group positions");
     }
   }
 }
