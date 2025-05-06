@@ -2,10 +2,14 @@
 
 import com.group7.krisefikser.model.Household;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -27,24 +31,24 @@ public class HouseholdRepository {
    * This method takes the name, longitude, and latitude of the household as parameters,
    * and inserts a new record into the households table.
    *
-   * @param name the name of the household
+   * @param name      the name of the household
    * @param longitude the longitude of the household
-   * @param latitude the latitude of the household
+   * @param latitude  the latitude of the household
    * @return the ID of the newly created household
    */
   public Long createHousehold(String name, double longitude, double latitude) {
-<span class="fc" id="L36">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
-<span class="fc" id="L37">    jdbcTemplate.update(connection -&gt; {</span>
-<span class="fc" id="L38">      PreparedStatement ps = connection.prepareStatement(</span>
-          &quot;INSERT INTO households (name, longitude, latitude) VALUES (?, ?, ?)&quot;,
-          Statement.RETURN_GENERATED_KEYS
+<span class="fc" id="L40">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
+<span class="fc" id="L41">    jdbcTemplate.update(connection -&gt; {</span>
+<span class="fc" id="L42">      PreparedStatement ps = connection.prepareStatement(</span>
+              &quot;INSERT INTO households (name, longitude, latitude) VALUES (?, ?, ?)&quot;,
+              Statement.RETURN_GENERATED_KEYS
       );
-<span class="fc" id="L42">      ps.setString(1, name);</span>
-<span class="fc" id="L43">      ps.setDouble(2, longitude);</span>
-<span class="fc" id="L44">      ps.setDouble(3, latitude);</span>
-<span class="fc" id="L45">      return ps;</span>
+<span class="fc" id="L46">      ps.setString(1, name);</span>
+<span class="fc" id="L47">      ps.setDouble(2, longitude);</span>
+<span class="fc" id="L48">      ps.setDouble(3, latitude);</span>
+<span class="fc" id="L49">      return ps;</span>
     }, keyHolder);
-<span class="fc" id="L47">    return keyHolder.getKey().longValue();</span>
+<span class="fc" id="L51">    return keyHolder.getKey().longValue();</span>
   }
 
   /**
@@ -57,9 +61,9 @@ public class HouseholdRepository {
    * @return true if the household exists, false otherwise
    */
   public boolean existsByName(String householdName) {
-<span class="fc" id="L60">    String sql = &quot;SELECT COUNT(*) FROM households WHERE name = ?&quot;;</span>
-<span class="fc" id="L61">    Integer count = jdbcTemplate.queryForObject(sql, new Object[]{householdName}, Integer.class);</span>
-<span class="pc bpc" id="L62" title="1 of 4 branches missed.">    return count != null &amp;&amp; count &gt; 0;</span>
+<span class="fc" id="L64">    String sql = &quot;SELECT COUNT(*) FROM households WHERE name = ?&quot;;</span>
+<span class="fc" id="L65">    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, householdName);</span>
+<span class="pc bpc" id="L66" title="1 of 4 branches missed.">    return count != null &amp;&amp; count &gt; 0;</span>
   }
 
   /**
@@ -69,19 +73,73 @@ public class HouseholdRepository {
    * @return the saved Household object with the generated ID
    */
   public Household save(Household household) {
-<span class="nc" id="L72">    SimpleJdbcInsert householdInsert = new SimpleJdbcInsert(jdbcTemplate)</span>
-<span class="nc" id="L73">        .withTableName(&quot;households&quot;)</span>
-<span class="nc" id="L74">        .usingGeneratedKeyColumns(&quot;id&quot;);</span>
+<span class="nc" id="L76">    SimpleJdbcInsert householdInsert = new SimpleJdbcInsert(jdbcTemplate)</span>
+<span class="nc" id="L77">            .withTableName(&quot;households&quot;)</span>
+<span class="nc" id="L78">            .usingGeneratedKeyColumns(&quot;id&quot;);</span>
 
-<span class="nc" id="L76">    Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L77">    params.put(&quot;name&quot;, household.getName());</span>
-<span class="nc" id="L78">    params.put(&quot;longitude&quot;, household.getLongitude());</span>
-<span class="nc" id="L79">    params.put(&quot;latitude&quot;, household.getLatitude());</span>
+<span class="nc" id="L80">    Map&lt;String, Object&gt; params = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L81">    params.put(&quot;name&quot;, household.getName());</span>
+<span class="nc" id="L82">    params.put(&quot;longitude&quot;, household.getLongitude());</span>
+<span class="nc" id="L83">    params.put(&quot;latitude&quot;, household.getLatitude());</span>
 
-<span class="nc" id="L81">    Number householdId = householdInsert.executeAndReturnKey(params);</span>
-<span class="nc" id="L82">    household.setId(householdId.longValue());</span>
+<span class="nc" id="L85">    Number householdId = householdInsert.executeAndReturnKey(params);</span>
+<span class="nc" id="L86">    household.setId(householdId.longValue());</span>
 
-<span class="nc" id="L84">    return household;</span>
+<span class="nc" id="L88">    return household;</span>
   }
+
+  /**
+   * Retrieves a Household by its name from the database.
+   *
+   * @param name the name of the household to retrieve
+   * @return the Household object with the specified name
+   */
+  public Optional&lt;Household&gt; getHouseholdByName(String name) {
+<span class="fc" id="L98">    String sql = &quot;SELECT * FROM households WHERE name = ?&quot;;</span>
+    try {
+<span class="fc" id="L100">      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L101">        mapRowToHousehold(rs), name));</span>
+<span class="fc" id="L102">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L103">      return Optional.empty();</span>
+    }
+  }
+
+  /**
+   * Retrieves a Household by its ID from the database.
+   *
+   * @param id the ID of the household to retrieve
+   * @return the Household object with the specified ID
+   */
+  public Optional&lt;Household&gt; getHouseholdById(Long id) {
+<span class="fc" id="L114">    String sql = &quot;SELECT * FROM households WHERE id = ?&quot;;</span>
+    try {
+<span class="fc" id="L116">      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L117">              mapRowToHousehold(rs), id));</span>
+<span class="fc" id="L118">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L119">      return Optional.empty();</span>
+    }
+  }
+
+  private Household mapRowToHousehold(ResultSet rs) throws SQLException {
+<span class="fc" id="L124">    Household household = new Household();</span>
+<span class="fc" id="L125">    household.setId(rs.getLong(&quot;id&quot;));</span>
+<span class="fc" id="L126">    household.setName(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L127">    household.setLongitude(rs.getDouble(&quot;longitude&quot;));</span>
+<span class="fc" id="L128">    household.setLatitude(rs.getDouble(&quot;latitude&quot;));</span>
+<span class="fc" id="L129">    household.setEmergencyGroupId(rs.getLong(&quot;emergency_group_id&quot;));</span>
+<span class="fc" id="L130">    return household;</span>
+  }
+
+  /**
+   * Updates the household ID of a user in the database.
+   * This method is used to associate a user with a specific household.
+   *
+   * @param householdId  the ID of the household to associate with the user
+   * @param groupId      the ID of the group to associate with the user
+   */
+  public void addHouseholdToGroup(long householdId, long groupId) {
+<span class="fc" id="L141">    String sql = &quot;UPDATE households SET emergency_group_id = ? WHERE id = ?&quot;;</span>
+<span class="fc" id="L142">    jdbcTemplate.update(sql, groupId, householdId);</span>
+<span class="fc" id="L143">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

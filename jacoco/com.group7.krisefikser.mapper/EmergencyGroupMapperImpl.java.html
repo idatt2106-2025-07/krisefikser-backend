@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmergencyGroupMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.mapper</a> &gt; <span class="el_source">EmergencyGroupMapperImpl.java</span></div><h1>EmergencyGroupMapperImpl.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.mapper;
+
+import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
+import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
+import com.group7.krisefikser.model.EmergencyGroup;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import javax.annotation.processing.Generated;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2025-05-06T08:04:56+0000&quot;,
+    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Eclipse Adoptium)&quot;
+)
+public class EmergencyGroupMapperImpl implements EmergencyGroupMapper {
+
+    private final DatatypeFactory datatypeFactory;
+
+<span class="fc" id="L23">    public EmergencyGroupMapperImpl() {</span>
+        try {
+<span class="fc" id="L25">            datatypeFactory = DatatypeFactory.newInstance();</span>
+        }
+<span class="nc" id="L27">        catch ( DatatypeConfigurationException ex ) {</span>
+<span class="nc" id="L28">            throw new RuntimeException( ex );</span>
+<span class="fc" id="L29">        }</span>
+<span class="fc" id="L30">    }</span>
+
+    @Override
+    public EmergencyGroupResponse emergencyGroupToResponse(EmergencyGroup emergencyGroup) {
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if ( emergencyGroup == null ) {</span>
+<span class="nc" id="L35">            return null;</span>
+        }
+
+<span class="fc" id="L38">        EmergencyGroupResponse emergencyGroupResponse = new EmergencyGroupResponse();</span>
+
+<span class="fc" id="L40">        emergencyGroupResponse.setId( emergencyGroup.getId() );</span>
+<span class="fc" id="L41">        emergencyGroupResponse.setName( emergencyGroup.getName() );</span>
+<span class="fc" id="L42">        emergencyGroupResponse.setCreatedAt( xmlGregorianCalendarToString( dateToXmlGregorianCalendar( emergencyGroup.getCreatedAt() ), &quot;yyyy-MM-dd&quot; ) );</span>
+
+<span class="fc" id="L44">        return emergencyGroupResponse;</span>
+    }
+
+    @Override
+    public EmergencyGroup emergencyGroupRequestToEntity(EmergencyGroupRequest emergencyGroupRequest) {
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if ( emergencyGroupRequest == null ) {</span>
+<span class="nc" id="L50">            return null;</span>
+        }
+
+<span class="fc" id="L53">        EmergencyGroup emergencyGroup = new EmergencyGroup();</span>
+
+<span class="fc" id="L55">        emergencyGroup.setName( emergencyGroupRequest.getName() );</span>
+
+<span class="fc" id="L57">        return emergencyGroup;</span>
+    }
+
+    private String xmlGregorianCalendarToString( XMLGregorianCalendar xcal, String dateFormat ) {
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if ( xcal == null ) {</span>
+<span class="nc" id="L62">            return null;</span>
+        }
+
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (dateFormat == null ) {</span>
+<span class="nc" id="L66">            return xcal.toString();</span>
+        }
+        else {
+<span class="fc" id="L69">            Date d = xcal.toGregorianCalendar().getTime();</span>
+<span class="fc" id="L70">            SimpleDateFormat sdf = new SimpleDateFormat( dateFormat );</span>
+<span class="fc" id="L71">            return sdf.format( d );</span>
+        }
+    }
+
+    private XMLGregorianCalendar dateToXmlGregorianCalendar( Date date ) {
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if ( date == null ) {</span>
+<span class="nc" id="L77">            return null;</span>
+        }
+
+<span class="fc" id="L80">        GregorianCalendar c = new GregorianCalendar();</span>
+<span class="fc" id="L81">        c.setTime( date );</span>
+<span class="fc" id="L82">        return datatypeFactory.newXMLGregorianCalendar( c );</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
