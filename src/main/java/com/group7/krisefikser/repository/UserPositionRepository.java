@@ -87,4 +87,27 @@ public class UserPositionRepository {
         new Object[] {userId, userId},
         new BeanPropertyRowMapper<>(UserPosition.class)).toArray(new UserPosition[0]);
   }
+
+  /**
+   * Retrieves the positions of all household members except the user themselves.
+   *
+   * @param userId The ID of the user whose household positions are to be retrieved.
+   * @return An array of UserPosition objects containing the positions of household members.
+   */
+  public UserPosition[] getGroupPositions(Long userId) {
+    String sql =
+        "SELECT *, users.name FROM user_position "
+        + "JOIN users ON user_position.user_id = users.id "
+        + "JOIN household ON users.household_id = household.id "
+        + "WHERE household.group_id = "
+          + "(SELECT group_id FROM household "
+          + "JOIN users ON users.household_id = household.id "
+          + "WHERE users.id = ?) "
+        + "AND users.id != ?";
+
+    return jdbcTemplate.query(
+        sql,
+        new Object[] {userId, userId},
+        new BeanPropertyRowMapper<>(UserPosition.class)).toArray(new UserPosition[0]);
+  }
 }
