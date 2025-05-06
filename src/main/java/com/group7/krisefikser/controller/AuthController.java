@@ -231,7 +231,14 @@ public class AuthController {
     logger.info("Received password reset request for user: " + resetPasswordRequest.getEmail());
     try {
       AuthResponse authResponse = userService.resetPassword(resetPasswordRequest);
-      return  ResponseEntity.ok(authResponse);
+      if (authResponse.getMessage().equals(
+          AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage())) {
+        logger.info("Password reset successfully for user: " + resetPasswordRequest.getEmail());
+        return ResponseEntity.ok(authResponse);
+      } else {
+        logger.warning("Error resetting password: " + authResponse.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);
+      }
     } catch (Exception e) {
       logger.warning("Error resetting password: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
