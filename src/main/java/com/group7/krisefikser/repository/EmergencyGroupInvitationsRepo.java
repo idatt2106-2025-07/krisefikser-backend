@@ -31,7 +31,8 @@ public class EmergencyGroupInvitationsRepo {
    * @param invitation the EmergencyGroupInvitation object to be inserted
    */
   public void addEmergencyGroupInvitation(EmergencyGroupInvitation invitation) {
-    String sql = "INSERT INTO emergency_group_invitations (household_id, emergency_group_id) VALUES (?, ?)";
+    String sql = "INSERT INTO emergency_group_invitations (household_id, "
+        + "emergency_group_id) VALUES (?, ?)";
     jdbcTemplate.update(sql, invitation.getHouseholdId(), invitation.getGroupId());
   }
 
@@ -42,7 +43,8 @@ public class EmergencyGroupInvitationsRepo {
    * @param groupId     the ID of the emergency group
    */
   public int deleteEmergencyGroupInvitation(long householdId, long groupId) {
-    String sql = "DELETE FROM emergency_group_invitations WHERE household_id = ? AND emergency_group_id = ?";
+    String sql = "DELETE FROM emergency_group_invitations WHERE household_id "
+        + "= ? AND emergency_group_id = ?";
     return jdbcTemplate.update(sql, householdId, groupId);
   }
 

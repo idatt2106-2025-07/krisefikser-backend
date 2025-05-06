@@ -124,7 +124,7 @@ public class UserRepository {
    *
    * @param user the user whose verified status is to be changed
    * @return an Optional containing the updated user if successful,
-   * or an empty Optional if not
+   *         or an empty Optional if not
    */
   public Optional<User> setVerified(User user) {
     String query = "UPDATE users SET verified = ? WHERE email = ?";
