@@ -81,15 +81,15 @@ public class SecurityConfig {
                 &quot;/api/items/**&quot;)
 <span class="fc" id="L82">            .hasAnyRole(&quot;ADMIN&quot;, &quot;SUPER_ADMIN&quot;)</span>
 
-<span class="fc" id="L84">            .requestMatchers(HttpMethod.POST,</span>
-                &quot;/api/admin/invite&quot;)
-<span class="fc" id="L86">            .hasRole(&quot;SUPER_ADMIN&quot;)</span>
-
-<span class="fc" id="L88">            .requestMatchers(</span>
+<span class="fc" id="L84">            .requestMatchers(</span>
                 &quot;/api/point-of-interest/**&quot;,
                 &quot;/api/affected-area/**&quot;,
                 &quot;/api/general-info/admin/**&quot;)
-<span class="fc" id="L92">            .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L88">            .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+
+<span class="fc" id="L90">            .requestMatchers(</span>
+                &quot;/api/super-admin/**&quot;
+<span class="fc" id="L92">            ).hasRole(&quot;SUPER_ADMIN&quot;)</span>
 
 <span class="fc" id="L94">            .anyRequest().authenticated())</span>
 <span class="fc" id="L95">        .headers(</span>

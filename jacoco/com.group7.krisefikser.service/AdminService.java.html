@@ -26,47 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminService {
 
-  private final EmailService emailService;
-
   private final JwtUtils jwtUtils;
 
   private final UserRepository userRepository;
 
   private final HouseholdService householdService;
-
-  /**
-   * Invites an admin by generating a jwt invite token and sending an email with the invite link.
-   *
-   * @param request The request containing the email of the admin to be invited.
-   * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
-   */
-  public void inviteAdmin(InviteAdminRequest request)
-      throws JwtMissingPropertyException, UsernameGenerationException {
-
-<span class="fc" id="L46">    String username = &quot;admin&quot; + UuidUtils.generateShortenedUuid();</span>
-
-<span class="fc bfc" id="L48" title="All 2 branches covered.">    for (int i = 0; i &lt; 15; i++) {</span>
-<span class="fc bfc" id="L49" title="All 2 branches covered.">      if (userRepository.existAdminByUsername(username)) {</span>
-<span class="fc" id="L50">        username = &quot;admin&quot; + UuidUtils.generateShortenedUuid();</span>
-      } else {
-        break;
-      }
-    }
-
-<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (userRepository.existAdminByUsername(username)) {</span>
-<span class="fc" id="L57">      throw new UsernameGenerationException(&quot;Failed to generate a unique username&quot;);</span>
-    }
-
-<span class="fc" id="L60">    String inviteToken = jwtUtils.generateInviteToken(username);</span>
-
-<span class="fc" id="L62">    String inviteLink = &quot;https://localhost:5173/invite?token=&quot; + inviteToken;</span>
-
-<span class="fc" id="L64">    emailService.sendTemplateMessage(</span>
-<span class="fc" id="L65">        request.getEmail(),</span>
-        EmailTemplateType.ADMIN_INVITE,
-<span class="fc" id="L67">        Map.of(&quot;inviteLink&quot;, inviteLink)</span>
-    );
-<span class="fc" id="L69">  }</span>
 
   /**
    * Registers an admin by validating the invite token and creating a new admin account.
@@ -77,22 +41,22 @@ public class AdminService {
   @Transactional
   public void registerAdmin(RegisterAdminRequest request)
       throws JwtMissingPropertyException, UsernameGenerationException {
-<span class="fc" id="L80">    String username = jwtUtils.validateInviteAdminTokenAndGetUsername(request.getToken());</span>
-<span class="fc" id="L81">    User user = new User();</span>
-<span class="fc" id="L82">    user.setEmail(request.getEmail());</span>
-<span class="fc" id="L83">    user.setName(username);</span>
-<span class="fc" id="L84">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
-<span class="fc" id="L85">    user.setRole(Role.ROLE_ADMIN);</span>
+<span class="fc" id="L44">    String username = jwtUtils.validateInviteAdminTokenAndGetUsername(request.getToken());</span>
+<span class="fc" id="L45">    User user = new User();</span>
+<span class="fc" id="L46">    user.setEmail(request.getEmail());</span>
+<span class="fc" id="L47">    user.setName(username);</span>
+<span class="fc" id="L48">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
+<span class="fc" id="L49">    user.setRole(Role.ROLE_ADMIN);</span>
 
-<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (userRepository.existAdminByUsername(username)) {</span>
-<span class="fc" id="L88">      throw new UsernameGenerationException(&quot;Username already taken&quot;);</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (userRepository.existAdminByUsername(username)) {</span>
+<span class="fc" id="L52">      throw new UsernameGenerationException(&quot;Username already taken&quot;);</span>
     }
-<span class="fc" id="L90">    Long householdId = householdService.createHouseholdForUser(username);</span>
-<span class="fc" id="L91">    user.setHouseholdId(householdId);</span>
-<span class="fc" id="L92">    userRepository.save(user);</span>
-<span class="fc" id="L93">    user.setVerified(true);</span>
-<span class="fc" id="L94">    userRepository.setVerified(user);</span>
-<span class="fc" id="L95">  }</span>
+<span class="fc" id="L54">    Long householdId = householdService.createHouseholdForUser(username);</span>
+<span class="fc" id="L55">    user.setHouseholdId(householdId);</span>
+<span class="fc" id="L56">    userRepository.save(user);</span>
+<span class="fc" id="L57">    user.setVerified(true);</span>
+<span class="fc" id="L58">    userRepository.setVerified(user);</span>
+<span class="fc" id="L59">  }</span>
 
   /**
    * Verifies the two-factor authentication token and generates a JWT token for the admin.
@@ -103,9 +67,9 @@ public class AdminService {
    */
   public void verifyTwoFactor(String twoFactorToken, HttpServletResponse response)
       throws JwtMissingPropertyException {
-<span class="fc" id="L106">    String userId = jwtUtils.validate2faTokenAndGetUserId(twoFactorToken);</span>
-<span class="fc" id="L107">    String token = jwtUtils.generateToken(Long.parseLong(userId), Role.ROLE_ADMIN);</span>
-<span class="fc" id="L108">    jwtUtils.setJwtCookie(token, response);</span>
-<span class="fc" id="L109">  }</span>
+<span class="fc" id="L70">    String userId = jwtUtils.validate2faTokenAndGetUserId(twoFactorToken);</span>
+<span class="fc" id="L71">    String token = jwtUtils.generateToken(Long.parseLong(userId), Role.ROLE_ADMIN);</span>
+<span class="fc" id="L72">    jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L73">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

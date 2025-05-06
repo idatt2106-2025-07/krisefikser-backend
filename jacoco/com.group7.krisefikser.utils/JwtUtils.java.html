@@ -30,36 +30,40 @@ public class JwtUtils {
   private final String inviteAdminSecretKey;
   private final String twoFactorSecretKey;
   private final String verificationSecretKey;
+  private final String resetPasswordSecretKey;
   private final String invitationSecretKey;
-<span class="fc" id="L34">  private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);</span>
-<span class="fc" id="L35">  private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);</span>
-<span class="fc" id="L36">  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);</span>
 
-<span class="fc" id="L38">  private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);</span>
+<span class="fc" id="L36">  private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);</span>
+<span class="fc" id="L37">  private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);</span>
+<span class="fc" id="L38">  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);</span>
+<span class="fc" id="L39">  private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);</span>
 
   /**
    * Constructor for JwtUtils, generates secret keys.
    *
    * @throws NoSuchAlgorithmException if the algorithm is not found
    */
-<span class="fc" id="L45">  public JwtUtils() throws NoSuchAlgorithmException {</span>
-<span class="fc" id="L46">    KeyGenerator keyGen = KeyGenerator.getInstance(&quot;HmacSHA256&quot;);</span>
+<span class="fc" id="L46">  public JwtUtils() throws NoSuchAlgorithmException {</span>
+<span class="fc" id="L47">    KeyGenerator keyGen = KeyGenerator.getInstance(&quot;HmacSHA256&quot;);</span>
 
-<span class="fc" id="L48">    SecretKey sk = keyGen.generateKey();</span>
-<span class="fc" id="L49">    secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());</span>
+<span class="fc" id="L49">    SecretKey sk = keyGen.generateKey();</span>
+<span class="fc" id="L50">    secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());</span>
 
-<span class="fc" id="L51">    SecretKey isk = keyGen.generateKey();</span>
-<span class="fc" id="L52">    inviteAdminSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());</span>
+<span class="fc" id="L52">    SecretKey isk = keyGen.generateKey();</span>
+<span class="fc" id="L53">    inviteAdminSecretKey = Base64.getEncoder().encodeToString(isk.getEncoded());</span>
 
-<span class="fc" id="L54">    SecretKey tfsk = keyGen.generateKey();</span>
-<span class="fc" id="L55">    twoFactorSecretKey = Base64.getEncoder().encodeToString(tfsk.getEncoded());</span>
+<span class="fc" id="L55">    SecretKey tfsk = keyGen.generateKey();</span>
+<span class="fc" id="L56">    twoFactorSecretKey = Base64.getEncoder().encodeToString(tfsk.getEncoded());</span>
 
-<span class="fc" id="L57">    SecretKey vsk = keyGen.generateKey();</span>
-<span class="fc" id="L58">    verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());</span>
+<span class="fc" id="L58">    SecretKey vsk = keyGen.generateKey();</span>
+<span class="fc" id="L59">    verificationSecretKey = Base64.getEncoder().encodeToString(vsk.getEncoded());</span>
 
-<span class="fc" id="L60">    SecretKey invSk = keyGen.generateKey();</span>
-<span class="fc" id="L61">    invitationSecretKey = Base64.getEncoder().encodeToString(invSk.getEncoded());</span>
-<span class="fc" id="L62">  }</span>
+<span class="fc" id="L61">    SecretKey rsk = keyGen.generateKey();</span>
+<span class="fc" id="L62">    resetPasswordSecretKey = Base64.getEncoder().encodeToString(rsk.getEncoded());</span>
+    
+<span class="fc" id="L64">    SecretKey invSk = keyGen.generateKey();</span>
+<span class="fc" id="L65">    invitationSecretKey = Base64.getEncoder().encodeToString(invSk.getEncoded());</span>
+<span class="fc" id="L66">  }</span>
 
   /**
    * This method retrieves the secret key used to sign the JWT tokens.
@@ -67,8 +71,8 @@ public class JwtUtils {
    * @return The secret key as an Algorithm object.
    */
   Algorithm getKey(String key) {
-<span class="fc" id="L70">    byte[] keyBytes = Base64.getDecoder().decode(key);</span>
-<span class="fc" id="L71">    return Algorithm.HMAC512(keyBytes);</span>
+<span class="fc" id="L74">    byte[] keyBytes = Base64.getDecoder().decode(key);</span>
+<span class="fc" id="L75">    return Algorithm.HMAC512(keyBytes);</span>
   }
 
   /**
@@ -81,17 +85,17 @@ public class JwtUtils {
    */
   public String generateToken(final Long userId, final Role role)
       throws JwtMissingPropertyException {
-<span class="nc bnc" id="L84" title="All 4 branches missed.">    if (role == null || userId &lt;= 0) {</span>
-<span class="nc" id="L85">      throw new JwtMissingPropertyException(&quot;Token generation call must include UserId and Role&quot;);</span>
+<span class="nc bnc" id="L88" title="All 4 branches missed.">    if (role == null || userId &lt;= 0) {</span>
+<span class="nc" id="L89">      throw new JwtMissingPropertyException(&quot;Token generation call must include UserId and Role&quot;);</span>
     }
-<span class="nc" id="L87">    final Instant now = Instant.now();</span>
-<span class="nc" id="L88">    return JWT.create()</span>
-<span class="nc" id="L89">      .withSubject(String.valueOf(userId))</span>
-<span class="nc" id="L90">      .withIssuer(&quot;krisefikser&quot;)</span>
-<span class="nc" id="L91">      .withIssuedAt(now)</span>
-<span class="nc" id="L92">      .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))</span>
-<span class="nc" id="L93">      .withClaim(&quot;role&quot;, role.toString())</span>
-<span class="nc" id="L94">      .sign(getKey(secretKey));</span>
+<span class="nc" id="L91">    final Instant now = Instant.now();</span>
+<span class="nc" id="L92">    return JWT.create()</span>
+<span class="nc" id="L93">      .withSubject(String.valueOf(userId))</span>
+<span class="nc" id="L94">      .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="nc" id="L95">      .withIssuedAt(now)</span>
+<span class="nc" id="L96">      .withExpiresAt(now.plusMillis(JWT_VALIDITY.toMillis()))</span>
+<span class="nc" id="L97">      .withClaim(&quot;role&quot;, role.toString())</span>
+<span class="nc" id="L98">      .sign(getKey(secretKey));</span>
   }
 
   /**
@@ -103,17 +107,17 @@ public class JwtUtils {
   **/
   public String generateInviteToken(final String username)
       throws JwtMissingPropertyException {
-<span class="nc bnc" id="L106" title="All 4 branches missed.">    if (username == null || username.isEmpty()) {</span>
-<span class="nc" id="L107">      throw new JwtMissingPropertyException(&quot;Invite token generation call must include username&quot;);</span>
+<span class="nc bnc" id="L110" title="All 4 branches missed.">    if (username == null || username.isEmpty()) {</span>
+<span class="nc" id="L111">      throw new JwtMissingPropertyException(&quot;Invite token generation call must include username&quot;);</span>
     }
-<span class="nc" id="L109">    final Instant now = Instant.now();</span>
-<span class="nc" id="L110">    return JWT.create()</span>
-<span class="nc" id="L111">        .withSubject(username)</span>
-<span class="nc" id="L112">        .withIssuer(&quot;krisefikser&quot;)</span>
-<span class="nc" id="L113">        .withIssuedAt(now)</span>
-<span class="nc" id="L114">        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))</span>
-<span class="nc" id="L115">        .withClaim(&quot;role&quot;, &quot;ROLE_INVITE&quot;)</span>
-<span class="nc" id="L116">        .sign(getKey(inviteAdminSecretKey));</span>
+<span class="nc" id="L113">    final Instant now = Instant.now();</span>
+<span class="nc" id="L114">    return JWT.create()</span>
+<span class="nc" id="L115">        .withSubject(username)</span>
+<span class="nc" id="L116">        .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="nc" id="L117">        .withIssuedAt(now)</span>
+<span class="nc" id="L118">        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))</span>
+<span class="nc" id="L119">        .withClaim(&quot;role&quot;, &quot;ROLE_INVITE&quot;)</span>
+<span class="nc" id="L120">        .sign(getKey(inviteAdminSecretKey));</span>
   }
 
   /**
@@ -125,17 +129,17 @@ public class JwtUtils {
    **/
   public String generate2faToken(final Long userId)
       throws JwtMissingPropertyException {
-<span class="nc bnc" id="L128" title="All 2 branches missed.">    if (userId &lt;= 0) {</span>
-<span class="nc" id="L129">      throw new JwtMissingPropertyException(&quot;2fa token generation call must include userId&quot;);</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">    if (userId &lt;= 0) {</span>
+<span class="nc" id="L133">      throw new JwtMissingPropertyException(&quot;2fa token generation call must include userId&quot;);</span>
     }
-<span class="nc" id="L131">    final Instant now = Instant.now();</span>
-<span class="nc" id="L132">    return JWT.create()</span>
-<span class="nc" id="L133">        .withSubject(userId.toString())</span>
-<span class="nc" id="L134">        .withIssuer(&quot;krisefikser&quot;)</span>
-<span class="nc" id="L135">        .withIssuedAt(now)</span>
-<span class="nc" id="L136">        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))</span>
-<span class="nc" id="L137">        .withClaim(&quot;role&quot;, &quot;ROLE_2FA&quot;)</span>
-<span class="nc" id="L138">        .sign(getKey(twoFactorSecretKey));</span>
+<span class="nc" id="L135">    final Instant now = Instant.now();</span>
+<span class="nc" id="L136">    return JWT.create()</span>
+<span class="nc" id="L137">        .withSubject(userId.toString())</span>
+<span class="nc" id="L138">        .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="nc" id="L139">        .withIssuedAt(now)</span>
+<span class="nc" id="L140">        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))</span>
+<span class="nc" id="L141">        .withClaim(&quot;role&quot;, &quot;ROLE_2FA&quot;)</span>
+<span class="nc" id="L142">        .sign(getKey(twoFactorSecretKey));</span>
   }
 
   /**
@@ -146,13 +150,13 @@ public class JwtUtils {
    * @return a jwt for the user
    */
   public String generateVerificationToken(final String email) {
-<span class="nc" id="L149">    final Instant now = Instant.now();</span>
-<span class="nc" id="L150">    return JWT.create()</span>
-<span class="nc" id="L151">      .withSubject(email)</span>
-<span class="nc" id="L152">      .withIssuer(&quot;krisefikser&quot;)</span>
-<span class="nc" id="L153">      .withIssuedAt(now)</span>
-<span class="nc" id="L154">      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))</span>
-<span class="nc" id="L155">      .sign(getKey(verificationSecretKey));</span>
+<span class="nc" id="L153">    final Instant now = Instant.now();</span>
+<span class="nc" id="L154">    return JWT.create()</span>
+<span class="nc" id="L155">      .withSubject(email)</span>
+<span class="nc" id="L156">      .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="nc" id="L157">      .withIssuedAt(now)</span>
+<span class="nc" id="L158">      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))</span>
+<span class="nc" id="L159">      .sign(getKey(verificationSecretKey));</span>
   }
 
   /**
@@ -163,13 +167,13 @@ public class JwtUtils {
    * @return a jwt for the user
    */
   public String generateInvitationToken(final String email) {
-<span class="fc" id="L166">    final Instant now = Instant.now();</span>
-<span class="fc" id="L167">    return JWT.create()</span>
-<span class="fc" id="L168">      .withSubject(email)</span>
-<span class="fc" id="L169">      .withIssuer(&quot;krisefikser&quot;)</span>
-<span class="fc" id="L170">      .withIssuedAt(now)</span>
-<span class="fc" id="L171">      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))</span>
-<span class="fc" id="L172">      .sign(getKey(invitationSecretKey));</span>
+<span class="fc" id="L170">    final Instant now = Instant.now();</span>
+<span class="fc" id="L171">    return JWT.create()</span>
+<span class="fc" id="L172">      .withSubject(email)</span>
+<span class="fc" id="L173">      .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="fc" id="L174">      .withIssuedAt(now)</span>
+<span class="fc" id="L175">      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))</span>
+<span class="fc" id="L176">      .sign(getKey(invitationSecretKey));</span>
   }
 
   /**
@@ -183,12 +187,29 @@ public class JwtUtils {
    */
   public String validateInvitationTokenAndGetEmail(final String token)
       throws JwtMissingPropertyException {
-<span class="nc" id="L186">    String subject = validateToken(token, invitationSecretKey).getSubject();</span>
-<span class="nc bnc" id="L187" title="All 2 branches missed.">    if (subject == null) {</span>
-<span class="nc" id="L188">      logger.error(&quot;Invitation token does not contain an email&quot;);</span>
-<span class="nc" id="L189">      throw new JwtMissingPropertyException(&quot;Invitation token does not contain an email&quot;);</span>
+<span class="nc" id="L190">    String subject = validateToken(token, invitationSecretKey).getSubject();</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">    if (subject == null) {</span>
+<span class="nc" id="L192">      logger.error(&quot;Invitation token does not contain an email&quot;);</span>
+<span class="nc" id="L193">      throw new JwtMissingPropertyException(&quot;Invitation token does not contain an email&quot;);</span>
     }
-<span class="nc" id="L191">    return subject;</span>
+<span class="nc" id="L195">    return subject;</span>
+  }
+
+  /**
+    * generates a reset password token for the given email.
+   * This token is used to reset the user's password.
+   *
+   * @param email the email address of the user
+   * @return a jwt for the user
+   */
+  public String generateResetPasswordToken(final String email) {
+<span class="nc" id="L206">    final Instant now = Instant.now();</span>
+<span class="nc" id="L207">    return JWT.create()</span>
+<span class="nc" id="L208">        .withSubject(email)</span>
+<span class="nc" id="L209">        .withIssuer(&quot;krisefikser&quot;)</span>
+<span class="nc" id="L210">        .withIssuedAt(now)</span>
+<span class="nc" id="L211">        .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))</span>
+<span class="nc" id="L212">        .sign(getKey(resetPasswordSecretKey));</span>
   }
 
   /**
@@ -200,11 +221,11 @@ public class JwtUtils {
    */
   private DecodedJWT validateToken(final String token, String key) throws JWTVerificationException {
     try {
-<span class="nc" id="L203">      final JWTVerifier verifier = JWT.require(getKey(key)).build();</span>
-<span class="nc" id="L204">      return verifier.verify(token);</span>
-<span class="nc" id="L205">    } catch (final JWTVerificationException e) {</span>
-<span class="nc" id="L206">      logger.warn(&quot;token is invalid {}&quot;, e.getMessage());</span>
-<span class="nc" id="L207">      throw e;</span>
+<span class="nc" id="L224">      final JWTVerifier verifier = JWT.require(getKey(key)).build();</span>
+<span class="nc" id="L225">      return verifier.verify(token);</span>
+<span class="nc" id="L226">    } catch (final JWTVerificationException e) {</span>
+<span class="nc" id="L227">      logger.warn(&quot;token is invalid {}&quot;, e.getMessage());</span>
+<span class="nc" id="L228">      throw e;</span>
     }
   }
 
@@ -216,12 +237,12 @@ public class JwtUtils {
    * @throws JwtMissingPropertyException if token doesn't contain a subject
    */
   public String validateTokenAndGetUserId(final String token) throws JwtMissingPropertyException {
-<span class="nc" id="L219">    String subject = validateToken(token, secretKey).getSubject();</span>
-<span class="nc bnc" id="L220" title="All 2 branches missed.">    if (subject == null) {</span>
-<span class="nc" id="L221">      logger.error(&quot;Token does not contain a subject&quot;);</span>
-<span class="nc" id="L222">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L240">    String subject = validateToken(token, secretKey).getSubject();</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">    if (subject == null) {</span>
+<span class="nc" id="L242">      logger.error(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L243">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
     }
-<span class="nc" id="L224">    return subject;</span>
+<span class="nc" id="L245">    return subject;</span>
   }
 
   /**
@@ -233,12 +254,12 @@ public class JwtUtils {
    */
   public String validate2faTokenAndGetUserId(final String token)
       throws JwtMissingPropertyException {
-<span class="nc" id="L236">    String subject = validateToken(token, twoFactorSecretKey).getSubject();</span>
-<span class="nc bnc" id="L237" title="All 2 branches missed.">    if (subject == null) {</span>
-<span class="nc" id="L238">      logger.error(&quot;Token does not contain a subject&quot;);</span>
-<span class="nc" id="L239">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L257">    String subject = validateToken(token, twoFactorSecretKey).getSubject();</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">    if (subject == null) {</span>
+<span class="nc" id="L259">      logger.error(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L260">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
     }
-<span class="nc" id="L241">    return subject;</span>
+<span class="nc" id="L262">    return subject;</span>
   }
 
   /**
@@ -249,12 +270,12 @@ public class JwtUtils {
    * @throws JwtMissingPropertyException if token doesn't contain a role
    */
   public String validateTokenAndGetRole(final String token) throws JwtMissingPropertyException {
-<span class="nc" id="L252">    String role = validateToken(token, secretKey).getClaim(&quot;role&quot;).asString();</span>
-<span class="nc bnc" id="L253" title="All 2 branches missed.">    if (role == null) {</span>
-<span class="nc" id="L254">      logger.error(&quot;Token does not contain a role&quot;);</span>
-<span class="nc" id="L255">      throw new JwtMissingPropertyException(&quot;Token does not contain a role&quot;);</span>
+<span class="nc" id="L273">    String role = validateToken(token, secretKey).getClaim(&quot;role&quot;).asString();</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">    if (role == null) {</span>
+<span class="nc" id="L275">      logger.error(&quot;Token does not contain a role&quot;);</span>
+<span class="nc" id="L276">      throw new JwtMissingPropertyException(&quot;Token does not contain a role&quot;);</span>
     }
-<span class="nc" id="L257">    return role;</span>
+<span class="nc" id="L278">    return role;</span>
   }
 
   /**
@@ -266,12 +287,12 @@ public class JwtUtils {
    */
   public String validateInviteAdminTokenAndGetUsername(final String token)
       throws JwtMissingPropertyException {
-<span class="nc" id="L269">    String username = validateToken(token, inviteAdminSecretKey).getSubject();</span>
-<span class="nc bnc" id="L270" title="All 2 branches missed.">    if (username == null) {</span>
-<span class="nc" id="L271">      logger.error(&quot;Token does not contain a subject&quot;);</span>
-<span class="nc" id="L272">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L290">    String username = validateToken(token, inviteAdminSecretKey).getSubject();</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">    if (username == null) {</span>
+<span class="nc" id="L292">      logger.error(&quot;Token does not contain a subject&quot;);</span>
+<span class="nc" id="L293">      throw new JwtMissingPropertyException(&quot;Token does not contain a subject&quot;);</span>
     }
-<span class="nc" id="L274">    return username;</span>
+<span class="nc" id="L295">    return username;</span>
   }
 
   /**
@@ -283,12 +304,30 @@ public class JwtUtils {
    */
   public String validateVerificationTokenAndGetEmail(final String token)
       throws JwtMissingPropertyException {
-<span class="nc" id="L286">    String subject = validateToken(token, verificationSecretKey).getSubject();</span>
-<span class="nc bnc" id="L287" title="All 2 branches missed.">    if (subject == null) {</span>
-<span class="nc" id="L288">      logger.error(&quot;Token does not contain an email&quot;);</span>
-<span class="nc" id="L289">      throw new JwtMissingPropertyException(&quot;Token does not contain an email&quot;);</span>
+<span class="nc" id="L307">    String subject = validateToken(token, verificationSecretKey).getSubject();</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">    if (subject == null) {</span>
+<span class="nc" id="L309">      logger.error(&quot;Token does not contain an email&quot;);</span>
+<span class="nc" id="L310">      throw new JwtMissingPropertyException(&quot;Token does not contain an email&quot;);</span>
     }
-<span class="nc" id="L291">    return subject;</span>
+<span class="nc" id="L312">    return subject;</span>
+  }
+
+  /**
+   * validates and retrieves the email from the given token.
+   * This token is used to reset the user's password.
+   *
+   * @param token the jwt to get email from
+   * @return the email
+   * @throws JwtMissingPropertyException if token doesn't contain a subject
+   */
+  public String validateResetPasswordTokenAndGetEmail(final String token)
+                              throws JwtMissingPropertyException {
+<span class="nc" id="L325">    String subject = validateToken(token, resetPasswordSecretKey).getSubject();</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">    if (subject == null) {</span>
+<span class="nc" id="L327">      logger.error(&quot;Token does not contain an email&quot;);</span>
+<span class="nc" id="L328">      throw new JwtMissingPropertyException(&quot;Token does not contain an email&quot;);</span>
+    }
+<span class="nc" id="L330">    return subject;</span>
   }
 
   /**
@@ -298,13 +337,13 @@ public class JwtUtils {
    * @param response The HttpServletResponse object to which the cookie will be added.
    */
   public void setJwtCookie(String jwtToken, HttpServletResponse response) {
-<span class="nc" id="L301">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, jwtToken);</span>
-<span class="nc" id="L302">    jwtCookie.setHttpOnly(true);</span>
-<span class="nc" id="L303">    jwtCookie.setSecure(true);</span>
-<span class="nc" id="L304">    jwtCookie.setPath(&quot;/&quot;);</span>
-<span class="nc" id="L305">    jwtCookie.setMaxAge((int) JWT_VALIDITY.getSeconds());</span>
-<span class="nc" id="L306">    response.addCookie(jwtCookie);</span>
-<span class="nc" id="L307">  }</span>
+<span class="nc" id="L340">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, jwtToken);</span>
+<span class="nc" id="L341">    jwtCookie.setHttpOnly(true);</span>
+<span class="nc" id="L342">    jwtCookie.setSecure(true);</span>
+<span class="nc" id="L343">    jwtCookie.setPath(&quot;/&quot;);</span>
+<span class="nc" id="L344">    jwtCookie.setMaxAge((int) JWT_VALIDITY.getSeconds());</span>
+<span class="nc" id="L345">    response.addCookie(jwtCookie);</span>
+<span class="nc" id="L346">  }</span>
 
 
   /**
@@ -314,13 +353,13 @@ public class JwtUtils {
    * @param response The HttpServletResponse object to which the cookie will be added.
    */
   public void setLogOutJwtCookie(HttpServletResponse response) {
-<span class="nc" id="L317">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, null);</span>
-<span class="nc" id="L318">    jwtCookie.setHttpOnly(true);</span>
-<span class="nc" id="L319">    jwtCookie.setSecure(true);</span>
-<span class="nc" id="L320">    jwtCookie.setPath(&quot;/&quot;);</span>
-<span class="nc" id="L321">    jwtCookie.setMaxAge(0);</span>
-<span class="nc" id="L322">    response.addCookie(jwtCookie);</span>
-<span class="nc" id="L323">  }</span>
+<span class="nc" id="L356">    Cookie jwtCookie = new Cookie(&quot;JWT&quot;, null);</span>
+<span class="nc" id="L357">    jwtCookie.setHttpOnly(true);</span>
+<span class="nc" id="L358">    jwtCookie.setSecure(true);</span>
+<span class="nc" id="L359">    jwtCookie.setPath(&quot;/&quot;);</span>
+<span class="nc" id="L360">    jwtCookie.setMaxAge(0);</span>
+<span class="nc" id="L361">    response.addCookie(jwtCookie);</span>
+<span class="nc" id="L362">  }</span>
 
   /**
    * Retrieves the expiration date of a given JWT token.
@@ -332,10 +371,10 @@ public class JwtUtils {
    */
   public Date getExpirationDate(String token) {
     try {
-<span class="nc" id="L335">      return validateToken(token, secretKey).getExpiresAt();</span>
-<span class="nc" id="L336">    } catch (JWTVerificationException e) {</span>
-<span class="nc" id="L337">      logger.error(&quot;Token is invalid: {}&quot;, e.getMessage());</span>
-<span class="nc" id="L338">      return null;</span>
+<span class="nc" id="L374">      return validateToken(token, secretKey).getExpiresAt();</span>
+<span class="nc" id="L375">    } catch (JWTVerificationException e) {</span>
+<span class="nc" id="L376">      logger.error(&quot;Token is invalid: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L377">      return null;</span>
     }
   }
 }

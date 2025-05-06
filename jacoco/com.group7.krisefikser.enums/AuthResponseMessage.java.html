@@ -23,18 +23,23 @@
 <span class="fc" id="L23">  USER_VERIFIED_SUCCESSFULLY(&quot;User verified successfully&quot;),</span>
 <span class="fc" id="L24">  INVALID_TOKEN(&quot;Invalid token&quot;),</span>
 <span class="fc" id="L25">  EMAIL_VERIFICATION_ERROR(&quot;Error verifying email: &quot;),</span>
-<span class="fc" id="L26">  USER_ACCOUNT_BLOCKED(&quot;User account is blocked&quot;);</span>
-
+<span class="fc" id="L26">  USER_ACCOUNT_BLOCKED(&quot;User account is blocked&quot;),</span>
+<span class="fc" id="L27">  PASSWORD_RESET_LINK_SENT(&quot;Password reset link sent to email&quot;),</span>
+<span class="fc" id="L28">  PASSWORD_RESET_LINK_REJECTED(&quot;Password reset link rejected&quot;),</span>
+<span class="fc" id="L29">  PASSWORD_RESET_SUCCESS(&quot;Password reset successfully&quot;),</span>
+<span class="fc" id="L30">  PASSWORD_RESET_ERROR(&quot;Error resetting password: &quot;),</span>
+<span class="fc" id="L31">  ADMIN_PASSWORD_TOO_WEAK(&quot;Password must be min 8 char, contain an uppercase letter, &quot;</span>
+      + &quot;a lowercase letter, a number and a special character&quot;);
 
 
   private final String message;
 
-<span class="fc" id="L32">  AuthResponseMessage(String message) {</span>
-<span class="fc" id="L33">    this.message = message;</span>
-<span class="fc" id="L34">  }</span>
+<span class="fc" id="L37">  AuthResponseMessage(String message) {</span>
+<span class="fc" id="L38">    this.message = message;</span>
+<span class="fc" id="L39">  }</span>
 
   public String getMessage() {
-<span class="fc" id="L37">    return message;</span>
+<span class="fc" id="L42">    return message;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

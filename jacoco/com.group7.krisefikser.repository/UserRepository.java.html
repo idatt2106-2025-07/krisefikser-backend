@@ -4,6 +4,7 @@ import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepository {
 
-<span class="fc" id="L22">  private static final Logger logger = Logger.getLogger(UserRepository.class.getName());</span>
+<span class="fc" id="L23">  private static final Logger logger = Logger.getLogger(UserRepository.class.getName());</span>
 
   private final JdbcTemplate jdbcTemplate;
 
@@ -30,9 +31,9 @@ public class UserRepository {
    * @param jdbcTemplate the JdbcTemplate to be used for database operations
    */
   @Autowired
-<span class="fc" id="L33">  public UserRepository(JdbcTemplate jdbcTemplate) {</span>
-<span class="fc" id="L34">    this.jdbcTemplate = jdbcTemplate;</span>
-<span class="fc" id="L35">  }</span>
+<span class="fc" id="L34">  public UserRepository(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L35">    this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L36">  }</span>
 
   /**
    * Finds a user by their email address.
@@ -44,28 +45,28 @@ public class UserRepository {
    * @return an Optional containing the user if found, or an empty Optional if not found
    */
   public Optional&lt;User&gt; findByEmail(String email) {
-<span class="fc" id="L47">    String sql = &quot;SELECT * FROM users WHERE email = ?&quot;;</span>
+<span class="fc" id="L48">    String sql = &quot;SELECT * FROM users WHERE email = ?&quot;;</span>
     try {
-<span class="fc" id="L49">      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -&gt;</span>
-<span class="fc" id="L50">              mapRowToUser(rs), email));</span>
-<span class="fc" id="L51">    } catch (EmptyResultDataAccessException e) {</span>
-<span class="fc" id="L52">      logger.info(&quot;No user found with email: &quot; + email);</span>
-<span class="fc" id="L53">      return Optional.empty();</span>
+<span class="fc" id="L50">      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L51">              mapRowToUser(rs), email));</span>
+<span class="fc" id="L52">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L53">      logger.info(&quot;No user found with email: &quot; + email);</span>
+<span class="fc" id="L54">      return Optional.empty();</span>
     }
   }
 
   private User mapRowToUser(ResultSet rs) throws SQLException {
-<span class="fc" id="L58">    User user = new User();</span>
-<span class="fc" id="L59">    user.setId(rs.getLong(&quot;id&quot;));</span>
-<span class="fc" id="L60">    user.setEmail(rs.getString(&quot;email&quot;));</span>
-<span class="fc" id="L61">    user.setName(rs.getString(&quot;name&quot;));</span>
-<span class="fc" id="L62">    user.setHouseholdId(rs.getLong(&quot;household_id&quot;));</span>
-<span class="fc" id="L63">    user.setPassword(rs.getString(&quot;password&quot;));</span>
-<span class="fc" id="L64">    String roleString = rs.getString(&quot;role&quot;).toUpperCase();</span>
-<span class="fc" id="L65">    Role role = Role.valueOf(roleString);</span>
-<span class="fc" id="L66">    user.setRole(role);</span>
-<span class="fc" id="L67">    user.setVerified(rs.getBoolean(&quot;verified&quot;));</span>
-<span class="fc" id="L68">    return user;</span>
+<span class="fc" id="L59">    User user = new User();</span>
+<span class="fc" id="L60">    user.setId(rs.getLong(&quot;id&quot;));</span>
+<span class="fc" id="L61">    user.setEmail(rs.getString(&quot;email&quot;));</span>
+<span class="fc" id="L62">    user.setName(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L63">    user.setHouseholdId(rs.getLong(&quot;household_id&quot;));</span>
+<span class="fc" id="L64">    user.setPassword(rs.getString(&quot;password&quot;));</span>
+<span class="fc" id="L65">    String roleString = rs.getString(&quot;role&quot;).toUpperCase();</span>
+<span class="fc" id="L66">    Role role = Role.valueOf(roleString);</span>
+<span class="fc" id="L67">    user.setRole(role);</span>
+<span class="fc" id="L68">    user.setVerified(rs.getBoolean(&quot;verified&quot;));</span>
+<span class="fc" id="L69">    return user;</span>
   }
 
   /**
@@ -78,13 +79,13 @@ public class UserRepository {
    * @return an Optional containing the user if found, or an empty Optional if not found
    */
   public Optional&lt;User&gt; findById(Long id) {
-<span class="fc" id="L81">    String sql = &quot;SELECT * FROM users WHERE id = ?&quot;;</span>
+<span class="fc" id="L82">    String sql = &quot;SELECT * FROM users WHERE id = ?&quot;;</span>
     try {
-<span class="fc" id="L83">      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -&gt;</span>
-<span class="fc" id="L84">              mapRowToUser(rs), id));</span>
-<span class="fc" id="L85">    } catch (EmptyResultDataAccessException e) {</span>
-<span class="fc" id="L86">      logger.info(&quot;No user found with ID: &quot; + id);</span>
-<span class="fc" id="L87">      return Optional.empty();</span>
+<span class="fc" id="L84">      return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L85">              mapRowToUser(rs), id));</span>
+<span class="fc" id="L86">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L87">      logger.info(&quot;No user found with ID: &quot; + id);</span>
+<span class="fc" id="L88">      return Optional.empty();</span>
     }
   }
 
@@ -99,19 +100,19 @@ public class UserRepository {
    * @return an Optional containing the saved user if successful, or an empty Optional if not
    */
   public Optional&lt;User&gt; save(User user) {
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">    if (user.getRole() == null) {</span>
-<span class="fc" id="L103">      user.setRole(Role.ROLE_NORMAL);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">    if (user.getRole() == null) {</span>
+<span class="fc" id="L104">      user.setRole(Role.ROLE_NORMAL);</span>
     }
-<span class="fc" id="L105">    String query = &quot;INSERT INTO users &quot;</span>
+<span class="fc" id="L106">    String query = &quot;INSERT INTO users &quot;</span>
             + &quot;(email, name, household_id, password, role) &quot;
             + &quot;VALUES (?, ?, ?, ?, ?)&quot;;
     try {
-<span class="fc" id="L109">      jdbcTemplate.update(query, user.getEmail(), user.getName(),</span>
-<span class="fc" id="L110">              user.getHouseholdId(), user.getPassword(), user.getRole().toString());</span>
-<span class="fc" id="L111">      return findByEmail(user.getEmail());</span>
-<span class="fc" id="L112">    } catch (Exception e) {</span>
-<span class="fc" id="L113">      logger.info(&quot;Failed to save user: &quot; + e.getMessage());</span>
-<span class="fc" id="L114">      return Optional.empty();</span>
+<span class="fc" id="L110">      jdbcTemplate.update(query, user.getEmail(), user.getName(),</span>
+<span class="fc" id="L111">              user.getHouseholdId(), user.getPassword(), user.getRole().toString());</span>
+<span class="fc" id="L112">      return findByEmail(user.getEmail());</span>
+<span class="fc" id="L113">    } catch (Exception e) {</span>
+<span class="fc" id="L114">      logger.info(&quot;Failed to save user: &quot; + e.getMessage());</span>
+<span class="fc" id="L115">      return Optional.empty();</span>
     }
   }
 
@@ -127,14 +128,14 @@ public class UserRepository {
    *      or an empty Optional if not
    */
   public Optional&lt;User&gt; setVerified(User user) {
-<span class="nc" id="L130">    String query = &quot;UPDATE users SET verified = ? WHERE email = ?&quot;;</span>
+<span class="nc" id="L131">    String query = &quot;UPDATE users SET verified = ? WHERE email = ?&quot;;</span>
     try {
-<span class="nc" id="L132">      jdbcTemplate.update(query, user.getVerified(), user.getEmail());</span>
-<span class="nc" id="L133">      return findByEmail(user.getEmail());</span>
-<span class="nc" id="L134">    } catch (Exception e) {</span>
-<span class="nc" id="L135">      logger.info(&quot;Failed to update verified: &quot; + e.getMessage());</span>
-<span class="nc" id="L136">      e.printStackTrace();</span>
-<span class="nc" id="L137">      return Optional.empty();</span>
+<span class="nc" id="L133">      jdbcTemplate.update(query, user.getVerified(), user.getEmail());</span>
+<span class="nc" id="L134">      return findByEmail(user.getEmail());</span>
+<span class="nc" id="L135">    } catch (Exception e) {</span>
+<span class="nc" id="L136">      logger.info(&quot;Failed to update verified: &quot; + e.getMessage());</span>
+<span class="nc" id="L137">      e.printStackTrace();</span>
+<span class="nc" id="L138">      return Optional.empty();</span>
     }
   }
 
@@ -148,14 +149,14 @@ public class UserRepository {
    * @return a bool if found
    */
   public boolean existAdminByUsername(String username) {
-<span class="nc" id="L151">    String sql =</span>
+<span class="nc" id="L152">    String sql =</span>
         &quot;SELECT CASE &quot;
         + &quot;WHEN EXISTS ( &quot;
         + &quot;SELECT 1 FROM users WHERE users.name = ? AND users.role = 'ROLE_ADMIN' &quot;
         + &quot;) THEN 'true' &quot;
         + &quot;ELSE 'false' &quot;
         + &quot;END AS finnes&quot;;
-<span class="nc" id="L158">    return jdbcTemplate.queryForObject(</span>
+<span class="nc" id="L159">    return jdbcTemplate.queryForObject(</span>
         sql,
         new Object[]{username},
         Boolean.class);
@@ -169,9 +170,56 @@ public class UserRepository {
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
-<span class="nc" id="L172">    jdbcTemplate.update(</span>
+<span class="nc" id="L173">    jdbcTemplate.update(</span>
             &quot;UPDATE users SET household_id = ? WHERE id = ?&quot;,
             householdId, userId);
-<span class="nc" id="L175">  }</span>
+<span class="nc" id="L176">  }</span>
+
+  /**
+   * Deletes a user from the database by their ID.
+   * This method removes the user from the users table
+   * and also deletes any associated records
+   * from the join_household_requests table.
+   *
+   * @param id the ID of the user to be deleted
+   */
+  public void deleteById(Long id) {
+<span class="fc" id="L187">    jdbcTemplate.update(&quot;DELETE FROM join_household_requests WHERE user_id = ?&quot;, id);</span>
+<span class="fc" id="L188">    jdbcTemplate.update(&quot;DELETE FROM users WHERE id = ?&quot;, id);</span>
+<span class="fc" id="L189">  }</span>
+
+  /**
+   * Finds users by their role.
+   * This method queries the database for users with the specified role.
+   * If users are found, it returns a list of users.
+   * If no users are found, it returns an empty list.
+   *
+   * @param role the role of the users to be found
+   * @return a list of users with the specified role, or an empty list if none are found
+   */
+  public List&lt;User&gt; findByRole(Role role) {
+<span class="fc" id="L201">    String sql = &quot;SELECT * FROM users WHERE role = ?&quot;;</span>
+    try {
+<span class="fc" id="L203">      return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L204">          mapRowToUser(rs), role.toString());</span>
+<span class="nc" id="L205">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L206">      logger.info(&quot;No users found with role: &quot; + role);</span>
+<span class="nc" id="L207">      return List.of();</span>
+    }
+  }
+
+  /**
+   * Updates a user's password in the database.
+   * This method sets the password for a user with the specified email.
+   * It is used for updating the password
+   * when a user requests a password reset.
+   *
+   * @param email the email address of the user whose password is being updated
+   * @param hashedPassword the new hashed password to be set
+   */
+  public void updatePasswordByEmail(String email, String hashedPassword) {
+<span class="fc" id="L221">    String sql = &quot;UPDATE users SET password = ? WHERE email = ?&quot;;</span>
+<span class="fc" id="L222">    jdbcTemplate.update(sql, hashedPassword, email);</span>
+<span class="fc" id="L223">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
