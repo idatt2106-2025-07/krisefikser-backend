@@ -152,11 +152,28 @@ public class UserRepository {
         householdId, userId);
   }
 
+  /**
+   * Deletes a user from the database by their ID.
+   * This method removes the user from the users table
+   * and also deletes any associated records
+   * from the join_household_requests table.
+   *
+   * @param id the ID of the user to be deleted
+   */
   public void deleteById(Long id) {
     jdbcTemplate.update("DELETE FROM join_household_requests WHERE user_id = ?", id);
     jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
   }
 
+  /**
+   * Maps a ResultSet row to a User object.
+   * This method extracts the user data from the ResultSet
+   * and creates a User object.
+   *
+   * @param rs the ResultSet containing the user data
+   * @return a User object populated with the data from the ResultSet
+   * @throws SQLException if an SQL error occurs while accessing the ResultSet
+   */
   private User mapRowToUser(ResultSet rs) throws SQLException {
     User user = new User();
     user.setId(rs.getLong("id"));
@@ -191,6 +208,15 @@ public class UserRepository {
     }
   }
 
+  /**
+   * Finds users by their role.
+   * This method queries the database for users with the specified role.
+   * If users are found, it returns a list of users.
+   * If no users are found, it returns an empty list.
+   *
+   * @param role the role of the users to be found
+   * @return a list of users with the specified role, or an empty list if none are found
+   */
   public List<User> findByRole(Role role) {
     String sql = "SELECT * FROM users WHERE role = ?";
     try {
@@ -202,6 +228,15 @@ public class UserRepository {
     }
   }
 
+  /**
+   * Updates a user's password in the database.
+   * This method sets the password for a user with the specified email.
+   * It is used for updating the password
+   * when a user requests a password reset.
+   *
+   * @param email the email address of the user whose password is being updated
+   * @param hashedPassword the new hashed password to be set
+   */
   public void updatePasswordByEmail(String email, String hashedPassword) {
     String sql = "UPDATE users SET password = ? WHERE email = ?";
     jdbcTemplate.update(sql, hashedPassword, email);
