@@ -242,10 +242,8 @@ public class UserService implements UserDetailsService {
       Map<String, String> params = Map.of("resetLink", resetLink);
       emailService.sendTemplateMessage(
           user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);
-      new AuthResponse(AuthResponseMessage
-          .PASSWORD_RESET_LINK_SENT.getMessage(), null, null);
     } else {
-      new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
+      throw new UsernameNotFoundException("User not found with email: " + email);
     }
   }
 }
