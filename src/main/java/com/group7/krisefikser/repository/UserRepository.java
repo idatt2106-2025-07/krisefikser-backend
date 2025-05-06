@@ -201,4 +201,9 @@ public class UserRepository {
       return List.of();
     }
   }
+
+  public void updatePasswordByEmail(String email, String hashedPassword) {
+    String sql = "UPDATE users SET password = ? WHERE email = ?";
+    jdbcTemplate.update(sql, hashedPassword, email);
+  }
 }
