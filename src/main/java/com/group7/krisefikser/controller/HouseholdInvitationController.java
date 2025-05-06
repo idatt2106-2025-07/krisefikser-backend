@@ -1,8 +1,9 @@
 package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.request.InvitationRequest;
+import com.group7.krisefikser.exception.InvitationNotFoundException;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.HouseholdInvitation;
-import com.group7.krisefikser.model.InvitationRequest;
 import com.group7.krisefikser.service.HouseholdInvitationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-
 
 /**
  * REST controller for managing household invitations.
@@ -50,6 +50,7 @@ public class HouseholdInvitationController {
     @ApiResponse(responseCode = "200", description = "Invitation created successfully",
       content = @Content(schema = @Schema(implementation = HouseholdInvitation.class))),
     @ApiResponse(responseCode = "400", description = "Invalid request data"),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "500", description = "Internal server error")
   })
   @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -58,15 +59,37 @@ public class HouseholdInvitationController {
       content = @Content(
       mediaType = "application/json",
       schema = @Schema(implementation = InvitationRequest.class)
-       )
+        )
   )
   public ResponseEntity<?> createInvitation(@RequestBody InvitationRequest request) {
-    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-    Long userId = Long.parseLong(userIdStr);
+    try {
+      if (request.getEmail() == null || request.getEmail().isBlank()) {
+        return ResponseEntity.badRequest().body("Email must not be empty");
+      }
 
-    HouseholdInvitation invitation = invitationService.createInvitation(userId, request.getEmail());
-    logger.info("Invitation created successfully with token: " + invitation.getInvitationToken());
-    return ResponseEntity.ok(invitation);
+      String emailRegex =
+          "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+      if (!request.getEmail().matches(emailRegex)) {
+        return ResponseEntity.badRequest().body("Invalid email format");
+      }
+
+      String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
+      Long userId = Long.parseLong(userIdStr);
+
+      HouseholdInvitation invitation = invitationService.createInvitation(userId,
+          request.getEmail());
+      logger.info("Invitation created successfully with token: " + invitation.getInvitationToken());
+      return ResponseEntity.ok(invitation);
+
+    } catch (IllegalArgumentException e) {
+      logger.severe("Invalid request data: " + e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+
+    } catch (Exception e) {
+      logger.severe("Unexpected error while creating invitation" + e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("An unexpected error occurred");
+    }
   }
 
   /**
@@ -103,7 +126,6 @@ public class HouseholdInvitationController {
    *
    * @param requestBody The request body containing the invitation token.
    * @return A ResponseEntity indicating the result of the acceptance.
-   * @throws JwtMissingPropertyException if the token is missing required properties.
    */
   @PostMapping("/accept")
   @Operation(
@@ -113,12 +135,14 @@ public class HouseholdInvitationController {
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Invitation accepted successfully"),
     @ApiResponse(responseCode = "400", description = "Missing or invalid token"),
-    @ApiResponse(responseCode = "404", description = "Invitation not found or expired")
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "404", description = "Invitation not found or expired"),
+    @ApiResponse(responseCode = "500", description = "Internal server error")
   })
   @io.swagger.v3.oas.annotations.parameters.RequestBody(
       description = "JSON object containing the invitation token",
       required = true,
-       content = @Content(
+      content = @Content(
       mediaType = "application/json",
       schema = @Schema(
         type = "object",
@@ -127,19 +151,41 @@ public class HouseholdInvitationController {
       )
       )
   )
-  public ResponseEntity<?> acceptInvitation(@RequestBody Map<String, String> requestBody)
-      throws JwtMissingPropertyException {
-    String token = requestBody.get("token");
+  public ResponseEntity<?> acceptInvitation(@RequestBody Map<String, String> requestBody) {
+    try {
+      String token = requestBody.get("token");
 
-    if (token == null || token.isEmpty()) {
-      return ResponseEntity.badRequest().body("Token is required");
+      if (token == null || token.isBlank()) {
+        return ResponseEntity.badRequest().body("Token is required");
+      }
+
+      String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
+      Long userId = Long.parseLong(userIdStr);
+
+      invitationService.acceptInvitation(token, userId);
+      logger.info("Invitation accepted successfully");
+      return ResponseEntity.ok().build();
+
+    } catch (NumberFormatException e) {
+      logger.severe("Invalid user ID in security context" + e.getMessage());
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid authentication context");
+
+    } catch (IllegalArgumentException e) {
+      logger.severe("Invalid token or user: " + e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+
+    } catch (InvitationNotFoundException e) {
+      logger.severe("Invitation not found or expired: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invitation not found or expired");
+
+    } catch (JwtMissingPropertyException e) {
+      logger.severe("Missing expected property in token: " + e.getMessage());
+      return ResponseEntity.badRequest().body("Invalid token format");
+
+    } catch (Exception e) {
+      logger.severe("Unexpected error while accepting invitation" + e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("An unexpected error occurred");
     }
-
-    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-    Long userId = Long.parseLong(userIdStr);
-
-    invitationService.acceptInvitation(token, userId);
-    logger.info("Invitation accepted successfully");
-    return ResponseEntity.ok().build();
   }
 }
