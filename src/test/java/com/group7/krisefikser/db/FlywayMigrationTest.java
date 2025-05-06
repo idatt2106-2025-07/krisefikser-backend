@@ -26,7 +26,7 @@ class FlywayMigrationTest {
     Integer tablesCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA()",
             Integer.class);
-    assertTrue(tablesCount > 1, "Database should contain multiple tables");
+    assertTrue(tablesCount > 10);
   }
 
   @Test
@@ -35,6 +35,6 @@ class FlywayMigrationTest {
             "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'households'",
             Integer.class);
 
-    assertEquals(4, columnsCount);
+    assertEquals(5, columnsCount);
   }
 }

@@ -1,10 +1,18 @@
+-- Insert emergency groups (no foreign key dependencies)
+INSERT INTO emergency_groups (name)
+VALUES ('Group A'),
+       ('Group B'),
+       ('Group C'),
+       ('Group D'),
+       ('Group E');
+
 -- Insert households (no foreign key dependencies)
-INSERT INTO households (name, longitude, latitude)
-VALUES ('The Smiths', 10.75, 59.91),
-       ('Team Rocket', 11.00, 60.10),
-       ('The Johnsons', 10.85, 59.95),
-       ('The Waltons', 11.20, 60.30),
-       ('The Doyles', 10.60, 59.80);
+INSERT INTO households (name, longitude, latitude, emergency_group_id)
+VALUES ('The Smiths', 10.75, 59.91, 1),
+       ('Team Rocket', 11.00, 60.10, null),
+       ('The Johnsons', 10.85, 59.95, 1),
+       ('The Waltons', 11.20, 60.30, null),
+       ('The Doyles', 10.60, 59.80, null);
 
 -- Insert items (no foreign key dependencies)
 INSERT INTO items (name, unit, calories, type)
@@ -83,9 +91,16 @@ VALUES (2, 2),
 
 -- Insert general info (no foreign key dependencies)
 INSERT INTO general_info (theme, title, content) VALUES
-     ('BEFORE_CRISIS', 'Create an Emergency Plan', 'Make sure everyone in your household knows the emergency plan, including meeting points and emergency contacts.'),
-     ('BEFORE_CRISIS', 'Emergency Supplies', 'Store food, water, medicine, flashlights, and batteries that can last at least 72 hours.'),
-     ('DURING_CRISIS', 'Stay Informed', 'Listen to official updates from local authorities via radio, TV, or trusted apps.'),
-     ('DURING_CRISIS', 'Shelter in Place', 'If advised, stay indoors and away from windows. Use your emergency kit.'),
-     ('AFTER_CRISIS', 'Check for Injuries', 'Administer first aid if needed and call emergency services for serious injuries.'),
-     ('AFTER_CRISIS', 'Report Damages', 'Contact your insurance provider and local authorities to report damage or unsafe conditions.');
+                                                     ('BEFORE_CRISIS', 'Create an Emergency Plan', 'Make sure everyone in your household knows the emergency plan, including meeting points and emergency contacts.'),
+                                                     ('BEFORE_CRISIS', 'Emergency Supplies', 'Store food, water, medicine, flashlights, and batteries that can last at least 72 hours.'),
+                                                     ('DURING_CRISIS', 'Stay Informed', 'Listen to official updates from local authorities via radio, TV, or trusted apps.'),
+                                                     ('DURING_CRISIS', 'Shelter in Place', 'If advised, stay indoors and away from windows. Use your emergency kit.'),
+                                                     ('AFTER_CRISIS', 'Check for Injuries', 'Administer first aid if needed and call emergency services for serious injuries.'),
+                                                     ('AFTER_CRISIS', 'Report Damages', 'Contact your insurance provider and local authorities to report damage or unsafe conditions.');
+
+
+-- Insert emergency group invitations (references households and emergency groups)
+INSERT INTO emergency_group_invitations (household_id, emergency_group_id)
+VALUES (2, 2),
+       (2, 4),
+       (5, 4);

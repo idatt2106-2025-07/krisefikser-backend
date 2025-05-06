@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -192,5 +193,48 @@ public class UserService implements UserDetailsService {
     } catch (JwtMissingPropertyException e) {
       return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);
     }
+  }
+
+  /**
+   * Gets the current authenticated user's ID from the security context.
+   *
+   * @return the ID of the authenticated user
+   * @throws RuntimeException if no authenticated user is found
+   */
+  public Long getCurrentUserId() {
+    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
+    if (userIdStr == null || userIdStr.isEmpty()) {
+      throw new RuntimeException("No authenticated user found");
+    }
+
+    return Long.parseLong(userIdStr);
+  }
+
+  /**
+   * Gets the current authenticated user from the repository.
+   *
+   * @return the authenticated User entity
+   * @throws RuntimeException if the user is not found
+   */
+  public User getCurrentUser() {
+    Long userId = getCurrentUserId();
+    return userRepo.findById(userId)
+      .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+  }
+
+  /**
+   * Gets the household ID of the current authenticated user.
+   *
+   * @return the household ID of the authenticated user
+   * @throws RuntimeException if the user or their household is not found
+   */
+  public int getCurrentUserHouseholdId() {
+    User user = getCurrentUser();
+
+    if (user.getHouseholdId() == null) {
+      throw new RuntimeException("User does not belong to any household");
+    }
+
+    return user.getHouseholdId().intValue();
   }
 }

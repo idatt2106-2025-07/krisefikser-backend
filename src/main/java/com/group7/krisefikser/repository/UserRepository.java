@@ -47,7 +47,7 @@ public class UserRepository {
     String sql = "SELECT * FROM users WHERE email = ?";
     try {
       return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
-        mapRowToUser(rs), email));
+              mapRowToUser(rs), email));
     } catch (EmptyResultDataAccessException e) {
       logger.info("No user found with email: " + email);
       return Optional.empty();
@@ -81,7 +81,7 @@ public class UserRepository {
     String sql = "SELECT * FROM users WHERE id = ?";
     try {
       return Optional.of(jdbcTemplate.queryForObject(sql, (rs, rowNum) ->
-        mapRowToUser(rs), id));
+              mapRowToUser(rs), id));
     } catch (EmptyResultDataAccessException e) {
       logger.info("No user found with ID: " + id);
       return Optional.empty();
@@ -103,11 +103,11 @@ public class UserRepository {
       user.setRole(Role.ROLE_NORMAL);
     }
     String query = "INSERT INTO users "
-        + "(email, name, household_id, password, role) "
-        + "VALUES (?, ?, ?, ?, ?)";
+            + "(email, name, household_id, password, role) "
+            + "VALUES (?, ?, ?, ?, ?)";
     try {
       jdbcTemplate.update(query, user.getEmail(), user.getName(),
-          user.getHouseholdId(), user.getPassword(), user.getRole().toString());
+              user.getHouseholdId(), user.getPassword(), user.getRole().toString());
       return findByEmail(user.getEmail());
     } catch (Exception e) {
       logger.info("Failed to save user: " + e.getMessage());
@@ -123,7 +123,8 @@ public class UserRepository {
    * containing the updated user.
    *
    * @param user the user whose verified status is to be changed
-   * @return an Optional containing the updated user if successful, or an empty Optional if not
+   * @return an Optional containing the updated user if successful,
+   *      or an empty Optional if not
    */
   public Optional<User> setVerified(User user) {
     String query = "UPDATE users SET verified = ? WHERE email = ?";
@@ -169,7 +170,7 @@ public class UserRepository {
    */
   public void updateUserHousehold(Long userId, Long householdId) {
     jdbcTemplate.update(
-        "UPDATE users SET household_id = ? WHERE id = ?",
-        householdId, userId);
+            "UPDATE users SET household_id = ? WHERE id = ?",
+            householdId, userId);
   }
 }
