@@ -2,6 +2,7 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
+import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
@@ -201,5 +202,50 @@ public class AuthController {
       return ResponseEntity.ok(auth.getName());
     }
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Endpoint for refreshing the JWT token.
+   * This method generates a new JWT token for the authenticated user.
+   * It accepts the old token as a request parameter.
+   *
+   * @param resetPasswordRequest the request containing the old token
+   * @return a ResponseEntity containing the authentication response
+   */
+  @PostMapping("/reset-password")
+  public ResponseEntity<AuthResponse> resetPassword(
+      @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+    logger.info("Received password reset request for user: " + resetPasswordRequest.getEmail());
+    try {
+      AuthResponse authResponse = userService.resetPassword(resetPasswordRequest);
+      return  ResponseEntity.ok(authResponse);
+    } catch (Exception e) {
+      logger.warning("Error resetting password: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+          new AuthResponse(AuthResponseMessage.PASSWORD_RESET_ERROR.getMessage()
+                  + e.getMessage(), null, null));
+    }
+  }
+
+  /**
+   * Endpoint for sending a new password link.
+   * This method sends a new password link to the user's email.
+   * It accepts a ResetPasswordRequest object containing the email.
+   *
+   * @param resetPasswordRequest the request containing the email
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PostMapping("/new-password-link")
+  public ResponseEntity<Object> sendNewPasswordLink(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+    String email = resetPasswordRequest.getEmail();
+    logger.info("Trying to send new password link to: " + resetPasswordRequest.getEmail());
+    try {
+      userService.sendResetPasswordLink(email);
+      logger.info("New password link sent to: " + email);
+      return ResponseEntity.ok("New password link sent to: " + email);
+    } catch (Exception e) {
+      logger.severe("Error sending new password link to " + email + ": " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 }
