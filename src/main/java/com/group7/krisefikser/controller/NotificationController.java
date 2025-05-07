@@ -38,7 +38,8 @@ public class NotificationController {
    */
   @Operation(
       summary = "Get incident notifications",
-      description = "Retrieves a list of high severity incident notifications that require immediate attention.",
+      description = "Retrieves a list of high severity incident notifications"
+          + " that require immediate attention.",
       responses = {
           @ApiResponse(
               responseCode = "200",
