@@ -22,6 +22,7 @@ krisefikser,com.group7.krisefikser.controller,EmergencyGroupController,16,232,0,
 krisefikser,com.group7.krisefikser.controller,ItemController,72,200,3,3,18,51,3,10,0,10
 krisefikser,com.group7.krisefikser.controller,HouseholdInvitationController,84,84,4,6,25,21,4,5,0,4
 krisefikser,com.group7.krisefikser.controller,AdminController,6,61,2,2,2,17,2,3,0,3
+krisefikser,com.group7.krisefikser.controller,NotificationController,0,31,0,0,0,9,0,2,0,2
 krisefikser,com.group7.krisefikser.controller,UserPositionController,36,70,1,1,10,23,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0,4,8,54,0,8,0,6
 krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2,3,0,2
@@ -65,6 +66,7 @@ krisefikser,com.group7.krisefikser.service,EmailService,0,41,0,0,0,12,0,3,0,3
 krisefikser,com.group7.krisefikser.service,AffectedAreaService,0,77,0,8,0,21,0,8,0,4
 krisefikser,com.group7.krisefikser.service,HouseholdService,30,63,2,0,10,15,2,6,1,6
 krisefikser,com.group7.krisefikser.service,SuperAdminService,0,151,0,16,0,39,0,12,0,4
+krisefikser,com.group7.krisefikser.service,NotificationService,0,31,0,4,0,6,0,3,0,1
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2
 krisefikser,com.group7.krisefikser.service,EmailTemplateService,6,47,2,8,3,15,2,9,0,3
@@ -72,7 +74,7 @@ krisefikser,com.group7.krisefikser.service,UserService,141,400,10,20,35,85,12,15
 krisefikser,com.group7.krisefikser.service,LoginAttemptService,5,50,0,2,4,14,0,6,0,5
 krisefikser,com.group7.krisefikser.service,HouseholdInvitationService,18,93,0,0,2,21,3,3,3,3
 krisefikser,com.group7.krisefikser.service,EmergencyGroupService,16,193,4,6,2,52,3,13,0,11
-krisefikser,com.group7.krisefikser.config,SecurityConfig,0,212,0,0,0,30,0,6,0,6
+krisefikser,com.group7.krisefikser.config,SecurityConfig,0,216,0,0,0,30,0,6,0,6
 krisefikser,com.group7.krisefikser.dto.request,ItemRequest,0,30,0,0,0,9,0,2,0,2
 krisefikser,com.group7.krisefikser.dto.request,StorageItemRequest,18,0,0,0,5,0,1,0,1,0
 krisefikser,com.group7.krisefikser.validation,EnumValidator,0,28,0,2,0,10,0,4,0,3
