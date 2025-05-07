@@ -593,6 +593,67 @@ public class StorageItemController {
   }
 
   /**
+   * Endpoint to update an existing shared storage item in the authenticated user's emergency group.
+   *
+   * @param id      The ID of the shared storage item to update
+   * @param request The request containing the updated shared storage item details
+   * @return The updated shared storage item
+   */
+  @Operation(
+          summary = "Update an existing shared storage item",
+          description = "Updates a shared storage item with the specified ID for the "
+                  + "authenticated user's emergency group.",
+          parameters = {
+            @Parameter(name = "id", description = "ID of the shared storage item to update",
+                    required = true)
+          },
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = "Updated details of the shared storage item",
+                  required = true,
+                  content = @Content(mediaType = "application/json",
+                          schema = @Schema(implementation = StorageItemRequest.class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = "200", description = "Shared storage item "
+                    + "successfully updated",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Shared storage item not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+          }
+  )
+  @PutMapping("/emergency-group/{id}")
+  public ResponseEntity<Object> updateSharedStorageItem(
+          @PathVariable int id,
+          @Valid @RequestBody StorageItemRequest request) {
+    try {
+
+      StorageItemResponse response = storageItemService.updateSharedStorageItem(
+              id, request);
+      logger.info("Successfully updated shared storage item with ID: " + id);
+      return ResponseEntity.ok(response);
+    } catch (IllegalArgumentException e) {
+      logger.info(e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
+              e.getMessage()
+      ));
+    } catch (NoSuchElementException e) {
+      logger.info(e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+              e.getMessage()
+      ));
+    } catch (Exception e) {
+      logger.severe("Error updating shared storage item: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                new ErrorResponse("An unexpected error occurred while updating the "
+                        + "shared storage item.")
+      );
+    }
+  }
+
+
+  /**
    * Endpoint to delete a storage item by its ID from the authenticated user's household.
    *
    * @param id The ID of the storage item to delete
