@@ -67,7 +67,8 @@ public class SecurityConfig {
                 "/v3/api-docs/**",
                 "/api/general-info/**", 
                 "/api/auth/**",
-                "/api/notification/**")
+                "/api/notification/**",
+                "/api/privacy-policy/**")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
@@ -85,7 +86,8 @@ public class SecurityConfig {
             .requestMatchers(
                 "/api/point-of-interest/**",
                 "/api/affected-area/**",
-                "/api/general-info/admin/**")
+                "/api/general-info/admin/**",
+                "/api/privacy-policy/**")
             .hasAnyRole("SUPER_ADMIN", "ADMIN")
 
             .requestMatchers(

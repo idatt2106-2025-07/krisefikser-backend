@@ -5,6 +5,7 @@ import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
 import com.group7.krisefikser.repository.UserRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -103,5 +104,20 @@ class HouseholdServiceTest {
 
     assertEquals(expected, result);
     verify(joinRequestRepo).findByHouseholdId(householdId);
+  }
+
+  @Test
+  void getHouseholdById_shouldReturnHousehold() {
+    Long householdId = 1L;
+    Household expected = new Household();
+    expected.setId(householdId);
+    expected.setName("Test Household");
+
+    when(householdRepository.getHouseholdById(householdId)).thenReturn(Optional.of(expected));
+
+    Household result = householdService.getHouseholdById(householdId);
+
+    assertEquals(expected, result);
+    verify(householdRepository).getHouseholdById(householdId);
   }
 }
