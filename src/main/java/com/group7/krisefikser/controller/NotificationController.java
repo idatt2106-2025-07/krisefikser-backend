@@ -1,6 +1,6 @@
 package com.group7.krisefikser.controller;
 
-import com.group7.krisefikser.dto.response.NotifiationResponse;
+import com.group7.krisefikser.dto.response.NotificationResponse;
 import com.group7.krisefikser.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,7 +45,7 @@ public class NotificationController {
               description = "Successfully retrieved incident notifications",
               content = @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = NotifiationResponse.class)
+                  schema = @Schema(implementation = NotificationResponse.class)
               )
           ),
           @ApiResponse(
@@ -56,10 +56,10 @@ public class NotificationController {
       }
   )
   @GetMapping("/incidents")
-  public ResponseEntity<List<NotifiationResponse>> getIncidentsNotifications() {
+  public ResponseEntity<List<NotificationResponse>> getIncidentsNotifications() {
     try {
       logger.info("Retrieving incident notifications");
-      List<NotifiationResponse> notifications =
+      List<NotificationResponse> notifications =
           notificationService.getIncidentsNotification();
       logger.info("Retrieved " + notifications.size() + " incident notifications");
       return ResponseEntity.ok(notifications);
