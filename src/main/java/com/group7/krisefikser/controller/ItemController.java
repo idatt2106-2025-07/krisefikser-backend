@@ -20,15 +20,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * ItemController handles HTTP requests related to items.
@@ -226,6 +218,41 @@ public class ItemController {
       return ResponseEntity.ok(itemService.convertToItemResponses(items));
     } catch (Exception e) {
       logger.severe("Unexpected error filtering and sorting items: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+    }
+  }
+
+  /**
+   * Endpoint to search for items by name.
+   * This endpoint searches for items whose names contain the provided search term.
+   * The search is case-insensitive and matches partial item names.
+   *
+   * @param searchTerm The term to search for in item names
+   * @return A list of items that match the search term
+   */
+  @Operation(
+      summary = "Search items by name",
+      description = "Searches for items whose names contain the provided search term. "
+        + "The search is case-insensitive and matches partial item names.",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved matching items",
+          content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+      }
+  )
+  @GetMapping("/search")
+  public ResponseEntity<List<ItemResponse>> searchItems(
+      @RequestParam(required = false) String searchTerm) {
+
+    logger.info("Searching for items with search term: " + searchTerm);
+    try {
+      List<Item> matchingItems = itemService.searchItemsByName(searchTerm);
+      List<ItemResponse> itemResponses = itemService.convertToItemResponses(matchingItems);
+      logger.info("Found " + matchingItems.size() + " matching items");
+      return ResponseEntity.ok(itemResponses);
+    } catch (Exception e) {
+      logger.severe("Unexpected error searching items: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
     }
   }
