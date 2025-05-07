@@ -19,5 +19,4 @@ public class AggregatedStorageItemResponse {
   private ItemResponse item;
   private int totalQuantity;
   private LocalDateTime earliestExpirationDate;
-  private String householdName;
 }

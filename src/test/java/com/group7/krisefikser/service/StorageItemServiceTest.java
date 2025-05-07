@@ -5,10 +5,8 @@ import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
-import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.StorageItem;
-import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.StorageItemRepo;
 import org.junit.jupiter.api.Test;
@@ -44,8 +42,6 @@ class StorageItemServiceTest {
   private ItemRepo itemRepo;
 
   @Mock HouseholdService householdService;
-  @Mock
-  private HouseholdRepository householdRepository;
 
   @InjectMocks
   private StorageItemService storageItemService;
@@ -84,7 +80,6 @@ class StorageItemServiceTest {
             createStorageItem(1, 1, 1, 5, LocalDateTime.now().plusDays(10)),
             createStorageItem(2, 2, 3, 4, shortestExpirationDate),
             createStorageItem(3, 2, 1, 3, LocalDateTime.now().plusDays(7)),
-            createStorageItem(6, 2, 3, 7, LocalDateTime.now().plusDays(8)),
             createStorageItem(4, 3, 2, 3, LocalDateTime.now().plusDays(8)),
             createStorageItem(5, 4, 1, 6, LocalDateTime.now().plusDays(6))
     );
@@ -109,24 +104,18 @@ class StorageItemServiceTest {
 
     when(householdService.getGroupIdForCurrentUser()).thenReturn(1L);
     when(storageItemRepo.getAllSharedStorageItemsInGroup(1L)).thenReturn(mockItems);
-    when(householdRepository.getHouseholdById(1L)).thenReturn(Optional.of(
-            new Household(1L, "Household 1", 10.0, 20.0, 1L)
-    ));
-    when(householdRepository.getHouseholdById(2L)).thenReturn(Optional.of(
-            new Household(2L, "Household 2", 30.0, 40.0, 1L)
-    ));
-    when(householdRepository.getHouseholdById(3L)).thenReturn(Optional.of(
-            new Household(3L, "Household 3", 50.0, 60.0, 1L)
-    ));
+
+
 
     List<AggregatedStorageItemResponse> result = storageItemService.getSharedStorageItemsInGroup(typesString, sortRequest);
 
     assertNotNull(result);
-    assertEquals(4, result.size());
+    assertEquals(3, result.size());
     assertEquals(2, result.get(0).getItemId());
-    assertEquals(11, result.get(0).getTotalQuantity());
+    assertEquals(7, result.get(0).getTotalQuantity());
     assertEquals(shortestExpirationDate, result.get(0).getEarliestExpirationDate());
     assertEquals(ItemType.FOOD, result.get(0).getItem().getType());
+    System.out.println(result);
     assertEquals(4, result.get(1).getItemId());
     assertEquals(1, result.get(2).getItemId());
     verify(storageItemRepo, times(1)).getAllSharedStorageItemsInGroup(1L);
@@ -161,7 +150,6 @@ class StorageItemServiceTest {
     List<StorageItem> mockItems = Arrays.asList(
             createStorageItem(1, 1, 1, 5, LocalDateTime.now().plusDays(10)),
             createStorageItem(2, 2, 3, 4, shortestExpirationDate),
-            createStorageItem(6, 2, 3, 7, LocalDateTime.now().plusDays(8)),
             createStorageItem(3, 2, 1, 3, LocalDateTime.now().plusDays(7)),
             createStorageItem(4, 3, 2, 3, LocalDateTime.now().plusDays(8)),
             createStorageItem(5, 4, 1, 6, LocalDateTime.now().plusDays(6))
@@ -187,24 +175,16 @@ class StorageItemServiceTest {
 
     when(householdService.getGroupIdForCurrentUser()).thenReturn(1L);
     when(storageItemRepo.getAllSharedStorageItemsInGroup(1L)).thenReturn(mockItems);
-    when(householdRepository.getHouseholdById(1L)).thenReturn(Optional.of(
-            new Household(1L, "Household 1", 10.0, 20.0, 1L)
-    ));
-    when(householdRepository.getHouseholdById(2L)).thenReturn(Optional.of(
-            new Household(2L, "Household 2", 30.0, 40.0, 1L)
-    ));
-    when(householdRepository.getHouseholdById(3L)).thenReturn(Optional.of(
-            new Household(3L, "Household 3", 50.0, 60.0, 1L)
-    ));
 
     List<AggregatedStorageItemResponse> result = storageItemService.getSharedStorageItemsInGroup(typesString, sortRequest);
 
     assertNotNull(result);
-    assertEquals(4, result.size());
+    assertEquals(3, result.size());
     assertEquals(2, result.get(0).getItemId());
-    assertEquals(11, result.get(0).getTotalQuantity());
+    assertEquals(7, result.get(0).getTotalQuantity());
     assertEquals(shortestExpirationDate, result.get(0).getEarliestExpirationDate());
     assertEquals(ItemType.FOOD, result.get(0).getItem().getType());
+    System.out.println(result);
     assertEquals(4, result.get(1).getItemId());
     assertEquals(1, result.get(2).getItemId());
     verify(storageItemRepo, times(1)).getAllSharedStorageItemsInGroup(1L);
@@ -477,8 +457,6 @@ class StorageItemServiceTest {
     when(storageItemRepo.getAllStorageItems(householdId)).thenReturn(allItems);
     when(itemRepo.findById(itemId1)).thenReturn(Optional.of(item1));
     when(itemRepo.findById(itemId2)).thenReturn(Optional.of(item2));
-    when(householdRepository.getHouseholdById((long) householdId)).thenReturn(Optional.of(
-            new Household((long) householdId, "Household 1", 10.0, 20.0, 1L)));
 
     // Execute
     List<AggregatedStorageItemResponse> result = storageItemService.getAggregatedStorageItems(householdId);
@@ -532,15 +510,15 @@ class StorageItemServiceTest {
     // Create mock aggregated responses
     AggregatedStorageItemResponse food1 = createAggregatedResponse(
       101, new ItemResponse(101, "Food 1", "units", 100, ItemType.FOOD), 5,
-      LocalDateTime.now().plusDays(10), "Household 1");
+      LocalDateTime.now().plusDays(10));
 
     AggregatedStorageItemResponse food2 = createAggregatedResponse(
       102, new ItemResponse(102, "Food 2", "units", 200, ItemType.FOOD), 10,
-      LocalDateTime.now().plusDays(5), "Household 1");
+      LocalDateTime.now().plusDays(5));
 
     AggregatedStorageItemResponse drink = createAggregatedResponse(
       103, new ItemResponse(103, "Drink", "ml", 50, ItemType.DRINK), 7,
-      LocalDateTime.now().plusDays(3), "Household 1");
+      LocalDateTime.now().plusDays(3));
 
     List<AggregatedStorageItemResponse> allAggregated = Arrays.asList(food1, food2, drink);
 
@@ -578,21 +556,17 @@ class StorageItemServiceTest {
     // Create mock aggregated responses
     AggregatedStorageItemResponse appleJuice = createAggregatedResponse(
       101, new ItemResponse(101, "Apple Juice", "ml", 50, ItemType.DRINK), 5,
-      LocalDateTime.now().plusDays(10), "Household 1");
+      LocalDateTime.now().plusDays(10));
 
     AggregatedStorageItemResponse apples = createAggregatedResponse(
       102, new ItemResponse(102, "Apples", "units", 80, ItemType.FOOD), 10,
-      LocalDateTime.now().plusDays(5), "Household 1");
+      LocalDateTime.now().plusDays(5));
 
     AggregatedStorageItemResponse bread = createAggregatedResponse(
       103, new ItemResponse(103, "Bread", "slices", 100, ItemType.FOOD), 7,
-      LocalDateTime.now().plusDays(3), "Household 1");
+      LocalDateTime.now().plusDays(3));
 
-    AggregatedStorageItemResponse orangeJuice = createAggregatedResponse(
-      104, new ItemResponse(104, "Orange Juice", "ml", 50, ItemType.DRINK), 5,
-      LocalDateTime.now().plusDays(10), "Household 2");
-
-    List<AggregatedStorageItemResponse> allAggregated = Arrays.asList(appleJuice, apples, bread, orangeJuice);
+    List<AggregatedStorageItemResponse> allAggregated = Arrays.asList(appleJuice, apples, bread);
 
     // Mock service method that's called by the method under test
     StorageItemService spyService = spy(storageItemService);
@@ -626,9 +600,8 @@ class StorageItemServiceTest {
 
   private AggregatedStorageItemResponse createAggregatedResponse(int itemId, ItemResponse item,
                                                                  int totalQuantity,
-                                                                 LocalDateTime earliestExpirationDate,
-                                                                 String householdName) {
+                                                                 LocalDateTime earliestExpirationDate) {
     return new AggregatedStorageItemResponse(itemId, item, totalQuantity,
-      earliestExpirationDate, householdName);
+      earliestExpirationDate);
   }
 }

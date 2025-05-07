@@ -6,10 +6,8 @@ import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
-import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.StorageItem;
-import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.StorageItemRepo;
 import java.time.LocalDateTime;
@@ -33,7 +31,6 @@ public class StorageItemService {
   private final StorageItemRepo storageItemRepo;
   private final ItemRepo itemRepo;
   private final HouseholdService householdService;
-  private final HouseholdRepository householdRepository;
   private final ItemService itemService;
   private static final Logger logger = Logger.getLogger(StorageItemService.class.getName());
 
@@ -309,18 +306,14 @@ public class StorageItemService {
           List<StorageItem> storageItems,
           String sortBy,
           String sortDirection) {
-    // Group by both itemId and householdId
-    Map<Map.Entry<Integer, Integer>, List<StorageItem>> groupedByItemAndHousehold = storageItems.stream()
-            .collect(Collectors.groupingBy(
-                    item -> Map.entry(item.getItemId(), item.getHouseholdId())
-            ));
+    Map<Integer, List<StorageItem>> groupedByItemId = storageItems.stream()
+            .collect(Collectors.groupingBy(StorageItem::getItemId));
 
     // Create aggregated responses
     List<AggregatedStorageItemResponse> result = new ArrayList<>();
 
-    for (Map.Entry<Map.Entry<Integer, Integer>, List<StorageItem>> entry : groupedByItemAndHousehold.entrySet()) {
-      int itemId = entry.getKey().getKey();
-      int householdId = entry.getKey().getValue();
+    for (Map.Entry<Integer, List<StorageItem>> entry : groupedByItemId.entrySet()) {
+      int itemId = entry.getKey();
       List<StorageItem> items = entry.getValue();
 
       // Calculate total quantity
@@ -345,19 +338,15 @@ public class StorageItemService {
 
       ItemResponse itemResponse = item != null ? ItemResponse.fromEntity(item) : null;
 
-      Household household = householdRepository.getHouseholdById((long) householdId).orElse(null);
+      // Create the aggregated response
+      AggregatedStorageItemResponse aggregated = new AggregatedStorageItemResponse(
+              itemId,
+              itemResponse,
+              totalQuantity,
+              earliestDate
+      );
 
-      if (household != null) {
-        AggregatedStorageItemResponse aggregated = new AggregatedStorageItemResponse(
-                itemId,
-                itemResponse,
-                totalQuantity,
-                earliestDate,
-                household.getName()
-        );
-
-        result.add(aggregated);
-      }
+      result.add(aggregated);
     }
 
     // Apply sorting if provided

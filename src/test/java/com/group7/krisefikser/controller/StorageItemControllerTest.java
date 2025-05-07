@@ -514,7 +514,7 @@ class StorageItemControllerTest {
 
   private StorageItemResponse createStorageItemResponse(int id, int itemId, int householdId, int quantity,
                                                         LocalDateTime expirationDate, String itemName,
-                                                        boolean isShared) {
+                                                        boolean is_shared) {
     ItemResponse itemResponse = new ItemResponse();
     itemResponse.setId(itemId);
     itemResponse.setName(itemName);
@@ -528,7 +528,7 @@ class StorageItemControllerTest {
     response.setHouseholdId(householdId);
     response.setQuantity(quantity);
     response.setExpirationDate(expirationDate);
-    response.setShared(isShared);
+    response.setShared(is_shared);
     response.setItem(itemResponse);
 
     return response;
@@ -544,6 +544,6 @@ class StorageItemControllerTest {
     itemResponse.setCalories(0);
     itemResponse.setType(itemType);
 
-    return new AggregatedStorageItemResponse(itemId, itemResponse, totalQuantity, earliestExpirationDate, "Household Name");
+    return new AggregatedStorageItemResponse(itemId, itemResponse, totalQuantity, earliestExpirationDate);
   }
 }
