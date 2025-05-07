@@ -51,7 +51,7 @@ class StorageItemRepoTest {
     List<StorageItem> items = storageItemRepo.getAllSharedStorageItemsInGroup(groupId);
 
     assertNotNull(items);
-    assertEquals(4, items.size());
+    assertEquals(7, items.size());
 
     for (StorageItem item : items) {
       assertTrue(item.isShared());
