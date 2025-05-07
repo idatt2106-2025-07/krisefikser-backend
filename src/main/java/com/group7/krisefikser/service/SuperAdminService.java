@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,6 +29,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SuperAdminService {
+  @Value("${app.frontend.url}")
+
+  private String frontendUrl;
 
   private final UserRepository userRepository;
   private final UserService userService;
@@ -58,7 +63,7 @@ public class SuperAdminService {
 
     String inviteToken = jwtUtils.generateInviteToken(username);
 
-    String inviteLink = "https://localhost:5173/invite?token=" + inviteToken;
+    String inviteLink = frontendUrl + "/register-admin?token=" + inviteToken;
 
     emailService.sendTemplateMessage(
         request.getEmail(),
