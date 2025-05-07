@@ -114,4 +114,14 @@ public class HouseholdService {
   public List<JoinHouseholdRequest> getRequestsForHousehold(Long householdId) {
     return joinRequestRepo.findByHouseholdId(householdId);
   }
+
+  /**
+   * Retrieves a household by its ID.
+   *
+   * @param id the ID of the household
+   * @return the Household object if found, null otherwise
+   */
+  public Household getHouseholdById(Long id) {
+    return householdRepository.getHouseholdById(id).orElse(null);
+  }
 }
