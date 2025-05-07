@@ -1,0 +1,64 @@
+package com.group7.krisefikser.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group7.krisefikser.dto.response.NotificationResponse;
+import com.group7.krisefikser.service.NotificationService;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
+class NotificationControllerTest {
+
+  @Autowired
+  private MockMvc mockMvc;
+
+  @MockitoBean
+  private NotificationService notificationService;
+
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @Test
+  @DisplayName("GET /api/notification/incidents - Success")
+  void testGetIncidentsNotificationsSuccess() throws Exception {
+    List<NotificationResponse> mockNotifications = Arrays.asList(
+        new NotificationResponse("High water level detected"),
+        new NotificationResponse("Severe drought increasing fire risk")
+    );
+
+    when(notificationService.getIncidentsNotification()).thenReturn(mockNotifications);
+
+    mockMvc.perform(get("/api/notification/incidents"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.size()").value(mockNotifications.size()))
+        .andExpect(jsonPath("$[0].message").value("High water level detected"))
+        .andExpect(jsonPath("$[1].message").value("Severe drought increasing fire risk"));
+  }
+
+  @Test
+  @DisplayName("GET /api/notification/incidents - Internal Server Error")
+  void testGetIncidentsNotificationsFailure() throws Exception {
+    when(notificationService.getIncidentsNotification())
+        .thenThrow(new RuntimeException("Database error"));
+
+    mockMvc.perform(get("/api/notification/incidents"))
+        .andExpect(status().isInternalServerError());
+  }
+}
