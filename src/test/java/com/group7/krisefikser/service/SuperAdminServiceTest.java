@@ -63,7 +63,7 @@ public class SuperAdminServiceTest {
       verify(emailService).sendTemplateMessage(
           eq(email),
           eq(EmailTemplateType.ADMIN_INVITE),
-          eq(Map.of("inviteLink", "https://localhost:5173/invite?token=" + fakeToken))
+          eq(Map.of("inviteLink", "https://dev.krisefikser.localhost:5173/register-admin?token=" + fakeToken))
       );
     }
   }
