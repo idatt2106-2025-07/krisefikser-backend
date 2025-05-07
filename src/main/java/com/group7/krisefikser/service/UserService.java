@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,6 +36,9 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
+  @Value("${app.frontend.url}")
+
+  private String frontendUrl;
 
   private final UserRepository userRepo;
   private final JwtUtils jwtUtils;
@@ -87,7 +91,7 @@ public class UserService implements UserDetailsService {
       userRepo.save(user);
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
       String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());
-      String verificationLink = "http://localhost:5173/verify-email?token=" + emailVerificationToken;
+      String verificationLink = frontendUrl + "/verify-email?token=" + emailVerificationToken;
       Map<String, String> params = Map.of("verificationLink", verificationLink);
       emailService.sendTemplateMessage(
           byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
@@ -138,7 +142,7 @@ public class UserService implements UserDetailsService {
     if (user.getRole() == Role.ROLE_ADMIN) {
       try {
         String twoFactorToken = jwtUtils.generate2faToken(user.getId());
-        String twoFactorLink = "https://localhost:5173/verify?token=" + twoFactorToken;
+        String twoFactorLink = frontendUrl + "/verify?token=" + twoFactorToken;
 
         emailService.sendTemplateMessage(
             user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,
@@ -239,7 +243,7 @@ public class UserService implements UserDetailsService {
     if (userOpt.isPresent()) {
       User user = userOpt.get();
       String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());
-      String resetLink = "http://localhost:5173/reset-password?token=" + resetToken;
+      String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
       Map<String, String> params = Map.of("resetLink", resetLink);
       emailService.sendTemplateMessage(
           user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);

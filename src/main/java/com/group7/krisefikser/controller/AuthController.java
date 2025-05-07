@@ -2,6 +2,7 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
+import com.group7.krisefikser.dto.request.ResetPasswordLinkRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
@@ -284,7 +285,7 @@ public class AuthController {
    * It accepts a ResetPasswordRequest object containing the email.
    * The link contains a token used to reset the password.
    *
-   * @param resetPasswordRequest the request containing the email
+   * @param request the request containing the email
    * @return a ResponseEntity indicating the result of the operation
    */
   @Operation(
@@ -300,8 +301,9 @@ public class AuthController {
   })
   @PostMapping("/new-password-link")
   public ResponseEntity<Object> sendNewPasswordLink(
-      @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-    String email = resetPasswordRequest.getEmail();
+      @Valid @RequestBody ResetPasswordLinkRequest request) {
+    
+    String email = request.getEmail();
     logger.info("Trying to send new password link to: " + email);
     try {
       userService.sendResetPasswordLink(email);

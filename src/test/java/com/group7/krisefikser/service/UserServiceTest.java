@@ -3,7 +3,6 @@ package com.group7.krisefikser.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
 
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
@@ -31,6 +30,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -74,7 +74,7 @@ public class UserServiceTest {
     testUser.setRole(Role.ROLE_NORMAL);
     testUser.setVerified(true);
     testUser.setHouseholdId(1L);
-
+    ReflectionTestUtils.setField(userService, "frontendUrl", "http://dev.krisefikser.localhost");
     // Setup register request
     registerRequest = new RegisterRequest("test@example.com", "Test User", "password123");
     // Setup login request
@@ -410,7 +410,7 @@ public class UserServiceTest {
 
     userService.sendResetPasswordLink("test@example.com");
 
-    String expectedLink = "http://localhost:5173/reset-password?token=resetToken";
+    String expectedLink = "http://dev.krisefikser.localhost/reset-password?token=resetToken";
     verify(emailService).sendTemplateMessage(eq("test@example.com"), eq(EmailTemplateType.PASSWORD_RESET),
         argThat(map -> expectedLink.equals(map.get("resetLink"))));
   }
