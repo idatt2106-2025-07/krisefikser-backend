@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller;
+
+import com.group7.krisefikser.dto.response.UserInfoResponse;
+import com.group7.krisefikser.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.logging.Logger;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ * Controller class for handling user-related operations.
+ * Provides endpoints for fetching user profile information.
+ */
+@Controller
+@RequestMapping(&quot;/api/user&quot;)
+@Tag(name = &quot;User&quot;, description = &quot;User management&quot;)
+@RequiredArgsConstructor
+public class UserController {
+
+  private final UserService userService;
+
+<span class="fc" id="L26">  private static final Logger logger = Logger.getLogger(AdminController.class.getName());</span>
+
+  /**
+   * Endpoint to fetch the user profile information.
+   *
+   * @return ResponseEntity containing user profile information or an error message.
+   */
+  @Operation(
+      summary = &quot;Get user profile&quot;,
+      description = &quot;Fetches the profile information of the currently authenticated user. &quot;
+          + &quot;Returns user details such as email, name, role, and household location.&quot;,
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = &quot;200&quot;,
+                description = &quot;User profile fetched successfully&quot;,
+                content = @io.swagger.v3.oas.annotations.media.Content(
+                    mediaType = &quot;application/json&quot;,
+                    schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        implementation = UserInfoResponse.class
+                    )
+                )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = &quot;500&quot;,
+                description = &quot;Error fetching user profile&quot;
+            )
+        }
+  )
+  @GetMapping(&quot;/profile&quot;)
+  public ResponseEntity&lt;?&gt; getUserProfile() {
+<span class="fc" id="L56">    logger.info(&quot;Fetching user profile&quot;);</span>
+    try {
+<span class="fc" id="L58">      UserInfoResponse userInfoResponse = userService.getUserInfo();</span>
+<span class="fc" id="L59">      return ResponseEntity.ok(userInfoResponse);</span>
+<span class="fc" id="L60">    } catch (Exception e) {</span>
+<span class="fc" id="L61">      logger.severe(&quot;Error fetching user profile: &quot; + e.getMessage());</span>
+<span class="fc" id="L62">      return ResponseEntity.status(500).body(&quot;Error fetching user profile&quot;);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

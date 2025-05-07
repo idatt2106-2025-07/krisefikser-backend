@@ -114,5 +114,15 @@ public class HouseholdService {
   public List&lt;JoinHouseholdRequest&gt; getRequestsForHousehold(Long householdId) {
 <span class="fc" id="L115">    return joinRequestRepo.findByHouseholdId(householdId);</span>
   }
+
+  /**
+   * Retrieves a household by its ID.
+   *
+   * @param id the ID of the household
+   * @return the Household object if found, null otherwise
+   */
+  public Household getHouseholdById(Long id) {
+<span class="fc" id="L125">    return householdRepository.getHouseholdById(id).orElse(null);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

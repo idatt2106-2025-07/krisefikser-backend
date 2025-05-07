@@ -4,11 +4,13 @@ import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.response.UserInfoResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.mapper.UserMapper;
+import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
@@ -48,13 +50,13 @@ public class UserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-<span class="fc" id="L51">    User user = userRepo.findByEmail(email)</span>
-<span class="fc" id="L52">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
-<span class="pc bpc" id="L53" title="1 of 2 branches missed.">    if (user == null) {</span>
-<span class="nc" id="L54">      throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
+<span class="fc" id="L53">    User user = userRepo.findByEmail(email)</span>
+<span class="fc" id="L54">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">    if (user == null) {</span>
+<span class="nc" id="L56">      throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
     }
-<span class="fc" id="L56">    return new org.springframework.security.core.userdetails.User(</span>
-<span class="fc" id="L57">        user.getEmail(), user.getPassword(),</span>
+<span class="fc" id="L58">    return new org.springframework.security.core.userdetails.User(</span>
+<span class="fc" id="L59">        user.getEmail(), user.getPassword(),</span>
         new ArrayList&lt;&gt;());
   }
 
@@ -68,39 +70,39 @@ public class UserService implements UserDetailsService {
    */
   @Transactional
   public AuthResponse registerUser(RegisterRequest request) {
-<span class="fc" id="L71">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
-<span class="fc" id="L72">    user.setRole(Role.ROLE_NORMAL);</span>
-<span class="fc" id="L73">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
+<span class="fc" id="L73">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
+<span class="fc" id="L74">    user.setRole(Role.ROLE_NORMAL);</span>
+<span class="fc" id="L75">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
     Long householdId;
-<span class="fc bfc" id="L75" title="All 2 branches covered.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
-<span class="fc" id="L76">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L77">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
+<span class="fc" id="L78">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L79">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
     }
 
     // When the user is created, we also create a household for them
     // This is for when the user waits for the request to join a household to be accepted
     // This is a temporary solution, in the future the user should be able to create a household
     try {
-<span class="fc" id="L84">      householdId = householdService.createHouseholdForUser(user.getName());</span>
-<span class="fc" id="L85">    } catch (Exception e) {</span>
-<span class="fc" id="L86">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L87">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
-<span class="fc" id="L88">    }</span>
+<span class="fc" id="L86">      householdId = householdService.createHouseholdForUser(user.getName());</span>
+<span class="fc" id="L87">    } catch (Exception e) {</span>
+<span class="fc" id="L88">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L89">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L90">    }</span>
     try {
-<span class="fc" id="L90">      user.setHouseholdId(householdId);</span>
-<span class="fc" id="L91">      userRepo.save(user);</span>
-<span class="fc" id="L92">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
-<span class="fc" id="L93">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
-<span class="fc" id="L94">      String verificationLink = frontendUrl + &quot;/verify-email?token=&quot; + emailVerificationToken;</span>
-<span class="fc" id="L95">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
-<span class="fc" id="L96">      emailService.sendTemplateMessage(</span>
-<span class="fc" id="L97">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
+<span class="fc" id="L92">      user.setHouseholdId(householdId);</span>
+<span class="fc" id="L93">      userRepo.save(user);</span>
+<span class="fc" id="L94">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
+<span class="fc" id="L95">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
+<span class="fc" id="L96">      String verificationLink = frontendUrl + &quot;/verify-email?token=&quot; + emailVerificationToken;</span>
+<span class="fc" id="L97">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
+<span class="fc" id="L98">      emailService.sendTemplateMessage(</span>
+<span class="fc" id="L99">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
 
-<span class="fc" id="L99">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L100">          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());</span>
-<span class="nc" id="L101">    } catch (Exception e) {</span>
-<span class="nc" id="L102">      return new AuthResponse(AuthResponseMessage</span>
-<span class="nc" id="L103">          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L101">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L102">          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());</span>
+<span class="nc" id="L103">    } catch (Exception e) {</span>
+<span class="nc" id="L104">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L105">          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);</span>
     }
   }
 
@@ -113,62 +115,62 @@ public class UserService implements UserDetailsService {
    * @return an AuthResponse object containing the result of the login
    */
   public AuthResponse loginUser(LoginRequest request, HttpServletResponse response) {
-<span class="fc" id="L116">    String email = request.getEmail();</span>
+<span class="fc" id="L118">    String email = request.getEmail();</span>
 
-<span class="fc" id="L118">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc" id="L120">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 
-<span class="fc bfc" id="L120" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
-<span class="fc" id="L121">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">    if (userOpt.isEmpty()) {</span>
+<span class="fc" id="L123">      return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
     }
 
-<span class="fc bfc" id="L124" title="All 2 branches covered.">    if (!userOpt.get().getVerified()) {</span>
-<span class="fc" id="L125">      return new AuthResponse(AuthResponseMessage.USER_NOT_VERIFIED.getMessage(), null, null);</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (!userOpt.get().getVerified()) {</span>
+<span class="fc" id="L127">      return new AuthResponse(AuthResponseMessage.USER_NOT_VERIFIED.getMessage(), null, null);</span>
     }
 
-<span class="fc" id="L128">    User user = userOpt.get();</span>
+<span class="fc" id="L130">    User user = userOpt.get();</span>
 
-<span class="pc bpc" id="L130" title="1 of 2 branches missed.">    if (loginAttemptService.isBlocked(user.getEmail())) {</span>
-<span class="nc" id="L131">      return new AuthResponse(AuthResponseMessage</span>
-<span class="nc" id="L132">          .USER_ACCOUNT_BLOCKED.getMessage(), null, null);</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">    if (loginAttemptService.isBlocked(user.getEmail())) {</span>
+<span class="nc" id="L133">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L134">          .USER_ACCOUNT_BLOCKED.getMessage(), null, null);</span>
     }
 
-<span class="fc bfc" id="L135" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
-<span class="fc" id="L136">      loginAttemptService.loginFailed(user.getEmail());</span>
-<span class="fc" id="L137">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    if (!PasswordUtil.verifyPassword(request.getPassword(), user.getPassword())) {</span>
+<span class="fc" id="L138">      loginAttemptService.loginFailed(user.getEmail());</span>
+<span class="fc" id="L139">      return new AuthResponse(AuthResponseMessage.INVALID_CREDENTIALS.getMessage(), null, null);</span>
     }
 
-<span class="fc" id="L140">    loginAttemptService.loginSucceeded(user.getEmail());</span>
+<span class="fc" id="L142">    loginAttemptService.loginSucceeded(user.getEmail());</span>
 
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">    if (user.getRole() == Role.ROLE_ADMIN) {</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">    if (user.getRole() == Role.ROLE_ADMIN) {</span>
       try {
-<span class="nc" id="L144">        String twoFactorToken = jwtUtils.generate2faToken(user.getId());</span>
-<span class="nc" id="L145">        String twoFactorLink = frontendUrl + &quot;/verify?token=&quot; + twoFactorToken;</span>
+<span class="nc" id="L146">        String twoFactorToken = jwtUtils.generate2faToken(user.getId());</span>
+<span class="nc" id="L147">        String twoFactorLink = frontendUrl + &quot;/verify?token=&quot; + twoFactorToken;</span>
 
-<span class="nc" id="L147">        emailService.sendTemplateMessage(</span>
-<span class="nc" id="L148">            user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,</span>
-<span class="nc" id="L149">            Map.of(&quot;loginLink&quot;, twoFactorLink));</span>
-<span class="nc" id="L150">        return new AuthResponse(</span>
-<span class="nc" id="L151">            AuthResponseMessage.TWO_FACTOR_SENT.getMessage(),</span>
+<span class="nc" id="L149">        emailService.sendTemplateMessage(</span>
+<span class="nc" id="L150">            user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,</span>
+<span class="nc" id="L151">            Map.of(&quot;loginLink&quot;, twoFactorLink));</span>
+<span class="nc" id="L152">        return new AuthResponse(</span>
+<span class="nc" id="L153">            AuthResponseMessage.TWO_FACTOR_SENT.getMessage(),</span>
             null, null);
-<span class="nc" id="L153">      } catch (Exception e) {</span>
-<span class="nc" id="L154">        return new AuthResponse(AuthResponseMessage</span>
-<span class="nc" id="L155">            .INVALID_EMAIL_FORMAT.getMessage() + e.getMessage(), null, null);</span>
+<span class="nc" id="L155">      } catch (Exception e) {</span>
+<span class="nc" id="L156">        return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L157">            .INVALID_EMAIL_FORMAT.getMessage() + e.getMessage(), null, null);</span>
       }
     }
 
     try {
-<span class="fc" id="L160">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
-<span class="fc" id="L161">      jwtUtils.setJwtCookie(token, response);</span>
-<span class="fc" id="L162">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
+<span class="fc" id="L162">      String token = jwtUtils.generateToken(user.getId(), user.getRole());</span>
+<span class="fc" id="L163">      jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L164">      Date expirationDate = jwtUtils.getExpirationDate(token);</span>
 
-<span class="fc" id="L164">      return new AuthResponse(</span>
-<span class="fc" id="L165">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
+<span class="fc" id="L166">      return new AuthResponse(</span>
+<span class="fc" id="L167">          AuthResponseMessage.USER_LOGGED_IN_SUCCESSFULLY.getMessage(),</span>
           expirationDate,
-<span class="fc" id="L167">          user.getRole()</span>
+<span class="fc" id="L169">          user.getRole()</span>
       );
-<span class="fc" id="L169">    } catch (Exception e) {</span>
-<span class="fc" id="L170">      return new AuthResponse(</span>
-<span class="fc" id="L171">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
+<span class="fc" id="L171">    } catch (Exception e) {</span>
+<span class="fc" id="L172">      return new AuthResponse(</span>
+<span class="fc" id="L173">          AuthResponseMessage.USER_LOGIN_ERROR.getMessage() + e.getMessage(), null, null);</span>
     }
   }
 
@@ -181,20 +183,20 @@ public class UserService implements UserDetailsService {
    */
   public AuthResponse verifyEmail(String token) {
     try {
-<span class="fc" id="L184">      String email = jwtUtils.validateVerificationTokenAndGetEmail(token);</span>
-<span class="fc" id="L185">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc" id="L186">      String email = jwtUtils.validateVerificationTokenAndGetEmail(token);</span>
+<span class="fc" id="L187">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 
-<span class="fc bfc" id="L187" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
-<span class="fc" id="L188">        User user = userOpt.get();</span>
-<span class="fc" id="L189">        user.setVerified(true);</span>
-<span class="fc" id="L190">        userRepo.setVerified(user);</span>
-<span class="fc" id="L191">        return new AuthResponse(</span>
-<span class="fc" id="L192">            AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage(), null, null);</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
+<span class="fc" id="L190">        User user = userOpt.get();</span>
+<span class="fc" id="L191">        user.setVerified(true);</span>
+<span class="fc" id="L192">        userRepo.setVerified(user);</span>
+<span class="fc" id="L193">        return new AuthResponse(</span>
+<span class="fc" id="L194">            AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage(), null, null);</span>
       } else {
-<span class="fc" id="L194">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+<span class="fc" id="L196">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
       }
-<span class="fc" id="L196">    } catch (JwtMissingPropertyException e) {</span>
-<span class="fc" id="L197">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
+<span class="fc" id="L198">    } catch (JwtMissingPropertyException e) {</span>
+<span class="fc" id="L199">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
     }
   }
 
@@ -207,27 +209,27 @@ public class UserService implements UserDetailsService {
    */
   public AuthResponse resetPassword(ResetPasswordRequest request) {
     try {
-<span class="fc" id="L210">      String email = jwtUtils.validateResetPasswordTokenAndGetEmail(request.getToken());</span>
-<span class="fc" id="L211">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc" id="L212">      String email = jwtUtils.validateResetPasswordTokenAndGetEmail(request.getToken());</span>
+<span class="fc" id="L213">      Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 
-<span class="fc bfc" id="L213" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
-<span class="fc" id="L214">        User user = userOpt.get();</span>
-<span class="fc" id="L215">        String newPassword = request.getNewPassword();</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">      if (userOpt.isPresent()) {</span>
+<span class="fc" id="L216">        User user = userOpt.get();</span>
+<span class="fc" id="L217">        String newPassword = request.getNewPassword();</span>
 
-<span class="pc bpc" id="L217" title="1 of 4 branches missed.">        if (user.getRole() == Role.ROLE_ADMIN &amp;&amp; !PasswordUtil.isStrongPassword(newPassword)) {</span>
-<span class="fc" id="L218">          return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L219">              .PASSWORD_TOO_WEAK.getMessage(), null, null);</span>
+<span class="pc bpc" id="L219" title="1 of 4 branches missed.">        if (user.getRole() == Role.ROLE_ADMIN &amp;&amp; !PasswordUtil.isStrongPassword(newPassword)) {</span>
+<span class="fc" id="L220">          return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L221">              .PASSWORD_TOO_WEAK.getMessage(), null, null);</span>
         }
 
-<span class="fc" id="L222">        user.setPassword(PasswordUtil.hashPassword(newPassword));</span>
-<span class="fc" id="L223">        userRepo.updatePasswordByEmail(user.getEmail(), user.getPassword());</span>
-<span class="fc" id="L224">        return new AuthResponse(</span>
-<span class="fc" id="L225">            AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage(), null, null);</span>
+<span class="fc" id="L224">        user.setPassword(PasswordUtil.hashPassword(newPassword));</span>
+<span class="fc" id="L225">        userRepo.updatePasswordByEmail(user.getEmail(), user.getPassword());</span>
+<span class="fc" id="L226">        return new AuthResponse(</span>
+<span class="fc" id="L227">            AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage(), null, null);</span>
       } else {
-<span class="fc" id="L227">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
+<span class="fc" id="L229">        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);</span>
       }
-<span class="fc" id="L229">    } catch (JwtMissingPropertyException e) {</span>
-<span class="fc" id="L230">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
+<span class="fc" id="L231">    } catch (JwtMissingPropertyException e) {</span>
+<span class="fc" id="L232">      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);</span>
     }
   }
 
@@ -239,18 +241,18 @@ public class UserService implements UserDetailsService {
    * @param email the user's email address
    */
   public void sendResetPasswordLink(String email) {
-<span class="fc" id="L242">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
-<span class="fc bfc" id="L243" title="All 2 branches covered.">    if (userOpt.isPresent()) {</span>
-<span class="fc" id="L244">      User user = userOpt.get();</span>
-<span class="fc" id="L245">      String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());</span>
-<span class="fc" id="L246">      String resetLink = frontendUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
-<span class="fc" id="L247">      Map&lt;String, String&gt; params = Map.of(&quot;resetLink&quot;, resetLink);</span>
-<span class="fc" id="L248">      emailService.sendTemplateMessage(</span>
-<span class="fc" id="L249">          user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);</span>
-<span class="fc" id="L250">    } else {</span>
-<span class="fc" id="L251">      throw new UsernameNotFoundException(&quot;User not found with email: &quot; + email);</span>
+<span class="fc" id="L244">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">    if (userOpt.isPresent()) {</span>
+<span class="fc" id="L246">      User user = userOpt.get();</span>
+<span class="fc" id="L247">      String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());</span>
+<span class="fc" id="L248">      String resetLink = frontendUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
+<span class="fc" id="L249">      Map&lt;String, String&gt; params = Map.of(&quot;resetLink&quot;, resetLink);</span>
+<span class="fc" id="L250">      emailService.sendTemplateMessage(</span>
+<span class="fc" id="L251">          user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);</span>
+<span class="fc" id="L252">    } else {</span>
+<span class="fc" id="L253">      throw new UsernameNotFoundException(&quot;User not found with email: &quot; + email);</span>
     }
-<span class="fc" id="L253">  }</span>
+<span class="fc" id="L255">  }</span>
 
   /**
    * Gets the current authenticated user's ID from the security context.
@@ -259,12 +261,12 @@ public class UserService implements UserDetailsService {
    * @throws RuntimeException if no authenticated user is found
    */
   public Long getCurrentUserId() {
-<span class="nc" id="L262">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="nc bnc" id="L263" title="All 4 branches missed.">    if (userIdStr == null || userIdStr.isEmpty()) {</span>
-<span class="nc" id="L264">      throw new RuntimeException(&quot;No authenticated user found&quot;);</span>
+<span class="nc" id="L264">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="nc bnc" id="L265" title="All 4 branches missed.">    if (userIdStr == null || userIdStr.isEmpty()) {</span>
+<span class="nc" id="L266">      throw new RuntimeException(&quot;No authenticated user found&quot;);</span>
     }
 
-<span class="nc" id="L267">    return Long.parseLong(userIdStr);</span>
+<span class="nc" id="L269">    return Long.parseLong(userIdStr);</span>
   }
 
   /**
@@ -274,9 +276,9 @@ public class UserService implements UserDetailsService {
    * @throws RuntimeException if the user is not found
    */
   public User getCurrentUser() {
-<span class="nc" id="L277">    Long userId = getCurrentUserId();</span>
-<span class="nc" id="L278">    return userRepo.findById(userId)</span>
-<span class="nc" id="L279">      .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with id: &quot; + userId));</span>
+<span class="nc" id="L279">    Long userId = getCurrentUserId();</span>
+<span class="nc" id="L280">    return userRepo.findById(userId)</span>
+<span class="nc" id="L281">      .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with id: &quot; + userId));</span>
   }
 
   /**
@@ -286,13 +288,30 @@ public class UserService implements UserDetailsService {
    * @throws RuntimeException if the user or their household is not found
    */
   public int getCurrentUserHouseholdId() {
-<span class="nc" id="L289">    User user = getCurrentUser();</span>
+<span class="nc" id="L291">    User user = getCurrentUser();</span>
 
-<span class="nc bnc" id="L291" title="All 2 branches missed.">    if (user.getHouseholdId() == null) {</span>
-<span class="nc" id="L292">      throw new RuntimeException(&quot;User does not belong to any household&quot;);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">    if (user.getHouseholdId() == null) {</span>
+<span class="nc" id="L294">      throw new RuntimeException(&quot;User does not belong to any household&quot;);</span>
     }
 
-<span class="nc" id="L295">    return user.getHouseholdId().intValue();</span>
+<span class="nc" id="L297">    return user.getHouseholdId().intValue();</span>
+  }
+
+  /**
+   * Gets the user information of the current authenticated user.
+   *
+   * @return a UserInfoResponse object containing user details
+   */
+  public UserInfoResponse getUserInfo() {
+<span class="nc" id="L306">    User user = getCurrentUser();</span>
+<span class="nc" id="L307">    Household household = householdService.getHouseholdById(user.getHouseholdId());</span>
+<span class="nc" id="L308">    return new UserInfoResponse(</span>
+<span class="nc" id="L309">        user.getEmail(),</span>
+<span class="nc" id="L310">        user.getName(),</span>
+<span class="nc" id="L311">        user.getRole(),</span>
+<span class="nc" id="L312">        household.getLatitude(),</span>
+<span class="nc" id="L313">        household.getLongitude()</span>
+    );
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

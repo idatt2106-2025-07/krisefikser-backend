@@ -30,6 +30,7 @@ krisefikser,com.group7.krisefikser.controller,StorageItemController,156,278,2,2,
 krisefikser,com.group7.krisefikser.controller,AuthController,110,167,7,7,27,40,7,8,2,6
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,116,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,SuperAdminController,13,113,1,1,4,30,1,5,0,5
+krisefikser,com.group7.krisefikser.controller,UserController,0,26,0,0,0,7,0,2,0,2
 krisefikser,com.group7.krisefikser.controller,HouseholdController,0,102,0,0,0,29,0,7,0,7
 krisefikser,com.group7.krisefikser.mapper,GeneralInfoMapperImpl,4,86,4,8,2,23,4,6,0,4
 krisefikser,com.group7.krisefikser.mapper,EmergencyGroupMapperImpl,17,75,5,5,7,23,5,5,0,5
@@ -62,12 +63,12 @@ krisefikser,com.group7.krisefikser.service,ItemService,25,234,5,29,7,56,4,30,1,1
 krisefikser,com.group7.krisefikser.service,StorageItemService,126,362,30,36,31,87,31,25,4,18
 krisefikser,com.group7.krisefikser.service,EmailService,0,41,0,0,0,12,0,3,0,3
 krisefikser,com.group7.krisefikser.service,AffectedAreaService,0,77,0,8,0,21,0,8,0,4
-krisefikser,com.group7.krisefikser.service,HouseholdService,30,55,2,0,10,14,2,5,1,5
+krisefikser,com.group7.krisefikser.service,HouseholdService,30,63,2,0,10,15,2,6,1,6
 krisefikser,com.group7.krisefikser.service,SuperAdminService,0,151,0,16,0,39,0,12,0,4
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2
 krisefikser,com.group7.krisefikser.service,EmailTemplateService,6,47,2,8,3,15,2,9,0,3
-krisefikser,com.group7.krisefikser.service,UserService,116,400,10,20,27,85,11,15,4,7
+krisefikser,com.group7.krisefikser.service,UserService,141,400,10,20,35,85,12,15,5,7
 krisefikser,com.group7.krisefikser.service,LoginAttemptService,5,50,0,2,4,14,0,6,0,5
 krisefikser,com.group7.krisefikser.service,HouseholdInvitationService,18,93,0,0,2,21,3,3,3,3
 krisefikser,com.group7.krisefikser.service,EmergencyGroupService,16,193,4,6,2,52,3,13,0,11
