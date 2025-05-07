@@ -93,7 +93,7 @@ public class StorageItemRepo {
   /**
    * This method retrieves a storage item by its ID.
    *
-   * @param id          The ID of the storage item to retrieve.
+   * @param id The ID of the storage item to retrieve.
    * @return An Optional containing the StorageItem object if found, or empty if not found.
    */
   public Optional<StorageItem> findById(int id) {
@@ -133,7 +133,7 @@ public class StorageItemRepo {
    */
   public StorageItem add(StorageItem storageItem) {
     String sql = "INSERT INTO storage_items (expiration_date, quantity, "
-            + "household_id, item_id) VALUES (?, ?, ?, ?)";
+            + "household_id, item_id, is_shared) VALUES (?, ?, ?, ?, ?)";
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
     jdbcTemplate.update(connection -> {
@@ -142,6 +142,7 @@ public class StorageItemRepo {
       ps.setDouble(2, storageItem.getQuantity());
       ps.setInt(3, storageItem.getHouseholdId());
       ps.setInt(4, storageItem.getItemId());
+      ps.setBoolean(5, storageItem.isShared());
       return ps;
     }, keyHolder);
 
@@ -159,12 +160,13 @@ public class StorageItemRepo {
    *                                        given ID in the specified household.
    */
   public StorageItem update(StorageItem storageItem) {
-    String sql = "UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ? "
-            + "WHERE id = ? AND household_id = ?";
+    String sql = "UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ?, "
+            + "is_shared = ? WHERE id = ? AND household_id = ?";
     int rowsAffected = jdbcTemplate.update(sql,
             Timestamp.valueOf(storageItem.getExpirationDate()),
             storageItem.getQuantity(),
             storageItem.getItemId(),
+            storageItem.isShared(),
             storageItem.getId(),
             storageItem.getHouseholdId());
 
