@@ -4,11 +4,13 @@ import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.response.UserInfoResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.mapper.UserMapper;
+import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.JwtUtils;
@@ -293,5 +295,17 @@ public class UserService implements UserDetailsService {
     }
 
     return user.getHouseholdId().intValue();
+  }
+
+  public UserInfoResponse getUserInfo() {
+    User user = getCurrentUser();
+    Household household = householdService.getHouseholdById(user.getHouseholdId());
+    return new UserInfoResponse(
+        user.getEmail(),
+        user.getName(),
+        user.getRole(),
+        household.getLatitude(),
+        household.getLongitude()
+    );
   }
 }
