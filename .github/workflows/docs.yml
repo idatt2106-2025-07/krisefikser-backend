@@ -19,18 +19,33 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
+      - name: Cache dependency-check data
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository/org/owasp/dependency-check-data
+            ~/.cache/dependency-check
+          key: ${{ runner.os }}-dependency-check-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-dependency-check-
+
       - name: Build and run tests with Maven
         run: mvn -B clean verify
 
       - name: Generate JaCoCo and Javadoc
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: |
           mvn jacoco:report
           mvn javadoc:javadoc
+          mvn dependency-check:check
 
       - name: Organize site contents
         run: |
           mkdir -p target/site/apidocs
+          mkdir -p target/site/owasp
           cp -r target/reports/apidocs/* target/site/apidocs/
+          cp target/dependency-check-report.html target/site/owasp/
 
       - name: Check target/site contents
         run: ls -R target/site
