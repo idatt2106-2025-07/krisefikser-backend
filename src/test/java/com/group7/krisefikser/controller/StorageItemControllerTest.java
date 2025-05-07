@@ -3,7 +3,6 @@ package com.group7.krisefikser.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.dto.request.StorageItemRequest;
-import com.group7.krisefikser.dto.request.StorageItemSearchRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
@@ -29,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -123,6 +123,75 @@ class StorageItemControllerTest {
 
   @Test
   @WithMockUser
+  void getAllSharedStorageItemsInGroup_valid_returnsOk() throws Exception {
+    List<AggregatedStorageItemResponse> mockResponses = Arrays.asList(
+            createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), ItemType.DRINK),
+            createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(10), ItemType.FOOD)
+    );
+    StorageItemSortRequest sortRequest = new StorageItemSortRequest();
+    sortRequest.setSortBy("quantity");
+    sortRequest.setSortDirection("desc");
+
+    List<String> types = List.of("DRINK", "FOOD");
+
+    when(storageItemService.getSharedStorageItemsInGroup(types, sortRequest))
+            .thenReturn(mockResponses);
+
+    MvcResult result = mockMvc.perform(get("/api/storage-items/emergency-group")
+                    .param("types", "DRINK")
+                    .param("types", "FOOD")
+                    .param("sortBy", "quantity")
+                    .param("sortDirection", "desc")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String responseContent = result.getResponse().getContentAsString();
+    List<AggregatedStorageItemResponse> actualResponses = objectMapper.readValue(responseContent, new TypeReference<>() {});
+    assertEquals(2, actualResponses.size());
+    assertEquals(101, actualResponses.get(0).getItemId());
+    assertEquals(8, actualResponses.get(0).getTotalQuantity());
+    assertEquals("Water", actualResponses.get(0).getItem().getName());
+  }
+
+  @Test
+  @WithMockUser
+  void getAllSharedStorageItemsInGroup_throwsNoSuchElementException_returnsNotFound() throws Exception {
+    StorageItemSortRequest sortRequest = new StorageItemSortRequest();
+    sortRequest.setSortBy("quantity");
+    sortRequest.setSortDirection("desc");
+
+    when(storageItemService.getSharedStorageItemsInGroup(null, sortRequest))
+            .thenThrow(new NoSuchElementException("No shared storage items found"));
+
+    mockMvc.perform(get("/api/storage-items/emergency-group")
+                    .param("sortBy", "quantity")
+                    .param("sortDirection", "desc")
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @WithMockUser
+  void getAllSharedStorageItemsInGroup_throwsException_returnsNotFound() throws Exception {
+    StorageItemSortRequest sortRequest = new StorageItemSortRequest();
+    sortRequest.setSortBy("quantity");
+    sortRequest.setSortDirection("desc");
+    when(storageItemService.getSharedStorageItemsInGroup(List.of("FOOD", "DRINK"), sortRequest))
+            .thenThrow(new RuntimeException("Some error message"));
+
+    mockMvc.perform(get("/api/storage-items/emergency-group")
+                    .param("types", "FOOD")
+                    .param("types", "DRINK")
+                    .param("sortBy", "quantity")
+                    .param("sortDirection", "desc")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
+  }
+
+
+  @Test
+  @WithMockUser
   void getExpiringStorageItems_shouldReturnOkWithItems_whenServiceReturnsItems() throws Exception {
     // Create mock storage items
     List<StorageItem> mockItems = Arrays.asList(
@@ -192,8 +261,8 @@ class StorageItemControllerTest {
   void getAggregatedStorageItems_shouldReturnOkWithItems_whenServiceReturnsItems() throws Exception {
     // Create mock aggregated responses
     List<AggregatedStorageItemResponse> mockResponses = Arrays.asList(
-      createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), MOCK_HOUSEHOLD_ID, ItemType.DRINK),
-      createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(10), MOCK_HOUSEHOLD_ID, ItemType.FOOD)
+      createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), ItemType.DRINK),
+      createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(10), ItemType.FOOD)
     );
 
     // Mock the service method
@@ -219,8 +288,8 @@ class StorageItemControllerTest {
   void sortAggregatedStorageItems_shouldReturnOkWithSortedItems_whenValidSortProvided() throws Exception {
     // Create mock aggregated responses (sorted by quantity descending)
     List<AggregatedStorageItemResponse> mockResponses = Arrays.asList(
-      createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), MOCK_HOUSEHOLD_ID, ItemType.DRINK),
-      createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(10), MOCK_HOUSEHOLD_ID, ItemType.FOOD)
+      createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), ItemType.DRINK),
+      createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(10), ItemType.FOOD)
     );
 
     // Mock the service method
@@ -252,7 +321,7 @@ class StorageItemControllerTest {
   void filterAggregatedStorageItemsByItemType_shouldReturnOkWithFilteredItems_whenValidTypesProvided() throws Exception {
     // Create mock aggregated responses (filtered to only DRINK items)
     List<AggregatedStorageItemResponse> mockResponses = Collections.singletonList(
-      createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), MOCK_HOUSEHOLD_ID, ItemType.DRINK)
+      createAggregatedResponse(101, "Water", 8, LocalDateTime.now().plusDays(5), ItemType.DRINK)
     );
 
     // Mock the service methods
@@ -284,8 +353,8 @@ class StorageItemControllerTest {
   void filterAndSortAggregatedStorageItems_shouldReturnOkWithFilteredAndSortedItems() throws Exception {
     // Create mock aggregated responses (filtered to FOOD items, sorted by expiration date)
     List<AggregatedStorageItemResponse> mockResponses = Arrays.asList(
-      createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(5), MOCK_HOUSEHOLD_ID, ItemType.FOOD),
-      createAggregatedResponse(103, "Rice", 2, LocalDateTime.now().plusDays(30), MOCK_HOUSEHOLD_ID, ItemType.FOOD)
+      createAggregatedResponse(102, "Bread", 3, LocalDateTime.now().plusDays(5), ItemType.FOOD),
+      createAggregatedResponse(103, "Rice", 2, LocalDateTime.now().plusDays(30), ItemType.FOOD)
     );
 
     // Mock the service methods
@@ -467,7 +536,7 @@ class StorageItemControllerTest {
 
   private AggregatedStorageItemResponse createAggregatedResponse(int itemId, String itemName, int totalQuantity,
                                                                  LocalDateTime earliestExpirationDate,
-                                                                 int householdId, ItemType itemType) {
+                                                                 ItemType itemType) {
     ItemResponse itemResponse = new ItemResponse();
     itemResponse.setId(itemId);
     itemResponse.setName(itemName);
@@ -475,6 +544,6 @@ class StorageItemControllerTest {
     itemResponse.setCalories(0);
     itemResponse.setType(itemType);
 
-    return new AggregatedStorageItemResponse(itemId, itemResponse, totalQuantity, earliestExpirationDate, householdId);
+    return new AggregatedStorageItemResponse(itemId, itemResponse, totalQuantity, earliestExpirationDate);
   }
 }
