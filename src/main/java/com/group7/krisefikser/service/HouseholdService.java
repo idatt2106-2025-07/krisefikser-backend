@@ -138,4 +138,17 @@ public class HouseholdService {
 
     return household.getEmergencyGroupId();
   }
+
+  /**
+   * Retrieves the name of the household associated with a householdId.
+   *
+   * @param householdId the ID of the household
+   * @return the name of the household
+   */
+  public String getHouseholdNameById(Long householdId) {
+    Household household = householdRepository.getHouseholdById(householdId)
+            .orElse(null);
+
+    return household != null ? household.getName() : null;
+  }
 }

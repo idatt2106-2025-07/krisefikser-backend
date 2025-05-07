@@ -4,21 +4,24 @@ import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
+import com.group7.krisefikser.dto.response.StorageItemGroupResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.StorageItem;
+import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.StorageItemRepo;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * This class is a service for managing storage items.
@@ -31,6 +34,7 @@ public class StorageItemService {
   private final StorageItemRepo storageItemRepo;
   private final ItemRepo itemRepo;
   private final HouseholdService householdService;
+  private final HouseholdRepository householdRepository;
   private final ItemService itemService;
   private static final Logger logger = Logger.getLogger(StorageItemService.class.getName());
 
@@ -79,6 +83,29 @@ public class StorageItemService {
   public List<StorageItem> getStorageItemsByItemId(int itemId, int householdId) {
     return storageItemRepo.findByItemId(itemId, householdId);
   }
+
+  /**
+   * Retrieves all storage items for a specific group ID and item ID.
+   *
+   * @param itemId  The itemID of the items to retrieve.
+   * @return The storage item with the specified ID, or null if not found.
+   */
+  public List<StorageItemGroupResponse> getSharedStorageItemsInGroupByItemId(
+          int itemId) {
+    Long groupId = householdService.getGroupIdForCurrentUser();
+
+    List<StorageItem> storageItems = storageItemRepo
+            .getSharedStorageItemsInGroupByItemId(itemId, groupId);
+
+
+    return storageItems.stream()
+            .map(storageItem -> new StorageItemGroupResponse(
+                    StorageItemResponse.fromEntity(storageItem),
+                    householdService.getHouseholdNameById((long) storageItem.getHouseholdId())
+            ))
+            .toList();
+  }
+
 
   /**
    * Adds a new storage item to the repository after validating it.
@@ -297,7 +324,7 @@ public class StorageItemService {
   /**
    * Aggregates storage items by item ID and creates a list of aggregated responses.
    *
-   * @param storageItems      The list of all storage items
+   * @param storageItems  The list of all storage items
    * @param sortBy        The field to sort by (e.g., "quantity", "expirationDate", "name")
    * @param sortDirection The direction of sorting (e.g., "asc" or "desc")
    * @return A list of aggregated storage item responses
@@ -426,7 +453,7 @@ public class StorageItemService {
                       aggregated.getItem() != null
                               &&
                               itemTypes.contains(aggregated.getItem().getType()))
-              .collect(Collectors.toList());
+              .collect(toList());
     }
 
     // Apply sorting if provided
@@ -478,7 +505,7 @@ public class StorageItemService {
 
               return matchesSearchTerm && matchesItemType;
             })
-            .collect(Collectors.toList());
+            .collect(toList());
 
     // Apply sorting if provided
     if (sortBy != null && !sortBy.isEmpty()) {
