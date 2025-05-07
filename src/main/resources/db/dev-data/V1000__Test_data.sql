@@ -115,3 +115,8 @@ INSERT INTO emergency_group_invitations (household_id, emergency_group_id)
 VALUES (2, 2),
        (2, 4),
        (5, 4);
+
+-- Update privacy policy
+UPDATE privacy_policy SET
+      registered = 'We are going to steal all your data and sell it to the highest bidder. This is because we are a shady company and we do not care about your privacy. We will also use your data to train our AI models, which will eventually take over the world. So, if you want to be part of the revolution, sign up now!',
+      unregistered = 'We now own your soul. We will use it to power our AI models and take over the world. If you want to get your soul back, you have to pay us a lot of money. So, if you want to be part of the revolution, sign up now!',;
