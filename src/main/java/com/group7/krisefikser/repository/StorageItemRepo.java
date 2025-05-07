@@ -76,6 +76,21 @@ public class StorageItemRepo {
   }
 
   /**
+   * This method retrieves storage items for a specific group based on item id
+   * and group ID.
+   *
+   * @param groupId The ID of the group to retrieve storage items for
+   * @return A list of StorageItem objects.
+   */
+  public List<StorageItem> getSharedStorageItemsInGroupByItemId(long groupId, long itemId) {
+    String sql = "SELECT si.id, si.expiration_date, si.quantity, si.household_id, "
+            + "si.item_id, si.is_shared FROM storage_items si "
+            + "JOIN households h ON si.household_id = h.id "
+            + "WHERE h.emergency_group_id = ? AND si.is_shared = TRUE AND si.item_id = ?";
+    return jdbcTemplate.query(sql, storageItemRowMapper, groupId, itemId);
+  }
+
+  /**
    * This method retrieves a storage item by its ID for a specific household.
    *
    * @param id          The ID of the storage item to retrieve.
