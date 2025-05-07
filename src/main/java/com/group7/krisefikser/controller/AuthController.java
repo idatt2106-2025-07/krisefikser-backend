@@ -193,7 +193,8 @@ public class AuthController {
    */
   @Operation(
       summary = "Get current user info",
-      description = "Returns the email and role of the currently authenticated user, or no content if not authenticated."
+      description = "Returns the email and role of the currently authenticated user,"
+      + "or no content if not authenticated."
   )
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Authenticated – returns user info"),
@@ -203,23 +204,23 @@ public class AuthController {
   public ResponseEntity<Map<String, String>> getCurrentUserInfo() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-        Map<String, String> userInfo = new HashMap<>();
-        userInfo.put("email", auth.getName());
+      Map<String, String> userInfo = new HashMap<>();
+      userInfo.put("email", auth.getName());
         
-        // Extract role from authorities
-        String role = auth.getAuthorities().stream()
-            .findFirst()
-            .map(authority -> authority.getAuthority())
-            .orElse("ROLE_UNKNOWN");
+      // Extract role from authorities
+      String role = auth.getAuthorities().stream()
+          .findFirst()
+          .map(authority -> authority.getAuthority())
+          .orElse("ROLE_UNKNOWN");
         
-        userInfo.put("role", role);
+      userInfo.put("role", role);
 
-        // Add logging to see what's being returned
-        logger.info("GET /me - Returning user info: email=" + auth.getName() + ", role=" + role);
-        logger.info("Authentication class: " + auth.getClass().getName());
-        logger.info("Authorities: " + auth.getAuthorities());
+      // Add logging to see what's being returned
+      logger.info("GET /me - Returning user info: email=" + auth.getName() + ", role=" + role);
+      logger.info("Authentication class: " + auth.getClass().getName());
+      logger.info("Authorities: " + auth.getAuthorities());
         
-        return ResponseEntity.ok(userInfo);
+      return ResponseEntity.ok(userInfo);
     }
     
     logger.info("GET /me - No authenticated user found");
