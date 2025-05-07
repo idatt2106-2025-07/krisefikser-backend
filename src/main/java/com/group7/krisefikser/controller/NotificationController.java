@@ -34,7 +34,7 @@ public class NotificationController {
    * Endpoint to get incident notifications.
    * Handles GET requests to "/api/notification/incidents"
    *
-   * @return ResponseEntity containing a list of NotifiationResponse objects
+   * @return ResponseEntity containing a list of NotificationResponse objects
    */
   @Operation(
       summary = "Get incident notifications",

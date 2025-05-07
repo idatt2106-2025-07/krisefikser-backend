@@ -21,7 +21,7 @@ public class NotificationService {
   /**
    * Retrieves a list of incident notifications.
    *
-   * @return a list of NotifiationResponse objects containing details of incidents.
+   * @return a list of NotificationResponse objects containing details of incidents.
    */
   public List<NotificationResponse> getIncidentsNotification() {
     List<NotificationResponse> incidents = new ArrayList<>();
