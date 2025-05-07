@@ -22,11 +22,13 @@ public class StorageItemRequest {
   @NotNull(message = "Expiration date cannot be null")
   private LocalDateTime expirationDate;
 
+  @NotNull
   @Min(value = 0, message = "Quantity cannot be negative")
-  private int quantity;
+  private Integer quantity;
 
+  @NotNull
   @Min(value = 1, message = "Item ID must be positive")
-  private int itemId;
+  private Integer itemId;
 
   /**
    * Converts this request to a StorageItem entity.

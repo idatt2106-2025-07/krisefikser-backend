@@ -1,5 +1,7 @@
 package com.group7.krisefikser.service;
 
+import static java.util.stream.Collectors.toList;
+
 import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
@@ -7,21 +9,22 @@ import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.dto.response.StorageItemGroupResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
+import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.StorageItem;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.StorageItemRepo;
-
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * This class is a service for managing storage items.
@@ -63,7 +66,8 @@ public class StorageItemService {
     long groupId = householdService.getGroupIdForCurrentUser();
     List<StorageItem> storageItems = storageItemRepo.getAllSharedStorageItemsInGroup(groupId);
 
-    List<AggregatedStorageItemResponse> aggregatedItems = aggregateStorageItems(storageItems, null, null);
+    List<AggregatedStorageItemResponse> aggregatedItems =
+            aggregateStorageItems(storageItems, null, null);
 
     return filterAndSortAggregatedStorageItems(
             aggregatedItems,
@@ -156,6 +160,37 @@ public class StorageItemService {
   }
 
   /**
+   * Updates a shared storage item from the request.
+   * This method checks if the item is shared and if the user belongs to the same group
+   * before allowing the update.
+   *
+   * @param id      The ID of the storage item to be updated.
+   * @param request The request containing the updated storage item details.
+   * @return The updated storage item response.
+   */
+  public StorageItemResponse updateSharedStorageItem(int id,
+                                                     StorageItemRequest request) {
+
+
+    Long userGroupId = householdService.getGroupIdForCurrentUser();
+    StorageItem item = storageItemRepo.findById(id).orElseThrow(
+            () -> new NoSuchElementException("Storage item not found with id: " + id)
+    );
+    if (!item.isShared()) {
+      throw new IllegalArgumentException("Item is not shared, user is not allowed to "
+              + "update");
+    }
+
+    Household household = householdRepository.getHouseholdById((long) item.getHouseholdId())
+            .orElseThrow(() -> new NoSuchElementException("Household not found with id: "
+                    + item.getHouseholdId()));
+    if (!household.getEmergencyGroupId().equals(userGroupId)) {
+      throw new IllegalArgumentException("User is not allowed to update this item");
+    }
+    return updateStorageItemFromRequest(id, item.getHouseholdId(), request);
+  }
+
+  /**
    * Deletes a storage item from the repository by its ID.
    *
    * @param id          The ID of the storage item to be deleted.
@@ -217,7 +252,7 @@ public class StorageItemService {
    * @return true if the storage item exists, false otherwise.
    */
   public boolean storageItemExists(int id, int householdId) {
-    return storageItemRepo.findById(id, householdId).isPresent();
+    return storageItemRepo.findById(id).isPresent();
   }
 
   /**

@@ -91,18 +91,17 @@ public class StorageItemRepo {
   }
 
   /**
-   * This method retrieves a storage item by its ID for a specific household.
+   * This method retrieves a storage item by its ID.
    *
    * @param id          The ID of the storage item to retrieve.
-   * @param householdId The ID of the household the storage item belongs to.
    * @return An Optional containing the StorageItem object if found, or empty if not found.
    */
-  public Optional<StorageItem> findById(int id, int householdId) {
+  public Optional<StorageItem> findById(int id) {
     try {
       String sql = "SELECT id, expiration_date, quantity, household_id, "
-              + "item_id, is_shared FROM storage_items WHERE id = ? AND household_id = ?";
+              + "item_id, is_shared FROM storage_items WHERE id = ?";
       StorageItem storageItem = jdbcTemplate.queryForObject(sql,
-              storageItemRowMapper, id, householdId);
+              storageItemRowMapper, id);
       return Optional.ofNullable(storageItem);
     } catch (EmptyResultDataAccessException e) {
       return Optional.empty();

@@ -111,7 +111,7 @@ class StorageItemRepoTest {
     int itemId = 1;
     int householdId = 1;
 
-    Optional<StorageItem> itemOptional = storageItemRepo.findById(itemId, householdId);
+    Optional<StorageItem> itemOptional = storageItemRepo.findById(itemId);
 
     assertTrue(itemOptional.isPresent());
     StorageItem item = itemOptional.get();
@@ -128,9 +128,8 @@ class StorageItemRepoTest {
   @Test
   void findByIdNonExistent() {
     int nonExistentId = 999;
-    int householdId = 1;
 
-    Optional<StorageItem> itemOptional = storageItemRepo.findById(nonExistentId, householdId);
+    Optional<StorageItem> itemOptional = storageItemRepo.findById(nonExistentId);
 
     assertTrue(itemOptional.isEmpty());
   }
@@ -182,7 +181,7 @@ class StorageItemRepoTest {
     assertNotNull(addedItem.getExpirationDate());
 
     // Verify the item was actually added to the database
-    Optional<StorageItem> retrievedItem = storageItemRepo.findById(addedItem.getId(), addedItem.getHouseholdId());
+    Optional<StorageItem> retrievedItem = storageItemRepo.findById(addedItem.getId());
     assertTrue(retrievedItem.isPresent());
     assertEquals(5, retrievedItem.get().getQuantity());
   }
@@ -217,7 +216,7 @@ class StorageItemRepoTest {
     assertFalse(updatedItem.isShared());
 
     // Verify the change in the database
-    Optional<StorageItem> retrievedItem = storageItemRepo.findById(updatedItem.getId(), updatedItem.getHouseholdId());
+    Optional<StorageItem> retrievedItem = storageItemRepo.findById(updatedItem.getId());
     assertTrue(retrievedItem.isPresent());
     assertEquals(10, retrievedItem.get().getQuantity());
   }
@@ -257,7 +256,7 @@ class StorageItemRepoTest {
     StorageItem addedItem = storageItemRepo.add(newItem);
 
     // Verify the item exists
-    Optional<StorageItem> existingItemOpt = storageItemRepo.findById(addedItem.getId(), addedItem.getHouseholdId());
+    Optional<StorageItem> existingItemOpt = storageItemRepo.findById(addedItem.getId());
     assertTrue(existingItemOpt.isPresent());
 
     // Delete the item
@@ -267,7 +266,7 @@ class StorageItemRepoTest {
     assertTrue(result);
 
     // Verify the item is no longer in the database
-    Optional<StorageItem> deletedItemOpt = storageItemRepo.findById(addedItem.getId(), addedItem.getHouseholdId());
+    Optional<StorageItem> deletedItemOpt = storageItemRepo.findById(addedItem.getId());
     assertTrue(deletedItemOpt.isEmpty());
   }
 

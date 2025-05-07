@@ -1,13 +1,16 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.dto.response.StorageItemGroupResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
+import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.StorageItem;
+import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.StorageItemRepo;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,8 @@ class StorageItemServiceTest {
 
   @Mock
   HouseholdService householdService;
+  @Mock
+  private HouseholdRepository householdRepository;
 
   @InjectMocks
   private StorageItemService storageItemService;
@@ -372,7 +377,7 @@ class StorageItemServiceTest {
     StorageItem updatedItem = createStorageItem(storageItemId, itemId, householdId, 10,
             LocalDateTime.now().plusDays(15));
 
-    when(storageItemRepo.findById(storageItemId, householdId)).thenReturn(Optional.of(new StorageItem()));
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem()));
     when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
     when(storageItemRepo.update(any(StorageItem.class))).thenReturn(updatedItem);
 
@@ -385,28 +390,98 @@ class StorageItemServiceTest {
     assertEquals(itemId, result.getItemId());
     assertEquals(householdId, result.getHouseholdId());
     assertEquals(10, result.getQuantity());
-    verify(storageItemRepo, times(1)).findById(storageItemId, householdId);
+    verify(storageItemRepo, times(1)).findById(storageItemId);
     verify(itemRepo, times(1)).findById(itemId);
     verify(storageItemRepo, times(1)).update(any(StorageItem.class));
   }
 
-  /**
-   * Test for deleteStorageItem method.
-   * This test verifies that the method successfully deletes an existing storage item.
-   */
+  @Test
+  void updateSharedStorageItemFromRequest_valid_returnsList() {
+    long groupId = 1L;
+    int itemId = 101;
+    int storageItemId = 1;
+    int householdId = 1;
+    StorageItem updatedItem = createStorageItem(storageItemId, itemId, householdId, 10,
+            LocalDateTime.now().plusDays(15));
+
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(groupId);
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
+            storageItemId, LocalDateTime.now().plusDays(4), 5, householdId, itemId, true)));
+    when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
+    when(storageItemRepo.update(any(StorageItem.class))).thenReturn(updatedItem);
+    when(householdRepository.getHouseholdById((long) householdId)).thenReturn(Optional.of(new Household(
+            (long)householdId, "Household Name", null, null, groupId
+    )));
+    StorageItemResponse result = storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
+            LocalDateTime.now().plusDays(15), 10, itemId)
+    );
+
+    assertNotNull(result);
+    assertEquals(storageItemId, result.getId());
+    assertEquals(itemId, result.getItemId());
+    assertEquals(householdId, result.getHouseholdId());
+    assertEquals(10, result.getQuantity());
+    verify(storageItemRepo, times(2)).findById(storageItemId);
+    verify(itemRepo, times(2)).findById(itemId);
+    verify(storageItemRepo, times(1)).update(any(StorageItem.class));
+
+  }
+
+  @Test
+  void updateSharedStorageItemFromRequest_isSharedFalse_throwsIllegalArgument() {
+    long groupId = 1L;
+    int itemId = 101;
+    int storageItemId = 1;
+    int householdId = 1;
+
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(groupId);
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
+            storageItemId, LocalDateTime.now().plusDays(4), 5, householdId, itemId, false)));
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+            storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
+                    LocalDateTime.now().plusDays(15), 10, itemId)
+            )
+    );
+
+    assertEquals("Item is not shared, user is not allowed to update", exception.getMessage());
+  }
+
+  @Test
+  void updateSharedStorageItemFromRequest_noItemFound_throwsNoSuchElement() {
+    long groupId = 1L;
+    int itemId = 101;
+    int storageItemId = 1;
+
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(groupId);
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.empty());
+
+    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () ->
+            storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
+                    LocalDateTime.now().plusDays(15), 10, itemId)
+            )
+    );
+
+    assertEquals("Storage item not found with id: 1", exception.getMessage());
+  }
+
+    /**
+     * Test for deleteStorageItem method.
+     * This test verifies that the method successfully deletes an existing storage item.
+     */
   @Test
   void deleteStorageItem_shouldDeleteExistingItem() {
     // Setup
     int storageItemId = 1;
     int householdId = 1;
 
-    when(storageItemRepo.findById(storageItemId, householdId)).thenReturn(Optional.of(new StorageItem()));
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem()));
 
     // Execute
     storageItemService.deleteStorageItem(storageItemId, householdId);
 
     // Verify
-    verify(storageItemRepo, times(1)).findById(storageItemId, householdId);
+    verify(storageItemRepo, times(1)).findById(storageItemId);
     verify(storageItemRepo, times(1)).deleteById(storageItemId, householdId);
   }
 
@@ -420,7 +495,7 @@ class StorageItemServiceTest {
     int storageItemId = 999;
     int householdId = 1;
 
-    when(storageItemRepo.findById(storageItemId, householdId)).thenReturn(Optional.empty());
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.empty());
 
     // Execute and verify
     RuntimeException exception = assertThrows(RuntimeException.class, () ->
@@ -429,7 +504,7 @@ class StorageItemServiceTest {
 
     assertEquals("Storage item not found with id: " + storageItemId + " in household: " + householdId,
             exception.getMessage());
-    verify(storageItemRepo, times(1)).findById(storageItemId, householdId);
+    verify(storageItemRepo, times(1)).findById(storageItemId);
     verify(storageItemRepo, never()).deleteById(anyInt(), anyInt());
   }
 
