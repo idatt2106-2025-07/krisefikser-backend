@@ -453,7 +453,7 @@ class StorageItemControllerTest {
     // Create request object
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(5);
+    request.setQuantity(5.0);
     request.setExpirationDate(LocalDateTime.now().plusDays(10));
 
     // Create response object
@@ -489,11 +489,11 @@ class StorageItemControllerTest {
     int storageItemId = 1;
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(10); // Updated quantity
+    request.setQuantity(10.0); // Updated quantity
     request.setExpirationDate(LocalDateTime.now().plusDays(15)); // Updated date
 
     // Create response object
-    StorageItemResponse response = createStorageItemResponse(storageItemId, 101, MOCK_HOUSEHOLD_ID, 10,
+    StorageItemResponse response = createStorageItemResponse(storageItemId, 101, MOCK_HOUSEHOLD_ID, 10.0,
             LocalDateTime.now().plusDays(15), "Water", true);
 
     // Mock the service method
@@ -524,7 +524,7 @@ class StorageItemControllerTest {
     int nonExistentItemId = 999;
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(10);
+    request.setQuantity(10.0);
     request.setExpirationDate(LocalDateTime.now().plusDays(15));
 
     // Mock the service to throw exception
@@ -544,7 +544,7 @@ class StorageItemControllerTest {
     int storageItemId = 1;
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(10);
+    request.setQuantity(10.0);
     request.setExpirationDate(LocalDateTime.now().plusDays(15));
 
     StorageItemResponse response = createStorageItemResponse(storageItemId, 101, MOCK_HOUSEHOLD_ID, 10,
@@ -570,7 +570,7 @@ class StorageItemControllerTest {
     int storageItemId = 1;
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(10);
+    request.setQuantity(10.0);
     request.setExpirationDate(LocalDateTime.now().plusDays(15));
 
     when(storageItemService.updateSharedStorageItem(storageItemId, request))
@@ -590,7 +590,7 @@ class StorageItemControllerTest {
     int storageItemId = 1;
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(10);
+    request.setQuantity(10.0);
     request.setExpirationDate(LocalDateTime.now().plusDays(15));
 
     when(storageItemService.updateSharedStorageItem(storageItemId, request))
@@ -610,7 +610,7 @@ class StorageItemControllerTest {
     int storageItemId = 1;
     StorageItemRequest request = new StorageItemRequest();
     request.setItemId(101);
-    request.setQuantity(10);
+    request.setQuantity(10.0);
     request.setExpirationDate(LocalDateTime.now().plusDays(15));
 
     when(storageItemService.updateSharedStorageItem(storageItemId, request))
@@ -662,7 +662,7 @@ class StorageItemControllerTest {
     return item;
   }
 
-  private StorageItemResponse createStorageItemResponse(int id, int itemId, int householdId, int quantity,
+  private StorageItemResponse createStorageItemResponse(int id, int itemId, int householdId, double quantity,
                                                         LocalDateTime expirationDate, String itemName,
                                                         boolean isShared) {
     ItemResponse itemResponse = new ItemResponse();

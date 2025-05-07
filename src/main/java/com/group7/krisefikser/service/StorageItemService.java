@@ -379,8 +379,8 @@ public class StorageItemService {
       List<StorageItem> items = entry.getValue();
 
       // Calculate total quantity
-      int totalQuantity = items.stream()
-              .mapToInt(StorageItem::getQuantity)
+      double totalQuantity = items.stream()
+              .mapToDouble(StorageItem::getQuantity)
               .sum();
 
       // Find earliest expiration date

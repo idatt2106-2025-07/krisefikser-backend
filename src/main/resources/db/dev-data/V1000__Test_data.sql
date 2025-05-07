@@ -56,7 +56,7 @@ VALUES ('Charlie', 'child', 1),
 
 -- Insert storage items (references households and items)
 INSERT INTO storage_items (expiration_date, quantity, household_id, item_id, is_shared)
-VALUES ('2025-12-31 00:00:00', 10, 1, 1, FALSE),
+VALUES ('2025-12-31 00:00:00', 10, 1.4, 1, FALSE),
        ('2035-12-31 00:00:00', 12, 1, 1, TRUE),
        ('2027-02-12 00:00:00', 2, 3, 1, TRUE),
        ('2026-09-02 00:00:00', 5, 3, 1, TRUE),

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class StorageItem {
   private int id;
   private LocalDateTime expirationDate;
-  private int quantity;
+  private double quantity;
   private int householdId;
   private int itemId;
   private boolean isShared;

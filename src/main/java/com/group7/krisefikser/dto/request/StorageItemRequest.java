@@ -24,7 +24,7 @@ public class StorageItemRequest {
 
   @NotNull
   @Min(value = 0, message = "Quantity cannot be negative")
-  private Integer quantity;
+  private Double quantity;
 
   @NotNull
   @Min(value = 1, message = "Item ID must be positive")

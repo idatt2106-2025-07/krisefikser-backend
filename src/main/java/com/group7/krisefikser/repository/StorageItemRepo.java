@@ -139,7 +139,7 @@ public class StorageItemRepo {
     jdbcTemplate.update(connection -> {
       PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       ps.setTimestamp(1, Timestamp.valueOf(storageItem.getExpirationDate()));
-      ps.setInt(2, storageItem.getQuantity());
+      ps.setDouble(2, storageItem.getQuantity());
       ps.setInt(3, storageItem.getHouseholdId());
       ps.setInt(4, storageItem.getItemId());
       return ps;

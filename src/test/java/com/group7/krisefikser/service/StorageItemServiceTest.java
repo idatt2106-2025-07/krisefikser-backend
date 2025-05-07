@@ -413,14 +413,14 @@ class StorageItemServiceTest {
             (long)householdId, "Household Name", null, null, groupId
     )));
     StorageItemResponse result = storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
-            LocalDateTime.now().plusDays(15), 10, itemId)
+            LocalDateTime.now().plusDays(15), 10.0, itemId)
     );
 
     assertNotNull(result);
     assertEquals(storageItemId, result.getId());
     assertEquals(itemId, result.getItemId());
     assertEquals(householdId, result.getHouseholdId());
-    assertEquals(10, result.getQuantity());
+    assertEquals(10.0, result.getQuantity());
     verify(storageItemRepo, times(2)).findById(storageItemId);
     verify(itemRepo, times(2)).findById(itemId);
     verify(storageItemRepo, times(1)).update(any(StorageItem.class));
@@ -440,7 +440,7 @@ class StorageItemServiceTest {
 
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
             storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
-                    LocalDateTime.now().plusDays(15), 10, itemId)
+                    LocalDateTime.now().plusDays(15), 10.0, itemId)
             )
     );
 
@@ -458,7 +458,7 @@ class StorageItemServiceTest {
 
     NoSuchElementException exception = assertThrows(NoSuchElementException.class, () ->
             storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
-                    LocalDateTime.now().plusDays(15), 10, itemId)
+                    LocalDateTime.now().plusDays(15), 10.0, itemId)
             )
     );
 
@@ -648,15 +648,15 @@ class StorageItemServiceTest {
 
     // Create mock aggregated responses
     AggregatedStorageItemResponse food1 = createAggregatedResponse(
-            101, new ItemResponse(101, "Food 1", "units", 100, ItemType.FOOD), 5,
+            101, new ItemResponse(101, "Food 1", "units", 100, ItemType.FOOD), 5.0,
             LocalDateTime.now().plusDays(10));
 
     AggregatedStorageItemResponse food2 = createAggregatedResponse(
-            102, new ItemResponse(102, "Food 2", "units", 200, ItemType.FOOD), 10,
+            102, new ItemResponse(102, "Food 2", "units", 200, ItemType.FOOD), 10.0,
             LocalDateTime.now().plusDays(5));
 
     AggregatedStorageItemResponse drink = createAggregatedResponse(
-            103, new ItemResponse(103, "Drink", "ml", 50, ItemType.DRINK), 7,
+            103, new ItemResponse(103, "Drink", "ml", 50, ItemType.DRINK), 7.0,
             LocalDateTime.now().plusDays(3));
 
     List<AggregatedStorageItemResponse> allAggregated = Arrays.asList(food1, food2, drink);
@@ -738,7 +738,7 @@ class StorageItemServiceTest {
   }
 
   private AggregatedStorageItemResponse createAggregatedResponse(int itemId, ItemResponse item,
-                                                                 int totalQuantity,
+                                                                 double totalQuantity,
                                                                  LocalDateTime earliestExpirationDate) {
     return new AggregatedStorageItemResponse(itemId, item, totalQuantity,
             earliestExpirationDate);
