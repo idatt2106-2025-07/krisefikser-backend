@@ -297,6 +297,11 @@ public class UserService implements UserDetailsService {
     return user.getHouseholdId().intValue();
   }
 
+  /**
+   * Gets the user information of the current authenticated user.
+   *
+   * @return a UserInfoResponse object containing user details
+   */
   public UserInfoResponse getUserInfo() {
     User user = getCurrentUser();
     Household household = householdService.getHouseholdById(user.getHouseholdId());
