@@ -6,6 +6,7 @@ import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
+import com.group7.krisefikser.dto.response.StorageItemGroupResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.StorageItem;
@@ -63,7 +64,6 @@ class StorageItemControllerTest {
     // Reset all mocks before each test
     reset(storageItemService, itemService, userService);
 
-    // Setup the userService to return a mock household ID for all tests
     when(userService.getCurrentUserHouseholdId()).thenReturn(MOCK_HOUSEHOLD_ID);
   }
 
@@ -168,12 +168,12 @@ class StorageItemControllerTest {
                     .param("sortBy", "quantity")
                     .param("sortDirection", "desc")
             .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isBadRequest());
   }
 
   @Test
   @WithMockUser
-  void getAllSharedStorageItemsInGroup_throwsException_returnsNotFound() throws Exception {
+  void getAllSharedStorageItemsInGroup_throwsException_returnsInternalServerError() throws Exception {
     StorageItemSortRequest sortRequest = new StorageItemSortRequest();
     sortRequest.setSortBy("quantity");
     sortRequest.setSortDirection("desc");
@@ -189,6 +189,60 @@ class StorageItemControllerTest {
             .andExpect(status().isInternalServerError());
   }
 
+  @Test
+  @WithMockUser
+  void getSharedStorageItemsInGroupByItemId_shouldReturnOkWithItems_whenServiceReturnsItems() throws Exception {
+    int itemId = 101;
+
+    List<StorageItemGroupResponse> mockResponses = Arrays.asList(
+      new StorageItemGroupResponse(
+              createStorageItemResponse(1, itemId, MOCK_HOUSEHOLD_ID, 5, LocalDateTime.now().plusDays(10), "Water", true),
+                "Household 1"),
+        new StorageItemGroupResponse(
+                createStorageItemResponse(2, itemId, 2, 3, LocalDateTime.now().plusDays(5), "Water", false),
+                "Household 2")
+    );
+
+    when(storageItemService.getSharedStorageItemsInGroupByItemId(itemId))
+            .thenReturn(mockResponses);
+
+    MvcResult result = mockMvc.perform(get("/api/storage-items/emergency-group/by-item/" + itemId)
+        .contentType(MediaType.APPLICATION_JSON))
+      .andExpect(status().isOk())
+      .andReturn();
+
+    String responseContent = result.getResponse().getContentAsString();
+    List<StorageItemGroupResponse> actualResponses = objectMapper.readValue(responseContent, new TypeReference<>() {});
+    assertEquals(2, actualResponses.size());
+    assertEquals(itemId, actualResponses.get(0).getStorageItem().getItemId());
+    assertEquals(itemId, actualResponses.get(1).getStorageItem().getItemId());
+    assertEquals("Household 1", actualResponses.get(0).getHouseholdName());
+    assertEquals("Household 2", actualResponses.get(1).getHouseholdName());
+  }
+
+  @Test
+  @WithMockUser
+  void getAllSharedStorageItemsInGroupById_throwsNoSuchElementException_returnsNotFound() throws Exception {
+    int itemId = 101;
+    when(storageItemService.getSharedStorageItemsInGroupByItemId(itemId))
+            .thenThrow(new NoSuchElementException("Some error message"));
+
+    mockMvc.perform(get("/api/storage-items/emergency-group/by-item/" + itemId)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @WithMockUser
+  void getAllSharedStorageItemsInGroupById_throwsException_returnsInternalServerError() throws Exception {
+    int itemId = 101;
+    when(storageItemService.getSharedStorageItemsInGroupByItemId(itemId))
+            .thenThrow(new RuntimeException("Some error message"));
+
+    mockMvc.perform(get("/api/storage-items/emergency-group/by-item/" + itemId)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
+  }
 
   @Test
   @WithMockUser

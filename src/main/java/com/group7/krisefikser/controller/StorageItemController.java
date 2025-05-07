@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.StorageItemSearchRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
+import com.group7.krisefikser.dto.response.StorageItemGroupResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.StorageItem;
@@ -78,7 +79,7 @@ public class StorageItemController {
   @Operation(
           summary = "Fetch all storage items for the user's household",
           description = "Retrieves a list of all storage items for the "
-              + "authenticated user's household.",
+                  + "authenticated user's household.",
           responses = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved storage items",
                     content = @Content(mediaType = "application/json",
@@ -111,7 +112,7 @@ public class StorageItemController {
                   + "emergency group.",
           parameters = {
             @Parameter(name = "types", description = "List of item types to filter by",
-              schema = @Schema(type = "array", implementation = ItemType.class)),
+                    schema = @Schema(type = "array", implementation = ItemType.class)),
             @Parameter(name = "sortBy", description = "Field to sort by"),
             @Parameter(name = "sortDirection", description = "Sort direction (asc/desc)")
           },
@@ -135,13 +136,57 @@ public class StorageItemController {
     try {
       List<AggregatedStorageItemResponse> responses = storageItemService
               .getSharedStorageItemsInGroup(
-              types,
-              sortRequest
-      );
+                      types,
+                      sortRequest
+              );
       return ResponseEntity.ok(responses);
     } catch (NoSuchElementException e) {
       logger.info("No shared storage items found: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
+              e.getMessage()
+      ));
+    } catch (Exception e) {
+      logger.severe("Error retrieving shared storage items: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
+              "An unexpected error occurred while retrieving shared storage items."
+      ));
+    }
+  }
+
+  /**
+   * Endpoint to retrieve storage items in a group by item ID.
+   *
+   * @param itemId The ID of the item to search for
+   * @return A response entity containing a list of storage items in the group
+   */
+  @Operation(
+          summary = "Retrieve storage items in a group by item ID",
+          description = "Retrieves a list of storage items in the authenticated user's "
+                  + "emergency group by item ID.",
+          parameters = {
+            @Parameter(name = "itemId", description = "ID of the item to search for",
+                    required = true)
+          },
+          responses = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved "
+                    + "storage items in group",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = StorageItemGroupResponse.class))),
+            @ApiResponse(responseCode = "404", description = "No shared storage found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+          }
+  )
+  @GetMapping("/emergency-group/by-item/{itemId}")
+  public ResponseEntity<Object> getSharedStorageItemsInGroupByItemId(
+          @Parameter(description = "Item ID", required = true)
+          @PathVariable int itemId) {
+    try {
+      List<StorageItemGroupResponse> responses = storageItemService
+              .getSharedStorageItemsInGroupByItemId(itemId);
+      return ResponseEntity.ok(responses);
+    } catch (NoSuchElementException e) {
+      logger.info(e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(
               e.getMessage()
       ));
     } catch (Exception e) {
