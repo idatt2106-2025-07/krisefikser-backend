@@ -1,6 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.StorageItemRequest;
+import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 public class StorageItemService {
   private final StorageItemRepo storageItemRepo;
   private final ItemRepo itemRepo;
+  private final HouseholdService householdService;
+  private final ItemService itemService;
   private static final Logger logger = Logger.getLogger(StorageItemService.class.getName());
 
 
@@ -43,9 +46,33 @@ public class StorageItemService {
   }
 
   /**
+   * Retrieves all shared storage items for a specific group from the repository.
+   * Using the group ID for the current user, it fetches all storage items that are
+   * marked as shared.
+   *
+   * @return A list of all shared storage items available for the specified group.
+   */
+  public List<AggregatedStorageItemResponse> getSharedStorageItemsInGroup(
+          List<String> itemTypesString,
+          StorageItemSortRequest sortRequest) {
+    List<ItemType> itemTypes = itemService.convertToItemTypes(itemTypesString);
+    long groupId = householdService.getGroupIdForCurrentUser();
+    List<StorageItem> storageItems = storageItemRepo.getAllSharedStorageItemsInGroup(groupId);
+
+    List<AggregatedStorageItemResponse> aggregatedItems = aggregateStorageItems(storageItems, null, null);
+
+    return filterAndSortAggregatedStorageItems(
+            aggregatedItems,
+            itemTypes,
+            sortRequest.getSortBy(),
+            sortRequest.getSortDirection()
+    );
+  }
+
+  /**
    * Retrieves storage items by their item ID for a specific household.
    *
-   * @param itemId The item ID of the storage items to retrieve.
+   * @param itemId      The item ID of the storage items to retrieve.
    * @param householdId The ID of the household the storage items belong to.
    * @return A list of storage items of the specified item.
    */
@@ -85,7 +112,7 @@ public class StorageItemService {
   public StorageItem updateStorageItem(int id, int householdId, StorageItem storageItem) {
     if (!storageItemExists(id, householdId)) {
       throw new RuntimeException("Storage item not found with id: " + id
-        + " in household: " + householdId);
+              + " in household: " + householdId);
     }
 
     validateStorageItem(storageItem);
@@ -110,7 +137,7 @@ public class StorageItemService {
   public void deleteStorageItem(int id, int householdId) {
     if (!storageItemExists(id, householdId)) {
       throw new RuntimeException("Storage item not found with id: " + id
-        + " in household: " + householdId);
+              + " in household: " + householdId);
     }
 
     storageItemRepo.deleteById(id, householdId);
@@ -203,15 +230,15 @@ public class StorageItemService {
    */
   public List<StorageItemResponse> convertToStorageItemResponses(List<StorageItem> storageItems) {
     return storageItems.stream()
-      .map(this::convertToStorageItemResponse)
-      .collect(Collectors.toList());
+            .map(this::convertToStorageItemResponse)
+            .toList();
   }
 
   /**
    * Adds a new storage item based on the provided request DTO.
    *
    * @param householdId The household ID to assign to the new storage item
-   * @param request The request containing the storage item details
+   * @param request     The request containing the storage item details
    * @return The response DTO for the created storage item
    */
   public StorageItemResponse addStorageItemFromRequest(int householdId,
@@ -225,9 +252,9 @@ public class StorageItemService {
   /**
    * Updates an existing storage item based on the provided request DTO.
    *
-   * @param id The ID of the storage item to update
+   * @param id          The ID of the storage item to update
    * @param householdId The household ID the storage item belongs to
-   * @param request The request containing the updated storage item details
+   * @param request     The request containing the updated storage item details
    * @return The response DTO for the updated storage item
    */
   public StorageItemResponse updateStorageItemFromRequest(int id, int householdId,
@@ -253,22 +280,34 @@ public class StorageItemService {
    * Aggregates storage items by item ID for a specific household,
    * with optional sorting.
    *
-   * @param householdId The ID of the household
-   * @param sortBy The field to sort by (e.g., "quantity", "expirationDate", "name")
+   * @param householdId   The ID of the household
+   * @param sortBy        The field to sort by (e.g., "quantity", "expirationDate", "name")
    * @param sortDirection The direction of sorting (e.g., "asc" or "desc")
    * @return A list of aggregated storage item responses
    */
   public List<AggregatedStorageItemResponse> getAggregatedStorageItems(
-      int householdId,
-      String sortBy,
-      String sortDirection) {
-
-    // Get all storage items for the household
+          int householdId,
+          String sortBy,
+          String sortDirection) {
     List<StorageItem> allItems = storageItemRepo.getAllStorageItems(householdId);
 
-    // Group items by itemId
-    Map<Integer, List<StorageItem>> groupedByItemId = allItems.stream()
-         .collect(Collectors.groupingBy(StorageItem::getItemId));
+    return aggregateStorageItems(allItems, sortBy, sortDirection);
+  }
+
+  /**
+   * Aggregates storage items by item ID and creates a list of aggregated responses.
+   *
+   * @param storageItems      The list of all storage items
+   * @param sortBy        The field to sort by (e.g., "quantity", "expirationDate", "name")
+   * @param sortDirection The direction of sorting (e.g., "asc" or "desc")
+   * @return A list of aggregated storage item responses
+   */
+  public List<AggregatedStorageItemResponse> aggregateStorageItems(
+          List<StorageItem> storageItems,
+          String sortBy,
+          String sortDirection) {
+    Map<Integer, List<StorageItem>> groupedByItemId = storageItems.stream()
+            .collect(Collectors.groupingBy(StorageItem::getItemId));
 
     // Create aggregated responses
     List<AggregatedStorageItemResponse> result = new ArrayList<>();
@@ -279,14 +318,14 @@ public class StorageItemService {
 
       // Calculate total quantity
       int totalQuantity = items.stream()
-          .mapToInt(StorageItem::getQuantity)
-          .sum();
+              .mapToInt(StorageItem::getQuantity)
+              .sum();
 
       // Find earliest expiration date
       LocalDateTime earliestDate = items.stream()
-          .map(StorageItem::getExpirationDate)
-          .min(LocalDateTime::compareTo)
-          .orElse(null);
+              .map(StorageItem::getExpirationDate)
+              .min(LocalDateTime::compareTo)
+              .orElse(null);
 
       // Get item details
       Item item = null;
@@ -301,11 +340,10 @@ public class StorageItemService {
 
       // Create the aggregated response
       AggregatedStorageItemResponse aggregated = new AggregatedStorageItemResponse(
-          itemId,
-          itemResponse,
-          totalQuantity,
-          earliestDate,
-          householdId
+              itemId,
+              itemResponse,
+              totalQuantity,
+              earliestDate
       );
 
       result.add(aggregated);
@@ -314,7 +352,7 @@ public class StorageItemService {
     // Apply sorting if provided
     if (sortBy != null && !sortBy.isEmpty()) {
       Comparator<AggregatedStorageItemResponse> comparator =
-          createAggregatedComparator(sortBy, sortDirection);
+              createAggregatedComparator(sortBy, sortDirection);
       result.sort(comparator);
     }
 
@@ -324,21 +362,21 @@ public class StorageItemService {
   /**
    * Creates a comparator for sorting aggregated storage items.
    *
-   * @param sortBy The field to sort by
+   * @param sortBy        The field to sort by
    * @param sortDirection The direction of sorting
    * @return A comparator for sorting aggregated storage items
    */
   private Comparator<AggregatedStorageItemResponse> createAggregatedComparator(
-      String sortBy, String sortDirection) {
+          String sortBy, String sortDirection) {
     Comparator<AggregatedStorageItemResponse> comparator = switch (sortBy.toLowerCase()) {
       case "quantity" -> Comparator.comparing(AggregatedStorageItemResponse::getTotalQuantity);
       case "expirationdate" -> Comparator.comparing(
-        AggregatedStorageItemResponse::getEarliestExpirationDate,
-        Comparator.nullsLast(Comparator.naturalOrder())
+              AggregatedStorageItemResponse::getEarliestExpirationDate,
+              Comparator.nullsLast(Comparator.naturalOrder())
       );
       case "name" -> Comparator.comparing(
-        response -> response.getItem() != null ? response.getItem().getName() : "",
-        String.CASE_INSENSITIVE_ORDER
+              response -> response.getItem() != null ? response.getItem().getName() : "",
+              String.CASE_INSENSITIVE_ORDER
       );
       default -> Comparator.comparing(AggregatedStorageItemResponse::getItemId);
     };
@@ -350,37 +388,51 @@ public class StorageItemService {
    * Aggregates storage items by item ID for a specific household,
    * with optional filtering and sorting.
    *
-   * @param householdId The ID of the household
-   * @param itemTypes The item types to filter by
-   * @param sortBy The field to sort by
+   * @param householdId   The ID of the household
+   * @param itemTypes     The item types to filter by
+   * @param sortBy        The field to sort by
    * @param sortDirection The direction of sorting
    * @return A list of filtered and sorted aggregated storage item responses
    */
   public List<AggregatedStorageItemResponse> getFilteredAndSortedAggregatedItems(
-      int householdId,
-      List<ItemType> itemTypes,
-      String sortBy,
-      String sortDirection) {
+          int householdId,
+          List<ItemType> itemTypes,
+          String sortBy,
+          String sortDirection) {
 
     // Get aggregated items
     List<AggregatedStorageItemResponse> aggregatedItems =
-        getAggregatedStorageItems(householdId, null, null);
+            getAggregatedStorageItems(householdId, null, null);
 
-    // Apply filtering if types are provided
+
+    return filterAndSortAggregatedStorageItems(
+            aggregatedItems,
+            itemTypes,
+            sortBy,
+            sortDirection
+    );
+  }
+
+  private List<AggregatedStorageItemResponse> filterAndSortAggregatedStorageItems(
+          List<AggregatedStorageItemResponse> aggregatedItems,
+          List<ItemType> itemTypes,
+          String sortBy,
+          String sortDirection) {
+
     List<AggregatedStorageItemResponse> filteredItems = aggregatedItems;
     if (itemTypes != null && !itemTypes.isEmpty()) {
       filteredItems = aggregatedItems.stream()
-        .filter(aggregated ->
-          aggregated.getItem() != null
-            &&
-            itemTypes.contains(aggregated.getItem().getType()))
-        .collect(Collectors.toList());
+              .filter(aggregated ->
+                      aggregated.getItem() != null
+                              &&
+                              itemTypes.contains(aggregated.getItem().getType()))
+              .collect(Collectors.toList());
     }
 
     // Apply sorting if provided
     if (sortBy != null && !sortBy.isEmpty()) {
       Comparator<AggregatedStorageItemResponse> comparator =
-          createAggregatedComparator(sortBy, sortDirection);
+              createAggregatedComparator(sortBy, sortDirection);
       filteredItems.sort(comparator);
     }
 
@@ -390,48 +442,48 @@ public class StorageItemService {
   /**
    * Searches for aggregated storage items by item name and/or type.
    *
-   * @param householdId The ID of the household
-   * @param searchTerm The search term to match against item names (can be null)
-   * @param itemTypes The item types to filter by (can be null or empty)
-   * @param sortBy The field to sort by (can be null)
+   * @param householdId   The ID of the household
+   * @param searchTerm    The search term to match against item names (can be null)
+   * @param itemTypes     The item types to filter by (can be null or empty)
+   * @param sortBy        The field to sort by (can be null)
    * @param sortDirection The direction of sorting (can be null)
    * @return A list of matching aggregated storage item responses
    */
   public List<AggregatedStorageItemResponse> searchAggregatedStorageItems(
-      int householdId,
-      String searchTerm,
-      List<ItemType> itemTypes,
-      String sortBy,
-      String sortDirection) {
+          int householdId,
+          String searchTerm,
+          List<ItemType> itemTypes,
+          String sortBy,
+          String sortDirection) {
 
     // Get all aggregated items for this household
     List<AggregatedStorageItemResponse> allItems = getAggregatedStorageItems(householdId);
 
     // Apply filtering based on search term and item types
     List<AggregatedStorageItemResponse> filteredItems = allItems.stream()
-        .filter(item -> {
-          boolean matchesSearchTerm = true;
-          boolean matchesItemType = true;
+            .filter(item -> {
+              boolean matchesSearchTerm = true;
+              boolean matchesItemType = true;
 
-          // Filter by search term if provided (case-insensitive partial match)
-          if (searchTerm != null && !searchTerm.trim().isEmpty() && item.getItem() != null) {
-            matchesSearchTerm = item.getItem().getName().toLowerCase()
-              .contains(searchTerm.toLowerCase().trim());
-          }
+              // Filter by search term if provided (case-insensitive partial match)
+              if (searchTerm != null && !searchTerm.trim().isEmpty() && item.getItem() != null) {
+                matchesSearchTerm = item.getItem().getName().toLowerCase()
+                        .contains(searchTerm.toLowerCase().trim());
+              }
 
-          // Filter by item types if provided
-          if (itemTypes != null && !itemTypes.isEmpty() && item.getItem() != null) {
-            matchesItemType = itemTypes.contains(item.getItem().getType());
-          }
+              // Filter by item types if provided
+              if (itemTypes != null && !itemTypes.isEmpty() && item.getItem() != null) {
+                matchesItemType = itemTypes.contains(item.getItem().getType());
+              }
 
-          return matchesSearchTerm && matchesItemType;
-        })
-        .collect(Collectors.toList());
+              return matchesSearchTerm && matchesItemType;
+            })
+            .collect(Collectors.toList());
 
     // Apply sorting if provided
     if (sortBy != null && !sortBy.isEmpty()) {
       Comparator<AggregatedStorageItemResponse> comparator =
-          createAggregatedComparator(sortBy, sortDirection);
+              createAggregatedComparator(sortBy, sortDirection);
       filteredItems.sort(comparator);
     }
     return filteredItems;

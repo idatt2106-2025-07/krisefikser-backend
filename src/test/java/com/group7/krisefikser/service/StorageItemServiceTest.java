@@ -1,5 +1,6 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
 import com.group7.krisefikser.dto.response.ItemResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
@@ -34,9 +35,13 @@ import static org.mockito.Mockito.*;
 class StorageItemServiceTest {
   @Mock
   private StorageItemRepo storageItemRepo;
+  @Mock
+  ItemService itemService;
 
   @Mock
   private ItemRepo itemRepo;
+
+  @Mock HouseholdService householdService;
 
   @InjectMocks
   private StorageItemService storageItemService;
@@ -65,6 +70,125 @@ class StorageItemServiceTest {
     assertEquals(1, result.get(0).getId());
     assertEquals(2, result.get(1).getId());
     verify(storageItemRepo, times(1)).getAllStorageItems(householdId);
+  }
+
+  @Test
+  void getAllSharedStorageItemsInGroup_returnsListOfStorageItemResponseSortedAndFiltered() {
+    LocalDateTime shortestExpirationDate = LocalDateTime.now().plusDays(5);
+
+    List<StorageItem> mockItems = Arrays.asList(
+            createStorageItem(1, 1, 1, 5, LocalDateTime.now().plusDays(10)),
+            createStorageItem(2, 2, 3, 4, shortestExpirationDate),
+            createStorageItem(3, 2, 1, 3, LocalDateTime.now().plusDays(7)),
+            createStorageItem(4, 3, 2, 3, LocalDateTime.now().plusDays(8)),
+            createStorageItem(5, 4, 1, 6, LocalDateTime.now().plusDays(6))
+    );
+
+    StorageItemSortRequest sortRequest = new StorageItemSortRequest();
+    sortRequest.setSortBy("quantity");
+    sortRequest.setSortDirection("desc");
+
+    List<String> typesString = List.of("DRINK", "FOOD");
+    List<ItemType> types = List.of(ItemType.DRINK, ItemType.FOOD);
+
+    when(itemService.convertToItemTypes(typesString)).thenReturn(types);
+    when(itemRepo.findById(1)).thenReturn(Optional.of(new Item(
+            1, "Item 1", "units", 100, ItemType.DRINK)));
+    when(itemRepo.findById(2)).thenReturn(Optional.of(new Item(
+            2, "Item 2", "units", 200, ItemType.FOOD)));
+    when(itemRepo.findById(3)).thenReturn(Optional.of(new Item(
+            3, "Item 3", "units", 300, ItemType.ACCESSORIES)));
+    when(itemRepo.findById(4)).thenReturn(Optional.of(new Item(
+            4, "Item 4", "units", 400, ItemType.FOOD)));
+
+
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(1L);
+    when(storageItemRepo.getAllSharedStorageItemsInGroup(1L)).thenReturn(mockItems);
+
+
+
+    List<AggregatedStorageItemResponse> result = storageItemService.getSharedStorageItemsInGroup(typesString, sortRequest);
+
+    assertNotNull(result);
+    assertEquals(3, result.size());
+    assertEquals(2, result.get(0).getItemId());
+    assertEquals(7, result.get(0).getTotalQuantity());
+    assertEquals(shortestExpirationDate, result.get(0).getEarliestExpirationDate());
+    assertEquals(ItemType.FOOD, result.get(0).getItem().getType());
+    System.out.println(result);
+    assertEquals(4, result.get(1).getItemId());
+    assertEquals(1, result.get(2).getItemId());
+    verify(storageItemRepo, times(1)).getAllSharedStorageItemsInGroup(1L);
+    verify(householdService, times(1)).getGroupIdForCurrentUser();
+  }
+
+  @Test
+  void getAllSharedStorageItemsInGroup_noItemsFromRepo_returnsEmptyList() {
+    List<StorageItem> mockItems = List.of();
+
+    StorageItemSortRequest sortRequest = new StorageItemSortRequest();
+    sortRequest.setSortBy("quantity");
+    sortRequest.setSortDirection("desc");
+
+    List<String> types = List.of("DRINK", "FOOD");
+
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(1L);
+    when(storageItemRepo.getAllSharedStorageItemsInGroup(1L)).thenReturn(mockItems);
+
+    List<AggregatedStorageItemResponse> result = storageItemService.getSharedStorageItemsInGroup(types, sortRequest);
+
+    assertNotNull(result);
+    assertEquals(0, result.size());
+     verify(storageItemRepo, times(1)).getAllSharedStorageItemsInGroup(1L);
+    verify(householdService, times(1)).getGroupIdForCurrentUser();
+  }
+
+  @Test
+  void getAllSharedStorageItemsFromGroup_invalidTypeGetsIgnored() {
+    LocalDateTime shortestExpirationDate = LocalDateTime.now().plusDays(5);
+
+    List<StorageItem> mockItems = Arrays.asList(
+            createStorageItem(1, 1, 1, 5, LocalDateTime.now().plusDays(10)),
+            createStorageItem(2, 2, 3, 4, shortestExpirationDate),
+            createStorageItem(3, 2, 1, 3, LocalDateTime.now().plusDays(7)),
+            createStorageItem(4, 3, 2, 3, LocalDateTime.now().plusDays(8)),
+            createStorageItem(5, 4, 1, 6, LocalDateTime.now().plusDays(6))
+    );
+
+    StorageItemSortRequest sortRequest = new StorageItemSortRequest();
+    sortRequest.setSortBy("quantity");
+    sortRequest.setSortDirection("desc");
+
+    List<String> typesString = List.of("DRINK", "food", "INVALID");
+    List<ItemType> types = List.of(ItemType.DRINK, ItemType.FOOD);
+
+    when(itemService.convertToItemTypes(typesString)).thenReturn(types);
+    when(itemRepo.findById(1)).thenReturn(Optional.of(new Item(
+            1, "Item 1", "units", 100, ItemType.DRINK)));
+    when(itemRepo.findById(2)).thenReturn(Optional.of(new Item(
+            2, "Item 2", "units", 200, ItemType.FOOD)));
+    when(itemRepo.findById(3)).thenReturn(Optional.of(new Item(
+            3, "Item 3", "units", 300, ItemType.ACCESSORIES)));
+    when(itemRepo.findById(4)).thenReturn(Optional.of(new Item(
+            4, "Item 4", "units", 400, ItemType.FOOD)));
+
+
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(1L);
+    when(storageItemRepo.getAllSharedStorageItemsInGroup(1L)).thenReturn(mockItems);
+
+    List<AggregatedStorageItemResponse> result = storageItemService.getSharedStorageItemsInGroup(typesString, sortRequest);
+
+    assertNotNull(result);
+    assertEquals(3, result.size());
+    assertEquals(2, result.get(0).getItemId());
+    assertEquals(7, result.get(0).getTotalQuantity());
+    assertEquals(shortestExpirationDate, result.get(0).getEarliestExpirationDate());
+    assertEquals(ItemType.FOOD, result.get(0).getItem().getType());
+    System.out.println(result);
+    assertEquals(4, result.get(1).getItemId());
+    assertEquals(1, result.get(2).getItemId());
+    verify(storageItemRepo, times(1)).getAllSharedStorageItemsInGroup(1L);
+    verify(householdService, times(1)).getGroupIdForCurrentUser();
   }
 
   /**
@@ -386,18 +510,15 @@ class StorageItemServiceTest {
     // Create mock aggregated responses
     AggregatedStorageItemResponse food1 = createAggregatedResponse(
       101, new ItemResponse(101, "Food 1", "units", 100, ItemType.FOOD), 5,
-      LocalDateTime.now().plusDays(10), householdId
-    );
+      LocalDateTime.now().plusDays(10));
 
     AggregatedStorageItemResponse food2 = createAggregatedResponse(
       102, new ItemResponse(102, "Food 2", "units", 200, ItemType.FOOD), 10,
-      LocalDateTime.now().plusDays(5), householdId
-    );
+      LocalDateTime.now().plusDays(5));
 
     AggregatedStorageItemResponse drink = createAggregatedResponse(
       103, new ItemResponse(103, "Drink", "ml", 50, ItemType.DRINK), 7,
-      LocalDateTime.now().plusDays(3), householdId
-    );
+      LocalDateTime.now().plusDays(3));
 
     List<AggregatedStorageItemResponse> allAggregated = Arrays.asList(food1, food2, drink);
 
@@ -435,18 +556,15 @@ class StorageItemServiceTest {
     // Create mock aggregated responses
     AggregatedStorageItemResponse appleJuice = createAggregatedResponse(
       101, new ItemResponse(101, "Apple Juice", "ml", 50, ItemType.DRINK), 5,
-      LocalDateTime.now().plusDays(10), householdId
-    );
+      LocalDateTime.now().plusDays(10));
 
     AggregatedStorageItemResponse apples = createAggregatedResponse(
       102, new ItemResponse(102, "Apples", "units", 80, ItemType.FOOD), 10,
-      LocalDateTime.now().plusDays(5), householdId
-    );
+      LocalDateTime.now().plusDays(5));
 
     AggregatedStorageItemResponse bread = createAggregatedResponse(
       103, new ItemResponse(103, "Bread", "slices", 100, ItemType.FOOD), 7,
-      LocalDateTime.now().plusDays(3), householdId
-    );
+      LocalDateTime.now().plusDays(3));
 
     List<AggregatedStorageItemResponse> allAggregated = Arrays.asList(appleJuice, apples, bread);
 
@@ -482,9 +600,8 @@ class StorageItemServiceTest {
 
   private AggregatedStorageItemResponse createAggregatedResponse(int itemId, ItemResponse item,
                                                                  int totalQuantity,
-                                                                 LocalDateTime earliestExpirationDate,
-                                                                 int householdId) {
+                                                                 LocalDateTime earliestExpirationDate) {
     return new AggregatedStorageItemResponse(itemId, item, totalQuantity,
-      earliestExpirationDate, householdId);
+      earliestExpirationDate);
   }
 }
