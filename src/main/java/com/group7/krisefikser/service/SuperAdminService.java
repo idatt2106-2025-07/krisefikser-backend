@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Service class for handling super admin-related operations.
@@ -27,6 +29,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SuperAdminService {
+
+  /**
+   * Fallback URL used in tests or when no frontend URL is injected.
+   */
+  private static final String DEFAULT_FRONTEND_URL = "https://dev.krisefikser.localhost:5173";
+
+  @Value("${app.frontend.url:}")
+  private String frontendUrl;
 
   private final UserRepository userRepository;
   private final UserService userService;
@@ -58,7 +68,9 @@ public class SuperAdminService {
 
     String inviteToken = jwtUtils.generateInviteToken(username);
 
-    String inviteLink = "https://localhost:5173/invite?token=" + inviteToken;
+    // choose injected URL if present, otherwise fallback
+    String base = StringUtils.hasText(frontendUrl) ? frontendUrl : DEFAULT_FRONTEND_URL;
+    String inviteLink = base + "/register-admin?token=" + inviteToken;
 
     emailService.sendTemplateMessage(
         request.getEmail(),

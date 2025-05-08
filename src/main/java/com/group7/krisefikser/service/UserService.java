@@ -144,7 +144,7 @@ public class UserService implements UserDetailsService {
     if (user.getRole() == Role.ROLE_ADMIN) {
       try {
         String twoFactorToken = jwtUtils.generate2faToken(user.getId());
-        String twoFactorLink = frontendUrl + "/verify?token=" + twoFactorToken;
+        String twoFactorLink = frontendUrl + "/verify-admin?token=" + twoFactorToken;
 
         emailService.sendTemplateMessage(
             user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,

@@ -17,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -184,32 +186,42 @@ public class AuthController {
   }
 
   /**
-   * Endpoint for getting the current user's email.
-   * This method retrieves the email of the currently authenticated user.
+   * Endpoint for getting the current user's info.
+   * This method retrieves the email and role of the currently authenticated user.
    *
-   * @return a ResponseEntity containing the user's email or no content if not authenticated
+   * @return a ResponseEntity containing the user's info or no content if not authenticated
    */
   @Operation(
-      summary = "Get current user email",
-      description = "Returns the email of the currently authenticated user,"
-       + "or no content if not authenticated."
+      summary = "Get current user info",
+      description = "Returns the email and role of the currently authenticated user,"
+      + "or no content if not authenticated."
   )
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Authenticated – returns email"),
+      @ApiResponse(responseCode = "200", description = "Authenticated – returns user info"),
       @ApiResponse(responseCode = "204", description = "Not authenticated – no content")
   })
   @GetMapping("/me")
-  public ResponseEntity<String> getCurrentUserEmail() {
+  public ResponseEntity<Map<String, String>> getCurrentUserInfo() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth != null && auth.isAuthenticated()
-         && !(auth instanceof AnonymousAuthenticationToken)) {
-      return ResponseEntity.ok(auth.getName());
+    if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+      Map<String, String> userInfo = new HashMap<>();
+      userInfo.put("email", auth.getName());
+        
+      // Extract role from authorities
+      String role = auth.getAuthorities().stream()
+          .findFirst()
+          .map(authority -> authority.getAuthority())
+          .orElse("ROLE_UNKNOWN");
+        
+      userInfo.put("role", role);
+      return ResponseEntity.ok(userInfo);
     }
+    
+    logger.info("GET /me - No authenticated user found");
     return ResponseEntity.noContent().build();
   }
 
   /**
-
    * Endpoint for logging out a user.
    * This method clears the JWT cookie to log out the current user.
    *
