@@ -116,3 +116,11 @@ INSERT INTO emergency_group_invitations (household_id, emergency_group_id)
 VALUES (2, 2),
        (2, 4),
        (5, 4);
+
+-- Insert news articles (no foreign key dependencies)
+INSERT INTO news_articles (title, content, published_at) VALUES
+       ('Earthquake Strikes Eastern Turkey','A magnitude 6.8 earthquake hit eastern Turkey, causing extensive damage and loss of life. Rescue operations are ongoing amid harsh winter conditions.','2025-05-07 08:00:00'),
+       ('Severe Flooding in Southern Brazil','Heavy rains have led to severe flooding in southern Brazil, displacing thousands and causing significant property damage. Emergency services are on high alert.','2025-05-06 10:30:00'),
+       ('Wildfires Rage in California','Wildfires continue to spread across California, fueled by strong winds and dry conditions. Thousands of residents have been evacuated as firefighters battle the blazes.','2025-05-05 14:15:00'),
+       ('Hurricane Approaches Gulf Coast','A Category 4 hurricane is expected to make landfall on the Gulf Coast, prompting evacuation orders for coastal communities. Residents are urged to prepare for severe weather.','2025-05-04 11:45:00'),
+       ('Tornado Touches Down in Oklahoma','A tornado touched down in Oklahoma, causing widespread destruction in its path. Emergency responders are assessing the damage and providing assistance to affected residents.','2025-05-03 17:20:00');
