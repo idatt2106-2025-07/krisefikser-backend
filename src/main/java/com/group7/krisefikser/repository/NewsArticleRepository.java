@@ -52,13 +52,17 @@ public class NewsArticleRepository {
    */
   public NewsArticle getNewsArticleById(Long id) {
     String sql = "SELECT * FROM news_articles WHERE id = ?";
-    return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
-      NewsArticle article = new NewsArticle();
-      article.setId(rs.getLong("id"));
-      article.setTitle(rs.getString("title"));
-      article.setContent(rs.getString("content"));
-      article.setPublishedAt(rs.getTimestamp("published_at").toLocalDateTime());
-      return article;
-    }, id);
+    try {
+      return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+        NewsArticle article = new NewsArticle();
+        article.setId(rs.getLong("id"));
+        article.setTitle(rs.getString("title"));
+        article.setContent(rs.getString("content"));
+        article.setPublishedAt(rs.getTimestamp("published_at").toLocalDateTime());
+        return article;
+      }, id);
+    } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+      return null;
+    }
   }
 }
