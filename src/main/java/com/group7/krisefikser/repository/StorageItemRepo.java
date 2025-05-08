@@ -32,7 +32,7 @@ public class StorageItemRepo {
   private final RowMapper<StorageItem> storageItemRowMapper = (rs, rowNum) -> new StorageItem(
           rs.getInt("id"),
           rs.getTimestamp("expiration_date").toLocalDateTime(),
-          rs.getInt("quantity"),
+          rs.getDouble("quantity"),
           rs.getInt("household_id"),
           rs.getInt("item_id"),
           rs.getBoolean("is_shared")
