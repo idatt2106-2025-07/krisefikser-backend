@@ -47,6 +47,7 @@ public class UserService implements UserDetailsService {
   private final EmailService emailService;
   private final HouseholdService householdService;
   private final LoginAttemptService loginAttemptService;
+  private final UserPositionService userPositionService;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -305,12 +306,14 @@ public class UserService implements UserDetailsService {
   public UserInfoResponse getUserInfo() {
     User user = getCurrentUser();
     Household household = householdService.getHouseholdById(user.getHouseholdId());
+    boolean isSharingLocation = userPositionService.isSharingPosition();
     return new UserInfoResponse(
         user.getEmail(),
         user.getName(),
         user.getRole(),
         household.getLatitude(),
-        household.getLongitude()
+        household.getLongitude(),
+        isSharingLocation
     );
   }
 }

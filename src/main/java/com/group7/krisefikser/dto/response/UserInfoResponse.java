@@ -16,4 +16,5 @@ public class UserInfoResponse {
   private Role role;
   private double householdLatitude;
   private double householdLongitude;
+  private boolean isSharingLocation;
 }

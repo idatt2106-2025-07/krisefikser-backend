@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 public class AggregatedStorageItemResponse {
   private int itemId;
   private ItemResponse item;
-  private int totalQuantity;
+  private double totalQuantity;
   private LocalDateTime earliestExpirationDate;
-  private int householdId;
 }

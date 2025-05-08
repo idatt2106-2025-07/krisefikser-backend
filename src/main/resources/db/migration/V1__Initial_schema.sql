@@ -51,7 +51,7 @@ CREATE TABLE storage_items
 (
     id              INT PRIMARY KEY AUTO_INCREMENT,
     expiration_date TIMESTAMP NOT NULL,
-    quantity        INT       NOT NULL CHECK (quantity >= 0),
+    quantity        DOUBLE       NOT NULL CHECK (quantity >= 0),
     household_id    INT       NOT NULL,
     item_id         INT       NOT NULL,
     FOREIGN KEY (household_id) REFERENCES households (id) ON DELETE CASCADE,
