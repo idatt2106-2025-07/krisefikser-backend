@@ -201,7 +201,6 @@ public class AuthController {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null && auth.isAuthenticated()
         && !(auth instanceof AnonymousAuthenticationToken)) {
-      String userIdStr = auth.getName();
       try {
         com.group7.krisefikser.model.User user = userService.getCurrentUser();
         if (user != null) {

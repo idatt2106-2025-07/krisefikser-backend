@@ -3,19 +3,14 @@ package com.group7.krisefikser.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
 
 import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
-import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
-import com.group7.krisefikser.mapper.HouseholdMapper;
-import com.group7.krisefikser.mapper.UserMapper;
-import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
@@ -46,15 +41,6 @@ public class UserServiceTest {
 
   @Mock
   private JwtUtils jwtUtils;
-
-  @Mock
-  private EmailService emailService;
-
-  @Mock
-  private LoginAttemptService loginAttemptService;
-
-  @Mock
-  private HouseholdService householdService;
 
   @Mock
   private HttpServletResponse response;
