@@ -3,8 +3,8 @@ package com.group7.krisefikser.controller;
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
-import com.group7.krisefikser.dto.response.HouseholdDetailsResponse;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
+import com.group7.krisefikser.dto.response.HouseholdDetailsResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +43,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/households")
 @Tag(name = "Household Management", description = "APIs for household operations and membership")
 public class HouseholdController {
-  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HouseholdController.class);
   private final HouseholdService householdService;
   private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());
   private final UserService userService;
