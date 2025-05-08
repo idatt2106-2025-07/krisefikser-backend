@@ -1,7 +1,7 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.model.JoinHouseholdRequest;
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
 import com.group7.krisefikser.repository.UserRepository;

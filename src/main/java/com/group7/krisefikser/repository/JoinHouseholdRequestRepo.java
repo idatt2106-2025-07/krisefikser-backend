@@ -1,6 +1,6 @@
 package com.group7.krisefikser.repository;
 
-import com.group7.krisefikser.model.JoinHouseholdRequest;
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;

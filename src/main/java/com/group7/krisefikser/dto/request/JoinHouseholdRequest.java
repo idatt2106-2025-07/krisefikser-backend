@@ -1,4 +1,4 @@
-package com.group7.krisefikser.model;
+package com.group7.krisefikser.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
