@@ -214,12 +214,6 @@ public class AuthController {
           .orElse("ROLE_UNKNOWN");
         
       userInfo.put("role", role);
-
-      // Add logging to see what's being returned
-      logger.info("GET /me - Returning user info: email=" + auth.getName() + ", role=" + role);
-      logger.info("Authentication class: " + auth.getClass().getName());
-      logger.info("Authorities: " + auth.getAuthorities());
-        
       return ResponseEntity.ok(userInfo);
     }
     
