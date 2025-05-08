@@ -55,17 +55,17 @@ VALUES ('Charlie', 'child', 1),
        ('Daisy', 'child', 5);
 
 -- Insert storage items (references households and items)
-INSERT INTO storage_items (expiration_date, quantity, household_id, item_id)
-VALUES ('2025-12-31 00:00:00', 10, 1, 1),
-       ('2024-09-01 00:00:00', 5, 1, 2),
-       ('2030-01-01 00:00:00', 2, 1, 3),
-       ('2024-08-15 00:00:00', 20, 2, 4),
-       ('2024-11-01 00:00:00', 15, 2, 5),
-       ('2023-10-01 00:00:00', 3, 3, 6),
-       ('2025-01-20 00:00:00', 8, 3, 7),
-       ('2025-07-10 00:00:00', 50, 4, 8),
-       ('2024-06-30 00:00:00', 6, 5, 9),
-       ('2024-12-15 00:00:00', 10, 1, 10);
+INSERT INTO storage_items (expiration_date, quantity, household_id, item_id, is_shared)
+VALUES ('2025-12-31 00:00:00', 10, 1, 1, FALSE),
+       ('2024-09-01 00:00:00', 5, 1, 2, TRUE),
+       ('2030-01-01 00:00:00', 2, 1, 3, TRUE),
+       ('2024-08-15 00:00:00', 20, 2, 4, TRUE),
+       ('2024-11-01 00:00:00', 15, 2, 5, FALSE),
+       ('2023-10-01 00:00:00', 3, 3, 6, FALSE),
+       ('2025-01-20 00:00:00', 8, 3, 7, FALSE),
+       ('2025-07-10 00:00:00', 50, 4, 8, FALSE),
+       ('2024-06-30 00:00:00', 6, 5, 9, TRUE),
+       ('2024-12-15 00:00:00', 10, 1, 10, TRUE);
 
 -- Insert points of interest (no foreign key dependencies)
 INSERT INTO points_of_interest (longitude, latitude, type, opens_at, closes_at, contact_number, description)
