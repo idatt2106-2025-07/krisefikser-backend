@@ -288,6 +288,7 @@ class StorageItemServiceTest {
       verify(householdService, times(0)).getHouseholdNameById(anyLong());
     }
   }
+
   /**
    * Test for addStorageItem method with valid item.
    * This test verifies that the method successfully adds a valid storage item.
@@ -411,7 +412,7 @@ class StorageItemServiceTest {
     when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
     when(storageItemRepo.update(any(StorageItem.class))).thenReturn(updatedItem);
     when(householdRepository.getHouseholdById((long) householdId)).thenReturn(Optional.of(new Household(
-            (long)householdId, "Household Name", null, null, groupId
+            (long) householdId, "Household Name", null, null, groupId
     )));
     StorageItemResponse result = storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
             LocalDateTime.now().plusDays(15), 10.0, itemId)
@@ -466,18 +467,21 @@ class StorageItemServiceTest {
     assertEquals("Storage item not found with id: 1", exception.getMessage());
   }
 
-    /**
-     * Test for deleteStorageItem method.
-     * This test verifies that the method successfully deletes an existing storage item.
-     */
+  /**
+   * Test for deleteStorageItem method.
+   * This test verifies that the method successfully deletes an existing storage item.
+   */
   @Test
   void deleteStorageItem_shouldDeleteExistingItem() {
     // Setup
     int storageItemId = 1;
     int householdId = 1;
 
-    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem()));
-
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
+            storageItemId, LocalDateTime.now().plusDays(4), 5, householdId, 101, true
+    )));
+    when(householdRepository.getHouseholdById((long) householdId))
+            .thenReturn(Optional.of(new Household((long) householdId, "Household Name", null, null, 1L)));
     // Execute
     storageItemService.deleteStorageItem(storageItemId, householdId);
 
@@ -503,11 +507,58 @@ class StorageItemServiceTest {
             storageItemService.deleteStorageItem(storageItemId, householdId)
     );
 
-    assertEquals("Storage item not found with id: " + storageItemId + " in household: " + householdId,
+    assertEquals("Storage item not found with id: " + storageItemId,
             exception.getMessage());
     verify(storageItemRepo, times(1)).findById(storageItemId);
     verify(storageItemRepo, never()).deleteById(anyInt(), anyInt());
   }
+
+  @Test
+  void deleteStorageItem_shouldThrowException_whenNotPartOfHouseholdAndItemNotShared() {
+    // Setup
+    int storageItemId = 999;
+    int householdId = 1;
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
+            storageItemId, LocalDateTime.now().plusDays(4), 5, 99, 101, false
+    )));
+    when(householdRepository.getHouseholdById((long) householdId))
+            .thenReturn(Optional.of(new Household(999L, "Household Name", null, null, 1L)));
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(1L);
+
+    RuntimeException exception = assertThrows(IllegalArgumentException.class, () ->
+            storageItemService.deleteStorageItem(storageItemId, householdId)
+    );
+
+    assertEquals("User is not allowed to delete this item",
+            exception.getMessage());
+    verify(storageItemRepo, times(1)).findById(storageItemId);
+    verify(storageItemRepo, never()).deleteById(anyInt(), anyInt());
+  }
+
+  @Test
+  void deleteStorageItem_shouldThrowException_whenNotPartOfHouseholdAndGroup() {
+    // Setup
+    int storageItemId = 999;
+    int householdId = 1;
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
+            storageItemId, LocalDateTime.now().plusDays(4), 5, 999, 101, true
+    )));
+    when(householdRepository.getHouseholdById((long) householdId))
+            .thenReturn(Optional.of(new Household(999L, "Household Name", null, null, 1L)));
+    when(householdService.getGroupIdForCurrentUser()).thenReturn(200L);
+
+    RuntimeException exception = assertThrows(IllegalArgumentException.class, () ->
+            storageItemService.deleteStorageItem(storageItemId, householdId)
+    );
+
+    assertEquals("User is not allowed to delete this item",
+            exception.getMessage());
+    verify(storageItemRepo, times(1)).findById(storageItemId);
+    verify(storageItemRepo, never()).deleteById(anyInt(), anyInt());
+  }
+
 
   /**
    * Test for getExpiringStorageItems method.
@@ -770,7 +821,7 @@ class StorageItemServiceTest {
     when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(existingItem));
     when(storageItemRepo.update(any(StorageItem.class))).thenReturn(existingItem);
 
-    List<StorageItemResponse> result = storageItemService.updateStorageItemSharedStatus(storageItemId, householdId,request);
+    List<StorageItemResponse> result = storageItemService.updateStorageItemSharedStatus(storageItemId, householdId, request);
 
     assertEquals(1, result.size());
     assertEquals(newSharedStatus, existingItem.isShared());

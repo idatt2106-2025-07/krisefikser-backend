@@ -662,7 +662,7 @@ public class StorageItemController {
    * @return No content if successful, or an error status
    */
   @Operation(
-          summary = "Delete a storage item",
+          summary = "Delete a storage item in household, or shared in group",
           description = "Deletes a storage item with the specified ID from the "
                   + "authenticated user's household. "
                   + "Returns no content if successful.",
@@ -680,7 +680,7 @@ public class StorageItemController {
     try {
       int householdId = userService.getCurrentUserHouseholdId();
       logger.info("Deleting storage item with ID: " + id
-              + " for household ID: " + householdId);
+              + " in household with ID: " + householdId);
 
       storageItemService.deleteStorageItem(id, householdId);
       logger.info("Successfully deleted storage item with ID: " + id);

@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -93,7 +94,7 @@ public class StorageItemService {
   /**
    * Retrieves all storage items for a specific group ID and item ID.
    *
-   * @param itemId  The itemID of the items to retrieve.
+   * @param itemId The itemID of the items to retrieve.
    * @return The storage item with the specified ID, or null if not found.
    */
   public List<StorageItemGroupResponse> getSharedStorageItemsInGroupByItemId(
@@ -199,9 +200,18 @@ public class StorageItemService {
    * @param householdId The ID of the household the storage item belongs to.
    */
   public void deleteStorageItem(int id, int householdId) {
-    if (!storageItemExists(id, householdId)) {
-      throw new RuntimeException("Storage item not found with id: " + id
-              + " in household: " + householdId);
+    Long groupId = householdService.getGroupIdForCurrentUser();
+    StorageItem storageItem = storageItemRepo.findById(id)
+                    .orElseThrow(() -> new NoSuchElementException(
+                    "Storage item not found with id: " + id));
+    Household household = householdRepository.getHouseholdById((long) householdId)
+            .orElseThrow(() -> new RuntimeException("Household not found with id: "
+                    + householdId));
+
+    if (storageItem.getHouseholdId() != householdId
+            && (!Objects.equals(groupId, household.getEmergencyGroupId())
+                || !storageItem.isShared())) {
+      throw new IllegalArgumentException("User is not allowed to delete this item");
     }
 
     storageItemRepo.deleteById(id, householdId);
