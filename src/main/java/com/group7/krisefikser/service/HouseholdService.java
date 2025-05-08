@@ -179,7 +179,8 @@ public class HouseholdService {
     }
     List<User> users = userRepository.getUsersByHouseholdId(household.getId());
     // Make list of non-user members (others) when non-user members are added
-//    List<NonUserMember> others = nonUserMemberRepo.getNonUserMembersByHouseholdId();
+    List<NonUserMember> others =
+        nonUserMemberRepository.getNonUserMembersByHousehold(household.getId());
 
     List<StorageItem> storageItems = storageItemRepo.getAllStorageItems(
         household.getId().intValue());
@@ -201,10 +202,10 @@ public class HouseholdService {
     }
 
     int people = users.size();
-//    double nonUserFactor = 0.75;
-//    double totalPeople = people + others.size() * nonUserFactor;
+    double nonUserFactor = 0.75;
+    double totalPeople = people + others.size() * nonUserFactor;
 
-    double dailyCalories = people * 2000;
+    double dailyCalories = totalPeople * 2000;
     double dailyLiters = people * 2.0;
 
     double calorieDays = totalCalories / dailyCalories;
