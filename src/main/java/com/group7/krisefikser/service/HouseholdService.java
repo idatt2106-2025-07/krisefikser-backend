@@ -21,6 +21,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -171,14 +173,18 @@ public class HouseholdService {
    * @param request the ReadinessRequest object containing household ID
    * @return a ReadinessResponse object containing the calculated readiness
    */
-  public ReadinessResponse calculateReadinessForHousehold(ReadinessRequest request) {
-    Household household = householdRepository.getHouseholdById(
-        request.getHouseholdId()).orElse(null);
+  public ReadinessResponse calculateReadinessForHousehold() {
+    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    Optional<User> userOpt = userRepository.findById(Long.parseLong(userId));
+    if (userOpt.isEmpty()) {
+      return null;
+    }
+    Long householdId = userOpt.get().getHouseholdId();
+    Household household = householdRepository.getHouseholdById(householdId).orElse(null);
     if (household == null) {
       return null;
     }
     List<User> users = userRepository.getUsersByHouseholdId(household.getId());
-    // Make list of non-user members (others) when non-user members are added
     List<NonUserMember> others =
         nonUserMemberRepository.getNonUserMembersByHousehold(household.getId());
 
@@ -194,8 +200,8 @@ public class HouseholdService {
         Item item = itemRepo.findById(si.getItemId()).orElse(null);
         totalCalories += item.getCalories() * si.getQuantity();
 
-        if ("L".equalsIgnoreCase(item.getUnit()) &&
-            "drink".equalsIgnoreCase(String.valueOf(item.getType()))) {
+        if ("L".equalsIgnoreCase(item.getUnit())
+            && "drink".equalsIgnoreCase(String.valueOf(item.getType()))) {
           totalLiters += si.getQuantity();
         }
       }
