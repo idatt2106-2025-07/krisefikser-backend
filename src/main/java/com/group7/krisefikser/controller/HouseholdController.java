@@ -2,7 +2,6 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
-import com.group7.krisefikser.dto.request.ReadinessRequest;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
@@ -223,11 +222,17 @@ public class HouseholdController {
   @GetMapping("/readiness")
   public ResponseEntity<ReadinessResponse> getReadiness() {
     logger.info("Calculating readiness for household");
-    ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold();
-    if (readinessResponse != null) {
-      return ResponseEntity.ok(readinessResponse);
-    } else {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    try {
+      ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold();
+      if (readinessResponse != null) {
+        return ResponseEntity.ok(readinessResponse);
+      } else {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+      }
+    } catch (Exception e) {
+      logger.severe("Error calculating readiness: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ReadinessResponse(0, 0));
     }
   }
 }
