@@ -144,7 +144,7 @@ public class UserService implements UserDetailsService {
 <span class="pc bpc" id="L144" title="1 of 2 branches missed.">    if (user.getRole() == Role.ROLE_ADMIN) {</span>
       try {
 <span class="nc" id="L146">        String twoFactorToken = jwtUtils.generate2faToken(user.getId());</span>
-<span class="nc" id="L147">        String twoFactorLink = frontendUrl + &quot;/verify?token=&quot; + twoFactorToken;</span>
+<span class="nc" id="L147">        String twoFactorLink = frontendUrl + &quot;/verify-admin?token=&quot; + twoFactorToken;</span>
 
 <span class="nc" id="L149">        emailService.sendTemplateMessage(</span>
 <span class="nc" id="L150">            user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,</span>

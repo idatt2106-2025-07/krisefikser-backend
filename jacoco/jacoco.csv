@@ -28,7 +28,7 @@ krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0
 krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2,3,0,2
 krisefikser,com.group7.krisefikser.controller,PrivacyPolicyController,54,50,2,2,14,16,2,4,0,4
 krisefikser,com.group7.krisefikser.controller,StorageItemController,156,278,2,2,46,76,3,12,1,12
-krisefikser,com.group7.krisefikser.controller,AuthController,110,167,7,7,27,40,7,8,2,6
+krisefikser,com.group7.krisefikser.controller,AuthController,110,197,7,7,27,48,7,9,2,7
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,116,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,SuperAdminController,13,113,1,1,4,30,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,UserController,0,26,0,0,0,7,0,2,0,2
@@ -65,7 +65,7 @@ krisefikser,com.group7.krisefikser.service,StorageItemService,126,362,30,36,31,8
 krisefikser,com.group7.krisefikser.service,EmailService,0,41,0,0,0,12,0,3,0,3
 krisefikser,com.group7.krisefikser.service,AffectedAreaService,0,77,0,8,0,21,0,8,0,4
 krisefikser,com.group7.krisefikser.service,HouseholdService,30,63,2,0,10,15,2,6,1,6
-krisefikser,com.group7.krisefikser.service,SuperAdminService,0,151,0,16,0,39,0,12,0,4
+krisefikser,com.group7.krisefikser.service,SuperAdminService,3,158,1,17,0,40,1,12,0,4
 krisefikser,com.group7.krisefikser.service,NotificationService,0,31,0,4,0,6,0,3,0,1
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2
