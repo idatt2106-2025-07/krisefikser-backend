@@ -116,6 +116,25 @@ public class ItemService {
   }
 
   /**
+   * Searches for items that match the given search term by name.
+   * The search is case-insensitive and matches partial item names.
+   *
+   * @param searchTerm The term to search for in item names
+   * @return A list of items that match the search term
+   */
+  public List&lt;Item&gt; searchItemsByName(String searchTerm) {
+<span class="nc bnc" id="L126" title="All 4 branches missed.">    if (searchTerm == null || searchTerm.trim().isEmpty()) {</span>
+<span class="nc" id="L127">      return getAllItems();</span>
+    }
+
+<span class="nc" id="L130">    String lowercaseSearchTerm = searchTerm.toLowerCase().trim();</span>
+
+<span class="nc" id="L132">    return getAllItems().stream()</span>
+<span class="nc" id="L133">      .filter(item -&gt; item.getName().toLowerCase().contains(lowercaseSearchTerm))</span>
+<span class="nc" id="L134">      .collect(Collectors.toList());</span>
+  }
+
+  /**
    * Adds a new item to the repository after validating it.
    * This method ensures that the item meets all validation criteria
    * before delegating the addition to the repository.
@@ -124,8 +143,8 @@ public class ItemService {
    * @return The added item with its generated ID.
    */
   public Item addItem(Item item) {
-<span class="fc" id="L127">    validateItem(item);</span>
-<span class="fc" id="L128">    return itemRepo.add(item);</span>
+<span class="fc" id="L146">    validateItem(item);</span>
+<span class="fc" id="L147">    return itemRepo.add(item);</span>
   }
 
   /**
@@ -138,13 +157,13 @@ public class ItemService {
    * @return The updated item.
    */
   public Item updateItem(int id, Item item) {
-<span class="fc bfc" id="L141" title="All 2 branches covered.">    if (!itemExists(id)) {</span>
-<span class="fc" id="L142">      throw new RuntimeException(&quot;Item not found with id: &quot; + id);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">    if (!itemExists(id)) {</span>
+<span class="fc" id="L161">      throw new RuntimeException(&quot;Item not found with id: &quot; + id);</span>
     }
 
-<span class="fc" id="L145">    validateItem(item);</span>
-<span class="fc" id="L146">    item.setId(id);</span>
-<span class="fc" id="L147">    return itemRepo.update(item);</span>
+<span class="fc" id="L164">    validateItem(item);</span>
+<span class="fc" id="L165">    item.setId(id);</span>
+<span class="fc" id="L166">    return itemRepo.update(item);</span>
   }
 
   /**
@@ -153,12 +172,12 @@ public class ItemService {
    * @param id The ID of the item to be deleted.
    */
   public void deleteItem(int id) {
-<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (!itemExists(id)) {</span>
-<span class="fc" id="L157">      throw new RuntimeException(&quot;Item not found with id: &quot; + id);</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">    if (!itemExists(id)) {</span>
+<span class="fc" id="L176">      throw new RuntimeException(&quot;Item not found with id: &quot; + id);</span>
     }
 
-<span class="fc" id="L160">    itemRepo.deleteById(id);</span>
-<span class="fc" id="L161">  }</span>
+<span class="fc" id="L179">    itemRepo.deleteById(id);</span>
+<span class="fc" id="L180">  }</span>
 
   /**
    * Validates the item properties before adding or updating it.
@@ -168,25 +187,25 @@ public class ItemService {
    */
   private void validateItem(Item item) {
     // Name validation
-<span class="fc bfc" id="L171" title="All 4 branches covered.">    if (item.getName() == null || item.getName().trim().isEmpty()) {</span>
-<span class="fc" id="L172">      throw new IllegalArgumentException(&quot;Item name cannot be empty&quot;);</span>
+<span class="fc bfc" id="L190" title="All 4 branches covered.">    if (item.getName() == null || item.getName().trim().isEmpty()) {</span>
+<span class="fc" id="L191">      throw new IllegalArgumentException(&quot;Item name cannot be empty&quot;);</span>
     }
 
     // Unit validation
-<span class="fc bfc" id="L176" title="All 4 branches covered.">    if (item.getUnit() == null || item.getUnit().trim().isEmpty()) {</span>
-<span class="fc" id="L177">      throw new IllegalArgumentException(&quot;Item unit cannot be empty&quot;);</span>
+<span class="fc bfc" id="L195" title="All 4 branches covered.">    if (item.getUnit() == null || item.getUnit().trim().isEmpty()) {</span>
+<span class="fc" id="L196">      throw new IllegalArgumentException(&quot;Item unit cannot be empty&quot;);</span>
     }
 
     // Calories validation
-<span class="fc bfc" id="L181" title="All 2 branches covered.">    if (item.getCalories() &lt; 0) {</span>
-<span class="fc" id="L182">      throw new IllegalArgumentException(&quot;Calories cannot be negative&quot;);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">    if (item.getCalories() &lt; 0) {</span>
+<span class="fc" id="L201">      throw new IllegalArgumentException(&quot;Calories cannot be negative&quot;);</span>
     }
 
     // Type validation
-<span class="fc bfc" id="L186" title="All 2 branches covered.">    if (item.getType() == null) {</span>
-<span class="fc" id="L187">      throw new IllegalArgumentException(&quot;Item type must be specified&quot;);</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">    if (item.getType() == null) {</span>
+<span class="fc" id="L206">      throw new IllegalArgumentException(&quot;Item type must be specified&quot;);</span>
     }
-<span class="fc" id="L189">  }</span>
+<span class="fc" id="L208">  }</span>
 
   /**
    * Checks if an item exists in the repository by its ID.
@@ -195,7 +214,7 @@ public class ItemService {
    * @return true if the item exists, false otherwise.
    */
   public boolean itemExists(int id) {
-<span class="fc" id="L198">    return itemRepo.findById(id).isPresent();</span>
+<span class="fc" id="L217">    return itemRepo.findById(id).isPresent();</span>
   }
 
   /**
@@ -205,9 +224,9 @@ public class ItemService {
    * @return A list of corresponding ItemResponse objects
    */
   public List&lt;ItemResponse&gt; convertToItemResponses(List&lt;Item&gt; items) {
-<span class="fc" id="L208">    return items.stream()</span>
-<span class="fc" id="L209">      .map(ItemResponse::fromEntity)</span>
-<span class="fc" id="L210">      .collect(Collectors.toList());</span>
+<span class="fc" id="L227">    return items.stream()</span>
+<span class="fc" id="L228">      .map(ItemResponse::fromEntity)</span>
+<span class="fc" id="L229">      .collect(Collectors.toList());</span>
   }
 
   /**
@@ -218,18 +237,18 @@ public class ItemService {
    * @return A list of valid ItemType enums
    */
   public List&lt;ItemType&gt; convertToItemTypes(List&lt;String&gt; typeStrings) {
-<span class="fc" id="L221">    List&lt;ItemType&gt; itemTypes = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L222" title="All 4 branches covered.">    if (typeStrings != null &amp;&amp; !typeStrings.isEmpty()) {</span>
-<span class="fc bfc" id="L223" title="All 2 branches covered.">      for (String typeStr : typeStrings) {</span>
+<span class="fc" id="L240">    List&lt;ItemType&gt; itemTypes = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L241" title="All 4 branches covered.">    if (typeStrings != null &amp;&amp; !typeStrings.isEmpty()) {</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">      for (String typeStr : typeStrings) {</span>
         try {
-<span class="fc" id="L225">          ItemType type = ItemType.fromString(typeStr);</span>
-<span class="fc" id="L226">          itemTypes.add(type);</span>
-<span class="fc" id="L227">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L244">          ItemType type = ItemType.fromString(typeStr);</span>
+<span class="fc" id="L245">          itemTypes.add(type);</span>
+<span class="fc" id="L246">        } catch (IllegalArgumentException e) {</span>
           // Skip invalid types
-<span class="fc" id="L229">        }</span>
-<span class="fc" id="L230">      }</span>
+<span class="fc" id="L248">        }</span>
+<span class="fc" id="L249">      }</span>
     }
-<span class="fc" id="L232">    return itemTypes;</span>
+<span class="fc" id="L251">    return itemTypes;</span>
   }
 
   /**
@@ -240,9 +259,9 @@ public class ItemService {
    * @return The response DTO for the created item
    */
   public ItemResponse addItemFromRequest(ItemRequest itemRequest) {
-<span class="fc" id="L243">    Item item = itemRequest.toEntity();</span>
-<span class="fc" id="L244">    Item createdItem = addItem(item);</span>
-<span class="fc" id="L245">    return ItemResponse.fromEntity(createdItem);</span>
+<span class="fc" id="L262">    Item item = itemRequest.toEntity();</span>
+<span class="fc" id="L263">    Item createdItem = addItem(item);</span>
+<span class="fc" id="L264">    return ItemResponse.fromEntity(createdItem);</span>
   }
 
   /**
@@ -254,9 +273,11 @@ public class ItemService {
    * @return The response DTO for the updated item
    */
   public ItemResponse updateItemFromRequest(int id, ItemRequest itemRequest) {
-<span class="fc" id="L257">    Item item = itemRequest.toEntity(id);</span>
-<span class="fc" id="L258">    Item updatedItem = updateItem(id, item);</span>
-<span class="fc" id="L259">    return ItemResponse.fromEntity(updatedItem);</span>
+<span class="fc" id="L276">    Item item = itemRequest.toEntity(id);</span>
+<span class="fc" id="L277">    Item updatedItem = updateItem(id, item);</span>
+<span class="fc" id="L278">    return ItemResponse.fromEntity(updatedItem);</span>
   }
+
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

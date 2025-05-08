@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -39,13 +40,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = &quot;Item&quot;, description = &quot;Endpoints for managing Items&quot;)
 public class ItemController {
   private final ItemService itemService;
-<span class="fc" id="L42">  private static final Logger logger = Logger.getLogger(ItemController.class.getName());</span>
+<span class="fc" id="L43">  private static final Logger logger = Logger.getLogger(ItemController.class.getName());</span>
 
 
   @Autowired
-<span class="fc" id="L46">  public ItemController(ItemService itemService) {</span>
-<span class="fc" id="L47">    this.itemService = itemService;</span>
-<span class="fc" id="L48">  }</span>
+<span class="fc" id="L47">  public ItemController(ItemService itemService) {</span>
+<span class="fc" id="L48">    this.itemService = itemService;</span>
+<span class="fc" id="L49">  }</span>
 
   /**
    * Endpoint to fetch all items.
@@ -65,9 +66,9 @@ public class ItemController {
     )
   @GetMapping
   public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; getAllItems() {
-<span class="fc" id="L68">    List&lt;Item&gt; items = itemService.getAllItems();</span>
-<span class="fc" id="L69">    List&lt;ItemResponse&gt; itemResponses = itemService.convertToItemResponses(items);</span>
-<span class="fc" id="L70">    return ResponseEntity.ok(itemResponses);</span>
+<span class="fc" id="L69">    List&lt;Item&gt; items = itemService.getAllItems();</span>
+<span class="fc" id="L70">    List&lt;ItemResponse&gt; itemResponses = itemService.convertToItemResponses(items);</span>
+<span class="fc" id="L71">    return ResponseEntity.ok(itemResponses);</span>
   }
 
   /**
@@ -90,14 +91,14 @@ public class ItemController {
   @GetMapping(&quot;/{id}&quot;)
   public ResponseEntity&lt;ItemResponse&gt; getItemById(@PathVariable int id) {
     try {
-<span class="fc" id="L93">      Item item = itemService.getItemById(id);</span>
-<span class="fc" id="L94">      return ResponseEntity.ok(ItemResponse.fromEntity(item));</span>
-<span class="fc" id="L95">    } catch (RuntimeException e) {</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
-<span class="fc" id="L97">        return ResponseEntity.notFound().build();</span>
+<span class="fc" id="L94">      Item item = itemService.getItemById(id);</span>
+<span class="fc" id="L95">      return ResponseEntity.ok(ItemResponse.fromEntity(item));</span>
+<span class="fc" id="L96">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L98">        return ResponseEntity.notFound().build();</span>
       }
-<span class="nc" id="L99">      logger.severe(&quot;Unexpected error retrieving item with ID &quot; + id + &quot;: &quot; + e.getMessage());</span>
-<span class="nc" id="L100">      return ResponseEntity.status(500).body(null);</span>
+<span class="nc" id="L100">      logger.severe(&quot;Unexpected error retrieving item with ID &quot; + id + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L101">      return ResponseEntity.status(500).body(null);</span>
     }
   }
 
@@ -131,17 +132,17 @@ public class ItemController {
   public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; filterItems(
       @Valid @ModelAttribute ItemFilterRequest request) {
 
-<span class="fc" id="L134">    logger.info(&quot;Received request to filter items by types: &quot; + request.getTypes());</span>
+<span class="fc" id="L135">    logger.info(&quot;Received request to filter items by types: &quot; + request.getTypes());</span>
     try {
       // Use the service method to convert strings to ItemTypes
-<span class="fc" id="L137">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(request.getTypes());</span>
+<span class="fc" id="L138">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(request.getTypes());</span>
 
-<span class="fc" id="L139">      List&lt;Item&gt; items = itemService.getItemsByTypes(itemTypes);</span>
-<span class="fc" id="L140">      logger.info(&quot;Successfully retrieved filtered items&quot;);</span>
-<span class="fc" id="L141">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
-<span class="nc" id="L142">    } catch (Exception e) {</span>
-<span class="nc" id="L143">      logger.severe(&quot;Unexpected error filtering items: &quot; + e.getMessage());</span>
-<span class="nc" id="L144">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L140">      List&lt;Item&gt; items = itemService.getItemsByTypes(itemTypes);</span>
+<span class="fc" id="L141">      logger.info(&quot;Successfully retrieved filtered items&quot;);</span>
+<span class="fc" id="L142">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
+<span class="nc" id="L143">    } catch (Exception e) {</span>
+<span class="nc" id="L144">      logger.severe(&quot;Unexpected error filtering items: &quot; + e.getMessage());</span>
+<span class="nc" id="L145">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -169,17 +170,17 @@ public class ItemController {
   @GetMapping(&quot;/sort&quot;)
   public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; sortItems(
       @Valid @ModelAttribute ItemSortRequest request) {
-<span class="fc" id="L172">    logger.info(&quot;Received request to sort items by: &quot; + request.getSortBy()</span>
-<span class="fc" id="L173">        + &quot; in direction: &quot; + request.getSortDirection());</span>
+<span class="fc" id="L173">    logger.info(&quot;Received request to sort items by: &quot; + request.getSortBy()</span>
+<span class="fc" id="L174">        + &quot; in direction: &quot; + request.getSortDirection());</span>
     try {
-<span class="fc" id="L175">      List&lt;Item&gt; items = itemService.getSortedItems(</span>
-<span class="fc" id="L176">          request.getSortBy().toLowerCase(),</span>
-<span class="fc" id="L177">          request.getSortDirection().toLowerCase());</span>
-<span class="fc" id="L178">      logger.info(&quot;Successfully sorted items&quot;);</span>
-<span class="fc" id="L179">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
-<span class="nc" id="L180">    } catch (Exception e) {</span>
-<span class="nc" id="L181">      logger.severe(&quot;Unexpected error sorting items: &quot; + e.getMessage());</span>
-<span class="nc" id="L182">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L176">      List&lt;Item&gt; items = itemService.getSortedItems(</span>
+<span class="fc" id="L177">          request.getSortBy().toLowerCase(),</span>
+<span class="fc" id="L178">          request.getSortDirection().toLowerCase());</span>
+<span class="fc" id="L179">      logger.info(&quot;Successfully sorted items&quot;);</span>
+<span class="fc" id="L180">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
+<span class="nc" id="L181">    } catch (Exception e) {</span>
+<span class="nc" id="L182">      logger.severe(&quot;Unexpected error sorting items: &quot; + e.getMessage());</span>
+<span class="nc" id="L183">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -213,20 +214,55 @@ public class ItemController {
       @Valid @ModelAttribute ItemFilterRequest filterRequest,
       @Valid @ModelAttribute ItemSortRequest sortRequest) {
 
-<span class="fc" id="L216">    logger.info(&quot;Received request to filter and sort items&quot;);</span>
+<span class="fc" id="L217">    logger.info(&quot;Received request to filter and sort items&quot;);</span>
     try {
       // Use the service method to convert strings to ItemTypes
-<span class="fc" id="L219">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(filterRequest.getTypes());</span>
+<span class="fc" id="L220">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(filterRequest.getTypes());</span>
 
-<span class="fc" id="L221">      List&lt;Item&gt; items = itemService.getFilteredAndSortedItems(</span>
+<span class="fc" id="L222">      List&lt;Item&gt; items = itemService.getFilteredAndSortedItems(</span>
           itemTypes,
-<span class="fc" id="L223">          sortRequest.getSortBy().toLowerCase(),</span>
-<span class="fc" id="L224">          sortRequest.getSortDirection().toLowerCase());</span>
-<span class="fc" id="L225">      logger.info(&quot;Successfully filtered and sorted items&quot;);</span>
-<span class="fc" id="L226">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
-<span class="nc" id="L227">    } catch (Exception e) {</span>
-<span class="nc" id="L228">      logger.severe(&quot;Unexpected error filtering and sorting items: &quot; + e.getMessage());</span>
-<span class="nc" id="L229">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L224">          sortRequest.getSortBy().toLowerCase(),</span>
+<span class="fc" id="L225">          sortRequest.getSortDirection().toLowerCase());</span>
+<span class="fc" id="L226">      logger.info(&quot;Successfully filtered and sorted items&quot;);</span>
+<span class="fc" id="L227">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
+<span class="nc" id="L228">    } catch (Exception e) {</span>
+<span class="nc" id="L229">      logger.severe(&quot;Unexpected error filtering and sorting items: &quot; + e.getMessage());</span>
+<span class="nc" id="L230">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+    }
+  }
+
+  /**
+   * Endpoint to search for items by name.
+   * This endpoint searches for items whose names contain the provided search term.
+   * The search is case-insensitive and matches partial item names.
+   *
+   * @param searchTerm The term to search for in item names
+   * @return A list of items that match the search term
+   */
+  @Operation(
+      summary = &quot;Search items by name&quot;,
+      description = &quot;Searches for items whose names contain the provided search term. &quot;
+        + &quot;The search is case-insensitive and matches partial item names.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved matching items&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @GetMapping(&quot;/search&quot;)
+  public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; searchItems(
+      @RequestParam(required = false) String searchTerm) {
+
+<span class="nc" id="L257">    logger.info(&quot;Searching for items with search term: &quot; + searchTerm);</span>
+    try {
+<span class="nc" id="L259">      List&lt;Item&gt; matchingItems = itemService.searchItemsByName(searchTerm);</span>
+<span class="nc" id="L260">      List&lt;ItemResponse&gt; itemResponses = itemService.convertToItemResponses(matchingItems);</span>
+<span class="nc" id="L261">      logger.info(&quot;Found &quot; + matchingItems.size() + &quot; matching items&quot;);</span>
+<span class="nc" id="L262">      return ResponseEntity.ok(itemResponses);</span>
+<span class="nc" id="L263">    } catch (Exception e) {</span>
+<span class="nc" id="L264">      logger.severe(&quot;Unexpected error searching items: &quot; + e.getMessage());</span>
+<span class="nc" id="L265">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -256,14 +292,14 @@ public class ItemController {
     )
   @PostMapping
   public ResponseEntity&lt;ItemResponse&gt; addItem(@Valid @RequestBody ItemRequest itemRequest) {
-<span class="fc" id="L259">    logger.info(&quot;Received request to add a new item: &quot; + itemRequest.getName());</span>
+<span class="fc" id="L295">    logger.info(&quot;Received request to add a new item: &quot; + itemRequest.getName());</span>
     try {
-<span class="fc" id="L261">      ItemResponse createdItemResponse = itemService.addItemFromRequest(itemRequest);</span>
-<span class="fc" id="L262">      logger.info(&quot;Successfully added item with ID: &quot; + createdItemResponse.getId());</span>
-<span class="fc" id="L263">      return ResponseEntity.status(HttpStatus.CREATED).body(createdItemResponse);</span>
-<span class="nc" id="L264">    } catch (Exception e) {</span>
-<span class="nc" id="L265">      logger.severe(&quot;Error adding item: &quot; + e.getMessage());</span>
-<span class="nc" id="L266">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="fc" id="L297">      ItemResponse createdItemResponse = itemService.addItemFromRequest(itemRequest);</span>
+<span class="fc" id="L298">      logger.info(&quot;Successfully added item with ID: &quot; + createdItemResponse.getId());</span>
+<span class="fc" id="L299">      return ResponseEntity.status(HttpStatus.CREATED).body(createdItemResponse);</span>
+<span class="nc" id="L300">    } catch (Exception e) {</span>
+<span class="nc" id="L301">      logger.severe(&quot;Error adding item: &quot; + e.getMessage());</span>
+<span class="nc" id="L302">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 
@@ -297,18 +333,18 @@ public class ItemController {
       @Parameter(description = &quot;ID of the item to update&quot;, required = true, example = &quot;1&quot;)
       @PathVariable int id,
       @Valid @RequestBody ItemRequest itemRequest) {
-<span class="fc" id="L300">    logger.info(&quot;Received request to update item with ID: &quot; + id);</span>
+<span class="fc" id="L336">    logger.info(&quot;Received request to update item with ID: &quot; + id);</span>
     try {
-<span class="fc" id="L302">      ItemResponse updatedItemResponse = itemService.updateItemFromRequest(id, itemRequest);</span>
-<span class="fc" id="L303">      logger.info(&quot;Successfully updated item with ID: &quot; + id);</span>
-<span class="fc" id="L304">      return ResponseEntity.ok(updatedItemResponse);</span>
-<span class="fc" id="L305">    } catch (RuntimeException e) {</span>
-<span class="pc bpc" id="L306" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
-<span class="fc" id="L307">        logger.info(&quot;Item not found with ID: &quot; + id);</span>
-<span class="fc" id="L308">        return ResponseEntity.notFound().build();</span>
+<span class="fc" id="L338">      ItemResponse updatedItemResponse = itemService.updateItemFromRequest(id, itemRequest);</span>
+<span class="fc" id="L339">      logger.info(&quot;Successfully updated item with ID: &quot; + id);</span>
+<span class="fc" id="L340">      return ResponseEntity.ok(updatedItemResponse);</span>
+<span class="fc" id="L341">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L343">        logger.info(&quot;Item not found with ID: &quot; + id);</span>
+<span class="fc" id="L344">        return ResponseEntity.notFound().build();</span>
       }
-<span class="nc" id="L310">      logger.severe(&quot;Error updating item: &quot; + e.getMessage());</span>
-<span class="nc" id="L311">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="nc" id="L346">      logger.severe(&quot;Error updating item: &quot; + e.getMessage());</span>
+<span class="nc" id="L347">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 
@@ -331,18 +367,18 @@ public class ItemController {
   public ResponseEntity&lt;Void&gt; deleteItem(
       @Parameter(description = &quot;ID of the item to delete&quot;, required = true, example = &quot;1&quot;)
       @PathVariable int id) {
-<span class="fc" id="L334">    logger.info(&quot;Received request to delete item with ID: &quot; + id);</span>
+<span class="fc" id="L370">    logger.info(&quot;Received request to delete item with ID: &quot; + id);</span>
     try {
-<span class="fc" id="L336">      itemService.deleteItem(id);</span>
-<span class="fc" id="L337">      logger.info(&quot;Successfully deleted item with ID: &quot; + id);</span>
-<span class="fc" id="L338">      return ResponseEntity.noContent().build();</span>
-<span class="fc" id="L339">    } catch (RuntimeException e) {</span>
-<span class="pc bpc" id="L340" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
-<span class="fc" id="L341">        logger.info(&quot;Item not found with ID: &quot; + id);</span>
-<span class="fc" id="L342">        return ResponseEntity.notFound().build();</span>
+<span class="fc" id="L372">      itemService.deleteItem(id);</span>
+<span class="fc" id="L373">      logger.info(&quot;Successfully deleted item with ID: &quot; + id);</span>
+<span class="fc" id="L374">      return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L375">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L377">        logger.info(&quot;Item not found with ID: &quot; + id);</span>
+<span class="fc" id="L378">        return ResponseEntity.notFound().build();</span>
       }
-<span class="nc" id="L344">      logger.severe(&quot;Error deleting item: &quot; + e.getMessage());</span>
-<span class="nc" id="L345">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="nc" id="L380">      logger.severe(&quot;Error deleting item: &quot; + e.getMessage());</span>
+<span class="nc" id="L381">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 }

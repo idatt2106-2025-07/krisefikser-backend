@@ -20,7 +20,8 @@ public class StorageItemResponse {
   private int quantity;
   private int householdId;
   private int itemId;
-  private ItemResponse item; // Include the associated item details
+  private boolean isShared;
+  private ItemResponse item;
 
   /**
    * Converts a StorageItem entity to a StorageItemResponse.
@@ -29,32 +30,34 @@ public class StorageItemResponse {
    * @return the StorageItemResponse
    */
   public static StorageItemResponse fromEntity(StorageItem storageItem) {
-<span class="nc" id="L32">    return new StorageItemResponse(</span>
-<span class="nc" id="L33">      storageItem.getId(),</span>
-<span class="nc" id="L34">      storageItem.getExpirationDate(),</span>
-<span class="nc" id="L35">      storageItem.getQuantity(),</span>
-<span class="nc" id="L36">      storageItem.getHouseholdId(),</span>
-<span class="nc" id="L37">      storageItem.getItemId(),</span>
-      null
+<span class="nc" id="L33">    return new StorageItemResponse(</span>
+<span class="nc" id="L34">            storageItem.getId(),</span>
+<span class="nc" id="L35">            storageItem.getExpirationDate(),</span>
+<span class="nc" id="L36">            storageItem.getQuantity(),</span>
+<span class="nc" id="L37">            storageItem.getHouseholdId(),</span>
+<span class="nc" id="L38">            storageItem.getItemId(),</span>
+<span class="nc" id="L39">            storageItem.isShared(),</span>
+            null
     );
   }
 
   /**
    * Converts a StorageItem entity to a StorageItemResponse with item details.
    *
-   * @param storageItem the StorageItem entity
+   * @param storageItem  the StorageItem entity
    * @param itemResponse the ItemResponse for the associated item
    * @return the StorageItemResponse with item details
    */
   public static StorageItemResponse fromEntityWithItem(StorageItem storageItem,
                                                        ItemResponse itemResponse) {
-<span class="fc" id="L51">    return new StorageItemResponse(</span>
-<span class="fc" id="L52">      storageItem.getId(),</span>
-<span class="fc" id="L53">      storageItem.getExpirationDate(),</span>
-<span class="fc" id="L54">      storageItem.getQuantity(),</span>
-<span class="fc" id="L55">      storageItem.getHouseholdId(),</span>
-<span class="fc" id="L56">      storageItem.getItemId(),</span>
-      itemResponse
+<span class="fc" id="L53">    return new StorageItemResponse(</span>
+<span class="fc" id="L54">            storageItem.getId(),</span>
+<span class="fc" id="L55">            storageItem.getExpirationDate(),</span>
+<span class="fc" id="L56">            storageItem.getQuantity(),</span>
+<span class="fc" id="L57">            storageItem.getHouseholdId(),</span>
+<span class="fc" id="L58">            storageItem.getItemId(),</span>
+<span class="fc" id="L59">            storageItem.isShared(),</span>
+            itemResponse
     );
   }
 }

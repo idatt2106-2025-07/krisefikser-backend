@@ -80,7 +80,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping
+  @GetMapping(&quot;/household&quot;)
   public ResponseEntity&lt;List&lt;StorageItemResponse&gt;&gt; getAllStorageItems() {
     try {
 <span class="fc" id="L86">      int householdId = userService.getCurrentUserHouseholdId();</span>
@@ -112,7 +112,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/expiring&quot;)
+  @GetMapping(&quot;/household/expiring&quot;)
   public ResponseEntity&lt;List&lt;StorageItemResponse&gt;&gt; getExpiringStorageItems(
       @RequestParam(defaultValue = &quot;7&quot;) int days) {
 
@@ -150,7 +150,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/by-item/{itemId}&quot;)
+  @GetMapping(&quot;/household/by-item/{itemId}&quot;)
   public ResponseEntity&lt;List&lt;StorageItemResponse&gt;&gt; getStorageItemsByItemId(
       @Parameter(description = &quot;Item ID&quot;, required = true)
       @PathVariable int itemId) {
@@ -190,7 +190,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/aggregated&quot;)
+  @GetMapping(&quot;/household/aggregated&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; getAggregatedStorageItems() {
     try {
 <span class="fc" id="L196">      int householdId = userService.getCurrentUserHouseholdId();</span>
@@ -224,7 +224,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/aggregated/sort&quot;)
+  @GetMapping(&quot;/household/aggregated/sort&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; sortAggregatedStorageItems(
       @Valid @ModelAttribute StorageItemSortRequest request) {
 
@@ -266,7 +266,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/aggregated/filter-by-type&quot;)
+  @GetMapping(&quot;/household/aggregated/filter-by-type&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; filterAggregatedStorageItemsByItemType(
       @RequestParam(required = false) List&lt;String&gt; types) {
 
@@ -315,7 +315,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/aggregated/filter-and-sort&quot;)
+  @GetMapping(&quot;/household/aggregated/filter-and-sort&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; filterAndSortAggregatedStorageItems(
       @RequestParam(required = false) List&lt;String&gt; types,
       @Valid @ModelAttribute StorageItemSortRequest sortRequest) {
@@ -363,7 +363,7 @@ public class StorageItemController {
         @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
       }
   )
-  @GetMapping(&quot;/aggregated/search&quot;)
+  @GetMapping(&quot;/household/aggregated/search&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; searchAggregatedStorageItems(
       @Valid @ModelAttribute StorageItemSearchRequest request) {
 
