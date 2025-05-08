@@ -2,6 +2,7 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
+import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
 import com.group7.krisefikser.mapper.HouseholdMapper;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/households")
 @Tag(name = "Household Management", description = "APIs for household operations and membership")
 public class HouseholdController {
+  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HouseholdController.class);
   private final HouseholdService householdService;
   private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());
 
@@ -169,5 +172,34 @@ public class HouseholdController {
     householdService.declineJoinRequest(requestId);
     logger.info("Declining join request: " + requestId);
     return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Endpoint to retrieve all members of the authenticated user's household.
+   *
+   * @return a ResponseEntity containing a list of household members
+   */
+  @Operation(summary = "Get household members",
+      description = "Retrieves all members of the authenticated user's household")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description =
+          "List of household members retrieved successfully",
+          content = @Content(schema = @Schema(implementation =
+              GetHouseholdMembersResponse.class))),
+      @ApiResponse(responseCode = "500", description =
+          "Internal server error"),
+      })
+  @GetMapping("/members")
+  public ResponseEntity<?> getHouseholdMembers() {
+    logger.info("Retrieving household members");
+
+    try {
+      List<GetHouseholdMembersResponse> responses = householdService.getHouseholdMembers();
+      return ResponseEntity.ok(responses);
+    } catch (Exception e) {
+      logger.severe("Error retrieving household members: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Error retrieving household members");
+    }
   }
 }
