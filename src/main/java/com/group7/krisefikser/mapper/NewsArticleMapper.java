@@ -25,6 +25,7 @@ public interface NewsArticleMapper {
    * @param newsArticle the NewsArticle object to convert
    * @return the converted ShortenedNewsArticleResponse object
    */
+  @Mapping(source = "id", target = "id")
   @Mapping(source = "title", target = "title")
   @Mapping(source = "publishedAt", target = "publishedAt",
       qualifiedByName = "localDateTimeToString")

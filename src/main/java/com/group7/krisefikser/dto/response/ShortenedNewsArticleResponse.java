@@ -7,6 +7,7 @@ import lombok.Data;
  */
 @Data
 public class ShortenedNewsArticleResponse {
+  private Long id;
   private String title;
   private String publishedAt;
 }
