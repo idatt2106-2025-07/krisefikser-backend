@@ -208,14 +208,14 @@ public class AuthController {
   public ResponseEntity<CurrentUserResponse> getCurrentUserInfo() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth != null && auth.isAuthenticated()
-      && !(auth instanceof AnonymousAuthenticationToken)) {
+        && !(auth instanceof AnonymousAuthenticationToken)) {
       try {
         com.group7.krisefikser.model.User user = userService.getCurrentUser();
         if (user != null) {
           String role = auth.getAuthorities().stream()
-            .findFirst()
-            .map(GrantedAuthority::getAuthority)
-            .orElse("ROLE_UNKNOWN");
+              .findFirst()
+              .map(GrantedAuthority::getAuthority)
+              .orElse("ROLE_UNKNOWN");
 
           return ResponseEntity.ok(new CurrentUserResponse(
             user.getEmail(), user.getName(), role));
@@ -223,7 +223,8 @@ public class AuthController {
       } catch (Exception e) {
         logger.warning("Error retrieving current user: " + e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-          new CurrentUserResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, "ROLE_UNKNOWN"));
+          new CurrentUserResponse(
+            AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, "ROLE_UNKNOWN"));
       }
     }
 
