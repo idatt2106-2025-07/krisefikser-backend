@@ -2,9 +2,11 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
+import com.group7.krisefikser.dto.request.ReadinessRequest;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
+import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.mapper.JoinRequestMapper;
 import com.group7.krisefikser.model.Household;
@@ -200,6 +202,35 @@ public class HouseholdController {
       logger.severe("Error retrieving household members: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Error retrieving household members");
+    }
+  }
+
+  /**
+   * Endpoint to retrieve a households readiness status.
+   *
+   * @param householdId the ID of the household
+   * @return a ResponseEntity containing the readiness status
+   */
+  @Operation(summary = "Get household readiness status",
+      description = "Retrieves the current readiness status and metrics for a specific household")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Readiness status retrieved successfully",
+          content = @Content(schema = @Schema(implementation = ReadinessResponse.class))),
+      @ApiResponse(responseCode = "404", description =
+          "Household not found or readiness data unavailable"),
+      @ApiResponse(responseCode = "403", description =
+          "Forbidden - Not authorized to access this household")
+  })
+  @GetMapping("/household/readiness/{householdId}")
+  public ResponseEntity<ReadinessResponse> getReadiness(@PathVariable Long householdId) {
+    logger.info("Calculating readiness for household ID: " + householdId);
+    ReadinessRequest request = new ReadinessRequest();
+    request.setHouseholdId(householdId);
+    ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold(request);
+    if (readinessResponse != null) {
+      return ResponseEntity.ok(readinessResponse);
+    } else {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
   }
 }
