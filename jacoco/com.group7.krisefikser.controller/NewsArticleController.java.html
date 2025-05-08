@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NewsArticleController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller</a> &gt; <span class="el_source">NewsArticleController.java</span></div><h1>NewsArticleController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller;
+
+import com.group7.krisefikser.dto.response.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
+import com.group7.krisefikser.model.NewsArticle;
+import com.group7.krisefikser.service.NewsArticleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Controller class for handling operations related to news articles.
+ * This class provides endpoints to retrieve all news articles
+ * and to retrieve a specific news article by its ID.
+ */
+@RestController
+@RequestMapping(&quot;/api/news&quot;)
+@Tag(name = &quot;News Articles&quot;, description = &quot;Operations related to news articles&quot;)
+public class NewsArticleController {
+
+  private final NewsArticleService newsArticleService;
+<span class="fc" id="L33">  private static final Logger logger = Logger.getLogger(NewsArticleController.class.getName());</span>
+
+  /**
+   * Constructor for NewsArticleController.
+   * Initializes the NewsArticleService instance.
+   *
+   * @param newsArticleService the NewsArticleService instance for handling news articles
+   */
+  @Autowired
+<span class="fc" id="L42">  public NewsArticleController(NewsArticleService newsArticleService) {</span>
+<span class="fc" id="L43">    this.newsArticleService = newsArticleService;</span>
+<span class="fc" id="L44">  }</span>
+
+  /**
+   * Retrieves all news articles.
+   *
+   * @return a ResponseEntity containing a list of NewsArticle objects
+   */
+  @Operation(
+      summary = &quot;Get all news articles&quot;,
+      description = &quot;Retrieves a list of all news articles sorted by publication date&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = &quot;200&quot;,
+          description = &quot;Successfully retrieved all news articles&quot;,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = NewsArticle.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = &quot;500&quot;,
+          description = &quot;Internal server error&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;)
+      )
+  })
+  @GetMapping
+  public ResponseEntity&lt;List&lt;ShortenedNewsArticleResponse&gt;&gt; getAllNews() {
+<span class="fc" id="L72">    logger.info(&quot;Fetching all news articles&quot;);</span>
+    try {
+<span class="fc" id="L74">      List&lt;ShortenedNewsArticleResponse&gt; newsArticles = newsArticleService.getAllNewsArticles();</span>
+<span class="fc" id="L75">      return ResponseEntity.ok(newsArticles);</span>
+<span class="fc" id="L76">    } catch (Exception e) {</span>
+<span class="fc" id="L77">      logger.severe(&quot;Error fetching news articles: &quot; + e.getMessage());</span>
+<span class="fc" id="L78">      return ResponseEntity.status(500).build();</span>
+    }
+  }
+
+  /**
+   * Retrieves a specific news article by its ID.
+   *
+   * @param id the ID of the news article to be retrieved
+   * @return a ResponseEntity containing the NewsArticle object
+   */
+  @Operation(
+      summary = &quot;Get news article by ID&quot;,
+      description = &quot;Retrieves a specific news article based on its ID&quot;
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = &quot;200&quot;,
+          description = &quot;Successfully retrieved news article&quot;,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = NewsArticle.class)
+          )
+      ),
+      @ApiResponse(
+          responseCode = &quot;404&quot;,
+          description = &quot;News article not found&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;)
+      ),
+      @ApiResponse(
+          responseCode = &quot;500&quot;,
+          description = &quot;Internal server error&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;)
+      )
+  })
+  @GetMapping(&quot;/{id}&quot;)
+  public ResponseEntity&lt;NewsArticleResponse&gt; getNewsById(@PathVariable Long id) {
+<span class="fc" id="L114">    logger.info(&quot;Fetching news article with ID: &quot; + id);</span>
+    try {
+<span class="fc" id="L116">      NewsArticleResponse newsArticle = newsArticleService.getNewsArticleById(id);</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">      if (newsArticle != null) {</span>
+<span class="fc" id="L118">        return ResponseEntity.ok(newsArticle);</span>
+      } else {
+<span class="fc" id="L120">        return ResponseEntity.notFound().build();</span>
+      }
+<span class="fc" id="L122">    } catch (Exception e) {</span>
+<span class="fc" id="L123">      logger.severe(&quot;Error fetching news article with ID &quot; + id + &quot;: &quot; + e.getMessage());</span>
+<span class="fc" id="L124">      return ResponseEntity.status(500).build();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

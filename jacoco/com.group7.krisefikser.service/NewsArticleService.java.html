@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NewsArticleService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service</a> &gt; <span class="el_source">NewsArticleService.java</span></div><h1>NewsArticleService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service;
+
+import com.group7.krisefikser.dto.response.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
+import com.group7.krisefikser.mapper.NewsArticleMapper;
+import com.group7.krisefikser.model.NewsArticle;
+import com.group7.krisefikser.repository.NewsArticleRepository;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service class for handling operations related to news articles.
+ * This class provides methods to retrieve all news articles
+ * and to get a specific article by its ID.
+ */
+@Service
+@RequiredArgsConstructor
+public class NewsArticleService {
+  private final NewsArticleRepository newsArticleRepo;
+
+  /**
+   * Retrieves all news articles from the repository.
+   * This method fetches the articles and returns them as a list.
+   *
+   * @return a list of NewsArticle objects containing details of all articles
+   */
+  public List&lt;ShortenedNewsArticleResponse&gt; getAllNewsArticles() {
+<span class="fc" id="L29">    List&lt;NewsArticle&gt; articles = newsArticleRepo.getAllNewsArticles();</span>
+<span class="fc" id="L30">    return articles.stream()</span>
+<span class="fc" id="L31">        .map(NewsArticleMapper.INSTANCE::newsArticleToShortenedNewsArticleResponse)</span>
+<span class="fc" id="L32">        .toList();</span>
+  }
+
+  /**
+   * Retrieves a news article by its ID.
+   * This method fetches the article from the repository
+   * based on the provided ID.
+   *
+   * @param id the ID of the news article to be retrieved
+   * @return the NewsArticle object containing details of the article
+   */
+  public NewsArticleResponse getNewsArticleById(long id) {
+<span class="fc" id="L44">    NewsArticle article = newsArticleRepo.getNewsArticleById(id);</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">    if (article != null) {</span>
+<span class="fc" id="L46">      return NewsArticleMapper.INSTANCE.newsArticleToNewsArticleResponse(article);</span>
+    } else {
+<span class="nc" id="L48">      throw new RuntimeException(&quot;News article not found with ID: &quot; + id);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

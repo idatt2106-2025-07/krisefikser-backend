@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NewsArticleMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.mapper</a> &gt; <span class="el_source">NewsArticleMapper.java</span></div><h1>NewsArticleMapper.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.mapper;
+
+import com.group7.krisefikser.dto.response.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
+import com.group7.krisefikser.model.NewsArticle;
+import java.time.LocalDateTime;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
+
+/**
+ * Mapper interface for converting between NewsArticle and its DTO representations.
+ * This interface uses MapStruct to generate the implementation at compile time.
+ */
+@Mapper
+public interface NewsArticleMapper {
+<span class="fc" id="L18">  NewsArticleMapper INSTANCE = Mappers.getMapper(NewsArticleMapper.class);</span>
+
+  /**
+   * Converts a NewsArticle object to a ShortenedNewsArticleResponse object.
+   * This method maps the fields of NewsArticle to the
+   * corresponding fields of ShortenedNewsArticleResponse.
+   *
+   * @param newsArticle the NewsArticle object to convert
+   * @return the converted ShortenedNewsArticleResponse object
+   */
+  @Mapping(source = &quot;title&quot;, target = &quot;title&quot;)
+  @Mapping(source = &quot;publishedAt&quot;, target = &quot;publishedAt&quot;,
+      qualifiedByName = &quot;localDateTimeToString&quot;)
+  ShortenedNewsArticleResponse newsArticleToShortenedNewsArticleResponse(
+      NewsArticle newsArticle);
+
+  /**
+   * Converts a NewsArticle object to a NewsArticleResponse object.
+   * This method maps the fields of NewsArticle to the corresponding fields of NewsArticleResponse.
+   *
+   * @param newsArticle the NewsArticle object to convert
+   * @return the converted NewsArticleResponse object
+   */
+  @Mapping(source = &quot;title&quot;, target = &quot;title&quot;)
+  @Mapping(source = &quot;content&quot;, target = &quot;content&quot;)
+  @Mapping(source = &quot;publishedAt&quot;, target = &quot;publishedAt&quot;,
+      qualifiedByName = &quot;localDateTimeToString&quot;)
+  NewsArticleResponse newsArticleToNewsArticleResponse(NewsArticle newsArticle);
+
+  /**
+   * Custom mapper method to convert LocalDateTime to String.
+   * This method handles the conversion of a LocalDateTime
+   * to its string representation.
+   *
+   * @param localDateTime the LocalDateTime object to convert
+   * @return the string representation of the LocalDateTime
+   */
+  @Named(&quot;localDateTimeToString&quot;)
+  default String localDateTimeToString(LocalDateTime localDateTime) {
+<span class="fc" id="L57">    return localDateTime.toString();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
