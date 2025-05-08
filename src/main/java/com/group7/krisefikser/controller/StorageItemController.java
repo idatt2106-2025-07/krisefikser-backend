@@ -1,5 +1,6 @@
 package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.request.ChangeStorageItemSharedStatusRequest;
 import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSearchRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
@@ -31,6 +32,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -690,6 +692,74 @@ public class StorageItemController {
       }
       logger.severe("Error deleting storage item: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /**
+   * Endpoint to update the shared status of a storage item.
+   *
+   * @param id      The ID of the storage item to update
+   * @param request The request containing the new shared status
+   * @return A list of updated storage items
+   */
+  @Operation(
+          summary = "Update the shared status of a storage item",
+          description = "Updates the shared status of a storage item with the specified ID "
+                  + "for the authenticated user's household.",
+          parameters = {
+              @Parameter(name = "id", description = "ID of the storage item to update",
+                      required = true)
+          },
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = "New shared status and quantity of the storage item",
+                  required = true,
+                  content = @Content(mediaType = "application/json",
+                          schema = @Schema(implementation =
+                                  ChangeStorageItemSharedStatusRequest.class))
+          ),
+          responses = {
+              @ApiResponse(responseCode = "200", description = "Storage item shared status "
+                      + "successfully updated",
+                      content = @Content(mediaType = "application/json",
+                              schema = @Schema(implementation =
+                                      StorageItemResponse.class))),
+              @ApiResponse(responseCode = "400", description = "Invalid request data"),
+              @ApiResponse(responseCode = "404", description = "Storage item not found"),
+              @ApiResponse(responseCode = "500", description = "Internal server error")
+          })
+  @PatchMapping("/household/{id}/shared-status")
+  public ResponseEntity<Object> updateStorageItemSharedStatus(
+          @PathVariable int id,
+          @Valid @RequestBody ChangeStorageItemSharedStatusRequest request,
+          BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
+    try {
+      int householdId = userService.getCurrentUserHouseholdId();
+      logger.info("Updating share status of storage item with ID: " + id
+              + " for household ID: " + householdId);
+
+      List<StorageItemResponse> response = storageItemService.updateStorageItemSharedStatus(id,
+              householdId, request);
+      logger.info("Successfully updated share status of storage item with ID: " + id);
+      return ResponseEntity.ok(response);
+    } catch (IllegalArgumentException e) {
+      logger.info("Did not update share status of storage item: " + e.getMessage());
+      return ResponseEntity.badRequest().body(new ErrorResponse(
+                e.getMessage()
+              ));
+    } catch (NoSuchElementException e) {
+      logger.info(e.getMessage());
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(
+              e.getMessage()
+      ));
+    } catch (Exception e) {
+      logger.severe("Error updating share status of storage item: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+              new ErrorResponse("An unexpected error occurred while updating the "
+                      + "share status of the storage item.")
+      );
     }
   }
 }

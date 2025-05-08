@@ -2,6 +2,7 @@ package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group7.krisefikser.dto.request.ChangeStorageItemSharedStatusRequest;
 import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
@@ -696,4 +697,97 @@ class StorageItemControllerTest {
 
     return new AggregatedStorageItemResponse(itemId, itemResponse, totalQuantity, earliestExpirationDate);
   }
+
+  @Test
+  @WithMockUser
+  void updateStorageItemSharedStatus_shouldReturnOk_whenValidRequest() throws Exception {
+    int storageItemId = 1;
+    ChangeStorageItemSharedStatusRequest request = new ChangeStorageItemSharedStatusRequest(
+            true,
+            10.0
+    );
+
+    List<StorageItemResponse> response = List.of(
+            createStorageItemResponse(storageItemId, 101, MOCK_HOUSEHOLD_ID, 10, LocalDateTime.now().plusDays(15), "Water", true)
+    );
+
+    when(storageItemService.updateStorageItemSharedStatus(storageItemId, MOCK_HOUSEHOLD_ID, request))
+            .thenReturn(response);
+
+    mockMvc.perform(patch("/api/storage-items/household/" + storageItemId + "/shared-status")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(result -> {
+              String responseContent = result.getResponse().getContentAsString();
+              List<StorageItemResponse> actualResponses = objectMapper.readValue(responseContent, new TypeReference<>() {
+              });
+              assertEquals(1, actualResponses.size());
+              assertEquals(storageItemId, actualResponses.get(0).getId());
+              assertEquals(101, actualResponses.get(0).getItemId());
+              assertEquals(10, actualResponses.get(0).getQuantity());
+            });
+  }
+
+  @Test
+  @WithMockUser
+  void updateStorageItemSharedStatus_shouldReturnBadRequest_whenIllegalArgument() throws Exception {
+    int storageItemId = 1;
+    ChangeStorageItemSharedStatusRequest request = new ChangeStorageItemSharedStatusRequest(
+            true,
+            10.0
+    );
+
+    when(storageItemService.updateStorageItemSharedStatus(storageItemId, MOCK_HOUSEHOLD_ID, request))
+            .thenThrow(new IllegalArgumentException("Invalid request"));
+
+    mockMvc.perform(patch("/api/storage-items/household/" + storageItemId + "/shared-status")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").exists());
+  }
+  @Test
+  @WithMockUser
+  void updateStorageItemSharedStatus_shouldReturnNotFound_whenNoSuchElement() throws Exception {
+    int storageItemId = 1;
+    ChangeStorageItemSharedStatusRequest request = new ChangeStorageItemSharedStatusRequest(
+            true,
+            10.0
+    );
+
+    when(storageItemService.updateStorageItemSharedStatus(storageItemId, MOCK_HOUSEHOLD_ID, request))
+            .thenThrow(new NoSuchElementException("Invalid request"));
+
+    mockMvc.perform(patch("/api/storage-items/household/" + storageItemId + "/shared-status")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isNotFound())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").exists());
+  }
+
+  @Test
+  @WithMockUser
+  void updateStorageItemSharedStatus_shouldReturnInternalServerError_whenException() throws Exception {
+    int storageItemId = 1;
+    ChangeStorageItemSharedStatusRequest request = new ChangeStorageItemSharedStatusRequest(
+            true,
+            10.0
+    );
+
+    when(storageItemService.updateStorageItemSharedStatus(storageItemId, MOCK_HOUSEHOLD_ID, request))
+            .thenThrow(new RuntimeException("Invalid request"));
+
+    mockMvc.perform(patch("/api/storage-items/household/" + storageItemId + "/shared-status")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.message").exists());
+  }
+
+
 }
