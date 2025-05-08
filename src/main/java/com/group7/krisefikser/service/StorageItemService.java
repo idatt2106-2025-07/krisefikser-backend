@@ -106,7 +106,7 @@ public class StorageItemService {
 
     return storageItems.stream()
             .map(storageItem -> new StorageItemGroupResponse(
-                    StorageItemResponse.fromEntity(storageItem),
+                    convertToStorageItemResponse(storageItem),
                     householdService.getHouseholdNameById((long) storageItem.getHouseholdId())
             ))
             .toList();
