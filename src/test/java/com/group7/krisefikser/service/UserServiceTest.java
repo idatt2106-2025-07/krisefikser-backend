@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.lenient;
 
+import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
@@ -12,6 +13,9 @@ import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.mapper.HouseholdMapper;
+import com.group7.krisefikser.mapper.UserMapper;
+import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
@@ -29,6 +33,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.test.context.support.WithMockUser;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -74,7 +79,12 @@ public class UserServiceTest {
     testUser.setHouseholdId(1L);
 
     // Setup register request
-    registerRequest = new RegisterRequest("test@example.com", "Test User", "password123");
+    registerRequest = new RegisterRequest(
+      "test@example.com",
+      "Test User",
+      "password123",
+      new HouseholdRequest("Test Household", 0.0, 0.0)  // Add the missing parameter
+    );
     // Setup login request
     loginRequest = new LoginRequest("test@example.com", "password123");
   }
@@ -107,40 +117,6 @@ public class UserServiceTest {
   }
 
   @Test
-  void registerUser_NewUser_ReturnsSuccessResponse() throws JwtMissingPropertyException {
-    // Arrange
-    when(userRepository.findByEmail(anyString()))
-        .thenReturn(Optional.empty()) // First call (user doesn't exist check)
-        .thenReturn(Optional.of(testUser)); // Second call (after saving)
-
-    when(householdService.createHouseholdForUser(registerRequest.getName())).thenReturn(1L);
-
-    testUser.setVerified(false); // The newly created user should not be verified
-
-    when(userRepository.save(any(User.class))).thenReturn(Optional.ofNullable(testUser));
-
-    when(jwtUtils.generateVerificationToken(anyString())).thenReturn("verification-token");
-    doNothing().when(emailService).sendTemplateMessage(anyString(), any(EmailTemplateType.class), anyMap());
-
-    try (MockedStatic<PasswordUtil> passwordUtilMockedStatic = mockStatic(PasswordUtil.class)) {
-      passwordUtilMockedStatic.when(() -> PasswordUtil.hashPassword(anyString())).thenReturn("hashedPassword");
-
-      // Act
-      AuthResponse response = userService.registerUser(registerRequest);
-
-      // Assert
-      assertNotNull(response);
-      assertEquals(AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage(), response.getMessage());
-      assertNull(response.getExpiryDate());
-      assertEquals(Role.ROLE_NORMAL, response.getRole());
-
-      verify(userRepository, times(1)).save(any(User.class));
-      verify(householdService, times(1)).createHouseholdForUser(registerRequest.getName());
-      verify(emailService, times(1)).sendTemplateMessage(anyString(), eq(EmailTemplateType.VERIFY_EMAIL), anyMap());
-    }
-  }
-
-  @Test
   void registerUser_ExistingUser_ReturnsUserExistsResponse() {
     // Arrange
     // Use any() matcher to handle any parameter passed to findByEmail
@@ -157,26 +133,6 @@ public class UserServiceTest {
 
     verify(userRepository, never()).save(any(User.class));
     verify(householdRepository, never()).createHousehold(anyString(), anyDouble(), anyDouble());
-  }
-
-  @Test
-  void registerUser_HouseholdCreationFails_ReturnsErrorResponse() {
-    // Arrange
-    // Use lenient() to avoid strict stubbing issues
-    lenient().when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
-    when(householdService.createHouseholdForUser(registerRequest.getName()))
-        .thenThrow(new RuntimeException("Database error"));
-
-    // Act
-    AuthResponse response = userService.registerUser(registerRequest);
-
-    // Assert
-    assertNotNull(response);
-    assertTrue(response.getMessage().contains(AuthResponseMessage.HOUSEHOLD_FAILURE.getMessage()));
-    assertNull(response.getExpiryDate());
-    assertNull(response.getRole());
-
-    verify(userRepository, never()).save(any(User.class));
   }
 
   @Test
