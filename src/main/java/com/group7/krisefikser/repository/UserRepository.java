@@ -173,4 +173,34 @@ public class UserRepository {
             "UPDATE users SET household_id = ? WHERE id = ?",
             householdId, userId);
   }
+
+  /**
+   * Finds the household ID associated with a user.
+   *
+   * @param userId the ID of the user
+   * @return the ID of the user's household, or null if not found
+   */
+  public Long findHouseholdIdByUserId(Long userId) {
+    String sql = "SELECT household_id FROM users WHERE id = ?";
+    try {
+      return jdbcTemplate.queryForObject(sql, Long.class, userId);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Finds the name associated with a user ID.
+   *
+   * @param userId the ID of the user
+   * @return the name of the user, or null if not found
+   */
+  public String findNameById(Long userId) {
+    String sql = "SELECT name FROM users WHERE id = ?";
+    try {
+      return jdbcTemplate.queryForObject(sql, String.class, userId);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
+    }
+  }
 }
