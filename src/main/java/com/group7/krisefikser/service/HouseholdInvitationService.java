@@ -71,6 +71,12 @@ public class HouseholdInvitationService {
       HouseholdInvitation invitation = invitationRepository.findByToken(token)
           .orElseThrow(() -> new RuntimeException("Invitation not found in database"));
 
+      User user = userRepository.findById(userId)
+          .orElseThrow(() -> new RuntimeException("User not found"));
+      if (!user.getEmail().equalsIgnoreCase(email)) {
+        throw new RuntimeException("You are not authorized to accept this invitation.");
+      }
+
       userRepository.updateUserHousehold(userId, invitation.getHouseholdId());
 
       invitationRepository.delete(invitation.getId());
