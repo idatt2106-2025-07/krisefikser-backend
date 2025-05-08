@@ -208,7 +208,6 @@ public class HouseholdController {
   /**
    * Endpoint to retrieve a households readiness status.
    *
-   * @param householdId the ID of the household
    * @return a ResponseEntity containing the readiness status
    */
   @Operation(summary = "Get household readiness status",

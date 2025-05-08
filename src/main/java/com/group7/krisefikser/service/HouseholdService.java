@@ -1,20 +1,18 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
-import com.group7.krisefikser.dto.request.ReadinessRequest;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.model.NonUserMember;
-import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.model.StorageItem;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
-import com.group7.krisefikser.repository.StorageItemRepo;
 import com.group7.krisefikser.repository.NonUserMemberRepository;
+import com.group7.krisefikser.repository.StorageItemRepo;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.UuidUtils;
 import java.time.Instant;
@@ -22,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -170,7 +167,6 @@ public class HouseholdService {
   /**
    * Calculates the readiness of a household based on its storage items, calories and user count.
    *
-   * @param request the ReadinessRequest object containing household ID
    * @return a ReadinessResponse object containing the calculated readiness
    */
   public ReadinessResponse calculateReadinessForHousehold() {
