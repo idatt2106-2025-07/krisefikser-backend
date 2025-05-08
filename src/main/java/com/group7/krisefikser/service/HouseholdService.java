@@ -194,6 +194,9 @@ public class HouseholdService {
       if (si.getExpirationDate().isAfter(LocalDateTime.ofInstant(
           Instant.now(), ZoneId.systemDefault()))) {
         Item item = itemRepo.findById(si.getItemId()).orElse(null);
+        if (item == null) {
+          continue;
+        }
         totalCalories += item.getCalories() * si.getQuantity();
 
         if ("L".equalsIgnoreCase(item.getUnit())
