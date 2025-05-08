@@ -3,10 +3,12 @@ package com.group7.krisefikser.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
+import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,12 +18,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -57,9 +61,9 @@ class HouseholdControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.post("/api/households")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(householdRequest)))
-      .andExpect(MockMvcResultMatchers.status().isCreated())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Test Household"));
+      .andExpect(status().isCreated())
+      .andExpect(jsonPath("$.id").value(1))
+      .andExpect(jsonPath("$.name").value("Test Household"));
   }
 
   @Test
@@ -83,10 +87,10 @@ class HouseholdControllerTest {
     mockMvc.perform(MockMvcRequestBuilders.post("/api/households/join-request")
         .contentType(MediaType.APPLICATION_JSON)
         .content(objectMapper.writeValueAsString(joinRequest)))
-      .andExpect(MockMvcResultMatchers.status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.householdId").value(2))
-      .andExpect(MockMvcResultMatchers.jsonPath("$.userId").value(3));
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.id").value(1))
+      .andExpect(jsonPath("$.householdId").value(2))
+      .andExpect(jsonPath("$.userId").value(3));
   }
 
   @Test
@@ -99,23 +103,47 @@ class HouseholdControllerTest {
     when(householdService.getRequestsForHousehold(2L)).thenReturn(requests);
 
     mockMvc.perform(MockMvcRequestBuilders.get("/api/households/2/requests"))
-      .andExpect(MockMvcResultMatchers.status().isOk())
-      .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
-      .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(1))
-      .andExpect(MockMvcResultMatchers.jsonPath("$[1].userId").value(4));
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$").isArray())
+      .andExpect(jsonPath("$[0].id").value(1))
+      .andExpect(jsonPath("$[1].userId").value(4));
   }
 
   @Test
   @WithMockUser
   void acceptJoinRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/accept"))
-      .andExpect(MockMvcResultMatchers.status().isOk());
+      .andExpect(status().isOk());
   }
 
   @Test
   @WithMockUser
   void declineJoinRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/decline"))
-      .andExpect(MockMvcResultMatchers.status().isOk());
+      .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(username = "1")
+  void shouldReturnReadinessResponse_whenHouseholdExists() throws Exception {
+    // Arrange
+    ReadinessResponse mockResponse = new ReadinessResponse(3, 12);
+    Mockito.when(householdService.calculateReadinessForHousehold()).thenReturn(mockResponse);
+
+    // Act & Assert
+    mockMvc.perform(get("/api/households/readiness")
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.days").value(3))
+        .andExpect(jsonPath("$.hours").value(12));
+  }
+
+  @Test
+  @WithMockUser
+  void shouldReturnNotFound_whenHouseholdDoesNotExist() throws Exception {
+    Mockito.when(householdService.calculateReadinessForHousehold()).thenReturn(null);
+
+    mockMvc.perform(get("/api/households/readiness/"))
+        .andExpect(status().isNotFound());
   }
 }

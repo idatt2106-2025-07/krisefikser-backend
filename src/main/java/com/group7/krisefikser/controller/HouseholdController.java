@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
+import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.mapper.JoinRequestMapper;
 import com.group7.krisefikser.model.Household;
@@ -200,6 +201,38 @@ public class HouseholdController {
       logger.severe("Error retrieving household members: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Error retrieving household members");
+    }
+  }
+
+  /**
+   * Endpoint to retrieve a households readiness status.
+   *
+   * @return a ResponseEntity containing the readiness status
+   */
+  @Operation(summary = "Get household readiness status",
+      description = "Retrieves the current readiness status and metrics for a specific household")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Readiness status retrieved successfully",
+          content = @Content(schema = @Schema(implementation = ReadinessResponse.class))),
+      @ApiResponse(responseCode = "404", description =
+          "Household not found or readiness data unavailable"),
+      @ApiResponse(responseCode = "403", description =
+          "Forbidden - Not authorized to access this household")
+  })
+  @GetMapping("/readiness")
+  public ResponseEntity<ReadinessResponse> getReadiness() {
+    logger.info("Calculating readiness for household");
+    try {
+      ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold();
+      if (readinessResponse != null) {
+        return ResponseEntity.ok(readinessResponse);
+      } else {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+      }
+    } catch (Exception e) {
+      logger.severe("Error calculating readiness: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(new ReadinessResponse(0, 0));
     }
   }
 }
