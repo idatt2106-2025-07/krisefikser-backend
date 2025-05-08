@@ -124,14 +124,14 @@ class HouseholdControllerTest {
   }
 
   @Test
-  @WithMockUser
+  @WithMockUser(username = "1")
   void shouldReturnReadinessResponse_whenHouseholdExists() throws Exception {
     // Arrange
     ReadinessResponse mockResponse = new ReadinessResponse(3, 12);
     Mockito.when(householdService.calculateReadinessForHousehold()).thenReturn(mockResponse);
 
     // Act & Assert
-    mockMvc.perform(get("/api/households/household/readiness/")
+    mockMvc.perform(get("/api/households/readiness")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.days").value(3))
@@ -143,7 +143,7 @@ class HouseholdControllerTest {
   void shouldReturnNotFound_whenHouseholdDoesNotExist() throws Exception {
     Mockito.when(householdService.calculateReadinessForHousehold()).thenReturn(null);
 
-    mockMvc.perform(get("/api/households/household/readiness/"))
+    mockMvc.perform(get("/api/households/readiness/"))
         .andExpect(status().isNotFound());
   }
 }
