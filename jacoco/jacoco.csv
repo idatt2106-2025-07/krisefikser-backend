@@ -46,7 +46,7 @@ krisefikser,com.group7.krisefikser.mapper,EmergencyGroupMapper,0,5,0,0,0,1,0,1,0
 krisefikser,com.group7.krisefikser.mapper,HouseholdMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,UserMapperImpl,2,23,1,1,1,7,1,2,0,2
 krisefikser,com.group7.krisefikser.mapper,AffectedAreaMapper,10,11,1,1,4,3,1,2,0,2
-krisefikser,com.group7.krisefikser.mapper,NewsArticleMapperImpl,4,43,2,2,2,12,2,3,0,3
+krisefikser,com.group7.krisefikser.mapper,NewsArticleMapperImpl,4,47,2,2,2,13,2,3,0,3
 krisefikser,com.group7.krisefikser.mapper,UserPositionMapperImpl,10,125,5,9,5,32,5,8,0,6
 krisefikser,com.group7.krisefikser.mapper,UserPositionMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,UserMapper,0,5,0,0,0,1,0,1,0,1

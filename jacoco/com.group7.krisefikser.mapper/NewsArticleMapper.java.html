@@ -25,6 +25,7 @@ public interface NewsArticleMapper {
    * @param newsArticle the NewsArticle object to convert
    * @return the converted ShortenedNewsArticleResponse object
    */
+  @Mapping(source = &quot;id&quot;, target = &quot;id&quot;)
   @Mapping(source = &quot;title&quot;, target = &quot;title&quot;)
   @Mapping(source = &quot;publishedAt&quot;, target = &quot;publishedAt&quot;,
       qualifiedByName = &quot;localDateTimeToString&quot;)
@@ -54,7 +55,7 @@ public interface NewsArticleMapper {
    */
   @Named(&quot;localDateTimeToString&quot;)
   default String localDateTimeToString(LocalDateTime localDateTime) {
-<span class="fc" id="L57">    return localDateTime.toString();</span>
+<span class="fc" id="L58">    return localDateTime.toString();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

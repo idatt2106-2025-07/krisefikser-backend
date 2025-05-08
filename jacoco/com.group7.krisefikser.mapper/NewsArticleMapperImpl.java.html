@@ -7,7 +7,7 @@ import javax.annotation.processing.Generated;
 
 @Generated(
     value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
-    date = &quot;2025-05-08T14:22:45+0000&quot;,
+    date = &quot;2025-05-08T15:20:43+0000&quot;,
     comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Eclipse Adoptium)&quot;
 )
 <span class="fc" id="L13">public class NewsArticleMapperImpl implements NewsArticleMapper {</span>
@@ -20,25 +20,26 @@ import javax.annotation.processing.Generated;
 
 <span class="fc" id="L21">        ShortenedNewsArticleResponse shortenedNewsArticleResponse = new ShortenedNewsArticleResponse();</span>
 
-<span class="fc" id="L23">        shortenedNewsArticleResponse.setTitle( newsArticle.getTitle() );</span>
-<span class="fc" id="L24">        shortenedNewsArticleResponse.setPublishedAt( localDateTimeToString( newsArticle.getPublishedAt() ) );</span>
+<span class="fc" id="L23">        shortenedNewsArticleResponse.setId( newsArticle.getId() );</span>
+<span class="fc" id="L24">        shortenedNewsArticleResponse.setTitle( newsArticle.getTitle() );</span>
+<span class="fc" id="L25">        shortenedNewsArticleResponse.setPublishedAt( localDateTimeToString( newsArticle.getPublishedAt() ) );</span>
 
-<span class="fc" id="L26">        return shortenedNewsArticleResponse;</span>
+<span class="fc" id="L27">        return shortenedNewsArticleResponse;</span>
     }
 
     @Override
     public NewsArticleResponse newsArticleToNewsArticleResponse(NewsArticle newsArticle) {
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">        if ( newsArticle == null ) {</span>
-<span class="nc" id="L32">            return null;</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if ( newsArticle == null ) {</span>
+<span class="nc" id="L33">            return null;</span>
         }
 
-<span class="fc" id="L35">        NewsArticleResponse newsArticleResponse = new NewsArticleResponse();</span>
+<span class="fc" id="L36">        NewsArticleResponse newsArticleResponse = new NewsArticleResponse();</span>
 
-<span class="fc" id="L37">        newsArticleResponse.setTitle( newsArticle.getTitle() );</span>
-<span class="fc" id="L38">        newsArticleResponse.setContent( newsArticle.getContent() );</span>
-<span class="fc" id="L39">        newsArticleResponse.setPublishedAt( localDateTimeToString( newsArticle.getPublishedAt() ) );</span>
+<span class="fc" id="L38">        newsArticleResponse.setTitle( newsArticle.getTitle() );</span>
+<span class="fc" id="L39">        newsArticleResponse.setContent( newsArticle.getContent() );</span>
+<span class="fc" id="L40">        newsArticleResponse.setPublishedAt( localDateTimeToString( newsArticle.getPublishedAt() ) );</span>
 
-<span class="fc" id="L41">        return newsArticleResponse;</span>
+<span class="fc" id="L42">        return newsArticleResponse;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
