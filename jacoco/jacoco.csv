@@ -76,7 +76,7 @@ krisefikser,com.group7.krisefikser.service,NonUserMemberService,46,0,0,0,15,0,3,
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2
 krisefikser,com.group7.krisefikser.service,EmailTemplateService,6,47,2,8,3,15,2,9,0,3
-krisefikser,com.group7.krisefikser.service,UserService,141,400,10,20,35,85,12,15,5,7
+krisefikser,com.group7.krisefikser.service,UserService,146,400,10,20,36,85,12,15,5,7
 krisefikser,com.group7.krisefikser.service,LoginAttemptService,5,50,0,2,4,14,0,6,0,5
 krisefikser,com.group7.krisefikser.service,HouseholdInvitationService,18,93,0,0,2,21,3,3,3,3
 krisefikser,com.group7.krisefikser.service,EmergencyGroupService,16,193,4,6,2,52,3,13,0,11
