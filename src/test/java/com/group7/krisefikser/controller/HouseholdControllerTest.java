@@ -124,16 +124,14 @@ class HouseholdControllerTest {
   }
 
   @Test
+  @WithMockUser
   void shouldReturnReadinessResponse_whenHouseholdExists() throws Exception {
     // Arrange
-    Long householdId = 1L;
     ReadinessResponse mockResponse = new ReadinessResponse(3, 12);
-    Mockito.when(householdService.calculateReadinessForHousehold(
-        Mockito.argThat(req -> req.getHouseholdId().equals(householdId))
-    )).thenReturn(mockResponse);
+    Mockito.when(householdService.calculateReadinessForHousehold()).thenReturn(mockResponse);
 
     // Act & Assert
-    mockMvc.perform(get("/api/households/readiness/{householdId}", householdId)
+    mockMvc.perform(get("/api/households/household/readiness/")
             .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.days").value(3))
@@ -141,14 +139,11 @@ class HouseholdControllerTest {
   }
 
   @Test
+  @WithMockUser
   void shouldReturnNotFound_whenHouseholdDoesNotExist() throws Exception {
-    Long householdId = 99L;
+    Mockito.when(householdService.calculateReadinessForHousehold()).thenReturn(null);
 
-    Mockito.when(householdService.calculateReadinessForHousehold(
-        Mockito.argThat(req -> req.getHouseholdId().equals(householdId))
-    )).thenReturn(null);
-
-    mockMvc.perform(get("/api/households/readiness/{householdId}", householdId))
+    mockMvc.perform(get("/api/households/household/readiness/"))
         .andExpect(status().isNotFound());
   }
 }
