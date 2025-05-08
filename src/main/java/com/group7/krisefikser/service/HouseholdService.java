@@ -11,6 +11,7 @@ import com.group7.krisefikser.repository.NonUserMemberRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.UuidUtils;
 import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,6 @@ public class HouseholdService {
    * @return The ID of the created household.
    */
   public Long createHouseholdForUser(String userName) {
-    Long householdId;
     int counter = 1;
     String baseName = userName + "'s household"
         + UuidUtils.generateShortenedUuid();
@@ -60,7 +60,7 @@ public class HouseholdService {
    * Creates a new household and associates it with a user.
    *
    * @param household the Household object containing household details
-   * @param userId the ID of the user creating the household
+   * @param userId    the ID of the user creating the household
    * @return the created Household object with the generated ID
    */
   @Transactional
@@ -74,7 +74,7 @@ public class HouseholdService {
    * Creates a request for a user to join a household.
    *
    * @param householdId the ID of the household to join
-   * @param userId the ID of the user making the request
+   * @param userId      the ID of the user making the request
    * @return the saved JoinHouseholdRequest object
    */
   @Transactional
@@ -151,5 +151,41 @@ public class HouseholdService {
             nonUserMember.getName(), nonUserMember.getType().toString()))
         .toList());
     return responses;
+  }
+
+  /**
+   * Retrieves the groupId of the household associated with the current user.
+   *
+   * @return the groupId of the users household
+   */
+  public Long getGroupIdForCurrentUser() {
+    Long userId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
+
+    Long householdId = userRepository.findById(userId)
+            .orElseThrow(() -> new NoSuchElementException("User not found"))
+            .getHouseholdId();
+
+    Household household = householdRepository.getHouseholdById(householdId)
+            .orElseThrow(() -> new NoSuchElementException("Household not found"));
+
+    Long groupId = household.getEmergencyGroupId();
+    if (groupId == null) {
+      throw new NoSuchElementException("Emergency group ID not found");
+    }
+
+    return household.getEmergencyGroupId();
+  }
+
+  /**
+   * Retrieves the name of the household associated with a householdId.
+   *
+   * @param householdId the ID of the household
+   * @return the name of the household
+   */
+  public String getHouseholdNameById(Long householdId) {
+    Household household = householdRepository.getHouseholdById(householdId)
+            .orElse(null);
+
+    return household != null ? household.getName() : null;
   }
 }

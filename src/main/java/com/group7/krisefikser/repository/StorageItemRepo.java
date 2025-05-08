@@ -29,16 +29,14 @@ public class StorageItemRepo {
   /**
    * RowMapper to map the result set to a StorageItem object.
    */
-  private final RowMapper<StorageItem> storageItemRowMapper = (rs, rowNum) -> {
-    return new StorageItem(
-            rs.getInt("id"),
-            rs.getTimestamp("expiration_date").toLocalDateTime(),
-            rs.getInt("quantity"),
-            rs.getInt("household_id"),
-            rs.getInt("item_id"),
-            rs.getBoolean("is_shared")
-    );
-  };
+  private final RowMapper<StorageItem> storageItemRowMapper = (rs, rowNum) -> new StorageItem(
+          rs.getInt("id"),
+          rs.getTimestamp("expiration_date").toLocalDateTime(),
+          rs.getDouble("quantity"),
+          rs.getInt("household_id"),
+          rs.getInt("item_id"),
+          rs.getBoolean("is_shared")
+  );
 
   /**
    * Constructor for StorageItemRepo.
@@ -63,18 +61,47 @@ public class StorageItemRepo {
   }
 
   /**
-   * This method retrieves a storage item by its ID for a specific household.
+   * This method retrieves all shared storage items for a specific emergency group from the
+   * database.
    *
-   * @param id          The ID of the storage item to retrieve.
-   * @param householdId The ID of the household the storage item belongs to.
+   * @param emergencyGroupId The ID of the emergency group to retrieve storage items for
+   * @return A list of StorageItem objects.
+   */
+  public List<StorageItem> getAllSharedStorageItemsInGroup(long emergencyGroupId) {
+    String sql = "SELECT si.id, si.expiration_date, si.quantity, si.household_id, "
+            + "si.item_id, si.is_shared FROM storage_items si "
+            + "JOIN households h ON si.household_id = h.id "
+            + "WHERE h.emergency_group_id = ? AND si.is_shared = TRUE";
+    return jdbcTemplate.query(sql, storageItemRowMapper, emergencyGroupId);
+  }
+
+  /**
+   * This method retrieves storage items for a specific group based on item id
+   * and group ID.
+   *
+   * @param groupId The ID of the group to retrieve storage items for
+   * @return A list of StorageItem objects.
+   */
+  public List<StorageItem> getSharedStorageItemsInGroupByItemId(long groupId, long itemId) {
+    String sql = "SELECT si.id, si.expiration_date, si.quantity, si.household_id, "
+            + "si.item_id, si.is_shared FROM storage_items si "
+            + "JOIN households h ON si.household_id = h.id "
+            + "WHERE h.emergency_group_id = ? AND si.is_shared = TRUE AND si.item_id = ?";
+    return jdbcTemplate.query(sql, storageItemRowMapper, groupId, itemId);
+  }
+
+  /**
+   * This method retrieves a storage item by its ID.
+   *
+   * @param id The ID of the storage item to retrieve.
    * @return An Optional containing the StorageItem object if found, or empty if not found.
    */
-  public Optional<StorageItem> findById(int id, int householdId) {
+  public Optional<StorageItem> findById(int id) {
     try {
       String sql = "SELECT id, expiration_date, quantity, household_id, "
-              + "item_id, is_shared FROM storage_items WHERE id = ? AND household_id = ?";
+              + "item_id, is_shared FROM storage_items WHERE id = ?";
       StorageItem storageItem = jdbcTemplate.queryForObject(sql,
-              storageItemRowMapper, id, householdId);
+              storageItemRowMapper, id);
       return Optional.ofNullable(storageItem);
     } catch (EmptyResultDataAccessException e) {
       return Optional.empty();
@@ -106,15 +133,16 @@ public class StorageItemRepo {
    */
   public StorageItem add(StorageItem storageItem) {
     String sql = "INSERT INTO storage_items (expiration_date, quantity, "
-            + "household_id, item_id) VALUES (?, ?, ?, ?)";
+            + "household_id, item_id, is_shared) VALUES (?, ?, ?, ?, ?)";
     KeyHolder keyHolder = new GeneratedKeyHolder();
 
     jdbcTemplate.update(connection -> {
       PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
       ps.setTimestamp(1, Timestamp.valueOf(storageItem.getExpirationDate()));
-      ps.setInt(2, storageItem.getQuantity());
+      ps.setDouble(2, storageItem.getQuantity());
       ps.setInt(3, storageItem.getHouseholdId());
       ps.setInt(4, storageItem.getItemId());
+      ps.setBoolean(5, storageItem.isShared());
       return ps;
     }, keyHolder);
 
@@ -132,12 +160,13 @@ public class StorageItemRepo {
    *                                        given ID in the specified household.
    */
   public StorageItem update(StorageItem storageItem) {
-    String sql = "UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ? "
-            + "WHERE id = ? AND household_id = ?";
+    String sql = "UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ?, "
+            + "is_shared = ? WHERE id = ? AND household_id = ?";
     int rowsAffected = jdbcTemplate.update(sql,
             Timestamp.valueOf(storageItem.getExpirationDate()),
             storageItem.getQuantity(),
             storageItem.getItemId(),
+            storageItem.isShared(),
             storageItem.getId(),
             storageItem.getHouseholdId());
 
