@@ -220,7 +220,7 @@ public class HouseholdController {
       @ApiResponse(responseCode = "403", description =
           "Forbidden - Not authorized to access this household")
   })
-  @GetMapping("/household/readiness/")
+  @GetMapping("/readiness")
   public ResponseEntity<ReadinessResponse> getReadiness() {
     logger.info("Calculating readiness for household");
     ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold();
