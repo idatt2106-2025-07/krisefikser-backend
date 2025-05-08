@@ -1,11 +1,14 @@
 package com.group7.krisefikser.repository;
 
+import com.group7.krisefikser.dto.response.HouseholdMemberResponse;
+import com.group7.krisefikser.dto.response.NonUserMemberResponse;
 import com.group7.krisefikser.model.Household;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -140,5 +143,39 @@ public class HouseholdRepository {
   public void addHouseholdToGroup(long householdId, long groupId) {
     String sql = "UPDATE households SET emergency_group_id = ? WHERE id = ?";
     jdbcTemplate.update(sql, groupId, householdId);
+  }
+
+  /**
+   * Finds all user members of a specific household.
+   *
+   * @param householdId the ID of the household
+   * @return a list of HouseholdMemberResponse objects
+   */
+  public List<HouseholdMemberResponse> findMembersByHouseholdId(Long householdId) {
+    String sql = "SELECT id, name, email FROM users WHERE household_id = ?";
+    return jdbcTemplate.query(sql, (rs, rowNum) -> {
+      HouseholdMemberResponse member = new HouseholdMemberResponse();
+      member.setId(rs.getLong("id"));
+      member.setName(rs.getString("name"));
+      member.setEmail(rs.getString("email"));
+      return member;
+    }, householdId);
+  }
+
+  /**
+   * Finds all non-user members of a specific household.
+   *
+   * @param householdId the ID of the household
+   * @return a list of NonUserMemberResponse objects
+   */
+  public List<NonUserMemberResponse> findNonUserMembersByHouseholdId(Long householdId) {
+    String sql = "SELECT id, name, type FROM non_user_members WHERE household_id = ?";
+    return jdbcTemplate.query(sql, (rs, rowNum) -> {
+      NonUserMemberResponse member = new NonUserMemberResponse();
+      member.setId(rs.getLong("id"));
+      member.setName(rs.getString("name"));
+      member.setType(rs.getString("type"));
+      return member;
+    }, householdId);
   }
 }
