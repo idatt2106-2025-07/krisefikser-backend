@@ -56,16 +56,43 @@ VALUES ('Charlie', 'child', 1),
 
 -- Insert storage items (references households and items)
 INSERT INTO storage_items (expiration_date, quantity, household_id, item_id, is_shared)
-VALUES ('2025-12-31 00:00:00', 10, 1, 1, FALSE),
-       ('2024-09-01 00:00:00', 5, 1, 2, TRUE),
-       ('2030-01-01 00:00:00', 2, 1, 3, TRUE),
-       ('2024-08-15 00:00:00', 20, 2, 4, TRUE),
-       ('2024-11-01 00:00:00', 15, 2, 5, FALSE),
-       ('2023-10-01 00:00:00', 3, 3, 6, FALSE),
-       ('2025-01-20 00:00:00', 8, 3, 7, FALSE),
-       ('2025-07-10 00:00:00', 50, 4, 8, FALSE),
-       ('2024-06-30 00:00:00', 6, 5, 9, TRUE),
-       ('2024-12-15 00:00:00', 10, 1, 10, TRUE);
+VALUES
+-- Household 1
+    ('2025-12-31 00:00:00', 10, 1, 1, FALSE),  -- Bottled Water
+    ('2025-09-01 00:00:00', 5, 1, 2, TRUE),   -- Canned Beans
+    ('2030-01-01 00:00:00', 2, 1, 3, TRUE),   -- Flashlight
+    ('2025-12-15 00:00:00', 10, 1, 10, FALSE), -- Cracker
+    ('2026-03-01 00:00:00', 4, 1, 4, TRUE),   -- Tuna Can
+    ('2024-12-01 00:00:00', 3, 1, 9, FALSE),   -- Expired Granola Bar
+
+-- Household 2
+    ('2026-08-15 00:00:00', 20, 2, 4, TRUE),  -- Tuna Can
+    ('2027-11-01 00:00:00', 15, 2, 5, FALSE),  -- Soda Can
+    ('2026-02-01 00:00:00', 2, 2, 6, FALSE),   -- First Aid Kit
+    ('2025-11-30 00:00:00', 8, 2, 2, TRUE),   -- Canned Beans
+    ('2026-06-01 00:00:00', 10, 2, 7, FALSE),  -- Canned Soup
+    ('2026-08-01 00:00:00', 6, 2, 9, FALSE),   -- Granola Bar
+
+-- Household 3
+    ('2026-10-01 00:00:00', 3, 3, 6, TRUE),   -- First Aid Kit
+    ('2026-01-20 00:00:00', 8, 3, 7, FALSE),   -- Canned Soup
+    ('2027-03-10 00:00:00', 12, 3, 1, FALSE),  -- Bottled Water
+    ('2027-05-05 00:00:00', 5, 3, 2, FALSE),   -- Canned Beans
+    ('2026-12-01 00:00:00', 5, 3, 4, FALSE),   -- Tuna Can
+
+-- Household 4
+    ('2025-07-10 00:00:00', 50, 4, 8, TRUE),  -- Battery Pack
+    ('2026-09-01 00:00:00', 20, 4, 2, TRUE),  -- Canned Beans
+    ('2027-07-10 00:00:00', 30, 4, 10, FALSE), -- Cracker
+    ('2026-08-01 00:00:00', 10, 4, 4, TRUE),  -- Tuna Can
+    ('2026-10-01 00:00:00', 15, 4, 9, TRUE),  -- Granola Bar
+
+-- Household 5
+    ('2027-06-30 00:00:00', 6, 5, 9, FALSE),   -- Granola Bar
+    ('2026-03-15 00:00:00', 12, 5, 1, TRUE),  -- Bottled Water
+    ('2025-12-01 00:00:00', 5, 5, 4, FALSE),   -- Tuna Can
+    ('2027-01-01 00:00:00', 6, 5, 7, FALSE),   -- Canned Soup
+    ('2027-11-01 00:00:00', 8, 5, 5, FALSE);   -- Soda Can
 
 -- Insert points of interest (no foreign key dependencies)
 INSERT INTO points_of_interest (longitude, latitude, type, opens_at, closes_at, contact_number, description)
