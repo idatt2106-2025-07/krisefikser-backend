@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StorageItemController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller</a> &gt; <span class="el_source">StorageItemController.java</span></div><h1>StorageItemController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.request.ChangeStorageItemSharedStatusRequest;
 import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSearchRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
+import com.group7.krisefikser.dto.response.ErrorResponse;
+import com.group7.krisefikser.dto.response.StorageItemGroupResponse;
 import com.group7.krisefikser.dto.response.StorageItemResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.StorageItem;
 import com.group7.krisefikser.service.ItemService;
 import com.group7.krisefikser.service.StorageItemService;
 import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,13 +23,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -46,24 +53,25 @@ public class StorageItemController {
   private final StorageItemService storageItemService;
   private final ItemService itemService;
   private final UserService userService;
-<span class="fc" id="L49">  private static final Logger logger = Logger.getLogger(StorageItemController.class.getName());</span>
+<span class="fc" id="L56">  private static final Logger logger = Logger.getLogger(StorageItemController.class.getName());</span>
 
   /**
    * Constructor for StorageItemController.
    *
    * @param storageItemService The service for managing storage items
-   * @param itemService The service for managing items
-   * @param userService The service for managing users and retrieving the current user's household
+   * @param itemService        The service for managing items
+   * @param userService        The service for managing users and retrieving the current
+   *                           user's household
    */
   @Autowired
   public StorageItemController(
-      StorageItemService storageItemService,
-      ItemService itemService,
-<span class="fc" id="L62">      UserService userService) {</span>
-<span class="fc" id="L63">    this.storageItemService = storageItemService;</span>
-<span class="fc" id="L64">    this.itemService = itemService;</span>
-<span class="fc" id="L65">    this.userService = userService;</span>
-<span class="fc" id="L66">  }</span>
+          StorageItemService storageItemService,
+          ItemService itemService,
+<span class="fc" id="L70">          UserService userService) {</span>
+<span class="fc" id="L71">    this.storageItemService = storageItemService;</span>
+<span class="fc" id="L72">    this.itemService = itemService;</span>
+<span class="fc" id="L73">    this.userService = userService;</span>
+<span class="fc" id="L74">  }</span>
 
   /**
    * Endpoint to fetch all storage items for the authenticated user's household.
@@ -71,26 +79,123 @@ public class StorageItemController {
    * @return a list of all storage items for the user's household
    */
   @Operation(
-      summary = &quot;Fetch all storage items for the user's household&quot;,
-      description = &quot;Retrieves a list of all storage items for the authenticated user's household.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = StorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Fetch all storage items for the user's household&quot;,
+          description = &quot;Retrieves a list of all storage items for the &quot;
+                  + &quot;authenticated user's household.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household&quot;)
   public ResponseEntity&lt;List&lt;StorageItemResponse&gt;&gt; getAllStorageItems() {
     try {
-<span class="fc" id="L86">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L87">      List&lt;StorageItem&gt; storageItems = storageItemService.getAllStorageItems(householdId);</span>
-<span class="fc" id="L88">      List&lt;StorageItemResponse&gt; responses = storageItemService</span>
-<span class="fc" id="L89">          .convertToStorageItemResponses(storageItems);</span>
-<span class="fc" id="L90">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L91">    } catch (Exception e) {</span>
-<span class="nc" id="L92">      logger.severe(&quot;Error retrieving storage items: &quot; + e.getMessage());</span>
-<span class="nc" id="L93">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L95">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L96">      List&lt;StorageItem&gt; storageItems = storageItemService.getAllStorageItems(householdId);</span>
+<span class="fc" id="L97">      List&lt;StorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L98">              .convertToStorageItemResponses(storageItems);</span>
+<span class="fc" id="L99">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L100">    } catch (Exception e) {</span>
+<span class="nc" id="L101">      logger.severe(&quot;Error retrieving storage items: &quot; + e.getMessage());</span>
+<span class="nc" id="L102">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+    }
+  }
+
+  /**
+   * Endpoint to fetch all shared storage items for the authenticated user's emergency group.
+   *
+   * @return a list of all shared storage items for the user's emergency group
+   */
+  @Operation(
+          summary = &quot;Fetch all shared storage items for the user's emergency group&quot;,
+          description = &quot;Retrieves a list of all shared storage items for the authenticated user's &quot;
+                  + &quot;emergency group.&quot;,
+          parameters = {
+            @Parameter(name = &quot;types&quot;, description = &quot;List of item types to filter by&quot;,
+                    schema = @Schema(type = &quot;array&quot;, implementation = ItemType.class)),
+            @Parameter(name = &quot;sortBy&quot;, description = &quot;Field to sort by&quot;),
+            @Parameter(name = &quot;sortDirection&quot;, description = &quot;Sort direction (asc/desc)&quot;)
+          },
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved &quot;
+                    + &quot;shared storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No shared storage found&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
+  )
+  @GetMapping(&quot;/emergency-group&quot;)
+  public ResponseEntity&lt;Object&gt; getSharedStorageItemsInGroup(
+          @RequestParam(required = false) List&lt;String&gt; types,
+          @Valid @ModelAttribute StorageItemSortRequest sortRequest,
+          BindingResult bindingResult) {
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">    if (bindingResult.hasErrors()) {</span>
+<span class="nc" id="L136">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
+    }
+    try {
+<span class="fc" id="L139">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L140">              .getSharedStorageItemsInGroup(</span>
+                      types,
+                      sortRequest
+              );
+<span class="fc" id="L144">      return ResponseEntity.ok(responses);</span>
+<span class="fc" id="L145">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L146">      logger.info(&quot;No shared storage items found: &quot; + e.getMessage());</span>
+<span class="fc" id="L147">      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(</span>
+<span class="fc" id="L148">              e.getMessage()</span>
+      ));
+<span class="fc" id="L150">    } catch (Exception e) {</span>
+<span class="fc" id="L151">      logger.severe(&quot;Error retrieving shared storage items: &quot; + e.getMessage());</span>
+<span class="fc" id="L152">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(</span>
+              &quot;An unexpected error occurred while retrieving shared storage items.&quot;
+      ));
+    }
+  }
+
+  /**
+   * Endpoint to retrieve storage items in a group by item ID.
+   *
+   * @param itemId The ID of the item to search for
+   * @return A response entity containing a list of storage items in the group
+   */
+  @Operation(
+          summary = &quot;Retrieve storage items in a group by item ID&quot;,
+          description = &quot;Retrieves a list of storage items in the authenticated user's &quot;
+                  + &quot;emergency group by item ID.&quot;,
+          parameters = {
+            @Parameter(name = &quot;itemId&quot;, description = &quot;ID of the item to search for&quot;,
+                    required = true)
+          },
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved &quot;
+                    + &quot;storage items in group&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemGroupResponse.class))),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No shared storage found&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
+  )
+  @GetMapping(&quot;/emergency-group/by-item/{itemId}&quot;)
+  public ResponseEntity&lt;Object&gt; getSharedStorageItemsInGroupByItemId(
+          @Parameter(description = &quot;Item ID&quot;, required = true)
+          @PathVariable int itemId) {
+    try {
+<span class="fc" id="L186">      List&lt;StorageItemGroupResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L187">              .getSharedStorageItemsInGroupByItemId(itemId);</span>
+<span class="fc" id="L188">      return ResponseEntity.ok(responses);</span>
+<span class="fc" id="L189">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L190">      logger.info(e.getMessage());</span>
+<span class="fc" id="L191">      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(</span>
+<span class="fc" id="L192">              e.getMessage()</span>
+      ));
+<span class="fc" id="L194">    } catch (Exception e) {</span>
+<span class="fc" id="L195">      logger.severe(&quot;Error retrieving shared storage items: &quot; + e.getMessage());</span>
+<span class="fc" id="L196">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(</span>
+              &quot;An unexpected error occurred while retrieving shared storage items.&quot;
+      ));
     }
   }
 
@@ -101,35 +206,35 @@ public class StorageItemController {
    * @return A list of storage items that will expire within the specified number of days
    */
   @Operation(
-      summary = &quot;Find expiring storage items&quot;,
-      description = &quot;Retrieves a list of storage items for the authenticated user's household &quot;
-        + &quot;that will expire within the specified number of days.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved&quot;
-          + &quot;expiring storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = StorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Find expiring storage items&quot;,
+          description = &quot;Retrieves a list of storage items for the authenticated user's household &quot;
+                  + &quot;that will expire within the specified number of days.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved&quot;
+                    + &quot;expiring storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/expiring&quot;)
   public ResponseEntity&lt;List&lt;StorageItemResponse&gt;&gt; getExpiringStorageItems(
-      @RequestParam(defaultValue = &quot;7&quot;) int days) {
+          @RequestParam(defaultValue = &quot;7&quot;) int days) {
 
     try {
-<span class="fc" id="L120">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L121">      logger.info(&quot;Finding storage items expiring within &quot; + days</span>
-          + &quot; days for household ID: &quot; + householdId);
+<span class="fc" id="L225">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L226">      logger.info(&quot;Finding storage items expiring within &quot; + days</span>
+              + &quot; days for household ID: &quot; + householdId);
 
-<span class="fc" id="L124">      List&lt;StorageItem&gt; storageItems = storageItemService.getExpiringStorageItems(days,</span>
-          householdId);
-<span class="fc" id="L126">      List&lt;StorageItemResponse&gt; responses = storageItemService</span>
-<span class="fc" id="L127">          .convertToStorageItemResponses(storageItems);</span>
-<span class="fc" id="L128">      logger.info(&quot;Successfully retrieved expiring storage items&quot;);</span>
-<span class="fc" id="L129">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L130">    } catch (Exception e) {</span>
-<span class="nc" id="L131">      logger.severe(&quot;Unexpected error finding expiring storage items: &quot; + e.getMessage());</span>
-<span class="nc" id="L132">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L229">      List&lt;StorageItem&gt; storageItems = storageItemService.getExpiringStorageItems(days,</span>
+              householdId);
+<span class="fc" id="L231">      List&lt;StorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L232">              .convertToStorageItemResponses(storageItems);</span>
+<span class="fc" id="L233">      logger.info(&quot;Successfully retrieved expiring storage items&quot;);</span>
+<span class="fc" id="L234">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L235">    } catch (Exception e) {</span>
+<span class="nc" id="L236">      logger.severe(&quot;Unexpected error finding expiring storage items: &quot; + e.getMessage());</span>
+<span class="nc" id="L237">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -140,36 +245,36 @@ public class StorageItemController {
    * @return A list of storage items that have the specified item ID
    */
   @Operation(
-      summary = &quot;Find storage items by item ID&quot;,
-      description = &quot;Retrieves a list of storage items for the authenticated user's household &quot;
-        + &quot;that have the specified item ID.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = StorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Find storage items by item ID&quot;,
+          description = &quot;Retrieves a list of storage items for the authenticated user's household &quot;
+                  + &quot;that have the specified item ID.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/by-item/{itemId}&quot;)
   public ResponseEntity&lt;List&lt;StorageItemResponse&gt;&gt; getStorageItemsByItemId(
-      @Parameter(description = &quot;Item ID&quot;, required = true)
-      @PathVariable int itemId) {
+          @Parameter(description = &quot;Item ID&quot;, required = true)
+          @PathVariable int itemId) {
 
     try {
-<span class="fc" id="L159">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L160">      logger.info(&quot;Finding storage items with item ID: &quot; + itemId</span>
-          + &quot; for household ID: &quot; + householdId);
+<span class="fc" id="L264">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L265">      logger.info(&quot;Finding storage items with item ID: &quot; + itemId</span>
+              + &quot; for household ID: &quot; + householdId);
 
-<span class="fc" id="L163">      List&lt;StorageItem&gt; storageItems = storageItemService.getStorageItemsByItemId(itemId,</span>
-            householdId);
-<span class="fc" id="L165">      List&lt;StorageItemResponse&gt; responses = storageItemService</span>
-<span class="fc" id="L166">          .convertToStorageItemResponses(storageItems);</span>
-<span class="fc" id="L167">      logger.info(&quot;Successfully retrieved storage items with item ID: &quot; + itemId);</span>
-<span class="fc" id="L168">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L169">    } catch (Exception e) {</span>
-<span class="nc" id="L170">      logger.severe(&quot;Unexpected error finding storage items with item ID: &quot; + itemId</span>
-<span class="nc" id="L171">          + &quot;: &quot; + e.getMessage());</span>
-<span class="nc" id="L172">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L268">      List&lt;StorageItem&gt; storageItems = storageItemService.getStorageItemsByItemId(itemId,</span>
+              householdId);
+<span class="fc" id="L270">      List&lt;StorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L271">              .convertToStorageItemResponses(storageItems);</span>
+<span class="fc" id="L272">      logger.info(&quot;Successfully retrieved storage items with item ID: &quot; + itemId);</span>
+<span class="fc" id="L273">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L274">    } catch (Exception e) {</span>
+<span class="nc" id="L275">      logger.severe(&quot;Unexpected error finding storage items with item ID: &quot; + itemId</span>
+<span class="nc" id="L276">              + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L277">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -179,27 +284,29 @@ public class StorageItemController {
    * @return a list of aggregated storage items for the user's household
    */
   @Operation(
-      summary = &quot;Fetch all storage items for the user's household, aggregated by item&quot;,
-      description = &quot;Retrieves a list of all storage items for the authenticated user's household, &quot;
-        + &quot;with quantities summed and earliest expiration date found for items of the same type.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved&quot;
-          + &quot;aggregated storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = AggregatedStorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Fetch all storage items for the user's household, aggregated by item&quot;,
+          description = &quot;Retrieves a list of all storage items for the authenticated &quot;
+                  + &quot;user's household, with quantities summed and earliest expiration date &quot;
+                  + &quot;found for items of the same type.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved&quot;
+                    + &quot;aggregated storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation =
+                                    AggregatedStorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/aggregated&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; getAggregatedStorageItems() {
     try {
-<span class="fc" id="L196">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L197">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
-<span class="fc" id="L198">          .getAggregatedStorageItems(householdId);</span>
-<span class="fc" id="L199">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L200">    } catch (Exception e) {</span>
-<span class="nc" id="L201">      logger.severe(&quot;Error retrieving aggregated storage items: &quot; + e.getMessage());</span>
-<span class="nc" id="L202">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L303">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L304">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L305">              .getAggregatedStorageItems(householdId);</span>
+<span class="fc" id="L306">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L307">    } catch (Exception e) {</span>
+<span class="nc" id="L308">      logger.severe(&quot;Error retrieving aggregated storage items: &quot; + e.getMessage());</span>
+<span class="nc" id="L309">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -210,39 +317,41 @@ public class StorageItemController {
    * @return A list of sorted aggregated storage items
    */
   @Operation(
-      summary = &quot;Sort aggregated storage items&quot;,
-      description = &quot;Retrieves all storage items for the authenticated user's household &quot;
-        + &quot;aggregated by item&quot;
-        + &quot;and sorted by the specified field and direction. &quot;
-        + &quot;Valid sort fields: quantity, expirationDate, name. Valid directions: asc, desc.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved sorted&quot;
-          + &quot;aggregated storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = AggregatedStorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid sort parameters&quot;),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Sort aggregated storage items&quot;,
+          description = &quot;Retrieves all storage items for the authenticated user's household &quot;
+                  + &quot;aggregated by item&quot;
+                  + &quot;and sorted by the specified field and direction. &quot;
+                  + &quot;Valid sort fields: quantity, expirationDate, name. Valid directions: &quot;
+                  + &quot;asc, desc.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved sorted&quot;
+                    + &quot;aggregated storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation =
+                                    AggregatedStorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid sort parameters&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/aggregated/sort&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; sortAggregatedStorageItems(
-      @Valid @ModelAttribute StorageItemSortRequest request) {
+          @Valid @ModelAttribute StorageItemSortRequest request) {
 
     try {
-<span class="fc" id="L232">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L233">      logger.info(&quot;Sorting aggregated storage items by: &quot; + request.getSortBy()</span>
-<span class="fc" id="L234">          + &quot; in direction: &quot; + request.getSortDirection()</span>
-          + &quot; for household ID: &quot; + householdId);
+<span class="fc" id="L341">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L342">      logger.info(&quot;Sorting aggregated storage items by: &quot; + request.getSortBy()</span>
+<span class="fc" id="L343">              + &quot; in direction: &quot; + request.getSortDirection()</span>
+              + &quot; for household ID: &quot; + householdId);
 
-<span class="fc" id="L237">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService.getAggregatedStorageItems(</span>
-          householdId,
-<span class="fc" id="L239">          request.getSortBy(),</span>
-<span class="fc" id="L240">          request.getSortDirection());</span>
-<span class="fc" id="L241">      logger.info(&quot;Successfully sorted aggregated storage items&quot;);</span>
-<span class="fc" id="L242">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L243">    } catch (Exception e) {</span>
-<span class="nc" id="L244">      logger.severe(&quot;Unexpected error sorting aggregated storage items: &quot; + e.getMessage());</span>
-<span class="nc" id="L245">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L346">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService.getAggregatedStorageItems(</span>
+              householdId,
+<span class="fc" id="L348">              request.getSortBy(),</span>
+<span class="fc" id="L349">              request.getSortDirection());</span>
+<span class="fc" id="L350">      logger.info(&quot;Successfully sorted aggregated storage items&quot;);</span>
+<span class="fc" id="L351">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L352">    } catch (Exception e) {</span>
+<span class="nc" id="L353">      logger.severe(&quot;Unexpected error sorting aggregated storage items: &quot; + e.getMessage());</span>
+<span class="nc" id="L354">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -254,93 +363,95 @@ public class StorageItemController {
    * @return A list of filtered aggregated storage items
    */
   @Operation(
-      summary = &quot;Filter aggregated storage items by item type&quot;,
-      description = &quot;Retrieves a list of aggregated storage items for the &quot;
-        + &quot;authenticated user's household&quot;
-        + &quot;filtered by the item types.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved filtered&quot;
-          + &quot;aggregated storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = AggregatedStorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Filter aggregated storage items by item type&quot;,
+          description = &quot;Retrieves a list of aggregated storage items for the &quot;
+                  + &quot;authenticated user's household&quot;
+                  + &quot;filtered by the item types.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved filtered&quot;
+                    + &quot;aggregated storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation =
+                                    AggregatedStorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/aggregated/filter-by-type&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; filterAggregatedStorageItemsByItemType(
-      @RequestParam(required = false) List&lt;String&gt; types) {
+          @RequestParam(required = false) List&lt;String&gt; types) {
 
     try {
-<span class="fc" id="L274">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L275">      logger.info(&quot;Filtering aggregated storage items by item types: &quot; + types</span>
-          + &quot; for household ID: &quot; + householdId);
+<span class="fc" id="L384">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L385">      logger.info(&quot;Filtering aggregated storage items by item types: &quot; + types</span>
+              + &quot; for household ID: &quot; + householdId);
 
       // Convert string types to ItemType enums
-<span class="fc" id="L279">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(types);</span>
+<span class="fc" id="L389">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(types);</span>
 
-<span class="fc" id="L281">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
-<span class="fc" id="L282">          .getFilteredAndSortedAggregatedItems(</span>
-          householdId,
-          itemTypes,
-          null,
-          null);
+<span class="fc" id="L391">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L392">              .getFilteredAndSortedAggregatedItems(</span>
+                      householdId,
+                      itemTypes,
+                      null,
+                      null);
 
-<span class="fc" id="L288">      logger.info(&quot;Successfully filtered aggregated storage items by item type&quot;);</span>
-<span class="fc" id="L289">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L290">    } catch (Exception e) {</span>
-<span class="nc" id="L291">      logger.severe(&quot;Unexpected error filtering aggregated storage items by item type: &quot;</span>
-<span class="nc" id="L292">          + e.getMessage());</span>
-<span class="nc" id="L293">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L398">      logger.info(&quot;Successfully filtered aggregated storage items by item type&quot;);</span>
+<span class="fc" id="L399">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L400">    } catch (Exception e) {</span>
+<span class="nc" id="L401">      logger.severe(&quot;Unexpected error filtering aggregated storage items by item type: &quot;</span>
+<span class="nc" id="L402">              + e.getMessage());</span>
+<span class="nc" id="L403">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
   /**
    * Endpoint to filter and sort aggregated storage items for the authenticated user's household.
    *
-   * @param types The list of item types to filter by
+   * @param types       The list of item types to filter by
    * @param sortRequest The sort request containing sort parameters
    * @return A list of filtered and sorted aggregated storage items
    */
   @Operation(
-      summary = &quot;Filter and sort aggregated storage items&quot;,
-      description = &quot;Retrieves a list of aggregated storage items for the &quot;
-        + &quot;authenticated user's household, &quot;
-        + &quot;filtered by item types and sorted by the specified field and direction.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved filtered &quot;
-          + &quot;and sorted aggregated storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = AggregatedStorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid sort parameters&quot;),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Filter and sort aggregated storage items&quot;,
+          description = &quot;Retrieves a list of aggregated storage items for the &quot;
+                  + &quot;authenticated user's household, &quot;
+                  + &quot;filtered by item types and sorted by the specified field and direction.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved filtered &quot;
+                    + &quot;and sorted aggregated storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation =
+                                    AggregatedStorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid sort parameters&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/aggregated/filter-and-sort&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; filterAndSortAggregatedStorageItems(
-      @RequestParam(required = false) List&lt;String&gt; types,
-      @Valid @ModelAttribute StorageItemSortRequest sortRequest) {
+          @RequestParam(required = false) List&lt;String&gt; types,
+          @Valid @ModelAttribute StorageItemSortRequest sortRequest) {
 
     try {
-<span class="fc" id="L324">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L325">      logger.info(&quot;Filtering and sorting aggregated storage items for household ID: &quot;</span>
-          + householdId);
+<span class="fc" id="L435">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L436">      logger.info(&quot;Filtering and sorting aggregated storage items for household ID: &quot;</span>
+              + householdId);
 
       // Convert string types to ItemType enums
-<span class="fc" id="L329">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(types);</span>
+<span class="fc" id="L440">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(types);</span>
 
-<span class="fc" id="L331">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
-<span class="fc" id="L332">          .getFilteredAndSortedAggregatedItems(</span>
-          householdId,
-          itemTypes,
-<span class="fc" id="L335">          sortRequest.getSortBy(),</span>
-<span class="fc" id="L336">          sortRequest.getSortDirection());</span>
+<span class="fc" id="L442">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
+<span class="fc" id="L443">              .getFilteredAndSortedAggregatedItems(</span>
+                      householdId,
+                      itemTypes,
+<span class="fc" id="L446">                      sortRequest.getSortBy(),</span>
+<span class="fc" id="L447">                      sortRequest.getSortDirection());</span>
 
-<span class="fc" id="L338">      logger.info(&quot;Successfully filtered and sorted aggregated storage items&quot;);</span>
-<span class="fc" id="L339">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L340">    } catch (Exception e) {</span>
-<span class="nc" id="L341">      logger.severe(&quot;Unexpected error filtering and sorting aggregated storage items: &quot;</span>
-<span class="nc" id="L342">          + e.getMessage());</span>
-<span class="nc" id="L343">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="fc" id="L449">      logger.info(&quot;Successfully filtered and sorted aggregated storage items&quot;);</span>
+<span class="fc" id="L450">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L451">    } catch (Exception e) {</span>
+<span class="nc" id="L452">      logger.severe(&quot;Unexpected error filtering and sorting aggregated storage items: &quot;</span>
+<span class="nc" id="L453">              + e.getMessage());</span>
+<span class="nc" id="L454">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -351,45 +462,46 @@ public class StorageItemController {
    * @return A list of matching aggregated storage items
    */
   @Operation(
-      summary = &quot;Search aggregated storage items&quot;,
-      description = &quot;Searches for aggregated storage items by item name and/or type for the &quot;
-        + &quot;authenticated user's household. The search is case-insensitive and matches &quot;
-        + &quot;partial item names.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved &quot;
-          + &quot;matching storage items&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = AggregatedStorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Search aggregated storage items&quot;,
+          description = &quot;Searches for aggregated storage items by item name and/or type for the &quot;
+                  + &quot;authenticated user's household. The search is case-insensitive and matches &quot;
+                  + &quot;partial item names.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved &quot;
+                    + &quot;matching storage items&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation =
+                                    AggregatedStorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @GetMapping(&quot;/household/aggregated/search&quot;)
   public ResponseEntity&lt;List&lt;AggregatedStorageItemResponse&gt;&gt; searchAggregatedStorageItems(
-      @Valid @ModelAttribute StorageItemSearchRequest request) {
+          @Valid @ModelAttribute StorageItemSearchRequest request) {
 
     try {
-<span class="nc" id="L371">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="nc" id="L372">      logger.info(&quot;Searching aggregated storage items with search term: &quot; + request.getSearchTerm()</span>
-<span class="nc" id="L373">          + &quot; and types: &quot; + request.getTypes()</span>
-          + &quot; for household ID: &quot; + householdId);
+<span class="nc" id="L483">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="nc" id="L484">      logger.info(&quot;Searching aggregated storage items with search term: &quot; + request.getSearchTerm()</span>
+<span class="nc" id="L485">              + &quot; and types: &quot; + request.getTypes()</span>
+              + &quot; for household ID: &quot; + householdId);
 
       // Convert string types to ItemType enums
-<span class="nc" id="L377">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(request.getTypes());</span>
+<span class="nc" id="L489">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(request.getTypes());</span>
 
-<span class="nc" id="L379">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
-<span class="nc" id="L380">          .searchAggregatedStorageItems(</span>
-          householdId,
-<span class="nc" id="L382">          request.getSearchTerm(),</span>
-          itemTypes,
-<span class="nc" id="L384">          request.getSortBy(),</span>
-<span class="nc" id="L385">          request.getSortDirection());</span>
+<span class="nc" id="L491">      List&lt;AggregatedStorageItemResponse&gt; responses = storageItemService</span>
+<span class="nc" id="L492">              .searchAggregatedStorageItems(</span>
+                      householdId,
+<span class="nc" id="L494">                      request.getSearchTerm(),</span>
+                      itemTypes,
+<span class="nc" id="L496">                      request.getSortBy(),</span>
+<span class="nc" id="L497">                      request.getSortDirection());</span>
 
-<span class="nc" id="L387">      logger.info(&quot;Successfully searched aggregated storage items, found &quot;</span>
-<span class="nc" id="L388">          + responses.size() + &quot; matches&quot;);</span>
-<span class="nc" id="L389">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L390">    } catch (Exception e) {</span>
-<span class="nc" id="L391">      logger.severe(&quot;Unexpected error searching aggregated storage items: &quot; + e.getMessage());</span>
-<span class="nc" id="L392">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+<span class="nc" id="L499">      logger.info(&quot;Successfully searched aggregated storage items, found &quot;</span>
+<span class="nc" id="L500">              + responses.size() + &quot; matches&quot;);</span>
+<span class="nc" id="L501">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L502">    } catch (Exception e) {</span>
+<span class="nc" id="L503">      logger.severe(&quot;Unexpected error searching aggregated storage items: &quot; + e.getMessage());</span>
+<span class="nc" id="L504">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
     }
   }
 
@@ -400,87 +512,148 @@ public class StorageItemController {
    * @return The created storage item
    */
   @Operation(
-      summary = &quot;Add a new storage item&quot;,
-      description = &quot;Creates a new storage item for the authenticated user's household.&quot;,
-      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-        description = &quot;Details of the storage item to be created&quot;,
-        required = true,
-        content = @Content(mediaType = &quot;application/json&quot;,
-          schema = @Schema(implementation = StorageItemRequest.class))
-      ),
-      responses = {
-        @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Storage item successfully created&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = StorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Add a new storage item&quot;,
+          description = &quot;Creates a new storage item for the authenticated user's household.&quot;,
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = &quot;Details of the storage item to be created&quot;,
+                  required = true,
+                  content = @Content(mediaType = &quot;application/json&quot;,
+                          schema = @Schema(implementation = StorageItemRequest.class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Storage item successfully created&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @PostMapping
   public ResponseEntity&lt;StorageItemResponse&gt; addStorageItem(
-      @Valid @RequestBody StorageItemRequest request) {
+          @Valid @RequestBody StorageItemRequest request) {
     try {
-<span class="fc" id="L423">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L424">      logger.info(&quot;Adding a new storage item for household ID: &quot; + householdId);</span>
+<span class="fc" id="L535">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L536">      logger.info(&quot;Adding a new storage item for household ID: &quot; + householdId);</span>
 
-<span class="fc" id="L426">      StorageItemResponse response = storageItemService.addStorageItemFromRequest(householdId,</span>
-          request);
-<span class="fc" id="L428">      logger.info(&quot;Successfully added storage item with ID: &quot; + response.getId());</span>
-<span class="fc" id="L429">      return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
-<span class="nc" id="L430">    } catch (Exception e) {</span>
-<span class="nc" id="L431">      logger.severe(&quot;Error adding storage item: &quot; + e.getMessage());</span>
-<span class="nc" id="L432">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="fc" id="L538">      StorageItemResponse response = storageItemService.addStorageItemFromRequest(householdId,</span>
+              request);
+<span class="fc" id="L540">      logger.info(&quot;Successfully added storage item with ID: &quot; + response.getId());</span>
+<span class="fc" id="L541">      return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+<span class="nc" id="L542">    } catch (Exception e) {</span>
+<span class="nc" id="L543">      logger.severe(&quot;Error adding storage item: &quot; + e.getMessage());</span>
+<span class="nc" id="L544">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 
   /**
    * Endpoint to update an existing storage item in the authenticated user's household.
    *
-   * @param id The ID of the storage item to update
+   * @param id      The ID of the storage item to update
    * @param request The request containing the updated storage item details
    * @return The updated storage item
    */
   @Operation(
-      summary = &quot;Update an existing storage item&quot;,
-      description = &quot;Updates a storage item with the specified ID for the &quot;
-        + &quot;authenticated user's household.&quot;,
-      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-        description = &quot;Updated details of the storage item&quot;,
-        required = true,
-        content = @Content(mediaType = &quot;application/json&quot;,
-          schema = @Schema(implementation = StorageItemRequest.class))
-      ),
-      responses = {
-        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Storage item successfully updated&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-            schema = @Schema(implementation = StorageItemResponse.class))),
-        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
-        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Storage item not found&quot;),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Update an existing storage item&quot;,
+          description = &quot;Updates a storage item with the specified ID for the &quot;
+                  + &quot;authenticated user's household.&quot;,
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = &quot;Updated details of the storage item&quot;,
+                  required = true,
+                  content = @Content(mediaType = &quot;application/json&quot;,
+                          schema = @Schema(implementation = StorageItemRequest.class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Storage item successfully updated&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Storage item not found&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @PutMapping(&quot;/{id}&quot;)
   public ResponseEntity&lt;StorageItemResponse&gt; updateStorageItem(
-      @PathVariable int id,
-      @Valid @RequestBody StorageItemRequest request) {
+          @PathVariable int id,
+          @Valid @RequestBody StorageItemRequest request) {
     try {
-<span class="fc" id="L467">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L468">      logger.info(&quot;Updating storage item with ID: &quot; + id</span>
-          + &quot; for household ID: &quot; + householdId);
+<span class="fc" id="L579">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L580">      logger.info(&quot;Updating storage item with ID: &quot; + id</span>
+              + &quot; for household ID: &quot; + householdId);
 
-<span class="fc" id="L471">      StorageItemResponse response = storageItemService.updateStorageItemFromRequest(</span>
-          id, householdId, request);
-<span class="fc" id="L473">      logger.info(&quot;Successfully updated storage item with ID: &quot; + id);</span>
-<span class="fc" id="L474">      return ResponseEntity.ok(response);</span>
-<span class="fc" id="L475">    } catch (RuntimeException e) {</span>
-<span class="pc bpc" id="L476" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
-<span class="fc" id="L477">        logger.info(&quot;Storage item not found with ID: &quot; + id);</span>
-<span class="fc" id="L478">        return ResponseEntity.notFound().build();</span>
+<span class="fc" id="L583">      StorageItemResponse response = storageItemService.updateStorageItemFromRequest(</span>
+              id, householdId, request);
+<span class="fc" id="L585">      logger.info(&quot;Successfully updated storage item with ID: &quot; + id);</span>
+<span class="fc" id="L586">      return ResponseEntity.ok(response);</span>
+<span class="fc" id="L587">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L588" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L589">        logger.info(&quot;Storage item not found with ID: &quot; + id);</span>
+<span class="fc" id="L590">        return ResponseEntity.notFound().build();</span>
       }
-<span class="nc" id="L480">      logger.severe(&quot;Error updating storage item: &quot; + e.getMessage());</span>
-<span class="nc" id="L481">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="nc" id="L592">      logger.severe(&quot;Error updating storage item: &quot; + e.getMessage());</span>
+<span class="nc" id="L593">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
+
+  /**
+   * Endpoint to update an existing shared storage item in the authenticated user's emergency group.
+   *
+   * @param id      The ID of the shared storage item to update
+   * @param request The request containing the updated shared storage item details
+   * @return The updated shared storage item
+   */
+  @Operation(
+          summary = &quot;Update an existing shared storage item&quot;,
+          description = &quot;Updates a shared storage item with the specified ID for the &quot;
+                  + &quot;authenticated user's emergency group.&quot;,
+          parameters = {
+            @Parameter(name = &quot;id&quot;, description = &quot;ID of the shared storage item to update&quot;,
+                    required = true)
+          },
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = &quot;Updated details of the shared storage item&quot;,
+                  required = true,
+                  content = @Content(mediaType = &quot;application/json&quot;,
+                          schema = @Schema(implementation = StorageItemRequest.class))
+          ),
+          responses = {
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Shared storage item &quot;
+                    + &quot;successfully updated&quot;,
+                    content = @Content(mediaType = &quot;application/json&quot;,
+                            schema = @Schema(implementation = StorageItemResponse.class))),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Shared storage item not found&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
+  )
+  @PutMapping(&quot;/emergency-group/{id}&quot;)
+  public ResponseEntity&lt;Object&gt; updateSharedStorageItem(
+          @PathVariable int id,
+          @Valid @RequestBody StorageItemRequest request) {
+    try {
+
+<span class="fc" id="L634">      StorageItemResponse response = storageItemService.updateSharedStorageItem(</span>
+              id, request);
+<span class="fc" id="L636">      logger.info(&quot;Successfully updated shared storage item with ID: &quot; + id);</span>
+<span class="fc" id="L637">      return ResponseEntity.ok(response);</span>
+<span class="fc" id="L638">    } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L639">      logger.info(e.getMessage());</span>
+<span class="fc" id="L640">      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(</span>
+<span class="fc" id="L641">              e.getMessage()</span>
+      ));
+<span class="fc" id="L643">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L644">      logger.info(e.getMessage());</span>
+<span class="fc" id="L645">      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(</span>
+<span class="fc" id="L646">              e.getMessage()</span>
+      ));
+<span class="fc" id="L648">    } catch (Exception e) {</span>
+<span class="fc" id="L649">      logger.severe(&quot;Error updating shared storage item: &quot; + e.getMessage());</span>
+<span class="fc" id="L650">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+                new ErrorResponse(&quot;An unexpected error occurred while updating the &quot;
+                        + &quot;shared storage item.&quot;)
+      );
+    }
+  }
+
 
   /**
    * Endpoint to delete a storage item by its ID from the authenticated user's household.
@@ -489,36 +662,104 @@ public class StorageItemController {
    * @return No content if successful, or an error status
    */
   @Operation(
-      summary = &quot;Delete a storage item&quot;,
-      description = &quot;Deletes a storage item with the specified ID from the &quot;
-        + &quot;authenticated user's household. &quot;
-        + &quot;Returns no content if successful.&quot;,
-      responses = {
-        @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Storage item successfully deleted&quot;),
-        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Storage item not found&quot;),
-        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
-      }
+          summary = &quot;Delete a storage item in household, or shared in group&quot;,
+          description = &quot;Deletes a storage item with the specified ID from the &quot;
+                  + &quot;authenticated user's household. &quot;
+                  + &quot;Returns no content if successful.&quot;,
+          responses = {
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Storage item successfully deleted&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Storage item not found&quot;),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          }
   )
   @DeleteMapping(&quot;/{id}&quot;)
   public ResponseEntity&lt;Void&gt; deleteStorageItem(
-      @Parameter(description = &quot;Storage item ID&quot;, required = true)
-      @PathVariable int id) {
+          @Parameter(description = &quot;Storage item ID&quot;, required = true)
+          @PathVariable int id) {
 
     try {
-<span class="fc" id="L508">      int householdId = userService.getCurrentUserHouseholdId();</span>
-<span class="fc" id="L509">      logger.info(&quot;Deleting storage item with ID: &quot; + id</span>
-          + &quot; for household ID: &quot; + householdId);
+<span class="fc" id="L681">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L682">      logger.info(&quot;Deleting storage item with ID: &quot; + id</span>
+              + &quot; in household with ID: &quot; + householdId);
 
-<span class="fc" id="L512">      storageItemService.deleteStorageItem(id, householdId);</span>
-<span class="fc" id="L513">      logger.info(&quot;Successfully deleted storage item with ID: &quot; + id);</span>
-<span class="fc" id="L514">      return ResponseEntity.noContent().build();</span>
-<span class="fc" id="L515">    } catch (RuntimeException e) {</span>
-<span class="pc bpc" id="L516" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
-<span class="fc" id="L517">        logger.info(&quot;Storage item not found with ID: &quot; + id);</span>
-<span class="fc" id="L518">        return ResponseEntity.notFound().build();</span>
+<span class="fc" id="L685">      storageItemService.deleteStorageItem(id, householdId);</span>
+<span class="fc" id="L686">      logger.info(&quot;Successfully deleted storage item with ID: &quot; + id);</span>
+<span class="fc" id="L687">      return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L688">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L689" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L690">        logger.info(&quot;Storage item not found with ID: &quot; + id);</span>
+<span class="fc" id="L691">        return ResponseEntity.notFound().build();</span>
       }
-<span class="nc" id="L520">      logger.severe(&quot;Error deleting storage item: &quot; + e.getMessage());</span>
-<span class="nc" id="L521">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="nc" id="L693">      logger.severe(&quot;Error deleting storage item: &quot; + e.getMessage());</span>
+<span class="nc" id="L694">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to update the shared status of a storage item.
+   *
+   * @param id      The ID of the storage item to update
+   * @param request The request containing the new shared status
+   * @return A list of updated storage items
+   */
+  @Operation(
+          summary = &quot;Update the shared status of a storage item&quot;,
+          description = &quot;Updates the shared status of a storage item with the specified ID &quot;
+                  + &quot;for the authenticated user's household.&quot;,
+          parameters = {
+              @Parameter(name = &quot;id&quot;, description = &quot;ID of the storage item to update&quot;,
+                      required = true)
+          },
+          requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                  description = &quot;New shared status and quantity of the storage item&quot;,
+                  required = true,
+                  content = @Content(mediaType = &quot;application/json&quot;,
+                          schema = @Schema(implementation =
+                                  ChangeStorageItemSharedStatusRequest.class))
+          ),
+          responses = {
+              @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Storage item shared status &quot;
+                      + &quot;successfully updated&quot;,
+                      content = @Content(mediaType = &quot;application/json&quot;,
+                              schema = @Schema(implementation =
+                                      StorageItemResponse.class))),
+              @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
+              @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Storage item not found&quot;),
+              @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+          })
+  @PatchMapping(&quot;/household/{id}/shared-status&quot;)
+  public ResponseEntity&lt;Object&gt; updateStorageItemSharedStatus(
+          @PathVariable int id,
+          @Valid @RequestBody ChangeStorageItemSharedStatusRequest request,
+          BindingResult bindingResult) {
+<span class="pc bpc" id="L735" title="1 of 2 branches missed.">    if (bindingResult.hasErrors()) {</span>
+<span class="nc" id="L736">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
+    }
+    try {
+<span class="fc" id="L739">      int householdId = userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L740">      logger.info(&quot;Updating share status of storage item with ID: &quot; + id</span>
+              + &quot; for household ID: &quot; + householdId);
+
+<span class="fc" id="L743">      List&lt;StorageItemResponse&gt; response = storageItemService.updateStorageItemSharedStatus(id,</span>
+              householdId, request);
+<span class="fc" id="L745">      logger.info(&quot;Successfully updated share status of storage item with ID: &quot; + id);</span>
+<span class="fc" id="L746">      return ResponseEntity.ok(response);</span>
+<span class="fc" id="L747">    } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L748">      logger.info(&quot;Did not update share status of storage item: &quot; + e.getMessage());</span>
+<span class="fc" id="L749">      return ResponseEntity.badRequest().body(new ErrorResponse(</span>
+<span class="fc" id="L750">                e.getMessage()</span>
+              ));
+<span class="fc" id="L752">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L753">      logger.info(e.getMessage());</span>
+<span class="fc" id="L754">      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(</span>
+<span class="fc" id="L755">              e.getMessage()</span>
+      ));
+<span class="fc" id="L757">    } catch (Exception e) {</span>
+<span class="fc" id="L758">      logger.severe(&quot;Error updating share status of storage item: &quot; + e.getMessage());</span>
+<span class="fc" id="L759">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+              new ErrorResponse(&quot;An unexpected error occurred while updating the &quot;
+                      + &quot;share status of the storage item.&quot;)
+      );
     }
   }
 }

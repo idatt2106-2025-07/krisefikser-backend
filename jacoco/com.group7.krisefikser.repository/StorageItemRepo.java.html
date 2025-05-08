@@ -29,16 +29,14 @@ public class StorageItemRepo {
   /**
    * RowMapper to map the result set to a StorageItem object.
    */
-<span class="fc" id="L32">  private final RowMapper&lt;StorageItem&gt; storageItemRowMapper = (rs, rowNum) -&gt; {</span>
-<span class="fc" id="L33">    return new StorageItem(</span>
-<span class="fc" id="L34">            rs.getInt(&quot;id&quot;),</span>
-<span class="fc" id="L35">            rs.getTimestamp(&quot;expiration_date&quot;).toLocalDateTime(),</span>
-<span class="fc" id="L36">            rs.getInt(&quot;quantity&quot;),</span>
-<span class="fc" id="L37">            rs.getInt(&quot;household_id&quot;),</span>
-<span class="fc" id="L38">            rs.getInt(&quot;item_id&quot;),</span>
-<span class="fc" id="L39">            rs.getBoolean(&quot;is_shared&quot;)</span>
-    );
-  };
+<span class="fc" id="L32">  private final RowMapper&lt;StorageItem&gt; storageItemRowMapper = (rs, rowNum) -&gt; new StorageItem(</span>
+<span class="fc" id="L33">          rs.getInt(&quot;id&quot;),</span>
+<span class="fc" id="L34">          rs.getTimestamp(&quot;expiration_date&quot;).toLocalDateTime(),</span>
+<span class="fc" id="L35">          rs.getDouble(&quot;quantity&quot;),</span>
+<span class="fc" id="L36">          rs.getInt(&quot;household_id&quot;),</span>
+<span class="fc" id="L37">          rs.getInt(&quot;item_id&quot;),</span>
+<span class="fc" id="L38">          rs.getBoolean(&quot;is_shared&quot;)</span>
+  );
 
   /**
    * Constructor for StorageItemRepo.
@@ -46,9 +44,9 @@ public class StorageItemRepo {
    * @param jdbcTemplate The JdbcTemplate used to interact with the database.
    */
   @Autowired
-<span class="fc" id="L49">  public StorageItemRepo(JdbcTemplate jdbcTemplate) {</span>
-<span class="fc" id="L50">    this.jdbcTemplate = jdbcTemplate;</span>
-<span class="fc" id="L51">  }</span>
+<span class="fc" id="L47">  public StorageItemRepo(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L48">    this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L49">  }</span>
 
   /**
    * This method retrieves all storage items for a specific household from the database.
@@ -57,27 +55,56 @@ public class StorageItemRepo {
    * @return A list of StorageItem objects.
    */
   public List&lt;StorageItem&gt; getAllStorageItems(int householdId) {
-<span class="fc" id="L60">    String sql = &quot;SELECT id, expiration_date, quantity, household_id, &quot;</span>
+<span class="fc" id="L58">    String sql = &quot;SELECT id, expiration_date, quantity, household_id, &quot;</span>
             + &quot;item_id, is_shared FROM storage_items WHERE household_id = ?&quot;;
-<span class="fc" id="L62">    return jdbcTemplate.query(sql, storageItemRowMapper, householdId);</span>
+<span class="fc" id="L60">    return jdbcTemplate.query(sql, storageItemRowMapper, householdId);</span>
   }
 
   /**
-   * This method retrieves a storage item by its ID for a specific household.
+   * This method retrieves all shared storage items for a specific emergency group from the
+   * database.
    *
-   * @param id          The ID of the storage item to retrieve.
-   * @param householdId The ID of the household the storage item belongs to.
+   * @param emergencyGroupId The ID of the emergency group to retrieve storage items for
+   * @return A list of StorageItem objects.
+   */
+  public List&lt;StorageItem&gt; getAllSharedStorageItemsInGroup(long emergencyGroupId) {
+<span class="fc" id="L71">    String sql = &quot;SELECT si.id, si.expiration_date, si.quantity, si.household_id, &quot;</span>
+            + &quot;si.item_id, si.is_shared FROM storage_items si &quot;
+            + &quot;JOIN households h ON si.household_id = h.id &quot;
+            + &quot;WHERE h.emergency_group_id = ? AND si.is_shared = TRUE&quot;;
+<span class="fc" id="L75">    return jdbcTemplate.query(sql, storageItemRowMapper, emergencyGroupId);</span>
+  }
+
+  /**
+   * This method retrieves storage items for a specific group based on item id
+   * and group ID.
+   *
+   * @param groupId The ID of the group to retrieve storage items for
+   * @return A list of StorageItem objects.
+   */
+  public List&lt;StorageItem&gt; getSharedStorageItemsInGroupByItemId(long groupId, long itemId) {
+<span class="fc" id="L86">    String sql = &quot;SELECT si.id, si.expiration_date, si.quantity, si.household_id, &quot;</span>
+            + &quot;si.item_id, si.is_shared FROM storage_items si &quot;
+            + &quot;JOIN households h ON si.household_id = h.id &quot;
+            + &quot;WHERE h.emergency_group_id = ? AND si.is_shared = TRUE AND si.item_id = ?&quot;;
+<span class="fc" id="L90">    return jdbcTemplate.query(sql, storageItemRowMapper, groupId, itemId);</span>
+  }
+
+  /**
+   * This method retrieves a storage item by its ID.
+   *
+   * @param id The ID of the storage item to retrieve.
    * @return An Optional containing the StorageItem object if found, or empty if not found.
    */
-  public Optional&lt;StorageItem&gt; findById(int id, int householdId) {
+  public Optional&lt;StorageItem&gt; findById(int id) {
     try {
-<span class="fc" id="L74">      String sql = &quot;SELECT id, expiration_date, quantity, household_id, &quot;</span>
-              + &quot;item_id, is_shared FROM storage_items WHERE id = ? AND household_id = ?&quot;;
-<span class="fc" id="L76">      StorageItem storageItem = jdbcTemplate.queryForObject(sql,</span>
-<span class="fc" id="L77">              storageItemRowMapper, id, householdId);</span>
-<span class="fc" id="L78">      return Optional.ofNullable(storageItem);</span>
-<span class="fc" id="L79">    } catch (EmptyResultDataAccessException e) {</span>
-<span class="fc" id="L80">      return Optional.empty();</span>
+<span class="fc" id="L101">      String sql = &quot;SELECT id, expiration_date, quantity, household_id, &quot;</span>
+              + &quot;item_id, is_shared FROM storage_items WHERE id = ?&quot;;
+<span class="fc" id="L103">      StorageItem storageItem = jdbcTemplate.queryForObject(sql,</span>
+<span class="fc" id="L104">              storageItemRowMapper, id);</span>
+<span class="fc" id="L105">      return Optional.ofNullable(storageItem);</span>
+<span class="fc" id="L106">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="fc" id="L107">      return Optional.empty();</span>
     }
   }
 
@@ -89,10 +116,10 @@ public class StorageItemRepo {
    * @return A list of StorageItem objects of the specified item.
    */
   public List&lt;StorageItem&gt; findByItemId(int itemId, int householdId) {
-<span class="fc" id="L92">    String sql = &quot;SELECT id, expiration_date, quantity, household_id, item_id, is_shared &quot;</span>
+<span class="fc" id="L119">    String sql = &quot;SELECT id, expiration_date, quantity, household_id, item_id, is_shared &quot;</span>
             + &quot;FROM storage_items &quot;
             + &quot;WHERE item_id = ? AND household_id = ?&quot;;
-<span class="fc" id="L95">    return jdbcTemplate.query(sql, storageItemRowMapper, itemId, householdId);</span>
+<span class="fc" id="L122">    return jdbcTemplate.query(sql, storageItemRowMapper, itemId, householdId);</span>
   }
 
   /**
@@ -105,21 +132,22 @@ public class StorageItemRepo {
    * @return The added storage item with the generated ID set.
    */
   public StorageItem add(StorageItem storageItem) {
-<span class="fc" id="L108">    String sql = &quot;INSERT INTO storage_items (expiration_date, quantity, &quot;</span>
-            + &quot;household_id, item_id) VALUES (?, ?, ?, ?)&quot;;
-<span class="fc" id="L110">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
+<span class="fc" id="L135">    String sql = &quot;INSERT INTO storage_items (expiration_date, quantity, &quot;</span>
+            + &quot;household_id, item_id, is_shared) VALUES (?, ?, ?, ?, ?)&quot;;
+<span class="fc" id="L137">    KeyHolder keyHolder = new GeneratedKeyHolder();</span>
 
-<span class="fc" id="L112">    jdbcTemplate.update(connection -&gt; {</span>
-<span class="fc" id="L113">      PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);</span>
-<span class="fc" id="L114">      ps.setTimestamp(1, Timestamp.valueOf(storageItem.getExpirationDate()));</span>
-<span class="fc" id="L115">      ps.setInt(2, storageItem.getQuantity());</span>
-<span class="fc" id="L116">      ps.setInt(3, storageItem.getHouseholdId());</span>
-<span class="fc" id="L117">      ps.setInt(4, storageItem.getItemId());</span>
-<span class="fc" id="L118">      return ps;</span>
+<span class="fc" id="L139">    jdbcTemplate.update(connection -&gt; {</span>
+<span class="fc" id="L140">      PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);</span>
+<span class="fc" id="L141">      ps.setTimestamp(1, Timestamp.valueOf(storageItem.getExpirationDate()));</span>
+<span class="fc" id="L142">      ps.setDouble(2, storageItem.getQuantity());</span>
+<span class="fc" id="L143">      ps.setInt(3, storageItem.getHouseholdId());</span>
+<span class="fc" id="L144">      ps.setInt(4, storageItem.getItemId());</span>
+<span class="fc" id="L145">      ps.setBoolean(5, storageItem.isShared());</span>
+<span class="fc" id="L146">      return ps;</span>
     }, keyHolder);
 
-<span class="fc" id="L121">    storageItem.setId(keyHolder.getKey().intValue());</span>
-<span class="fc" id="L122">    return storageItem;</span>
+<span class="fc" id="L149">    storageItem.setId(keyHolder.getKey().intValue());</span>
+<span class="fc" id="L150">    return storageItem;</span>
   }
 
   /**
@@ -132,21 +160,22 @@ public class StorageItemRepo {
    *                                        given ID in the specified household.
    */
   public StorageItem update(StorageItem storageItem) {
-<span class="fc" id="L135">    String sql = &quot;UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ? &quot;</span>
-            + &quot;WHERE id = ? AND household_id = ?&quot;;
-<span class="fc" id="L137">    int rowsAffected = jdbcTemplate.update(sql,</span>
-<span class="fc" id="L138">            Timestamp.valueOf(storageItem.getExpirationDate()),</span>
-<span class="fc" id="L139">            storageItem.getQuantity(),</span>
-<span class="fc" id="L140">            storageItem.getItemId(),</span>
-<span class="fc" id="L141">            storageItem.getId(),</span>
-<span class="fc" id="L142">            storageItem.getHouseholdId());</span>
+<span class="fc" id="L163">    String sql = &quot;UPDATE storage_items SET expiration_date = ?, quantity = ?, item_id = ?, &quot;</span>
+            + &quot;is_shared = ? WHERE id = ? AND household_id = ?&quot;;
+<span class="fc" id="L165">    int rowsAffected = jdbcTemplate.update(sql,</span>
+<span class="fc" id="L166">            Timestamp.valueOf(storageItem.getExpirationDate()),</span>
+<span class="fc" id="L167">            storageItem.getQuantity(),</span>
+<span class="fc" id="L168">            storageItem.getItemId(),</span>
+<span class="fc" id="L169">            storageItem.isShared(),</span>
+<span class="fc" id="L170">            storageItem.getId(),</span>
+<span class="fc" id="L171">            storageItem.getHouseholdId());</span>
 
-<span class="fc bfc" id="L144" title="All 2 branches covered.">    if (rowsAffected == 0) {</span>
-<span class="fc" id="L145">      throw new EmptyResultDataAccessException(</span>
-<span class="fc" id="L146">              &quot;No storage item found with id: &quot; + storageItem.getId()</span>
-<span class="fc" id="L147">                      + &quot; in household: &quot; + storageItem.getHouseholdId(), 1);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">    if (rowsAffected == 0) {</span>
+<span class="fc" id="L174">      throw new EmptyResultDataAccessException(</span>
+<span class="fc" id="L175">              &quot;No storage item found with id: &quot; + storageItem.getId()</span>
+<span class="fc" id="L176">                      + &quot; in household: &quot; + storageItem.getHouseholdId(), 1);</span>
     }
-<span class="fc" id="L149">    return storageItem;</span>
+<span class="fc" id="L178">    return storageItem;</span>
   }
 
   /**
@@ -158,8 +187,8 @@ public class StorageItemRepo {
    * @return true if the storage item was deleted, false otherwise.
    */
   public boolean deleteById(int id, int householdId) {
-<span class="fc" id="L161">    String sql = &quot;DELETE FROM storage_items WHERE id = ? AND household_id = ?&quot;;</span>
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">    return jdbcTemplate.update(sql, id, householdId) &gt; 0;</span>
+<span class="fc" id="L190">    String sql = &quot;DELETE FROM storage_items WHERE id = ? AND household_id = ?&quot;;</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">    return jdbcTemplate.update(sql, id, householdId) &gt; 0;</span>
   }
 
   /**
@@ -169,8 +198,8 @@ public class StorageItemRepo {
    * @return The number of storage items deleted.
    */
   public int deleteByHouseholdId(int householdId) {
-<span class="fc" id="L172">    String sql = &quot;DELETE FROM storage_items WHERE household_id = ?&quot;;</span>
-<span class="fc" id="L173">    return jdbcTemplate.update(sql, householdId);</span>
+<span class="fc" id="L201">    String sql = &quot;DELETE FROM storage_items WHERE household_id = ?&quot;;</span>
+<span class="fc" id="L202">    return jdbcTemplate.update(sql, householdId);</span>
   }
 
   /**
@@ -182,19 +211,19 @@ public class StorageItemRepo {
    */
   public List&lt;StorageItem&gt; findExpiringItems(int days, int householdId) {
     // Calculate current date and future date using Java
-<span class="fc" id="L185">    LocalDateTime now = LocalDateTime.now();</span>
-<span class="fc" id="L186">    LocalDateTime futureDate = now.plusDays(days);</span>
+<span class="fc" id="L214">    LocalDateTime now = LocalDateTime.now();</span>
+<span class="fc" id="L215">    LocalDateTime futureDate = now.plusDays(days);</span>
 
-<span class="fc" id="L188">    String sql = &quot;SELECT id, expiration_date, quantity, household_id, item_id, is_shared &quot;</span>
+<span class="fc" id="L217">    String sql = &quot;SELECT id, expiration_date, quantity, household_id, item_id, is_shared &quot;</span>
             + &quot;FROM storage_items &quot;
             + &quot;WHERE expiration_date &lt;= ? &quot;
             + &quot;AND expiration_date &gt;= ? &quot;
             + &quot;AND household_id = ?&quot;;
 
-<span class="fc" id="L194">    return jdbcTemplate.query(sql, storageItemRowMapper,</span>
-<span class="fc" id="L195">            Timestamp.valueOf(futureDate),</span>
-<span class="fc" id="L196">            Timestamp.valueOf(now),</span>
-<span class="fc" id="L197">            householdId);</span>
+<span class="fc" id="L223">    return jdbcTemplate.query(sql, storageItemRowMapper,</span>
+<span class="fc" id="L224">            Timestamp.valueOf(futureDate),</span>
+<span class="fc" id="L225">            Timestamp.valueOf(now),</span>
+<span class="fc" id="L226">            householdId);</span>
   }
 
   /**
@@ -206,26 +235,26 @@ public class StorageItemRepo {
    * @return A list of StorageItem objects matching the criteria.
    */
   public List&lt;StorageItem&gt; findByItemTypes(int householdId, List&lt;String&gt; itemTypeStrings) {
-<span class="pc bpc" id="L209" title="1 of 4 branches missed.">    if (itemTypeStrings == null || itemTypeStrings.isEmpty()) {</span>
-<span class="fc" id="L210">      return getAllStorageItems(householdId);</span>
+<span class="pc bpc" id="L238" title="1 of 4 branches missed.">    if (itemTypeStrings == null || itemTypeStrings.isEmpty()) {</span>
+<span class="fc" id="L239">      return getAllStorageItems(householdId);</span>
     }
 
-<span class="fc" id="L213">    String placeholders = String.join(&quot;,&quot;, Collections.nCopies(itemTypeStrings.size(), &quot;?&quot;));</span>
+<span class="fc" id="L242">    String placeholders = String.join(&quot;,&quot;, Collections.nCopies(itemTypeStrings.size(), &quot;?&quot;));</span>
 
-<span class="fc" id="L215">    String sql = &quot;SELECT si.id, si.expiration_date, si.quantity, si.household_id, si.item_id, &quot;</span>
+<span class="fc" id="L244">    String sql = &quot;SELECT si.id, si.expiration_date, si.quantity, si.household_id, si.item_id, &quot;</span>
             + &quot;si.is_shared &quot;
             + &quot;FROM storage_items si &quot;
             + &quot;JOIN items i ON si.item_id = i.id &quot;
             + &quot;WHERE si.household_id = ? &quot;
             + &quot;AND i.type IN (&quot; + placeholders + &quot;)&quot;;
 
-<span class="fc" id="L222">    Object[] params = new Object[itemTypeStrings.size() + 1];</span>
-<span class="fc" id="L223">    params[0] = householdId;</span>
-<span class="fc bfc" id="L224" title="All 2 branches covered.">    for (int i = 0; i &lt; itemTypeStrings.size(); i++) {</span>
-<span class="fc" id="L225">      params[i + 1] = itemTypeStrings.get(i);</span>
+<span class="fc" id="L251">    Object[] params = new Object[itemTypeStrings.size() + 1];</span>
+<span class="fc" id="L252">    params[0] = householdId;</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">    for (int i = 0; i &lt; itemTypeStrings.size(); i++) {</span>
+<span class="fc" id="L254">      params[i + 1] = itemTypeStrings.get(i);</span>
     }
 
-<span class="fc" id="L228">    return jdbcTemplate.query(sql, storageItemRowMapper, params);</span>
+<span class="fc" id="L257">    return jdbcTemplate.query(sql, storageItemRowMapper, params);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
