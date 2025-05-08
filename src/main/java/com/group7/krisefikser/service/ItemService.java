@@ -116,6 +116,25 @@ public class ItemService {
   }
 
   /**
+   * Searches for items that match the given search term by name.
+   * The search is case-insensitive and matches partial item names.
+   *
+   * @param searchTerm The term to search for in item names
+   * @return A list of items that match the search term
+   */
+  public List<Item> searchItemsByName(String searchTerm) {
+    if (searchTerm == null || searchTerm.trim().isEmpty()) {
+      return getAllItems();
+    }
+
+    String lowercaseSearchTerm = searchTerm.toLowerCase().trim();
+
+    return getAllItems().stream()
+      .filter(item -> item.getName().toLowerCase().contains(lowercaseSearchTerm))
+      .collect(Collectors.toList());
+  }
+
+  /**
    * Adds a new item to the repository after validating it.
    * This method ensures that the item meets all validation criteria
    * before delegating the addition to the repository.
@@ -258,4 +277,6 @@ public class ItemService {
     Item updatedItem = updateItem(id, item);
     return ItemResponse.fromEntity(updatedItem);
   }
+
+
 }

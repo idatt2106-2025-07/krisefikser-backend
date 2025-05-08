@@ -1,9 +1,13 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
+import com.group7.krisefikser.model.NonUserMember;
+import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
+import com.group7.krisefikser.repository.NonUserMemberRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.UuidUtils;
 import java.util.List;
@@ -24,6 +28,7 @@ public class HouseholdService {
   private final JoinHouseholdRequestRepo joinRequestRepo;
   private final UserRepository userRepository;
   private final HouseholdRepository householdRepository;
+  private final NonUserMemberRepository nonUserMemberRepository;
 
 
   /**
@@ -124,6 +129,28 @@ public class HouseholdService {
    */
   public Household getHouseholdById(Long id) {
     return householdRepository.getHouseholdById(id).orElse(null);
+  }
+
+  /**
+   * Retrieves all household members for the current user.
+   *
+   * @return a list of GetHouseholdMembersResponse objects representing the household members
+   */
+  public List<GetHouseholdMembersResponse> getHouseholdMembers() {
+    String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+    long householdId = userRepository.findById(Long.parseLong(userId)).get().getHouseholdId();
+    List<User> users = userRepository.getUsersByHouseholdId(householdId);
+    List<NonUserMember> nonUserMembers =
+        nonUserMemberRepository.getNonUserMembersByHousehold(householdId);
+    List<GetHouseholdMembersResponse> responses = new java.util.ArrayList<>(users.stream()
+        .map(user -> new GetHouseholdMembersResponse(user.getId(), user.getName(),
+            "USER"))
+        .toList());
+    responses.addAll(nonUserMembers.stream()
+        .map(nonUserMember -> new GetHouseholdMembersResponse(nonUserMember.getId(),
+            nonUserMember.getName(), nonUserMember.getType().toString()))
+        .toList());
+    return responses;
   }
 
   /**
