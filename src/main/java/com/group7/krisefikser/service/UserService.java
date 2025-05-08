@@ -2,7 +2,9 @@ package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
+import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.response.UserInfoResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
@@ -21,6 +23,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -36,12 +39,16 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
+  @Value("${app.frontend.url}")
+
+  private String frontendUrl;
 
   private final UserRepository userRepo;
   private final JwtUtils jwtUtils;
   private final EmailService emailService;
   private final HouseholdService householdService;
   private final LoginAttemptService loginAttemptService;
+  private final UserPositionService userPositionService;
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -87,7 +94,7 @@ public class UserService implements UserDetailsService {
       userRepo.save(user);
       Optional<User> byEmail = userRepo.findByEmail(user.getEmail());
       String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());
-      String verificationLink = "http://localhost:5173/verify-email?token=" + emailVerificationToken;
+      String verificationLink = frontendUrl + "/verify-email?token=" + emailVerificationToken;
       Map<String, String> params = Map.of("verificationLink", verificationLink);
       emailService.sendTemplateMessage(
           byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);
@@ -138,7 +145,7 @@ public class UserService implements UserDetailsService {
     if (user.getRole() == Role.ROLE_ADMIN) {
       try {
         String twoFactorToken = jwtUtils.generate2faToken(user.getId());
-        String twoFactorLink = "https://localhost:5173/verify?token=" + twoFactorToken;
+        String twoFactorLink = frontendUrl + "/verify-admin?token=" + twoFactorToken;
 
         emailService.sendTemplateMessage(
             user.getEmail(), EmailTemplateType.ADMIN_VERIFICATION,
@@ -195,6 +202,60 @@ public class UserService implements UserDetailsService {
   }
 
   /**
+   * Resets the user's password using a token.
+   * This method checks if the token is valid and updates the user's password.
+   *
+   * @param request the reset password request containing the token and new password
+   * @return an AuthResponse object containing the result of the password reset
+   */
+  public AuthResponse resetPassword(ResetPasswordRequest request) {
+    try {
+      String email = jwtUtils.validateResetPasswordTokenAndGetEmail(request.getToken());
+      Optional<User> userOpt = userRepo.findByEmail(email);
+
+      if (userOpt.isPresent()) {
+        User user = userOpt.get();
+        String newPassword = request.getNewPassword();
+
+        if (user.getRole() == Role.ROLE_ADMIN && !PasswordUtil.isStrongPassword(newPassword)) {
+          return new AuthResponse(AuthResponseMessage
+              .PASSWORD_TOO_WEAK.getMessage(), null, null);
+        }
+
+        user.setPassword(PasswordUtil.hashPassword(newPassword));
+        userRepo.updatePasswordByEmail(user.getEmail(), user.getPassword());
+        return new AuthResponse(
+            AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage(), null, null);
+      } else {
+        return new AuthResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, null);
+      }
+    } catch (JwtMissingPropertyException e) {
+      return new AuthResponse(AuthResponseMessage.INVALID_TOKEN.getMessage(), null, null);
+    }
+  }
+
+  /**
+   * Sends a password reset link to the user's email.
+   * This method generates a reset token and sends it to the user's email.
+   * It also checks if the user exists.
+   *
+   * @param email the user's email address
+   */
+  public void sendResetPasswordLink(String email) {
+    Optional<User> userOpt = userRepo.findByEmail(email);
+    if (userOpt.isPresent()) {
+      User user = userOpt.get();
+      String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());
+      String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
+      Map<String, String> params = Map.of("resetLink", resetLink);
+      emailService.sendTemplateMessage(
+          user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);
+    } else {
+      throw new UsernameNotFoundException("User not found with email: " + email);
+    }
+  }
+
+  /**
    * Gets the current authenticated user's ID from the security context.
    *
    * @return the ID of the authenticated user
@@ -235,5 +296,24 @@ public class UserService implements UserDetailsService {
     }
 
     return user.getHouseholdId().intValue();
+  }
+
+  /**
+   * Gets the user information of the current authenticated user.
+   *
+   * @return a UserInfoResponse object containing user details
+   */
+  public UserInfoResponse getUserInfo() {
+    User user = getCurrentUser();
+    Household household = householdService.getHouseholdById(user.getHouseholdId());
+    boolean isSharingLocation = userPositionService.isSharingPosition();
+    return new UserInfoResponse(
+        user.getEmail(),
+        user.getName(),
+        user.getRole(),
+        household.getLatitude(),
+        household.getLongitude(),
+        isSharingLocation
+    );
   }
 }

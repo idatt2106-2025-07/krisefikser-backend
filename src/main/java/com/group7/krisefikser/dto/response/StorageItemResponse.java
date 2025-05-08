@@ -17,10 +17,11 @@ import lombok.NoArgsConstructor;
 public class StorageItemResponse {
   private int id;
   private LocalDateTime expirationDate;
-  private int quantity;
+  private double quantity;
   private int householdId;
   private int itemId;
-  private ItemResponse item; // Include the associated item details
+  private boolean isShared;
+  private ItemResponse item;
 
   /**
    * Converts a StorageItem entity to a StorageItemResponse.
@@ -30,31 +31,33 @@ public class StorageItemResponse {
    */
   public static StorageItemResponse fromEntity(StorageItem storageItem) {
     return new StorageItemResponse(
-      storageItem.getId(),
-      storageItem.getExpirationDate(),
-      storageItem.getQuantity(),
-      storageItem.getHouseholdId(),
-      storageItem.getItemId(),
-      null
+            storageItem.getId(),
+            storageItem.getExpirationDate(),
+            storageItem.getQuantity(),
+            storageItem.getHouseholdId(),
+            storageItem.getItemId(),
+            storageItem.isShared(),
+            null
     );
   }
 
   /**
    * Converts a StorageItem entity to a StorageItemResponse with item details.
    *
-   * @param storageItem the StorageItem entity
+   * @param storageItem  the StorageItem entity
    * @param itemResponse the ItemResponse for the associated item
    * @return the StorageItemResponse with item details
    */
   public static StorageItemResponse fromEntityWithItem(StorageItem storageItem,
                                                        ItemResponse itemResponse) {
     return new StorageItemResponse(
-      storageItem.getId(),
-      storageItem.getExpirationDate(),
-      storageItem.getQuantity(),
-      storageItem.getHouseholdId(),
-      storageItem.getItemId(),
-      itemResponse
+            storageItem.getId(),
+            storageItem.getExpirationDate(),
+            storageItem.getQuantity(),
+            storageItem.getHouseholdId(),
+            storageItem.getItemId(),
+            storageItem.isShared(),
+            itemResponse
     );
   }
 }

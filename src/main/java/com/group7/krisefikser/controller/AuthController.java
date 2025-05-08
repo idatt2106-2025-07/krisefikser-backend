@@ -2,10 +2,13 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
+import com.group7.krisefikser.dto.request.ResetPasswordLinkRequest;
+import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.dto.response.CurrentUserResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +17,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final UserService userService;
+  private final JwtUtils jwtUtils;
   private static final Logger logger = Logger.getLogger(AuthController.class.getName());
 
   /**
@@ -216,6 +223,114 @@ public class AuthController {
           new CurrentUserResponse(AuthResponseMessage.USER_NOT_FOUND.getMessage(), null));
       }
     }
+    
+    logger.info("GET /me - No authenticated user found");
     return ResponseEntity.noContent().build();
+  }
+
+  /**
+   * Endpoint for logging out a user.
+   * This method clears the JWT cookie to log out the current user.
+   *
+   * @param response the HTTP response object
+   * @return a ResponseEntity indicating the logout status
+   * @throws NoSuchAlgorithmException if an error occurs while setting the JWT cookie
+   * @see JwtUtils#setLogOutJwtCookie(HttpServletResponse)
+   */
+  @Operation(
+      summary = "Log out a user",
+      description = "Clears the JWT cookie to log out the current user."
+  )
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "User logged out successfully")
+  })
+  @PostMapping("/logout")
+  public ResponseEntity<Void> logout(HttpServletResponse response) {
+    try {
+      jwtUtils.setLogOutJwtCookie(response);
+      return ResponseEntity.ok().build();
+    } catch (Exception e) {
+      logger.warning("Error during logout: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /**
+   * Endpoint for resetting the password.
+   * This method handles the password reset process.
+   * It accepts a ResetPasswordRequest object containing the email and new password.
+   *
+   * @param resetPasswordRequest the request containing the email
+   *                             and new password
+   */
+  @Operation(
+      summary = "Reset password",
+      description = "Resets a user's password using a valid token and new password. "
+          + "Typically used after clicking a reset link sent to email."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Password reset successfully",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class))),
+      @ApiResponse(responseCode = "500", description = "Server error during password reset",
+          content = @Content(mediaType = "application/json",
+              schema = @Schema(implementation = AuthResponse.class)))
+  })
+  @PostMapping("/reset-password")
+  public ResponseEntity<AuthResponse> resetPassword(
+      @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
+    logger.info("Received password reset request for user: " + resetPasswordRequest.getEmail());
+    try {
+      AuthResponse authResponse = userService.resetPassword(resetPasswordRequest);
+      if (authResponse.getMessage().equals(
+          AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage())) {
+        logger.info("Password reset successfully for user: " + resetPasswordRequest.getEmail());
+        return ResponseEntity.ok(authResponse);
+      } else {
+        logger.warning("Error resetting password: " + authResponse.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);
+      }
+    } catch (Exception e) {
+      logger.warning("Error resetting password: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+          new AuthResponse(AuthResponseMessage.PASSWORD_RESET_ERROR.getMessage()
+                  + e.getMessage(), null, null));
+    }
+  }
+
+  /**
+   * Endpoint for sending a new password link.
+   * This method sends a new password link to the user's email.
+   * It accepts a ResetPasswordRequest object containing the email.
+   * The link contains a token used to reset the password.
+   *
+   * @param request the request containing the email
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @Operation(
+      summary = "Send reset password link",
+      description = "Sends a reset password link to the user's email if the user exists. "
+          + "The link contains a token used to reset the password."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "Reset link sent successfully",
+          content = @Content(mediaType = "application/json")),
+      @ApiResponse(responseCode = "500", description = "Server error when sending reset link",
+          content = @Content(mediaType = "application/json"))
+  })
+  @PostMapping("/new-password-link")
+  public ResponseEntity<Object> sendNewPasswordLink(
+      @Valid @RequestBody ResetPasswordLinkRequest request) {
+    
+    String email = request.getEmail();
+    logger.info("Trying to send new password link to: " + email);
+    try {
+      userService.sendResetPasswordLink(email);
+      logger.info("New password link sent to: " + email);
+      return ResponseEntity.ok("New password link sent to: " + email);
+    } catch (Exception e) {
+      logger.severe("Error sending new password link to " + email + ": " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 }

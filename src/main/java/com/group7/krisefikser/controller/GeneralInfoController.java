@@ -66,9 +66,9 @@ public class GeneralInfoController {
   public ResponseEntity<List<GeneralInfoResponse>> getAllGeneralInfo() {
     logger.info("Received request to get all general information");
     try {
-      generalInfoService.getAllGeneralInfo();
+      List<GeneralInfoResponse> allGeneralInfo = generalInfoService.getAllGeneralInfo();
       logger.info("Successfully retrieved all general information");
-      return new ResponseEntity<>(generalInfoService.getAllGeneralInfo(), HttpStatus.OK);
+      return new ResponseEntity<>(allGeneralInfo, HttpStatus.OK);
     } catch (Exception e) {
       logger.severe("Error retrieving all general information: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -102,10 +102,11 @@ public class GeneralInfoController {
       } catch (IllegalArgumentException e) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid theme: " + theme);
       }
-      generalInfoService.getGeneralInfoByTheme(parsedTheme);
+      List<GeneralInfoResponse> generalInfoByTheme =
+          generalInfoService.getGeneralInfoByTheme(parsedTheme);
       logger.info("Successfully retrieved general information for theme: " + theme);
       return new ResponseEntity<>(
-          generalInfoService.getGeneralInfoByTheme(parsedTheme), HttpStatus.OK);
+          generalInfoByTheme, HttpStatus.OK);
     } catch (ResponseStatusException e) {
       logger.warning("Error retrieving general information by theme: " + e.getMessage());
       return ResponseEntity.status(e.getStatusCode()).body(null);

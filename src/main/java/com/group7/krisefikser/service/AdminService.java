@@ -26,47 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminService {
 
-  private final EmailService emailService;
-
   private final JwtUtils jwtUtils;
 
   private final UserRepository userRepository;
 
   private final HouseholdService householdService;
-
-  /**
-   * Invites an admin by generating a jwt invite token and sending an email with the invite link.
-   *
-   * @param request The request containing the email of the admin to be invited.
-   * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
-   */
-  public void inviteAdmin(InviteAdminRequest request)
-      throws JwtMissingPropertyException, UsernameGenerationException {
-
-    String username = "admin" + UuidUtils.generateShortenedUuid();
-
-    for (int i = 0; i < 15; i++) {
-      if (userRepository.existAdminByUsername(username)) {
-        username = "admin" + UuidUtils.generateShortenedUuid();
-      } else {
-        break;
-      }
-    }
-
-    if (userRepository.existAdminByUsername(username)) {
-      throw new UsernameGenerationException("Failed to generate a unique username");
-    }
-
-    String inviteToken = jwtUtils.generateInviteToken(username);
-
-    String inviteLink = "https://localhost:5173/invite?token=" + inviteToken;
-
-    emailService.sendTemplateMessage(
-        request.getEmail(),
-        EmailTemplateType.ADMIN_INVITE,
-        Map.of("inviteLink", inviteLink)
-    );
-  }
 
   /**
    * Registers an admin by validating the invite token and creating a new admin account.
