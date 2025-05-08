@@ -1,5 +1,7 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.response.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
 import com.group7.krisefikser.model.NewsArticle;
 import com.group7.krisefikser.repository.NewsArticleRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +34,7 @@ class NewsArticleServiceTest {
 
     when(newsArticleRepository.getAllNewsArticles()).thenReturn(mockArticles);
 
-    List<NewsArticle> result = newsArticleService.getAllNewsArticles();
+    List<ShortenedNewsArticleResponse> result = newsArticleService.getAllNewsArticles();
 
     assertThat(result).hasSize(2);
     assertThat(result.get(0).getTitle()).isEqualTo("Title 1");
@@ -45,10 +47,9 @@ class NewsArticleServiceTest {
 
     when(newsArticleRepository.getNewsArticleById(1L)).thenReturn(mockArticle);
 
-    NewsArticle result = newsArticleService.getNewsArticleById(1L);
+    NewsArticleResponse result = newsArticleService.getNewsArticleById(1L);
 
     assertThat(result).isNotNull();
-    assertThat(result.getId()).isEqualTo(1L);
     assertThat(result.getTitle()).isEqualTo("Mock Title");
     verify(newsArticleRepository, times(1)).getNewsArticleById(1L);
   }
