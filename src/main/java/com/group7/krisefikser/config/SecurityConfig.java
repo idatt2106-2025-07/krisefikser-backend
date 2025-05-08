@@ -46,7 +46,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
-    corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
+    corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://dev.krisefikser.localhost:5173"));
     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     corsConfiguration.setAllowedHeaders(List.of("*"));
     corsConfiguration.setAllowCredentials(true);
@@ -66,29 +66,33 @@ public class SecurityConfig {
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
                 "/api/general-info/**", 
-                "/api/auth/**")
+                "/api/auth/**",
+                "/api/notification/**",
+                "/api/privacy-policy/**")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
                 "/api/auth/**",
                 "/api/admin/register",
                 "/api/admin/2fa",
-                "/h2-console/**")
+                "/h2-console/**",
+                "/api/hcaptcha/**")
             .permitAll()
 
             .requestMatchers(HttpMethod.DELETE,
                 "/api/items/**")
             .hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-            .requestMatchers(HttpMethod.POST,
-                "/api/admin/invite")
-            .hasRole("SUPER_ADMIN")
-
             .requestMatchers(
                 "/api/point-of-interest/**",
                 "/api/affected-area/**",
-                "/api/general-info/admin/**")
+                "/api/general-info/admin/**",
+                "/api/privacy-policy/**")
             .hasAnyRole("SUPER_ADMIN", "ADMIN")
+
+            .requestMatchers(
+                "/api/super-admin/**"
+            ).hasRole("SUPER_ADMIN")
 
             .anyRequest().authenticated())
         .headers(

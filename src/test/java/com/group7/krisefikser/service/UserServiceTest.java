@@ -3,15 +3,17 @@ package com.group7.krisefikser.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.lenient;
 
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
+import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.response.UserInfoResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
 import com.group7.krisefikser.repository.UserRepository;
@@ -26,9 +28,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -72,7 +76,7 @@ public class UserServiceTest {
     testUser.setRole(Role.ROLE_NORMAL);
     testUser.setVerified(true);
     testUser.setHouseholdId(1L);
-
+    ReflectionTestUtils.setField(userService, "frontendUrl", "http://dev.krisefikser.localhost");
     // Setup register request
     registerRequest = new RegisterRequest("test@example.com", "Test User", "password123");
     // Setup login request
@@ -337,5 +341,89 @@ public class UserServiceTest {
 
     verify(userRepository, never()).findByEmail(anyString());
     verify(userRepository, never()).setVerified(any(User.class));
+  }
+
+  @Test
+  void resetPassword_ShouldResetPassword_WhenTokenValidAndUserExists() throws JwtMissingPropertyException {
+    String token = "validToken";
+    String email = "test@user.com";
+    String newPassword = "NewStrongPassword1!";
+    ResetPasswordRequest request = new ResetPasswordRequest(token, email, newPassword);
+
+    when(jwtUtils.validateResetPasswordTokenAndGetEmail(token)).thenReturn("test@example.com");
+    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+    try (MockedStatic<PasswordUtil> mockedPasswordUtil = Mockito.mockStatic(PasswordUtil.class)) {
+      mockedPasswordUtil
+          .when(() -> PasswordUtil.hashPassword(newPassword))
+          .thenReturn("newHashedPassword");
+
+      AuthResponse response = userService.resetPassword(request);
+
+      assertEquals(AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage(), response.getMessage());
+      verify(userRepository).updatePasswordByEmail("test@example.com", "newHashedPassword");
+    }
+  }
+
+  @Test
+  void resetPassword_ShouldReturnUserNotFound_WhenEmailInvalid() throws JwtMissingPropertyException {
+    ResetPasswordRequest request = new ResetPasswordRequest("token", "email@tester.com", "password");
+
+    when(jwtUtils.validateResetPasswordTokenAndGetEmail("token")).thenReturn("missing@example.com");
+    when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+    AuthResponse response = userService.resetPassword(request);
+
+    assertEquals(AuthResponseMessage.USER_NOT_FOUND.getMessage(), response.getMessage());
+  }
+
+  @Test
+  void resetPassword_ShouldReturnInvalidToken_WhenJwtExceptionThrown() throws JwtMissingPropertyException {
+    ResetPasswordRequest request = new ResetPasswordRequest("badToken", "email@tester.com", "password");
+
+    when(jwtUtils.validateResetPasswordTokenAndGetEmail("badToken"))
+        .thenThrow(new JwtMissingPropertyException("Missing"));
+
+    AuthResponse response = userService.resetPassword(request);
+
+    assertEquals(AuthResponseMessage.INVALID_TOKEN.getMessage(), response.getMessage());
+  }
+
+  @Test
+  void resetPassword_ShouldRejectWeakPassword_WhenUserIsAdmin() throws JwtMissingPropertyException {
+    testUser.setRole(Role.ROLE_ADMIN);
+    ResetPasswordRequest request = new ResetPasswordRequest("token", "email@test.no", "weak");
+
+    when(jwtUtils.validateResetPasswordTokenAndGetEmail("token")).thenReturn("test@example.com");
+    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+    try (MockedStatic<PasswordUtil> mockedPasswordUtil = Mockito.mockStatic(PasswordUtil.class)) {
+      mockedPasswordUtil.when(() -> PasswordUtil.isStrongPassword("weak")).thenReturn(false);
+
+      AuthResponse response = userService.resetPassword(request);
+
+      assertEquals(AuthResponseMessage.PASSWORD_TOO_WEAK.getMessage(), response.getMessage());
+    }
+  }
+
+  @Test
+  void sendResetPasswordLink_ShouldSendEmail_WhenUserExists() {
+    when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+    when(jwtUtils.generateResetPasswordToken("test@example.com")).thenReturn("resetToken");
+
+    userService.sendResetPasswordLink("test@example.com");
+
+    String expectedLink = "http://dev.krisefikser.localhost/reset-password?token=resetToken";
+    verify(emailService).sendTemplateMessage(eq("test@example.com"), eq(EmailTemplateType.PASSWORD_RESET),
+        argThat(map -> expectedLink.equals(map.get("resetLink"))));
+  }
+
+  @Test
+  void sendResetPasswordLink_ShouldThrowException_WhenUserNotFound() {
+    when(userRepository.findByEmail("unknown@example.com")).thenReturn(Optional.empty());
+
+    assertThrows(UsernameNotFoundException.class,
+        () -> userService.sendResetPasswordLink("unknown@example.com"));
+
+    verify(emailService, never()).sendTemplateMessage(any(), any(), any());
   }
 }

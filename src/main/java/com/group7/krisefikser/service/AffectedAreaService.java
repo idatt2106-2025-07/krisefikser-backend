@@ -31,16 +31,7 @@ public class AffectedAreaService {
   public List<AffectedAreaResponse> getAllAffectedAreas() {
     return affectedAreaRepo.getAllAffectedAreas()
             .stream()
-            .map(area -> new AffectedAreaResponse(
-                    area.getId(),
-                    area.getLongitude(),
-                    area.getLatitude(),
-                    area.getHighDangerRadiusKm(),
-                    area.getMediumDangerRadiusKm(),
-                    area.getLowDangerRadiusKm(),
-                    area.getSeverityLevel(),
-                    area.getDescription(),
-                    area.getStartDate().format(java.time.format.DateTimeFormatter.ISO_DATE_TIME)))
+            .map(AffectedAreaMapper.INSTANCE::affectedAreaToResponse)
             .toList();
   }
 

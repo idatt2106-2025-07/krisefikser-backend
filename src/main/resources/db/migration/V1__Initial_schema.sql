@@ -80,6 +80,7 @@ CREATE TABLE points_of_interest
 CREATE TABLE affected_areas
 (
     id                      INT PRIMARY KEY AUTO_INCREMENT,
+    name                    VARCHAR(255) NOT NULL,
     longitude               DOUBLE NOT NULL,
     latitude                DOUBLE NOT NULL,
     high_danger_radius_km          DOUBLE NOT NULL,

@@ -80,10 +80,10 @@ VALUES (10.76, 59.91, 'shelter', '08:00:00', '18:00:00', '+47 123 45 678', 'A sa
        (10.70, 59.88, 'meeting_place', '10:00:00', '17:00:00', '+47 222 33 444', 'Community gathering point.');
 
 -- Insert affected areas (no foreign key dependencies)
-INSERT INTO affected_areas (longitude, latitude, high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km, severity_level, description, start_time)
-VALUES (10.77, 59.92, 1, 2, 3, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
-       (10.90, 59.95, 2, 4, 7, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
-       (10.85, 60.00, 3, 5.2, 5.7, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
+INSERT INTO affected_areas (name, longitude, latitude, high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km, severity_level, description, start_time)
+VALUES ('Chemical Spill', 10.77, 59.92, 1, 2, 3, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
+       ('Flooding risk', 10.90, 59.95, 2, 4, 7, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
+       ('Tornado', 10.85, 60.00, 3, 5.2, 5.7, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
 
 -- Insert join household request (references users and households)
 INSERT INTO join_household_requests (user_id, household_id)
@@ -94,12 +94,24 @@ VALUES (2, 2),
 
 -- Insert general info (no foreign key dependencies)
 INSERT INTO general_info (theme, title, content) VALUES
-                                                     ('BEFORE_CRISIS', 'Create an Emergency Plan', 'Make sure everyone in your household knows the emergency plan, including meeting points and emergency contacts.'),
-                                                     ('BEFORE_CRISIS', 'Emergency Supplies', 'Store food, water, medicine, flashlights, and batteries that can last at least 72 hours.'),
-                                                     ('DURING_CRISIS', 'Stay Informed', 'Listen to official updates from local authorities via radio, TV, or trusted apps.'),
-                                                     ('DURING_CRISIS', 'Shelter in Place', 'If advised, stay indoors and away from windows. Use your emergency kit.'),
-                                                     ('AFTER_CRISIS', 'Check for Injuries', 'Administer first aid if needed and call emergency services for serious injuries.'),
-                                                     ('AFTER_CRISIS', 'Report Damages', 'Contact your insurance provider and local authorities to report damage or unsafe conditions.');
+     ('BEFORE_CRISIS', 'Create an Emergency Plan', 'Make sure everyone in your household knows the emergency plan, including meeting points and emergency contacts.'),
+     ('BEFORE_CRISIS', 'Emergency Supplies', 'Store food, water, medicine, flashlights, and batteries that can last at least 72 hours.'),
+     ('DURING_CRISIS', 'Stay Informed', 'Listen to official updates from local authorities via radio, TV, or trusted apps.'),
+     ('DURING_CRISIS', 'Shelter in Place', 'If advised, stay indoors and away from windows. Use your emergency kit.'),
+     ('AFTER_CRISIS', 'Check for Injuries', 'Administer first aid if needed and call emergency services for serious injuries.'),
+     ('AFTER_CRISIS', 'Report Damages', 'Contact your insurance provider and local authorities to report damage or unsafe conditions.');
+
+--insert user positions
+INSERT INTO user_position (user_id, longitude, latitude) VALUES
+    (1, 10.75, 59.91),
+    (2, 10.80, 59.90),
+    (3, 10.85, 59.95),
+    (4, 10.90, 60.00),
+    (5, 10.95, 60.05),
+    (6, 11.00, 60.10),
+    (7, 11.05, 60.15),
+    (8, 11.10, 60.20);
+
 
 
 -- Insert emergency group invitations (references households and emergency groups)
