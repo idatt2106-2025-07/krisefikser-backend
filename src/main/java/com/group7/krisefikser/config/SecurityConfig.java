@@ -68,7 +68,8 @@ public class SecurityConfig {
                 "/api/general-info/**", 
                 "/api/auth/**",
                 "/api/notification/**",
-                "/api/privacy-policy/**")
+                "/api/privacy-policy/**",
+                "/api/news/**")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
