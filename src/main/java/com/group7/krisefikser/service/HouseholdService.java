@@ -1,15 +1,25 @@
 package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
+import com.group7.krisefikser.dto.request.ReadinessRequest;
+import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.model.Household;
+import com.group7.krisefikser.model.Item;
 import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.model.NonUserMember;
 import com.group7.krisefikser.model.User;
+import com.group7.krisefikser.model.StorageItem;
+import com.group7.krisefikser.model.User;
 import com.group7.krisefikser.repository.HouseholdRepository;
+import com.group7.krisefikser.repository.ItemRepo;
 import com.group7.krisefikser.repository.JoinHouseholdRequestRepo;
+import com.group7.krisefikser.repository.StorageItemRepo;
 import com.group7.krisefikser.repository.NonUserMemberRepository;
 import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.utils.UuidUtils;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +37,8 @@ public class HouseholdService {
   private final JoinHouseholdRequestRepo joinRequestRepo;
   private final UserRepository userRepository;
   private final HouseholdRepository householdRepository;
+  private final StorageItemRepo storageItemRepo;
+  private final ItemRepo itemRepo;
   private final NonUserMemberRepository nonUserMemberRepository;
 
 
@@ -151,5 +163,57 @@ public class HouseholdService {
             nonUserMember.getName(), nonUserMember.getType().toString()))
         .toList());
     return responses;
+  }
+
+  /**
+   * Calculates the readiness of a household based on its storage items, calories and user count.
+   *
+   * @param request the ReadinessRequest object containing household ID
+   * @return a ReadinessResponse object containing the calculated readiness
+   */
+  public ReadinessResponse calculateReadinessForHousehold(ReadinessRequest request) {
+    Household household = householdRepository.getHouseholdById(
+        request.getHouseholdId()).orElse(null);
+    if (household == null) {
+      return null;
+    }
+    List<User> users = userRepository.getUsersByHouseholdId(household.getId());
+    // Make list of non-user members (others) when non-user members are added
+//    List<NonUserMember> others = nonUserMemberRepo.getNonUserMembersByHouseholdId();
+
+    List<StorageItem> storageItems = storageItemRepo.getAllStorageItems(
+        household.getId().intValue());
+
+    int totalCalories = 0;
+    double totalLiters = 0.0;
+
+    for (StorageItem si : storageItems) {
+      if (si.getExpirationDate().isAfter(LocalDateTime.ofInstant(
+          Instant.now(), ZoneId.systemDefault()))) {
+        Item item = itemRepo.findById(si.getItemId()).orElse(null);
+        totalCalories += item.getCalories() * si.getQuantity();
+
+        if ("L".equalsIgnoreCase(item.getUnit()) &&
+            "drink".equalsIgnoreCase(String.valueOf(item.getType()))) {
+          totalLiters += si.getQuantity();
+        }
+      }
+    }
+
+    int people = users.size();
+//    double nonUserFactor = 0.75;
+//    double totalPeople = people + others.size() * nonUserFactor;
+
+    double dailyCalories = people * 2000;
+    double dailyLiters = people * 2.0;
+
+    double calorieDays = totalCalories / dailyCalories;
+    double waterDays = totalLiters / dailyLiters;
+
+    double minDays = Math.min(calorieDays, waterDays);
+    int fullDays = (int) minDays;
+    int hours = (int) ((minDays - fullDays) * 24);
+
+    return new ReadinessResponse(fullDays, hours);
   }
 }
