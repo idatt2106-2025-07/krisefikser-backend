@@ -88,6 +88,7 @@ class NonMemberUserControllerTest {
     UpdateNonUserMemberRequest request = new UpdateNonUserMemberRequest();
     request.setId(99L);
     request.setName("Will Fail");
+    request.setType(NonUserMemberType.CHILD.toString());
 
     doThrow(new RuntimeException("Update failed"))
         .when(nonUserMemberService).updateNonUserMember(request);

@@ -12,6 +12,5 @@ import lombok.Data;
 public class AddNonUserMemberRequest {
   @NotBlank(message = "Name cannot be blank")
   private String name;
-  @NotBlank(message = "Type cannot be blank")
   private NonUserMemberType type;
 }

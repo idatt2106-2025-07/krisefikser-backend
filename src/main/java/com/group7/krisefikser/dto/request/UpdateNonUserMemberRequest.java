@@ -12,7 +12,6 @@ import lombok.Data;
 public class UpdateNonUserMemberRequest {
   @NotBlank(message = "Name cannot be blank")
   private String name;
-  @NotBlank(message = "Type cannot be blank")
   private String type;
   @Positive(message = "Household ID must be positive")
   private long id;
