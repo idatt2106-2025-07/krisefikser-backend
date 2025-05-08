@@ -221,5 +221,21 @@ public class UserRepository {
 <span class="fc" id="L221">    String sql = &quot;UPDATE users SET password = ? WHERE email = ?&quot;;</span>
 <span class="fc" id="L222">    jdbcTemplate.update(sql, hashedPassword, email);</span>
 <span class="fc" id="L223">  }</span>
+
+  /**
+   * Retrieves a list of users associated with a specific household ID.
+   * This method queries the database for users with the specified household ID.
+   * If users are found, it returns a list of users.
+   * If no users are found, it returns an empty list.
+   *
+   * @param householdId the ID of the household whose users are to be retrieved
+   * @return a list of users associated with the specified household ID,
+   *         or an empty list if none are found
+   */
+  public List&lt;User&gt; getUsersByHouseholdId(Long householdId) {
+<span class="nc" id="L236">    String sql = &quot;SELECT * FROM users WHERE household_id = ?&quot;;</span>
+<span class="nc" id="L237">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
+<span class="nc" id="L238">            mapRowToUser(rs), householdId);</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -5,10 +5,11 @@ krisefikser,com.group7.krisefikser.exception,UsernameGenerationException,9,4,0,0
 krisefikser,com.group7.krisefikser.exception,InvitationNotFoundException,4,0,0,0,2,0,1,0,1,0
 krisefikser,com.group7.krisefikser.exception,JwtMissingPropertyException,9,4,0,0,4,2,2,1,2,1
 krisefikser,com.group7.krisefikser.repository,EmergencyGroupRepo,0,86,1,1,0,20,1,5,0,5
+krisefikser,com.group7.krisefikser.repository,NonUserMemberRepository,0,123,0,0,0,25,0,5,0,5
 krisefikser,com.group7.krisefikser.repository,GeneralInfoRepository,174,6,0,0,35,3,7,1,7,1
 krisefikser,com.group7.krisefikser.repository,EmergencyGroupInvitationsRepo,3,120,1,3,2,20,1,7,0,6
 krisefikser,com.group7.krisefikser.repository,AffectedAreaRepo,0,231,0,0,0,47,0,7,0,7
-krisefikser,com.group7.krisefikser.repository,UserRepository,74,232,1,1,14,45,4,12,3,12
+krisefikser,com.group7.krisefikser.repository,UserRepository,93,232,1,1,17,45,6,12,5,12
 krisefikser,com.group7.krisefikser.repository,ItemRepo,9,187,2,2,1,41,2,9,0,9
 krisefikser,com.group7.krisefikser.repository,StorageItemRepo,1,319,2,8,0,63,2,15,0,12
 krisefikser,com.group7.krisefikser.repository,PrivacyPolicyRepository,0,46,0,0,0,10,0,4,0,4
@@ -23,6 +24,7 @@ krisefikser,com.group7.krisefikser.controller,ItemController,72,200,3,3,18,51,3,
 krisefikser,com.group7.krisefikser.controller,HouseholdInvitationController,84,84,4,6,25,21,4,5,0,4
 krisefikser,com.group7.krisefikser.controller,AdminController,6,61,2,2,2,17,2,3,0,3
 krisefikser,com.group7.krisefikser.controller,NotificationController,0,31,0,0,0,9,0,2,0,2
+krisefikser,com.group7.krisefikser.controller,NonMemberUserController,9,77,3,3,3,22,3,4,0,4
 krisefikser,com.group7.krisefikser.controller,UserPositionController,36,70,1,1,10,23,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0,4,8,54,0,8,0,6
 krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2,3,0,2
@@ -32,9 +34,10 @@ krisefikser,com.group7.krisefikser.controller,AuthController,110,197,7,7,27,48,7
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,116,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,SuperAdminController,13,113,1,1,4,30,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,UserController,0,26,0,0,0,7,0,2,0,2
-krisefikser,com.group7.krisefikser.controller,HouseholdController,0,102,0,0,0,29,0,7,0,7
+krisefikser,com.group7.krisefikser.controller,HouseholdController,21,105,0,0,7,30,1,7,1,7
 krisefikser,com.group7.krisefikser.mapper,GeneralInfoMapperImpl,4,86,4,8,2,23,4,6,0,4
 krisefikser,com.group7.krisefikser.mapper,EmergencyGroupMapperImpl,17,75,5,5,7,23,5,5,0,5
+krisefikser,com.group7.krisefikser.mapper,NonUserMemberMapperImpl,49,0,6,0,15,0,6,0,3,0
 krisefikser,com.group7.krisefikser.mapper,HouseholdMapperImpl,4,47,2,2,2,14,2,3,0,3
 krisefikser,com.group7.krisefikser.mapper,EmergencyGroupMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,HouseholdMapper,0,5,0,0,0,1,0,1,0,1
@@ -44,12 +47,14 @@ krisefikser,com.group7.krisefikser.mapper,UserPositionMapperImpl,10,125,5,9,5,32
 krisefikser,com.group7.krisefikser.mapper,UserPositionMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,UserMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,AdminMapper,0,5,0,0,0,1,0,1,0,1
+krisefikser,com.group7.krisefikser.mapper,NonUserMemberMapper,5,0,0,0,1,0,1,0,1,0
 krisefikser,com.group7.krisefikser.mapper,JoinRequestMapper,0,5,0,0,0,1,0,1,0,1
 krisefikser,com.group7.krisefikser.mapper,AdminMapperImpl,4,50,2,4,2,14,2,4,0,3
 krisefikser,com.group7.krisefikser.mapper,AffectedAreaMapperImpl,4,106,4,4,2,28,4,3,0,3
 krisefikser,com.group7.krisefikser.mapper,JoinRequestMapperImpl,4,50,2,4,2,13,2,4,0,3
 krisefikser,com.group7.krisefikser.mapper,GeneralInfoMapper,7,9,0,0,2,2,0,2,0,2
 krisefikser,com.group7.krisefikser,KrisefikserApplication,5,7,0,0,2,2,1,2,1,2
+krisefikser,com.group7.krisefikser.enums,NonUserMemberType,0,21,0,0,0,4,0,1,0,1
 krisefikser,com.group7.krisefikser.enums,EmailTemplateType,0,33,0,0,0,6,0,1,0,1
 krisefikser,com.group7.krisefikser.enums,ItemType,2,34,1,1,1,8,1,2,0,2
 krisefikser,com.group7.krisefikser.enums,PointOfInterestType,0,75,0,0,0,14,0,5,0,5
@@ -64,9 +69,10 @@ krisefikser,com.group7.krisefikser.service,ItemService,25,234,5,29,7,56,4,30,1,1
 krisefikser,com.group7.krisefikser.service,StorageItemService,126,362,30,36,31,87,31,25,4,18
 krisefikser,com.group7.krisefikser.service,EmailService,0,41,0,0,0,12,0,3,0,3
 krisefikser,com.group7.krisefikser.service,AffectedAreaService,0,77,0,8,0,21,0,8,0,4
-krisefikser,com.group7.krisefikser.service,HouseholdService,30,63,2,0,10,15,2,6,1,6
+krisefikser,com.group7.krisefikser.service,HouseholdService,96,63,2,0,23,15,5,6,4,6
 krisefikser,com.group7.krisefikser.service,SuperAdminService,3,158,1,17,0,40,1,12,0,4
 krisefikser,com.group7.krisefikser.service,NotificationService,0,31,0,4,0,6,0,3,0,1
+krisefikser,com.group7.krisefikser.service,NonUserMemberService,46,0,0,0,15,0,3,0,3,0
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2
 krisefikser,com.group7.krisefikser.service,EmailTemplateService,6,47,2,8,3,15,2,9,0,3
