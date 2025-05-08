@@ -1,6 +1,7 @@
 package com.group7.krisefikser.dto.request;
 
 import com.group7.krisefikser.enums.NonUserMemberType;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 /**
@@ -9,6 +10,8 @@ import lombok.Data;
  */
 @Data
 public class AddNonUserMemberRequest {
+  @NotBlank(message = "Name cannot be blank")
   private String name;
+  @NotBlank(message = "Type cannot be blank")
   private NonUserMemberType type;
 }

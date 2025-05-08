@@ -4,15 +4,18 @@ import com.group7.krisefikser.dto.request.AddNonUserMemberRequest;
 import com.group7.krisefikser.dto.request.DeleteNonUserMemberRequest;
 import com.group7.krisefikser.dto.request.UpdateNonUserMemberRequest;
 import com.group7.krisefikser.service.NonUserMemberService;
+import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,8 +73,14 @@ public class NonMemberUserController {
       }
   )
   @PostMapping("/add")
-  public ResponseEntity<?> addNonUserMember(@RequestBody AddNonUserMemberRequest request) {
+  public ResponseEntity<?> addNonUserMember(
+      @Valid @RequestBody AddNonUserMemberRequest request, BindingResult bindingResult) {
     logger.info("Adding non-user member");
+
+    if (bindingResult.hasErrors()) {
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
+
     try {
       nonUserMemberService.addNonUserMember(request);
       return ResponseEntity.ok("Non-user member added successfully");
@@ -118,9 +127,13 @@ public class NonMemberUserController {
       }
   )
   @PostMapping("/update")
-  public ResponseEntity<?> updateNonUserMember(@RequestBody UpdateNonUserMemberRequest request) {
+  public ResponseEntity<?> updateNonUserMember(
+      @Valid @RequestBody UpdateNonUserMemberRequest request, BindingResult bindingResult) {
     logger.info("Updating non-user member");
 
+    if (bindingResult.hasErrors()) {
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
     try {
       nonUserMemberService.updateNonUserMember(request);
       return ResponseEntity.ok("Non-user member updated successfully");
@@ -167,9 +180,13 @@ public class NonMemberUserController {
       }
   )
   @DeleteMapping("/delete")
-  public ResponseEntity<?> deleteNonUserMember(@RequestBody DeleteNonUserMemberRequest request) {
+  public ResponseEntity<?> deleteNonUserMember(
+      @Valid @RequestBody DeleteNonUserMemberRequest request, BindingResult bindingResult) {
     logger.info("Deleting non-user member");
 
+    if (bindingResult.hasErrors()) {
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
     try {
       nonUserMemberService.deleteNonUserMember(request);
       return ResponseEntity.ok("Non-user member deleted successfully");

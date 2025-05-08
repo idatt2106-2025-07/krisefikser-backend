@@ -1,5 +1,6 @@
 package com.group7.krisefikser.dto.request;
 
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 /**
@@ -8,5 +9,6 @@ import lombok.Data;
  */
 @Data
 public class DeleteNonUserMemberRequest {
+  @Positive(message = "ID must be positive")
   private long id;
 }
