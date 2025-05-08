@@ -1,5 +1,8 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.response.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
+import com.group7.krisefikser.mapper.NewsArticleMapper;
 import com.group7.krisefikser.model.NewsArticle;
 import com.group7.krisefikser.repository.NewsArticleRepository;
 import java.util.List;
@@ -22,8 +25,11 @@ public class NewsArticleService {
    *
    * @return a list of NewsArticle objects containing details of all articles
    */
-  public List<NewsArticle> getAllNewsArticles() {
-    return newsArticleRepo.getAllNewsArticles();
+  public List<ShortenedNewsArticleResponse> getAllNewsArticles() {
+    List<NewsArticle> articles = newsArticleRepo.getAllNewsArticles();
+    return articles.stream()
+        .map(NewsArticleMapper.INSTANCE::newsArticleToShortenedNewsArticleResponse)
+        .toList();
   }
 
   /**
@@ -34,7 +40,12 @@ public class NewsArticleService {
    * @param id the ID of the news article to be retrieved
    * @return the NewsArticle object containing details of the article
    */
-  public NewsArticle getNewsArticleById(long id) {
-    return newsArticleRepo.getNewsArticleById(id);
+  public NewsArticleResponse getNewsArticleById(long id) {
+    NewsArticle article = newsArticleRepo.getNewsArticleById(id);
+    if (article != null) {
+      return NewsArticleMapper.INSTANCE.newsArticleToNewsArticleResponse(article);
+    } else {
+      throw new RuntimeException("News article not found with ID: " + id);
+    }
   }
 }

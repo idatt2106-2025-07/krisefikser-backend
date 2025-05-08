@@ -1,5 +1,7 @@
 package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.response.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
 import com.group7.krisefikser.model.NewsArticle;
 import com.group7.krisefikser.service.NewsArticleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,10 +68,10 @@ public class NewsArticleController {
       )
   })
   @GetMapping
-  public ResponseEntity<List<NewsArticle>> getAllNews() {
+  public ResponseEntity<List<ShortenedNewsArticleResponse>> getAllNews() {
     logger.info("Fetching all news articles");
     try {
-      List<NewsArticle> newsArticles = newsArticleService.getAllNewsArticles();
+      List<ShortenedNewsArticleResponse> newsArticles = newsArticleService.getAllNewsArticles();
       return ResponseEntity.ok(newsArticles);
     } catch (Exception e) {
       logger.severe("Error fetching news articles: " + e.getMessage());
@@ -108,10 +110,10 @@ public class NewsArticleController {
       )
   })
   @GetMapping("/{id}")
-  public ResponseEntity<NewsArticle> getNewsById(@PathVariable Long id) {
+  public ResponseEntity<NewsArticleResponse> getNewsById(@PathVariable Long id) {
     logger.info("Fetching news article with ID: " + id);
     try {
-      NewsArticle newsArticle = newsArticleService.getNewsArticleById(id);
+      NewsArticleResponse newsArticle = newsArticleService.getNewsArticleById(id);
       if (newsArticle != null) {
         return ResponseEntity.ok(newsArticle);
       } else {
