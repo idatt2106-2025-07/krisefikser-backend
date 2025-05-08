@@ -41,7 +41,7 @@ class UserControllerTest {
   @WithMockUser
   void getUserProfile_returnsUserInfoResponse() throws Exception {
     UserInfoResponse mockResponse = new UserInfoResponse(
-        "john.doe@example.com", "John Doe", Role.ROLE_NORMAL, 10, 11
+        "john.doe@example.com", "John Doe", Role.ROLE_NORMAL, 10, 11, true
     );
 
     when(userService.getUserInfo()).thenReturn(mockResponse);
