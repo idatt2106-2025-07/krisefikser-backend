@@ -221,4 +221,20 @@ public class UserRepository {
     String sql = "UPDATE users SET password = ? WHERE email = ?";
     jdbcTemplate.update(sql, hashedPassword, email);
   }
+
+  /**
+   * Retrieves a list of users associated with a specific household ID.
+   * This method queries the database for users with the specified household ID.
+   * If users are found, it returns a list of users.
+   * If no users are found, it returns an empty list.
+   *
+   * @param householdId the ID of the household whose users are to be retrieved
+   * @return a list of users associated with the specified household ID,
+   *         or an empty list if none are found
+   */
+  public List<User> getUsersByHouseholdId(Long householdId) {
+    String sql = "SELECT * FROM users WHERE household_id = ?";
+    return jdbcTemplate.query(sql, (rs, rowNum) ->
+            mapRowToUser(rs), householdId);
+  }
 }
