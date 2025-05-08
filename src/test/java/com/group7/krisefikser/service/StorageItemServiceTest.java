@@ -1,5 +1,6 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.ChangeStorageItemSharedStatusRequest;
 import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
@@ -61,8 +62,8 @@ class StorageItemServiceTest {
     // Setup
     int householdId = 1;
     List<StorageItem> mockItems = Arrays.asList(
-            createStorageItem(1, 101, householdId, 5, LocalDateTime.now().plusDays(10)),
-            createStorageItem(2, 102, householdId, 3, LocalDateTime.now().plusDays(5))
+            createStorageItem(1, 101, householdId, 5, true, LocalDateTime.now().plusDays(10)),
+            createStorageItem(2, 102, householdId, 3, true, LocalDateTime.now().plusDays(5))
     );
 
     when(storageItemRepo.getAllStorageItems(householdId)).thenReturn(mockItems);
@@ -83,11 +84,11 @@ class StorageItemServiceTest {
     LocalDateTime shortestExpirationDate = LocalDateTime.now().plusDays(5);
 
     List<StorageItem> mockItems = Arrays.asList(
-            createStorageItem(1, 1, 1, 5, LocalDateTime.now().plusDays(10)),
-            createStorageItem(2, 2, 3, 4, shortestExpirationDate),
-            createStorageItem(3, 2, 1, 3, LocalDateTime.now().plusDays(7)),
-            createStorageItem(4, 3, 2, 3, LocalDateTime.now().plusDays(8)),
-            createStorageItem(5, 4, 1, 6, LocalDateTime.now().plusDays(6))
+            createStorageItem(1, 1, 1, 5, true, LocalDateTime.now().plusDays(10)),
+            createStorageItem(2, 2, 3, 4, true, shortestExpirationDate),
+            createStorageItem(3, 2, 1, 3, true, LocalDateTime.now().plusDays(7)),
+            createStorageItem(4, 3, 2, 3, true, LocalDateTime.now().plusDays(8)),
+            createStorageItem(5, 4, 1, 6, true, LocalDateTime.now().plusDays(6))
     );
 
     StorageItemSortRequest sortRequest = new StorageItemSortRequest();
@@ -153,11 +154,11 @@ class StorageItemServiceTest {
     LocalDateTime shortestExpirationDate = LocalDateTime.now().plusDays(5);
 
     List<StorageItem> mockItems = Arrays.asList(
-            createStorageItem(1, 1, 1, 5, LocalDateTime.now().plusDays(10)),
-            createStorageItem(2, 2, 3, 4, shortestExpirationDate),
-            createStorageItem(3, 2, 1, 3, LocalDateTime.now().plusDays(7)),
-            createStorageItem(4, 3, 2, 3, LocalDateTime.now().plusDays(8)),
-            createStorageItem(5, 4, 1, 6, LocalDateTime.now().plusDays(6))
+            createStorageItem(1, 1, 1, 5, true, LocalDateTime.now().plusDays(10)),
+            createStorageItem(2, 2, 3, 4, true, shortestExpirationDate),
+            createStorageItem(3, 2, 1, 3, true, LocalDateTime.now().plusDays(7)),
+            createStorageItem(4, 3, 2, 3, true, LocalDateTime.now().plusDays(8)),
+            createStorageItem(5, 4, 1, 6, true, LocalDateTime.now().plusDays(6))
     );
 
     StorageItemSortRequest sortRequest = new StorageItemSortRequest();
@@ -206,8 +207,8 @@ class StorageItemServiceTest {
     int itemId = 101;
     int householdId = 1;
     List<StorageItem> mockItems = Arrays.asList(
-            createStorageItem(1, itemId, householdId, 5, LocalDateTime.now().plusDays(10)),
-            createStorageItem(2, itemId, householdId, 3, LocalDateTime.now().plusDays(5))
+            createStorageItem(1, itemId, householdId, 5, true, LocalDateTime.now().plusDays(10)),
+            createStorageItem(2, itemId, householdId, 3, true, LocalDateTime.now().plusDays(5))
     );
 
     when(storageItemRepo.findByItemId(itemId, householdId)).thenReturn(mockItems);
@@ -228,9 +229,9 @@ class StorageItemServiceTest {
     int itemId = 1;
     long groupId = 1L;
 
-    StorageItem item1 = createStorageItem(1, itemId, 1, 5, LocalDateTime.now().plusDays(10));
-    StorageItem item2 = createStorageItem(2, itemId, 2, 3, LocalDateTime.now().plusDays(5));
-    StorageItem item3 = createStorageItem(3, itemId, 2, 2, LocalDateTime.now().plusDays(7));
+    StorageItem item1 = createStorageItem(1, itemId, 1, 5, true, LocalDateTime.now().plusDays(10));
+    StorageItem item2 = createStorageItem(2, itemId, 2, 3, true, LocalDateTime.now().plusDays(5));
+    StorageItem item3 = createStorageItem(3, itemId, 2, 2, true, LocalDateTime.now().plusDays(7));
     List<StorageItem> mockItems = Arrays.asList(item1, item2, item3);
 
     try (MockedStatic<StorageItemResponse> mocked = Mockito.mockStatic(StorageItemResponse.class)) {
@@ -297,9 +298,9 @@ class StorageItemServiceTest {
     int itemId = 101;
     int householdId = 1;
     StorageItem itemToAdd = createStorageItem(0, itemId, householdId, 5,
-            LocalDateTime.now().plusDays(10));
+            true, LocalDateTime.now().plusDays(10));
     StorageItem addedItem = createStorageItem(1, itemId, householdId, 5,
-            LocalDateTime.now().plusDays(10));
+            true, LocalDateTime.now().plusDays(10));
 
     when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
     when(storageItemRepo.add(any(StorageItem.class))).thenReturn(addedItem);
@@ -326,7 +327,7 @@ class StorageItemServiceTest {
     // Setup
     int itemId = 101;
     int householdId = 1;
-    StorageItem invalidItem = createStorageItem(0, itemId, householdId, 5, null);
+    StorageItem invalidItem = createStorageItem(0, itemId, householdId, 5, false, null);
 
     // Execute and verify
     IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
@@ -348,7 +349,7 @@ class StorageItemServiceTest {
     int itemId = 999;
     int householdId = 1;
     StorageItem itemToAdd = createStorageItem(0, itemId, householdId, 5,
-            LocalDateTime.now().plusDays(10));
+            false, LocalDateTime.now().plusDays(10));
 
     when(itemRepo.findById(itemId)).thenReturn(Optional.empty());
 
@@ -373,9 +374,9 @@ class StorageItemServiceTest {
     int storageItemId = 1;
     int householdId = 1;
     StorageItem itemToUpdate = createStorageItem(0, itemId, householdId, 10,
-            LocalDateTime.now().plusDays(15));
+            true, LocalDateTime.now().plusDays(15));
     StorageItem updatedItem = createStorageItem(storageItemId, itemId, householdId, 10,
-            LocalDateTime.now().plusDays(15));
+            true, LocalDateTime.now().plusDays(15));
 
     when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem()));
     when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
@@ -402,7 +403,7 @@ class StorageItemServiceTest {
     int storageItemId = 1;
     int householdId = 1;
     StorageItem updatedItem = createStorageItem(storageItemId, itemId, householdId, 10,
-            LocalDateTime.now().plusDays(15));
+            true, LocalDateTime.now().plusDays(15));
 
     when(householdService.getGroupIdForCurrentUser()).thenReturn(groupId);
     when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
@@ -518,8 +519,8 @@ class StorageItemServiceTest {
     int days = 7;
     int householdId = 1;
     List<StorageItem> expiringItems = Arrays.asList(
-            createStorageItem(1, 101, householdId, 5, LocalDateTime.now().plusDays(3)),
-            createStorageItem(2, 102, householdId, 3, LocalDateTime.now().plusDays(5))
+            createStorageItem(1, 101, householdId, 5, true, LocalDateTime.now().plusDays(3)),
+            createStorageItem(2, 102, householdId, 3, true, LocalDateTime.now().plusDays(5))
     );
 
     when(storageItemRepo.findExpiringItems(days, householdId)).thenReturn(expiringItems);
@@ -544,7 +545,7 @@ class StorageItemServiceTest {
     int storageItemId = 1;
     int householdId = 1;
     StorageItem storageItem = createStorageItem(storageItemId, itemId, householdId, 5,
-            LocalDateTime.now().plusDays(10));
+            false, LocalDateTime.now().plusDays(10));
     Item item = new Item(itemId, "Test Item", "units", 100, ItemType.FOOD);
 
     when(itemRepo.findById(itemId)).thenReturn(Optional.of(item));
@@ -585,9 +586,9 @@ class StorageItemServiceTest {
     LocalDateTime later = now.plusDays(5);
 
     List<StorageItem> allItems = Arrays.asList(
-            createStorageItem(1, itemId1, householdId, 5, later),
-            createStorageItem(2, itemId1, householdId, 3, earlier),
-            createStorageItem(3, itemId2, householdId, 2, now)
+            createStorageItem(1, itemId1, householdId, 5, false, later),
+            createStorageItem(2, itemId1, householdId, 3, true, earlier),
+            createStorageItem(3, itemId2, householdId, 2, false, now)
     );
 
     Item item1 = new Item(itemId1, "Item 1", "units", 100, ItemType.FOOD);
@@ -727,12 +728,14 @@ class StorageItemServiceTest {
   // Helper methods
 
   private StorageItem createStorageItem(int id, int itemId, int householdId, int quantity,
+                                        boolean isShared,
                                         LocalDateTime expirationDate) {
     StorageItem item = new StorageItem();
     item.setId(id);
     item.setItemId(itemId);
     item.setHouseholdId(householdId);
     item.setQuantity(quantity);
+    item.setShared(isShared);
     item.setExpirationDate(expirationDate);
     return item;
   }
@@ -742,5 +745,148 @@ class StorageItemServiceTest {
                                                                  LocalDateTime earliestExpirationDate) {
     return new AggregatedStorageItemResponse(itemId, item, totalQuantity,
             earliestExpirationDate);
+  }
+
+  private ChangeStorageItemSharedStatusRequest createRequest(double quantity, Boolean isShared) {
+    ChangeStorageItemSharedStatusRequest request = new ChangeStorageItemSharedStatusRequest();
+    request.setQuantity(quantity);
+    request.setIsShared(isShared);
+    return request;
+  }
+
+  @Test
+  void testChangeStorageItemSharedStatus_fullQuantityUpdate_success() {
+    int storageItemId = 1;
+    int itemId = 1;
+    int householdId = 101;
+    int quantity = 10;
+    boolean initialSharedStatus = false;
+    boolean newSharedStatus = true;
+    LocalDateTime expirationDate = LocalDateTime.now().plusDays(30);
+
+    StorageItem existingItem = createStorageItem(storageItemId, itemId, householdId, quantity, initialSharedStatus, expirationDate);
+    ChangeStorageItemSharedStatusRequest request = createRequest(quantity, newSharedStatus);
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(existingItem));
+    when(storageItemRepo.update(any(StorageItem.class))).thenReturn(existingItem);
+
+    List<StorageItemResponse> result = storageItemService.updateStorageItemSharedStatus(storageItemId, householdId,request);
+
+    assertEquals(1, result.size());
+    assertEquals(newSharedStatus, existingItem.isShared());
+    verify(storageItemRepo, times(1)).update(existingItem);
+    verify(storageItemRepo, never()).add(any(StorageItem.class));
+  }
+
+  @Test
+  void testChangeStorageItemSharedStatus_partialQuantityUpdate_success() {
+    int storageItemId = 1;
+    int itemId = 1;
+    int householdId = 101;
+    int initialQuantity = 10;
+    double quantityToMove = 3.0;
+    boolean initialSharedStatus = false;
+    boolean newSharedStatus = true;
+    LocalDateTime expirationDate = LocalDateTime.now().plusDays(30);
+
+    StorageItem existingItem = createStorageItem(storageItemId, itemId, householdId, initialQuantity, initialSharedStatus, expirationDate);
+    ChangeStorageItemSharedStatusRequest request = createRequest(quantityToMove, newSharedStatus);
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(existingItem));
+    when(storageItemRepo.update(any(StorageItem.class))).thenReturn(existingItem);
+    when(storageItemRepo.add(any(StorageItem.class))).thenReturn(createStorageItem(2, itemId, householdId, (int) (initialQuantity - quantityToMove), initialSharedStatus, expirationDate));
+
+    List<StorageItemResponse> result = storageItemService.updateStorageItemSharedStatus(storageItemId, householdId, request);
+
+    assertEquals(2, result.size());
+    assertEquals(quantityToMove, existingItem.getQuantity());
+    assertEquals(newSharedStatus, existingItem.isShared());
+    verify(storageItemRepo, times(1)).update(existingItem);
+    verify(storageItemRepo, times(1)).add(any(StorageItem.class));
+  }
+
+  @Test
+  void testChangeStorageItemSharedStatus_itemNotFound_throwsException() {
+    int storageItemId = 1;
+    ChangeStorageItemSharedStatusRequest request = createRequest(5.0, true);
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.empty());
+
+    NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
+      storageItemService.updateStorageItemSharedStatus(storageItemId, 1L, request);
+    });
+    assertEquals("Storage item not found with id: " + storageItemId, exception.getMessage());
+    verify(storageItemRepo, never()).update(any(StorageItem.class));
+    verify(storageItemRepo, never()).add(any(StorageItem.class));
+  }
+
+  @Test
+  void testChangeStorageItemSharedStatus_sameIsSharedStatus_throwsException() {
+    int storageItemId = 1;
+    int itemId = 1;
+    int householdId = 101;
+    int quantity = 10;
+    boolean sharedStatus = true;
+    LocalDateTime expirationDate = LocalDateTime.now().plusDays(30);
+
+    StorageItem existingItem = createStorageItem(storageItemId, itemId, householdId, quantity, sharedStatus, expirationDate);
+    ChangeStorageItemSharedStatusRequest request = createRequest(5.0, sharedStatus);
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(existingItem));
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+      storageItemService.updateStorageItemSharedStatus(storageItemId, householdId, request);
+    });
+    assertEquals("Storage item already has the requested shared status", exception.getMessage());
+    verify(storageItemRepo, never()).update(any(StorageItem.class));
+    verify(storageItemRepo, never()).add(any(StorageItem.class));
+  }
+
+  @Test
+  void testChangeStorageItemSharedStatus_quantityToMoveTooLarge_throwsException() {
+    int storageItemId = 1;
+    int itemId = 1;
+    int householdId = 101;
+    int initialQuantity = 10;
+    double quantityToMove = 15.0;
+    boolean initialSharedStatus = false;
+    boolean newSharedStatus = true;
+    LocalDateTime expirationDate = LocalDateTime.now().plusDays(30);
+
+    StorageItem existingItem = createStorageItem(storageItemId, itemId, householdId, initialQuantity, initialSharedStatus, expirationDate);
+    ChangeStorageItemSharedStatusRequest request = createRequest(quantityToMove, newSharedStatus);
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(existingItem));
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+      storageItemService.updateStorageItemSharedStatus(storageItemId, householdId, request);
+    });
+    assertEquals("Cannot move more than the available quantity", exception.getMessage());
+    verify(storageItemRepo, never()).update(any(StorageItem.class));
+    verify(storageItemRepo, never()).add(any(StorageItem.class));
+  }
+
+  @Test
+  void testChangeStorageItemSharedStatus_householdDoesntMatch_throwsIllegalArgumentException() {
+    int storageItemId = 1;
+    int itemId = 1;
+    int householdId = 101;
+    int initialQuantity = 10;
+    double quantityToMove = 15.0;
+    boolean initialSharedStatus = false;
+    boolean newSharedStatus = true;
+    LocalDateTime expirationDate = LocalDateTime.now().plusDays(30);
+
+    StorageItem existingItem = createStorageItem(storageItemId, itemId, householdId, initialQuantity, initialSharedStatus, expirationDate);
+    ChangeStorageItemSharedStatusRequest request = createRequest(quantityToMove, newSharedStatus);
+
+    when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(existingItem));
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+      storageItemService.updateStorageItemSharedStatus(storageItemId, 1L, request);
+    });
+    assertEquals("User is not allowed to update this item", exception.getMessage());
+    verify(storageItemRepo, never()).update(any(StorageItem.class));
+    verify(storageItemRepo, never()).add(any(StorageItem.class));
   }
 }

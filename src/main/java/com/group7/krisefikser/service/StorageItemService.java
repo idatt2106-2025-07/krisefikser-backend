@@ -2,6 +2,7 @@ package com.group7.krisefikser.service;
 
 import static java.util.stream.Collectors.toList;
 
+import com.group7.krisefikser.dto.request.ChangeStorageItemSharedStatusRequest;
 import com.group7.krisefikser.dto.request.StorageItemRequest;
 import com.group7.krisefikser.dto.request.StorageItemSortRequest;
 import com.group7.krisefikser.dto.response.AggregatedStorageItemResponse;
@@ -25,6 +26,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is a service for managing storage items.
@@ -550,4 +552,53 @@ public class StorageItemService {
     }
     return filteredItems;
   }
+
+  /**
+   * Changes the shared status of a storage item and updates its quantity.
+   * If the quantity is changed, a new storage item is created with the updated quantity.
+   *
+   * @param id      The ID of the storage item to update
+   * @param request The request containing the new shared status and quantity
+   * @return A list of updated storage item responses
+   */
+  @Transactional
+  public List<StorageItemResponse> updateStorageItemSharedStatus(
+          int id, long householdId, ChangeStorageItemSharedStatusRequest request) {
+    StorageItem storageItem = storageItemRepo.findById(id).orElseThrow(
+            () -> new NoSuchElementException("Storage item not found with id: " + id)
+    );
+    if (storageItem.getHouseholdId() != householdId) {
+      throw new IllegalArgumentException("User is not allowed to update this item");
+    }
+    if (storageItem.isShared() == Boolean.TRUE.equals(request.getIsShared())) {
+      throw new IllegalArgumentException("Storage item already has the requested shared status");
+    }
+
+    double quantityToMove = request.getQuantity();
+    double previousQuantity = storageItem.getQuantity();
+    if (quantityToMove > previousQuantity) {
+      throw new IllegalArgumentException("Cannot move more than the available quantity");
+    } else if (quantityToMove == previousQuantity) {
+      storageItem.setShared(request.getIsShared());
+      return convertToStorageItemResponses(List.of(storageItemRepo.update(storageItem)));
+    } else {
+      StorageItem newStorageItem = new StorageItem();
+      newStorageItem.setExpirationDate(storageItem.getExpirationDate());
+      newStorageItem.setQuantity(previousQuantity - quantityToMove);
+      newStorageItem.setHouseholdId(storageItem.getHouseholdId());
+      newStorageItem.setItemId(storageItem.getItemId());
+      newStorageItem.setShared(storageItem.isShared());
+
+      storageItem.setQuantity(quantityToMove);
+      storageItem.setShared(request.getIsShared());
+
+      List<StorageItem> updatedItems = List.of(
+              storageItemRepo.update(storageItem),
+              storageItemRepo.add(newStorageItem)
+      );
+
+      return convertToStorageItemResponses(updatedItems);
+    }
+  }
+
 }
