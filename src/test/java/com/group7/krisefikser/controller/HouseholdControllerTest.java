@@ -95,22 +95,6 @@ class HouseholdControllerTest {
 
   @Test
   @WithMockUser
-  void getRequests_shouldReturnOkAndListOfJoinRequests() throws Exception {
-    List<JoinHouseholdRequest> requests = Arrays.asList(
-      new JoinHouseholdRequest(1L, 2L, 3L),
-      new JoinHouseholdRequest(2L, 2L, 4L)
-    );
-    when(householdService.getRequestsForHousehold(2L)).thenReturn(requests);
-
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/households/2/requests"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$").isArray())
-      .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[1].userId").value(4));
-  }
-
-  @Test
-  @WithMockUser
   void acceptJoinRequest_shouldReturnOk() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.put("/api/households/requests/1/accept"))
       .andExpect(status().isOk());

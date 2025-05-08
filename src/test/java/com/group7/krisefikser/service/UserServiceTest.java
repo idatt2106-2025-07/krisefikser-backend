@@ -11,6 +11,7 @@ import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
 import com.group7.krisefikser.dto.response.UserInfoResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
+import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.Household;
@@ -49,6 +50,12 @@ public class UserServiceTest {
 
   @Mock
   private HttpServletResponse response;
+
+  @Mock
+  private LoginAttemptService loginAttemptService;
+
+  @Mock
+  private EmailService emailService;
 
   @InjectMocks
   private UserService userService;
