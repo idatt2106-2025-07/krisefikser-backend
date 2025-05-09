@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller class for handling notifications.
@@ -58,10 +61,10 @@ public class NotificationController {
   @PostMapping("/incidents")
   public ResponseEntity<List<NotificationResponse>> getIncidentsNotifications(@RequestBody
                         NotificationRequest request) {
+    logger.info("Retrieving incident notifications");
     double latitude = request.getLatitude();
     double longitude = request.getLongitude();
     try {
-      logger.info("Retrieving incident notifications");
       if (notificationService.withinDangerZone(latitude, longitude)) {
         List<NotificationResponse> notifications =
             notificationService.getIncidentsNotification();
