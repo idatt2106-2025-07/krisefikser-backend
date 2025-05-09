@@ -9,6 +9,7 @@ import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.mapper.UserMapper;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
@@ -72,6 +73,8 @@ public class UserService implements UserDetailsService {
   @Transactional
   public AuthResponse registerUser(RegisterRequest request) {
     User user = UserMapper.INSTANCE.registerRequestToUser(request);
+    Household household =
+        HouseholdMapper.INSTANCE.householdRequestToHousehold(request.getHouseholdRequest());
     user.setRole(Role.ROLE_NORMAL);
     user.setPassword(PasswordUtil.hashPassword(request.getPassword()));
     Long householdId;
@@ -80,11 +83,8 @@ public class UserService implements UserDetailsService {
           .USER_ALREADY_EXISTS.getMessage(), null, null);
     }
 
-    // When the user is created, we also create a household for them
-    // This is for when the user waits for the request to join a household to be accepted
-    // This is a temporary solution, in the future the user should be able to create a household
     try {
-      householdId = householdService.createHouseholdForUser(user.getName());
+      householdId = householdService.createHousehold(household);
     } catch (Exception e) {
       return new AuthResponse(AuthResponseMessage
           .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);
@@ -315,5 +315,19 @@ public class UserService implements UserDetailsService {
         household.getLongitude(),
         isSharingLocation
     );
+  }
+
+  /**
+   * Gets the user ID by email.
+   * This method retrieves the user ID associated with the given email address.
+   * If the user is not found, it throws a RuntimeException.
+   *
+   * @param email the email address of the user
+   * @return the user ID
+   */
+  public Long getUserIdByEmail(String email) {
+    return userRepo.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with email: " + email))
+        .getId();
   }
 }

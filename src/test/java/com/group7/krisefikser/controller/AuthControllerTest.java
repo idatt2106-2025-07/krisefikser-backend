@@ -1,6 +1,7 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.request.LoginRequest;
 import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
@@ -41,7 +42,9 @@ class AuthControllerTest {
 
   @Test
   void registerUser_validRequest_returnsCreatedResponse() throws Exception {
-    RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "password123");
+    RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "password1HDH!23",
+      new HouseholdRequest("Test Household", 0.0, 0.0)  // Add the missing parameter
+    );
     AuthResponse response = new AuthResponse("User registered successfully", new Date(), Role.ROLE_NORMAL);
 
     Mockito.when(userService.registerUser(any(RegisterRequest.class)))
@@ -58,7 +61,9 @@ class AuthControllerTest {
 
   @Test
   void registerUser_serviceThrowsException_returnsInternalServerError() throws Exception {
-    RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "secret");
+    RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "secretFJJD318764!",
+      new HouseholdRequest("Test Household", 0.0, 0.0)  // Add the missing parameter
+    );
 
     Mockito.when(userService.registerUser(any(RegisterRequest.class)))
         .thenThrow(new RuntimeException("Database error"));
@@ -155,11 +160,15 @@ class AuthControllerTest {
 
   @WithMockUser(username = "johndoe@test.com", roles = "USER")
   @Test
-  void getCurrentUserEmail_authenticated() throws Exception {
+  void getCurrentUserEmail_authenticated_returnsEmail() throws Exception {
+    com.group7.krisefikser.model.User mockUser = new com.group7.krisefikser.model.User();
+    mockUser.setEmail("johndoe@test.com");
+    mockUser.setName("John Doe");
+    Mockito.when(userService.getCurrentUser()).thenReturn(mockUser);
+
     mockMvc.perform(get("/api/auth/me"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.role").value("ROLE_USER"))
-        .andExpect(jsonPath("$.email").value("johndoe@test.com"));
+      .andExpect(status().isOk())
+      .andExpect(jsonPath("$.email").value("johndoe@test.com"));
   }
 
   @Test

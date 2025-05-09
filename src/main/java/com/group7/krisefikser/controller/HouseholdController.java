@@ -2,15 +2,17 @@ package com.group7.krisefikser.controller;
 
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
+import com.group7.krisefikser.dto.response.HouseholdDetailsResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.mapper.JoinRequestMapper;
 import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
+import com.group7.krisefikser.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +22,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +43,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/households")
 @Tag(name = "Household Management", description = "APIs for household operations and membership")
 public class HouseholdController {
-  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HouseholdController.class);
   private final HouseholdService householdService;
   private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());
+  private final UserService userService;
 
   /**
    * Constructor for injecting the HouseholdService dependency.
@@ -52,8 +53,32 @@ public class HouseholdController {
    * @param householdService the service layer for household-related operations
    */
   @Autowired
-  public HouseholdController(HouseholdService householdService) {
+  public HouseholdController(HouseholdService householdService, UserService userService) {
     this.householdService = householdService;
+    this.userService = userService;
+  }
+
+  /**
+   * Endpoint to retrieve the details of the authenticated user's household.
+   *
+   * @return a ResponseEntity containing the household details
+   */
+  @GetMapping
+  @Operation(summary = "Get details of user's household",
+      description = "Retrieves details of the authenticated user's household including all members")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Household details retrieved successfully",
+      content = @Content(schema = @Schema(implementation = HouseholdDetailsResponse.class))),
+    @ApiResponse(responseCode = "404", description = "Household not found")
+  })
+  public ResponseEntity<HouseholdDetailsResponse> getMyHouseholdDetails() {
+    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
+    Long userId = Long.parseLong(userIdStr);
+    logger.info("Fetching household details for user ID: " + userId);
+
+    HouseholdDetailsResponse householdDetails =
+        householdService.getHouseholdDetailsByUserId(userId);
+    return ResponseEntity.ok(householdDetails);
   }
 
   /**
@@ -110,10 +135,9 @@ public class HouseholdController {
   /**
    * Endpoint to retrieve all join requests for a specific household.
    *
-   * @param householdId the ID of the household
    * @return a ResponseEntity containing a list of JoinHouseholdRequest objects
    */
-  @GetMapping("/{householdId}/requests")
+  @GetMapping("/requests")
   @Operation(summary = "Get all join requests for a household",
       description = "Retrieves all pending join requests for a specific household")
   @ApiResponses(value = {
@@ -123,8 +147,8 @@ public class HouseholdController {
         "Forbidden - User not authorized for this household"),
     @ApiResponse(responseCode = "404", description = "Household not found")
   })
-  public ResponseEntity<List<JoinHouseholdRequestResponse>> getJoinRequests(
-      @PathVariable Long householdId) {
+  public ResponseEntity<List<JoinHouseholdRequestResponse>> getJoinRequests() {
+    Long householdId = (long) userService.getCurrentUserHouseholdId();
     logger.info("Retrieving requests for household ID: " + householdId);
 
     List<JoinHouseholdRequest> joinRequests =

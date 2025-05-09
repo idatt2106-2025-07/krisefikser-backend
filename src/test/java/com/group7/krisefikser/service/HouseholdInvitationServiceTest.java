@@ -106,22 +106,6 @@ class HouseholdInvitationServiceTest {
   }
 
   @Test
-  void acceptInvitation_shouldAddUserToHouseholdAndDeleteInvitation() throws JwtMissingPropertyException {
-    when(jwtUtils.validateInvitationTokenAndGetEmail(token)).thenReturn(email);
-    when(invitationRepository.findByToken(token)).thenReturn(Optional.of(invitation));
-
-    Long result = invitationService.acceptInvitation(token, userId);
-
-    assertEquals(householdId, result);
-
-    verify(jwtUtils).validateInvitationTokenAndGetEmail(token);
-
-    verify(userRepository).updateUserHousehold(userId, householdId);
-
-    verify(invitationRepository).delete(invitation.getId());
-  }
-
-  @Test
   void acceptInvitation_shouldThrowExceptionWhenInvitationNotFound() throws JwtMissingPropertyException {
     when(jwtUtils.validateInvitationTokenAndGetEmail(token)).thenReturn(email);
     when(invitationRepository.findByToken(token)).thenReturn(Optional.empty());

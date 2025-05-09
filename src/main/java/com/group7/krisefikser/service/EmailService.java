@@ -2,9 +2,12 @@ package com.group7.krisefikser.service;
 
 import com.group7.krisefikser.enums.EmailTemplateType;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class EmailService {
+
+  private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
   @Autowired
   JavaMailSender mailSender;
@@ -26,13 +31,19 @@ public class EmailService {
    * @param subject The subject of the email.
    * @param text    The body of the email.
    */
+  @Async
   public void sendSimpleMessage(String to, String subject, String text) {
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom("krisefikser@gmail.com");
-    message.setTo(to);
-    message.setSubject(subject);
-    message.setText(text);
-    mailSender.send(message);
+    try {
+      SimpleMailMessage message = new SimpleMailMessage();
+      message.setFrom("krisefikser@gmail.com");
+      message.setTo(to);
+      message.setSubject(subject);
+      message.setText(text);
+      mailSender.send(message);
+      logger.info("Email sent to {}", to);
+    } catch (Exception e) {
+      logger.error("Failed to send email to {}: {}", to, e.getMessage());
+    }
   }
 
   /**

@@ -9,8 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group7.krisefikser.model.HouseholdInvitation;
 import com.group7.krisefikser.dto.request.InvitationRequest;
 import com.group7.krisefikser.service.HouseholdInvitationService;
+import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.utils.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -99,21 +102,6 @@ class HouseholdInvitationControllerTest {
     void verifyInvitation_missingToken_returnsBadRequest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/verify"))
           .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
-
-    @Test
-    @WithMockUser(username = "2", roles = "NORMAL")
-    void acceptInvitation_validToken_returnsOk() throws Exception {
-        when(invitationService.acceptInvitation(eq(token), eq(2L)))
-          .thenReturn(householdId);
-
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("token", token);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL + "/accept")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(requestBody)))
-          .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test

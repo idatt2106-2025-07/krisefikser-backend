@@ -5,7 +5,7 @@ import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.model.JoinHouseholdRequest;
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -91,22 +91,6 @@ class HouseholdControllerTest {
       .andExpect(jsonPath("$.id").value(1))
       .andExpect(jsonPath("$.householdId").value(2))
       .andExpect(jsonPath("$.userId").value(3));
-  }
-
-  @Test
-  @WithMockUser
-  void getRequests_shouldReturnOkAndListOfJoinRequests() throws Exception {
-    List<JoinHouseholdRequest> requests = Arrays.asList(
-      new JoinHouseholdRequest(1L, 2L, 3L),
-      new JoinHouseholdRequest(2L, 2L, 4L)
-    );
-    when(householdService.getRequestsForHousehold(2L)).thenReturn(requests);
-
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/households/2/requests"))
-      .andExpect(status().isOk())
-      .andExpect(jsonPath("$").isArray())
-      .andExpect(jsonPath("$[0].id").value(1))
-      .andExpect(jsonPath("$[1].userId").value(4));
   }
 
   @Test

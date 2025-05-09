@@ -5,9 +5,11 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordLinkRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.response.CurrentUserResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
 import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +27,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,31 +61,42 @@ public class AuthController {
   @Operation(
       summary = "Register a new user",
       description = "Registers a new user account using the provided email, name and password. "
-          + "A verification email is sent to the provided email address."
+      + "A verification email is sent to the provided email address."
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "201", description = "User registered successfully",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = "500", description = "Server error while saving the user",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = "201", description = "User registered successfully",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = "500", description = "Server error while saving the user",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class)))
   })
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> registerUser(
-      @Valid @RequestBody RegisterRequest request) {
+  public ResponseEntity<?> registerUser(
+      @Valid @RequestBody RegisterRequest request, BindingResult bindingResult) {
     logger.info("Received register request for user: " + request.getEmail());
+
+    if (bindingResult.hasErrors()) {
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
     try {
       AuthResponse authResponse = userService.registerUser(request);
 
-      logger.info("User registered successfully: " + request.getEmail());
-      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+      if (authResponse.getMessage().equals(
+          AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage())) {
+        logger.info("User registered successfully: " + request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+      } else {
+        logger.warning("Error registering user: " + authResponse.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);
+      }
+
 
     } catch (Exception e) {
       logger.warning("Error registering user: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-          new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()
-                  + e.getMessage(), null, null));
+        new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()
+          + e.getMessage(), null, null));
     }
   }
 
@@ -90,22 +105,22 @@ public class AuthController {
    * This method handles the login of an existing user.
    * It accepts a LoginRequest object containing user credentials.
    *
-   * @param request the login request containing user credentials
+   * @param request  the login request containing user credentials
    * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
   @Operation(
       summary = "Log in a user",
       description = "Logs in a user using their email and password. "
-          + "If the credentials are valid and the user is verified, a JWT token is returned."
+      + "If the credentials are valid and the user is verified, a JWT token is returned."
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "User logged in successfully",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = "500", description = "Server error during login process",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = "200", description = "User logged in successfully",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = "500", description = "Server error during login process",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class)))
   })
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> loginUser(
@@ -127,8 +142,8 @@ public class AuthController {
     } catch (Exception e) {
       logger.warning("Error logging in user: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()
-                  + e.getMessage(), null, null));
+        new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()
+          + e.getMessage(), null, null));
     }
   }
 
@@ -143,25 +158,25 @@ public class AuthController {
   @Operation(
       summary = "Verify user email",
       description = "Verifies a user's email address using a token sent "
-          + "to them via email after registration.",
+      + "to them via email after registration.",
       parameters = @Parameter(
-          name = "token",
-          description = "Verification token received by email. "
-              + "Must match a token issued during registration.",
-          required = true,
-          schema = @Schema(type = "string")
+      name = "token",
+      description = "Verification token received by email. "
+        + "Must match a token issued during registration.",
+      required = true,
+      schema = @Schema(type = "string")
       )
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "User verified successfully",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = "400", description = "Invalid or expired verification token",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = "500", description = "Server error during email verification",
-          content = @Content(mediaType = "application/json",
-              schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = "200", description = "User verified successfully",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Invalid or expired verification token",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = "500", description = "Server error during email verification",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = AuthResponse.class)))
   })
   @GetMapping("/verify-email")
   public ResponseEntity<AuthResponse> verifyEmail(@Valid @RequestParam String token) {
@@ -180,46 +195,56 @@ public class AuthController {
     } catch (Exception e) {
       logger.warning("Error verifying email: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-          new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()
-                  + e.getMessage(), null, null));
+        new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()
+          + e.getMessage(), null, null));
     }
   }
 
   /**
-   * Endpoint for getting the current user's info.
-   * This method retrieves the email and role of the currently authenticated user.
+   * Endpoint to get the current user's information.
+   * This method retrieves the email and name of the currently authenticated user.
    *
-   * @return a ResponseEntity containing the user's info or no content if not authenticated
+   * @return a ResponseEntity containing the current user's information
    */
   @Operation(
       summary = "Get current user info",
-      description = "Returns the email and role of the currently authenticated user,"
-      + "or no content if not authenticated."
+      description = "Returns the email and name of the currently"
+         + " authenticated user, or no content if not authenticated."
   )
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Authenticated – returns user info"),
-      @ApiResponse(responseCode = "204", description = "Not authenticated – no content")
+    @ApiResponse(responseCode = "200", description = "Authenticated – returns email and name",
+      content = @Content(mediaType = "application/json",
+        schema = @Schema(implementation = CurrentUserResponse.class))),
+    @ApiResponse(responseCode = "204", description = "Not authenticated – no content")
   })
   @GetMapping("/me")
-  public ResponseEntity<Map<String, String>> getCurrentUserInfo() {
+  public ResponseEntity<CurrentUserResponse> getCurrentUserInfo() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
-      Map<String, String> userInfo = new HashMap<>();
-      userInfo.put("email", auth.getName());
-        
-      // Extract role from authorities
-      String role = auth.getAuthorities().stream()
-          .findFirst()
-          .map(authority -> authority.getAuthority())
-          .orElse("ROLE_UNKNOWN");
-        
-      userInfo.put("role", role);
-      return ResponseEntity.ok(userInfo);
+    if (auth != null && auth.isAuthenticated()
+        && !(auth instanceof AnonymousAuthenticationToken)) {
+      try {
+        com.group7.krisefikser.model.User user = userService.getCurrentUser();
+        if (user != null) {
+          String role = auth.getAuthorities().stream()
+              .findFirst()
+              .map(GrantedAuthority::getAuthority)
+              .orElse("ROLE_UNKNOWN");
+
+          return ResponseEntity.ok(new CurrentUserResponse(
+            user.getEmail(), user.getName(), role));
+        }
+      } catch (Exception e) {
+        logger.warning("Error retrieving current user: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+          new CurrentUserResponse(
+            AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, "ROLE_UNKNOWN"));
+      }
     }
-    
+
     logger.info("GET /me - No authenticated user found");
     return ResponseEntity.noContent().build();
   }
+
 
   /**
    * Endpoint for logging out a user.

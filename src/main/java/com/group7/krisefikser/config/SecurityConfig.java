@@ -47,8 +47,8 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
     corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://dev.krisefikser.localhost:5173"));
-    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE",
-        "OPTIONS", "PATCH"));
+    corsConfiguration.setAllowedMethods(
+        List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     corsConfiguration.setAllowedHeaders(List.of("*"));
     corsConfiguration.setAllowCredentials(true);
     corsConfiguration.setMaxAge(3600L);
@@ -70,7 +70,8 @@ public class SecurityConfig {
                 "/api/auth/**",
                 "/api/notification/**",
                 "/api/privacy-policy/**",
-                "/api/news/**")
+                "/api/news/**",
+                "/api/household-invitations/verify")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
@@ -78,7 +79,8 @@ public class SecurityConfig {
                 "/api/admin/register",
                 "/api/admin/2fa",
                 "/h2-console/**",
-                "/api/hcaptcha/**")
+                "/api/hcaptcha/**",
+                "/api/household-invitations/accept")
             .permitAll()
 
             .requestMatchers(HttpMethod.DELETE,

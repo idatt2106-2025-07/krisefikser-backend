@@ -170,11 +170,40 @@ public class UserRepository {
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
-    jdbcTemplate.update(
-            "UPDATE users SET household_id = ? WHERE id = ?",
-            householdId, userId);
+    jdbcTemplate.update("DELETE FROM join_household_requests WHERE user_id = ?", userId);
+    jdbcTemplate.update("UPDATE users SET household_id = ? WHERE id = ?", householdId, userId);
   }
 
+  /**
+   * Finds the household ID associated with a user.
+   *
+   * @param userId the ID of the user
+   * @return the ID of the user's household, or null if not found
+   */
+  public Long findHouseholdIdByUserId(Long userId) {
+    String sql = "SELECT household_id FROM users WHERE id = ?";
+    try {
+      return jdbcTemplate.queryForObject(sql, Long.class, userId);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
+    }
+  }
+
+  /**
+   * Finds the name associated with a user ID.
+   *
+   * @param userId the ID of the user
+   * @return the name of the user, or null if not found
+   */
+  public String findNameById(Long userId) {
+    String sql = "SELECT name FROM users WHERE id = ?";
+    try {
+      return jdbcTemplate.queryForObject(sql, String.class, userId);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
+    }
+  }
+  
   /**
    * Deletes a user from the database by their ID.
    * This method removes the user from the users table

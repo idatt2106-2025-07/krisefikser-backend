@@ -7,6 +7,7 @@ import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.service.EmergencyGroupService;
+import com.group7.krisefikser.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,47 +42,60 @@ class EmergencyGroupControllerTest {
   private ObjectMapper objectMapper;
   @MockitoBean
   private EmergencyGroupService emergencyGroupService;
+  @MockitoBean
+  private UserService userService;
 
   @Test
   @WithMockUser
   void getEmergencyGroupById_existingId_returnsOkAndEmergencyGroupResponseWithDate() throws Exception {
+    Long householdId = 10L;
     Long groupId = 1L;
     Date creationDate = new Date();
     EmergencyGroupResponse mockResponse = new EmergencyGroupResponse(groupId, "Group Alpha", creationDate.toString());
+
+    // Mock the userService and emergencyGroupService calls
+    when(userService.getCurrentUserHouseholdId()).thenReturn(householdId.intValue());
+    when(emergencyGroupService.getEmergencyGroupIdByHouseholdId(householdId)).thenReturn(groupId);
     when(emergencyGroupService.getEmergencyGroupById(groupId)).thenReturn(mockResponse);
 
-    mockMvc.perform(get("/api/emergency-groups/{id}", groupId))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(mockResponse)));
+    mockMvc.perform(get("/api/emergency-groups"))
+      .andExpect(status().isOk())
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(content().json(objectMapper.writeValueAsString(mockResponse)));
   }
 
   @Test
   @WithMockUser
   void getEmergencyGroupById_nonExistingId_returnsNotFoundAndErrorResponseWithDate() throws Exception {
-    // Arrange
+    Long householdId = 10L;
     Long groupId = 99L;
-    when(emergencyGroupService.getEmergencyGroupById(groupId)).thenThrow(NoSuchElementException.class);
+
+    when(userService.getCurrentUserHouseholdId()).thenReturn(householdId.intValue());
+    when(emergencyGroupService.getEmergencyGroupIdByHouseholdId(householdId)).thenReturn(groupId);
+    when(emergencyGroupService.getEmergencyGroupById(groupId))
+      .thenThrow(new NoSuchElementException("Emergency group not found. The emergency group with the specified ID does not exist."));
+
     ErrorResponse expectedResponse = new ErrorResponse("Emergency group not found. The emergency group with the specified ID does not exist.");
 
-    // Act & Assert
-    mockMvc.perform(get("/api/emergency-groups/{id}", groupId))
-            .andExpect(status().isNotFound())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
+    mockMvc.perform(get("/api/emergency-groups"))
+      .andExpect(status().isNotFound())
+      .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+      .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
   }
 
   @Test
   @WithMockUser
   void getEmergencyGroupById_serviceThrowsException_returnsInternalServerError() throws Exception {
-    // Arrange
+    Long householdId = 10L;
     Long groupId = 1L;
+
+    when(userService.getCurrentUserHouseholdId()).thenReturn(householdId.intValue());
+    when(emergencyGroupService.getEmergencyGroupIdByHouseholdId(householdId)).thenReturn(groupId);
     when(emergencyGroupService.getEmergencyGroupById(groupId)).thenThrow(new RuntimeException("Database error"));
 
-    // Act & Assert
-    mockMvc.perform(get("/api/emergency-groups/{id}", groupId))
-            .andExpect(status().isInternalServerError())
-            .andExpect(content().string("An error occurred while retrieving the emergency group."));
+    mockMvc.perform(get("/api/emergency-groups"))
+      .andExpect(status().isInternalServerError())
+      .andExpect(content().string("An error occurred while retrieving the emergency group."));
   }
 
   @Test
