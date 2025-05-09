@@ -19,4 +19,6 @@ public class RegisterRequest {
   private String email;
   @NotNull(message = "password is required")
   private String password;
+  @NotNull(message = "household is required")
+  private HouseholdRequest householdRequest;
 }

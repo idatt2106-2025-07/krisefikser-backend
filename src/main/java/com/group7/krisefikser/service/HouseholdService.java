@@ -1,10 +1,14 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
+import com.group7.krisefikser.dto.response.HouseholdDetailsResponse;
+import com.group7.krisefikser.dto.response.HouseholdMemberResponse;
+import com.group7.krisefikser.dto.response.NonUserMemberResponse;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
+import com.group7.krisefikser.exception.ResourceNotFoundException;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.Item;
-import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.model.NonUserMember;
 import com.group7.krisefikser.model.StorageItem;
 import com.group7.krisefikser.model.User;
@@ -82,6 +86,20 @@ public class HouseholdService {
   }
 
   /**
+   * Creates a new household with the specified details.
+   * Persists the household using the provided name, longitude, and latitude.
+   * This operation is transactional.
+   *
+   * @param household the Household object containing the name, longitude, and latitude
+   * @return the ID of the created household
+   */
+  @Transactional
+  public Long createHousehold(Household household) {
+    return householdRepository
+        .createHousehold(household.getName(), household.getLongitude(), household.getLatitude());
+  }
+
+  /**
    * Creates a request for a user to join a household.
    *
    * @param householdId the ID of the household to join
@@ -132,6 +150,43 @@ public class HouseholdService {
     return joinRequestRepo.findByHouseholdId(householdId);
   }
 
+  /**
+   * Retrieves the details of a user's household including all members.
+   *
+   * @param userId the ID of the user
+   * @return a HouseholdDetailsResponse containing household information and its members
+   * @throws ResourceNotFoundException if the household or user is not found
+   */
+  public HouseholdDetailsResponse getHouseholdDetailsByUserId(Long userId) {
+    // Get the user's household ID
+    Long householdId = userRepository.findHouseholdIdByUserId(userId);
+
+    if (householdId == null) {
+      throw new ResourceNotFoundException("User is not associated with any household");
+    }
+
+    // Get household details
+    Household household = householdRepository.getHouseholdById(householdId)
+        .orElseThrow(() -> new ResourceNotFoundException("Household not found"));
+
+    // Get household members and non-user members
+    List<HouseholdMemberResponse> members =
+        householdRepository.findMembersByHouseholdId(householdId);
+    List<NonUserMemberResponse> nonUserMembers =
+        householdRepository.findNonUserMembersByHouseholdId(householdId);
+
+    // Create response
+    HouseholdDetailsResponse response = new HouseholdDetailsResponse();
+    response.setId(household.getId());
+    response.setName(household.getName());
+    response.setLongitude(household.getLongitude());
+    response.setLatitude(household.getLatitude());
+    response.setMembers(members);
+    response.setNonUserMembers(nonUserMembers);
+
+    return response;
+  }
+  
   /**
    * Retrieves a household by its ID.
    *

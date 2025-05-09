@@ -1,5 +1,6 @@
 package com.group7.krisefikser.service;
 
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.enums.ItemType;
 import com.group7.krisefikser.model.*;
