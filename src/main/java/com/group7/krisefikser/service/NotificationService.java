@@ -24,32 +24,15 @@ public class NotificationService {
    *
    * @return a list of NotificationResponse objects containing details of incidents.
    */
-  public List<NotificationResponse> getIncidentsNotification() {
+  public List<NotificationResponse> getIncidentsNotification(double lat, double lon) {
     List<NotificationResponse> incidents = new ArrayList<>();
     for (AffectedAreaResponse area : affectedAreaService.getAllAffectedAreas()) {
-      if (area.getSeverityLevel() == 3) {
+      if (calculateDistance(area.getLatitude(), area.getLongitude(), lat, lon)
+          <= area.getMediumDangerRadiusKm()) {
         incidents.add(new NotificationResponse(area.getDescription()));
       }
     }
     return incidents;
-  }
-
-  /**
-   * Checks if a given latitude and longitude are within a danger zone.
-   *
-   * @param latitude the latitude to check
-   * @param longitude the longitude to check
-   * @return true if the coordinates are within a danger zone, false otherwise
-   */
-  public boolean withinDangerZone(double latitude, double longitude) {
-    List<AffectedAreaResponse> affectedAreas = affectedAreaService.getAllAffectedAreas();
-    for (AffectedAreaResponse area : affectedAreas) {
-      if (calculateDistance(area.getLatitude(), area.getLongitude(), latitude, longitude)
-          <= area.getMediumDangerRadiusKm()) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**

@@ -65,15 +65,10 @@ public class NotificationController {
     double latitude = request.getLatitude();
     double longitude = request.getLongitude();
     try {
-      if (notificationService.withinDangerZone(latitude, longitude)) {
-        List<NotificationResponse> notifications =
-            notificationService.getIncidentsNotification();
-        logger.info("Retrieved " + notifications.size() + " incident notifications");
-        return ResponseEntity.ok(notifications);
-      } else {
-        logger.info("No incident notifications found within the danger zone");
-        return ResponseEntity.ok(List.of());
-      }
+      List<NotificationResponse> notifications =
+          notificationService.getIncidentsNotification(latitude, longitude);
+      logger.info("Retrieved " + notifications.size() + " incident notifications");
+      return ResponseEntity.ok(notifications);
     } catch (Exception e) {
       logger.severe("Error retrieving incident notifications: " + e.getMessage());
       return ResponseEntity.status(500).body(null);
