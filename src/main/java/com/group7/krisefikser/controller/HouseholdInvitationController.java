@@ -4,7 +4,10 @@ import com.group7.krisefikser.dto.request.InvitationRequest;
 import com.group7.krisefikser.exception.InvitationNotFoundException;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.HouseholdInvitation;
+import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.service.HouseholdInvitationService;
+import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,6 +39,9 @@ public class HouseholdInvitationController {
   private final HouseholdInvitationService invitationService;
   private static final Logger logger = Logger
       .getLogger(HouseholdInvitationController.class.getName());
+  private final JwtUtils jwtUtils;
+  private final UserRepository userRepository;
+  private final UserService userService;
 
   /**
    * Creates a new household invitation.
@@ -117,6 +123,7 @@ public class HouseholdInvitationController {
     @ApiResponse(responseCode = "404", description = "Invitation not found or expired")
   })
   public ResponseEntity<?> verifyInvitation(@RequestParam String token) {
+    logger.info("Verify invitation token: " + token);
     HouseholdInvitation invitation = invitationService.verifyInvitation(token);
     return ResponseEntity.ok(invitation);
   }
@@ -159,8 +166,8 @@ public class HouseholdInvitationController {
         return ResponseEntity.badRequest().body("Token is required");
       }
 
-      String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-      Long userId = Long.parseLong(userIdStr);
+      String email = jwtUtils.validateInvitationTokenAndGetEmail(token);
+      Long userId = userService.getUserIdByEmail(email);
 
       invitationService.acceptInvitation(token, userId);
       logger.info("Invitation accepted successfully");
