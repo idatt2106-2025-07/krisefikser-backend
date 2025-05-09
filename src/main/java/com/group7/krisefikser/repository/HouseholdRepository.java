@@ -178,4 +178,19 @@ public class HouseholdRepository {
       return member;
     }, householdId);
   }
+
+  /**
+   * Retrieves the emergency group ID for a specific household.
+   *
+   * @param householdId the ID of the household
+   * @return the emergency group ID associated with the household
+   */
+  public Long getEmergencyIdByHouseholdId(Long householdId) {
+    String sql = "SELECT emergency_group_id FROM households WHERE id = ?";
+    try {
+      return jdbcTemplate.queryForObject(sql, Long.class, householdId);
+    } catch (EmptyResultDataAccessException e) {
+      return null;
+    }
+  }
 }
