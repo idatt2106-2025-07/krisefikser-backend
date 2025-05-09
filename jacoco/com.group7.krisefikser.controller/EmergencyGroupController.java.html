@@ -6,6 +6,7 @@ import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.service.EmergencyGroupService;
+import com.group7.krisefikser.service.UserService;
 import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,11 +42,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmergencyGroupController {
   private final EmergencyGroupService emergencyGroupService;
   private final Logger logger = LoggerFactory.getLogger(EmergencyGroupController.class);
+  private final UserService userService;
 
   /**
    * Retrieves the EmergencyGroup object with the specified ID from the repository.
    *
-   * @param id the ID of the EmergencyGroup to retrieve
    * @return the EmergencyGroupResponse object with the specified ID
    */
   @Operation(
@@ -69,21 +70,23 @@ public class EmergencyGroupController {
                             schema = @Schema(implementation = ErrorResponse.class)))
           }
   )
-  @GetMapping(&quot;/{id}&quot;)
-  public ResponseEntity&lt;Object&gt; getEmergencyGroupById(@PathVariable Long id) {
+  @GetMapping
+  public ResponseEntity&lt;Object&gt; getEmergencyGroupById() {
     try {
-<span class="fc" id="L75">      EmergencyGroupResponse response = emergencyGroupService.getEmergencyGroupById(id);</span>
-<span class="fc" id="L76">      logger.info(&quot;Emergency group with ID {} retrieved successfully.&quot;, id);</span>
-<span class="fc" id="L77">      return ResponseEntity.ok(response);</span>
-<span class="fc" id="L78">    } catch (NoSuchElementException e) {</span>
-<span class="fc" id="L79">      logger.error(&quot;Emergency group with ID {} not found.&quot;, id);</span>
-<span class="fc" id="L80">      return ResponseEntity.status(404).body(new ErrorResponse(&quot;Emergency group not found. &quot;</span>
+<span class="fc" id="L76">      Long householdId = (long) userService.getCurrentUserHouseholdId();</span>
+<span class="fc" id="L77">      Long emergencyGroupId = emergencyGroupService.getEmergencyGroupIdByHouseholdId(householdId);</span>
+<span class="fc" id="L78">      EmergencyGroupResponse response =</span>
+<span class="fc" id="L79">          emergencyGroupService.getEmergencyGroupById(emergencyGroupId);</span>
+<span class="fc" id="L80">      logger.info(&quot;Emergency group with ID {} retrieved successfully.&quot;, emergencyGroupId);</span>
+<span class="fc" id="L81">      return ResponseEntity.ok(response);</span>
+<span class="fc" id="L82">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L83">      logger.error(&quot;Emergency group not found.&quot; + e.getMessage());</span>
+<span class="fc" id="L84">      return ResponseEntity.status(404).body(new ErrorResponse(&quot;Emergency group not found. &quot;</span>
               + &quot;The emergency group with the specified ID does not exist.&quot;
       ));
-<span class="fc" id="L83">    } catch (Exception e) {</span>
-<span class="fc" id="L84">      logger.error(&quot;An error occurred while retrieving emergency group with ID {}: {}&quot;,</span>
-<span class="fc" id="L85">              id, e.getMessage());</span>
-<span class="fc" id="L86">      return ResponseEntity.status(500).body(&quot;An error occurred while retrieving the &quot;</span>
+<span class="fc" id="L87">    } catch (Exception e) {</span>
+<span class="fc" id="L88">      logger.error(&quot;An error occurred while retrieving emergency group&quot;);</span>
+<span class="fc" id="L89">      return ResponseEntity.status(500).body(&quot;An error occurred while retrieving the &quot;</span>
               + &quot;emergency group.&quot;);
     }
   }
@@ -120,15 +123,15 @@ public class EmergencyGroupController {
   @PostMapping
   public ResponseEntity&lt;Object&gt; addEmergencyGroup(@RequestBody EmergencyGroupRequest request) {
     try {
-<span class="nc" id="L123">      EmergencyGroupResponse response = emergencyGroupService.addEmergencyGroup(request);</span>
-<span class="nc" id="L124">      logger.info(&quot;Emergency group {} added successfully.&quot;, response.getName());</span>
-<span class="nc" id="L125">      return ResponseEntity.status(201).body(response);</span>
-<span class="fc" id="L126">    } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L127">      logger.error(&quot;Failed to add emergency group: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L128">      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));</span>
-<span class="fc" id="L129">    } catch (Exception e) {</span>
-<span class="fc" id="L130">      logger.error(&quot;An error occurred while adding the emergency group: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L131">      return ResponseEntity.status(500).body(&quot;An error occurred while adding the emergency group.&quot;);</span>
+<span class="nc" id="L126">      EmergencyGroupResponse response = emergencyGroupService.addEmergencyGroup(request);</span>
+<span class="nc" id="L127">      logger.info(&quot;Emergency group {} added successfully.&quot;, response.getName());</span>
+<span class="nc" id="L128">      return ResponseEntity.status(201).body(response);</span>
+<span class="fc" id="L129">    } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L130">      logger.error(&quot;Failed to add emergency group: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L131">      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));</span>
+<span class="fc" id="L132">    } catch (Exception e) {</span>
+<span class="fc" id="L133">      logger.error(&quot;An error occurred while adding the emergency group: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L134">      return ResponseEntity.status(500).body(&quot;An error occurred while adding the emergency group.&quot;);</span>
     }
   }
 
@@ -164,20 +167,20 @@ public class EmergencyGroupController {
   )
   @PostMapping(&quot;/invite/{householdName}&quot;)
   public ResponseEntity&lt;Object&gt; inviteHouseholdByName(@PathVariable String householdName) {
-<span class="fc" id="L167">    logger.info(&quot;Inviting household with name: {}&quot;, householdName);</span>
+<span class="fc" id="L170">    logger.info(&quot;Inviting household with name: {}&quot;, householdName);</span>
     try {
-<span class="fc" id="L169">      emergencyGroupService.inviteHouseholdByName(householdName);</span>
-<span class="fc" id="L170">      logger.info(&quot;Household {} invited successfully.&quot;, householdName);</span>
-<span class="fc" id="L171">      return ResponseEntity.ok(&quot;Household invited successfully.&quot;);</span>
-<span class="fc" id="L172">    } catch (NoSuchElementException e) {</span>
-<span class="fc" id="L173">      logger.error(&quot;Household with name {} not found.&quot;, householdName);</span>
-<span class="fc" id="L174">      return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage()));</span>
-<span class="fc" id="L175">    } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L176">      logger.error(&quot;Failed to invite household: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L177">      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));</span>
-<span class="fc" id="L178">    } catch (Exception e) {</span>
-<span class="fc" id="L179">      logger.error(&quot;An unexpected error occurred while inviting the household: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L180">      return ResponseEntity.status(500).body(new ErrorResponse(</span>
+<span class="fc" id="L172">      emergencyGroupService.inviteHouseholdByName(householdName);</span>
+<span class="fc" id="L173">      logger.info(&quot;Household {} invited successfully.&quot;, householdName);</span>
+<span class="fc" id="L174">      return ResponseEntity.ok(&quot;Household invited successfully.&quot;);</span>
+<span class="fc" id="L175">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L176">      logger.error(&quot;Household with name {} not found.&quot;, householdName);</span>
+<span class="fc" id="L177">      return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage()));</span>
+<span class="fc" id="L178">    } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L179">      logger.error(&quot;Failed to invite household: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L180">      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));</span>
+<span class="fc" id="L181">    } catch (Exception e) {</span>
+<span class="fc" id="L182">      logger.error(&quot;An unexpected error occurred while inviting the household: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L183">      return ResponseEntity.status(500).body(new ErrorResponse(</span>
               &quot;An unexpected error occurred while inviting the household.&quot;
       ));
     }
@@ -228,24 +231,24 @@ public class EmergencyGroupController {
           @PathVariable Long groupId,
           @Valid @RequestBody InvitationReplyRequest request,
           BindingResult bindingResult) {
-<span class="fc bfc" id="L231" title="All 2 branches covered.">    if (bindingResult.hasErrors()) {</span>
-<span class="fc" id="L232">      logger.error(&quot;Validation failed: {}&quot;, bindingResult.getAllErrors());</span>
-<span class="fc" id="L233">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">    if (bindingResult.hasErrors()) {</span>
+<span class="fc" id="L235">      logger.error(&quot;Validation failed: {}&quot;, bindingResult.getAllErrors());</span>
+<span class="fc" id="L236">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
     }
     try {
-<span class="fc" id="L236">      emergencyGroupService.answerEmergencyGroupInvitation(groupId, request.getIsAccept());</span>
-<span class="fc" id="L237">      logger.info(&quot;Invitation answered successfully.&quot;);</span>
-<span class="fc" id="L238">      return ResponseEntity.ok(&quot;Invitation answered successfully.&quot;);</span>
-<span class="fc" id="L239">    } catch (NoSuchElementException e) {</span>
-<span class="fc" id="L240">      logger.error(&quot;Emergency group with ID {} not found.&quot;, groupId);</span>
-<span class="fc" id="L241">      return ResponseEntity.status(404).body(new ErrorResponse(&quot;Emergency group not found.&quot;));</span>
-<span class="fc" id="L242">    } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L243">      logger.error(&quot;Failed to answer invitation: {}&quot;, e.getMessage());</span>
-<span class="fc" id="L244">      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));</span>
-<span class="fc" id="L245">    } catch (Exception e) {</span>
-<span class="fc" id="L246">      logger.error(&quot;An unexpected error occurred while answering the invitation: {}&quot;,</span>
-<span class="fc" id="L247">              e.getMessage());</span>
-<span class="fc" id="L248">      return ResponseEntity.status(500).body(new ErrorResponse(</span>
+<span class="fc" id="L239">      emergencyGroupService.answerEmergencyGroupInvitation(groupId, request.getIsAccept());</span>
+<span class="fc" id="L240">      logger.info(&quot;Invitation answered successfully.&quot;);</span>
+<span class="fc" id="L241">      return ResponseEntity.ok(&quot;Invitation answered successfully.&quot;);</span>
+<span class="fc" id="L242">    } catch (NoSuchElementException e) {</span>
+<span class="fc" id="L243">      logger.error(&quot;Emergency group with ID {} not found.&quot;, groupId);</span>
+<span class="fc" id="L244">      return ResponseEntity.status(404).body(new ErrorResponse(&quot;Emergency group not found.&quot;));</span>
+<span class="fc" id="L245">    } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L246">      logger.error(&quot;Failed to answer invitation: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L247">      return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));</span>
+<span class="fc" id="L248">    } catch (Exception e) {</span>
+<span class="fc" id="L249">      logger.error(&quot;An unexpected error occurred while answering the invitation: {}&quot;,</span>
+<span class="fc" id="L250">              e.getMessage());</span>
+<span class="fc" id="L251">      return ResponseEntity.status(500).body(new ErrorResponse(</span>
               &quot;An unexpected error occurred while answering the invitation.&quot;
       ));
     }
@@ -273,17 +276,17 @@ public class EmergencyGroupController {
   )
   @GetMapping(&quot;/invitations&quot;)
   public ResponseEntity&lt;Object&gt; getInvitations() {
-<span class="fc" id="L276">    logger.info(&quot;Retrieving group invitations for the current users household.&quot;);</span>
+<span class="fc" id="L279">    logger.info(&quot;Retrieving group invitations for the current users household.&quot;);</span>
 
     try {
-<span class="fc" id="L279">      List&lt;EmergencyGroupInvitationResponse&gt; invitations =</span>
-<span class="fc" id="L280">              emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser();</span>
-<span class="fc" id="L281">      logger.info(&quot;Retrieved invitations successfully.&quot;);</span>
-<span class="fc" id="L282">      return ResponseEntity.ok(invitations);</span>
-<span class="fc" id="L283">    } catch (Exception e) {</span>
-<span class="fc" id="L284">      logger.error(&quot;An unexpected error occurred while retrieving invitations: {}&quot;,</span>
-<span class="fc" id="L285">              e.getMessage());</span>
-<span class="fc" id="L286">      return ResponseEntity.status(500).body(new ErrorResponse(</span>
+<span class="fc" id="L282">      List&lt;EmergencyGroupInvitationResponse&gt; invitations =</span>
+<span class="fc" id="L283">              emergencyGroupService.getEmergencyGroupInvitationsForCurrentUser();</span>
+<span class="fc" id="L284">      logger.info(&quot;Retrieved invitations successfully.&quot;);</span>
+<span class="fc" id="L285">      return ResponseEntity.ok(invitations);</span>
+<span class="fc" id="L286">    } catch (Exception e) {</span>
+<span class="fc" id="L287">      logger.error(&quot;An unexpected error occurred while retrieving invitations: {}&quot;,</span>
+<span class="fc" id="L288">              e.getMessage());</span>
+<span class="fc" id="L289">      return ResponseEntity.status(500).body(new ErrorResponse(</span>
               &quot;An unexpected error occurred while retrieving invitations.&quot;
       ));
     }

@@ -105,17 +105,20 @@ public class EmergencyGroupService {
 <span class="fc" id="L105">  }</span>
 
   /**
-   * Retrieves the ID of the group associated with the current users household.
+   * Retrieves the ID of the group associated with the current user's household.
    *
    * @return the ID of the group associated with the user's household
+   * @throws NoSuchElementException if user has no household or household has no group
    */
   private long getGroupIdForCurrentUser() {
-<span class="fc" id="L113">    long householdId = getHouseholdIdForCurrentUser();</span>
+<span class="fc" id="L114">    long householdId = getHouseholdIdForCurrentUser();</span>
+<span class="fc" id="L115">    Long emergencyGroupId = householdRepository.getEmergencyIdByHouseholdId(householdId);</span>
 
-<span class="fc" id="L115">    return householdRepository.getHouseholdById(householdId)</span>
-<span class="fc" id="L116">            .orElseThrow(() -&gt; new NoSuchElementException(&quot;The requesting user&quot;</span>
-                    + &quot;is not part of a household.&quot;))
-<span class="fc" id="L118">            .getId();</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">    if (emergencyGroupId == null) {</span>
+<span class="nc" id="L118">      throw new IllegalArgumentException(&quot;Your household is not part of any emergency group&quot;);</span>
+    }
+
+<span class="fc" id="L121">    return emergencyGroupId;</span>
   }
 
   /**
@@ -126,17 +129,17 @@ public class EmergencyGroupService {
    */
   @Transactional
   public void answerEmergencyGroupInvitation(Long groupId, boolean accept) {
-<span class="fc" id="L129">    long householdId = getHouseholdIdForCurrentUser();</span>
-<span class="fc bfc" id="L130" title="All 2 branches covered.">    if (!emergencyGroupInvitationsRepo.isInvitedToGroup(householdId, groupId)) {</span>
-<span class="fc" id="L131">      throw new IllegalArgumentException(&quot;Household is not invited to this group.&quot;);</span>
+<span class="fc" id="L132">    long householdId = getHouseholdIdForCurrentUser();</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">    if (!emergencyGroupInvitationsRepo.isInvitedToGroup(householdId, groupId)) {</span>
+<span class="fc" id="L134">      throw new IllegalArgumentException(&quot;Household is not invited to this group.&quot;);</span>
     }
 
-<span class="fc bfc" id="L134" title="All 2 branches covered.">    if (accept) {</span>
-<span class="fc" id="L135">      householdRepository.addHouseholdToGroup(householdId, groupId);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    if (accept) {</span>
+<span class="fc" id="L138">      householdRepository.addHouseholdToGroup(householdId, groupId);</span>
     }
 
-<span class="fc" id="L138">    emergencyGroupInvitationsRepo.deleteEmergencyGroupInvitation(householdId, groupId);</span>
-<span class="fc" id="L139">  }</span>
+<span class="fc" id="L141">    emergencyGroupInvitationsRepo.deleteEmergencyGroupInvitation(householdId, groupId);</span>
+<span class="fc" id="L142">  }</span>
 
   /**
    * Retrieves the ID of the household associated with the current user.
@@ -144,11 +147,11 @@ public class EmergencyGroupService {
    * @return the ID of the household associated with the current user
    */
   private long getHouseholdIdForCurrentUser() {
-<span class="fc" id="L147">    long userId = Long.parseLong(SecurityContextHolder.getContext()</span>
-<span class="fc" id="L148">            .getAuthentication().getName());</span>
-<span class="fc" id="L149">    return userRepository.findById(userId)</span>
-<span class="fc" id="L150">            .orElseThrow(() -&gt; new NoSuchElementException(&quot;User not found.&quot;))</span>
-<span class="fc" id="L151">            .getHouseholdId();</span>
+<span class="fc" id="L150">    long userId = Long.parseLong(SecurityContextHolder.getContext()</span>
+<span class="fc" id="L151">            .getAuthentication().getName());</span>
+<span class="fc" id="L152">    return userRepository.findById(userId)</span>
+<span class="fc" id="L153">            .orElseThrow(() -&gt; new NoSuchElementException(&quot;User not found.&quot;))</span>
+<span class="fc" id="L154">            .getHouseholdId();</span>
   }
 
   /**
@@ -157,20 +160,34 @@ public class EmergencyGroupService {
    * @return a list of EmergencyGroupInvitationResponse objects
    */
   public List&lt;EmergencyGroupInvitationResponse&gt; getEmergencyGroupInvitationsForCurrentUser() {
-<span class="fc" id="L160">    long householdId = getHouseholdIdForCurrentUser();</span>
-<span class="fc" id="L161">    List&lt;EmergencyGroupInvitation&gt; invitations = emergencyGroupInvitationsRepo</span>
-<span class="fc" id="L162">            .getInvitationsByHouseholdId(householdId);</span>
+<span class="fc" id="L163">    long householdId = getHouseholdIdForCurrentUser();</span>
+<span class="fc" id="L164">    List&lt;EmergencyGroupInvitation&gt; invitations = emergencyGroupInvitationsRepo</span>
+<span class="fc" id="L165">            .getInvitationsByHouseholdId(householdId);</span>
 
-<span class="fc" id="L164">    return invitations.stream()</span>
-<span class="fc" id="L165">            .map(invitation -&gt; new EmergencyGroupInvitationResponse(</span>
-<span class="fc" id="L166">                    invitation.getId(),</span>
-<span class="fc" id="L167">                    invitation.getHouseholdId(),</span>
-<span class="fc" id="L168">                    invitation.getGroupId(),</span>
-<span class="fc" id="L169">                    invitation.getCreatedAt().toString(),</span>
-<span class="fc" id="L170">                    emergencyGroupRepo.getEmergencyGroupById(invitation.getGroupId()).getName()</span>
+<span class="fc" id="L167">    return invitations.stream()</span>
+<span class="fc" id="L168">            .map(invitation -&gt; new EmergencyGroupInvitationResponse(</span>
+<span class="fc" id="L169">                    invitation.getId(),</span>
+<span class="fc" id="L170">                    invitation.getHouseholdId(),</span>
+<span class="fc" id="L171">                    invitation.getGroupId(),</span>
+<span class="fc" id="L172">                    invitation.getCreatedAt().toString(),</span>
+<span class="fc" id="L173">                    emergencyGroupRepo.getEmergencyGroupById(invitation.getGroupId()).getName()</span>
             ))
-<span class="fc" id="L172">            .toList();</span>
+<span class="fc" id="L175">            .toList();</span>
   }
 
+  /**
+   * Retrieves the emergency group ID associated with a household.
+   *
+   * @param householdId the ID of the household
+   * @return the ID of the associated emergency group
+   * @throws NoSuchElementException if the household is not found or has no associated group
+   */
+  public Long getEmergencyGroupIdByHouseholdId(Long householdId) {
+<span class="nc" id="L186">    Long emergencyGroupId = householdRepository.getEmergencyIdByHouseholdId(householdId);</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">    if (emergencyGroupId == null) {</span>
+<span class="nc" id="L188">      throw new NoSuchElementException(&quot;No emergency group found for household&quot;);</span>
+    }
+<span class="nc" id="L190">    return emergencyGroupId;</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -178,5 +178,20 @@ public class HouseholdRepository {
 <span class="nc" id="L178">      return member;</span>
     }, householdId);
   }
+
+  /**
+   * Retrieves the emergency group ID for a specific household.
+   *
+   * @param householdId the ID of the household
+   * @return the emergency group ID associated with the household
+   */
+  public Long getEmergencyIdByHouseholdId(Long householdId) {
+<span class="nc" id="L189">    String sql = &quot;SELECT emergency_group_id FROM households WHERE id = ?&quot;;</span>
+    try {
+<span class="nc" id="L191">      return jdbcTemplate.queryForObject(sql, Long.class, householdId);</span>
+<span class="nc" id="L192">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L193">      return null;</span>
+    }
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

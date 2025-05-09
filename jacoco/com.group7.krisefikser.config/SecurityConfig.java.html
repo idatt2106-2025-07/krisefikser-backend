@@ -47,19 +47,20 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 <span class="fc" id="L48">    CorsConfiguration corsConfiguration = new CorsConfiguration();</span>
 <span class="fc" id="L49">    corsConfiguration.setAllowedOrigins(List.of(&quot;http://localhost:5173&quot;, &quot;http://dev.krisefikser.localhost:5173&quot;));</span>
-<span class="fc" id="L50">    corsConfiguration.setAllowedMethods(List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;));</span>
-<span class="fc" id="L51">    corsConfiguration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
-<span class="fc" id="L52">    corsConfiguration.setAllowCredentials(true);</span>
-<span class="fc" id="L53">    corsConfiguration.setMaxAge(3600L);</span>
+<span class="fc" id="L50">    corsConfiguration.setAllowedMethods(</span>
+<span class="fc" id="L51">        List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;OPTIONS&quot;, &quot;PATCH&quot;));</span>
+<span class="fc" id="L52">    corsConfiguration.setAllowedHeaders(List.of(&quot;*&quot;));</span>
+<span class="fc" id="L53">    corsConfiguration.setAllowCredentials(true);</span>
+<span class="fc" id="L54">    corsConfiguration.setMaxAge(3600L);</span>
 
-<span class="fc" id="L55">    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
-<span class="fc" id="L56">    source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
+<span class="fc" id="L56">    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();</span>
+<span class="fc" id="L57">    source.registerCorsConfiguration(&quot;/**&quot;, corsConfiguration);</span>
 
-<span class="fc" id="L58">    http.cors(cors -&gt; cors.configurationSource(source))</span>
-<span class="fc" id="L59">        .csrf(AbstractHttpConfigurer::disable)</span>
-<span class="fc" id="L60">        .authorizeHttpRequests(authorize -&gt; authorize</span>
+<span class="fc" id="L59">    http.cors(cors -&gt; cors.configurationSource(source))</span>
+<span class="fc" id="L60">        .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L61">        .authorizeHttpRequests(authorize -&gt; authorize</span>
                                
-<span class="fc" id="L62">            .requestMatchers(HttpMethod.GET,</span>
+<span class="fc" id="L63">            .requestMatchers(HttpMethod.GET,</span>
                 &quot;/api/affected-area&quot;,
                 &quot;/api/point-of-interest&quot;,
                 &quot;/h2-console/**&quot;,
@@ -71,42 +72,42 @@ public class SecurityConfig {
                 &quot;/api/privacy-policy/**&quot;,
                 &quot;/api/news/**&quot;,
                 &quot;/api/household-invitations/verify&quot;)
-<span class="fc" id="L74">            .permitAll()</span>
+<span class="fc" id="L75">            .permitAll()</span>
 
-<span class="fc" id="L76">            .requestMatchers(HttpMethod.POST,</span>
+<span class="fc" id="L77">            .requestMatchers(HttpMethod.POST,</span>
                 &quot;/api/auth/**&quot;,
                 &quot;/api/admin/register&quot;,
                 &quot;/api/admin/2fa&quot;,
                 &quot;/h2-console/**&quot;,
                 &quot;/api/hcaptcha/**&quot;,
                 &quot;/api/household-invitations/accept&quot;)
-<span class="fc" id="L83">            .permitAll()</span>
+<span class="fc" id="L84">            .permitAll()</span>
 
-<span class="fc" id="L85">            .requestMatchers(HttpMethod.DELETE,</span>
+<span class="fc" id="L86">            .requestMatchers(HttpMethod.DELETE,</span>
                 &quot;/api/items/**&quot;)
-<span class="fc" id="L87">            .hasAnyRole(&quot;ADMIN&quot;, &quot;SUPER_ADMIN&quot;)</span>
+<span class="fc" id="L88">            .hasAnyRole(&quot;ADMIN&quot;, &quot;SUPER_ADMIN&quot;)</span>
 
-<span class="fc" id="L89">            .requestMatchers(</span>
+<span class="fc" id="L90">            .requestMatchers(</span>
                 &quot;/api/point-of-interest/**&quot;,
                 &quot;/api/affected-area/**&quot;,
                 &quot;/api/general-info/admin/**&quot;,
                 &quot;/api/privacy-policy/**&quot;)
-<span class="fc" id="L94">            .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
+<span class="fc" id="L95">            .hasAnyRole(&quot;SUPER_ADMIN&quot;, &quot;ADMIN&quot;)</span>
 
-<span class="fc" id="L96">            .requestMatchers(</span>
+<span class="fc" id="L97">            .requestMatchers(</span>
                 &quot;/api/super-admin/**&quot;
-<span class="fc" id="L98">            ).hasRole(&quot;SUPER_ADMIN&quot;)</span>
+<span class="fc" id="L99">            ).hasRole(&quot;SUPER_ADMIN&quot;)</span>
 
-<span class="fc" id="L100">            .anyRequest().authenticated())</span>
-<span class="fc" id="L101">        .headers(</span>
-<span class="fc" id="L102">            headers -&gt; headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)</span>
+<span class="fc" id="L101">            .anyRequest().authenticated())</span>
+<span class="fc" id="L102">        .headers(</span>
+<span class="fc" id="L103">            headers -&gt; headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)</span>
         )
-<span class="fc" id="L104">        .sessionManagement(session -&gt; session</span>
-<span class="fc" id="L105">            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
-<span class="fc" id="L106">    http.addFilterBefore(</span>
-<span class="fc" id="L107">        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L105">        .sessionManagement(session -&gt; session</span>
+<span class="fc" id="L106">            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));</span>
+<span class="fc" id="L107">    http.addFilterBefore(</span>
+<span class="fc" id="L108">        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);</span>
 
-<span class="fc" id="L109">    return http.build();</span>
+<span class="fc" id="L110">    return http.build();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
