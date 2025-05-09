@@ -1,6 +1,7 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.group7.krisefikser.dto.request.NotificationRequest;
 import com.group7.krisefikser.dto.response.NotificationResponse;
 import com.group7.krisefikser.service.NotificationService;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -32,19 +33,30 @@ class NotificationControllerTest {
   @MockitoBean
   private NotificationService notificationService;
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Test
-  @DisplayName("GET /api/notification/incidents - Success")
-  void testGetIncidentsNotificationsSuccess() throws Exception {
+  @DisplayName("POST /api/notification/incidents - Success")
+  void testPostIncidentsNotificationsSuccess() throws Exception {
     List<NotificationResponse> mockNotifications = Arrays.asList(
         new NotificationResponse("High water level detected"),
         new NotificationResponse("Severe drought increasing fire risk")
     );
 
-    when(notificationService.getIncidentsNotification()).thenReturn(mockNotifications);
+    double lat = 60.0;
+    double lon = 10.85;
 
-    mockMvc.perform(get("/api/notification/incidents"))
+    NotificationRequest request = new NotificationRequest();
+    request.setLatitude(lat);
+    request.setLongitude(lon);
+
+    when(notificationService.getIncidentsNotification(lat, lon))
+        .thenReturn(mockNotifications);
+
+    mockMvc.perform(post("/api/notification/incidents")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.size()").value(mockNotifications.size()))
@@ -53,12 +65,21 @@ class NotificationControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/notification/incidents - Internal Server Error")
-  void testGetIncidentsNotificationsFailure() throws Exception {
-    when(notificationService.getIncidentsNotification())
+  @DisplayName("POST /api/notification/incidents - Internal Server Error")
+  void testPostIncidentsNotificationsFailure() throws Exception {
+    double lat = 60.0;
+    double lon = 10.85;
+
+    NotificationRequest request = new NotificationRequest();
+    request.setLatitude(lat);
+    request.setLongitude(lon);
+
+    when(notificationService.getIncidentsNotification(lat, lon))
         .thenThrow(new RuntimeException("Database error"));
 
-    mockMvc.perform(get("/api/notification/incidents"))
+    mockMvc.perform(post("/api/notification/incidents")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isInternalServerError());
   }
 }

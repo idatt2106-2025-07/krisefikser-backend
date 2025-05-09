@@ -68,7 +68,6 @@ public class SecurityConfig {
                 "/v3/api-docs/**",
                 "/api/general-info/**", 
                 "/api/auth/**",
-                "/api/notification/**",
                 "/api/privacy-policy/**",
                 "/api/news/**",
                 "/api/household-invitations/verify")
@@ -80,6 +79,7 @@ public class SecurityConfig {
                 "/api/admin/2fa",
                 "/h2-console/**",
                 "/api/hcaptcha/**",
+                "/api/notification/**",
                 "/api/household-invitations/accept")
             .permitAll()
 
