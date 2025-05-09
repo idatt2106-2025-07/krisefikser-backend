@@ -75,7 +75,8 @@ public class EmergencyGroupController {
     try {
       Long householdId = (long) userService.getCurrentUserHouseholdId();
       Long emergencyGroupId = emergencyGroupService.getEmergencyGroupIdByHouseholdId(householdId);
-      EmergencyGroupResponse response = emergencyGroupService.getEmergencyGroupById(emergencyGroupId);
+      EmergencyGroupResponse response =
+          emergencyGroupService.getEmergencyGroupById(emergencyGroupId);
       logger.info("Emergency group with ID {} retrieved successfully.", emergencyGroupId);
       return ResponseEntity.ok(response);
     } catch (NoSuchElementException e) {

@@ -158,12 +158,13 @@ class EmergencyGroupServiceTest {
 
     when(householdRepository.getHouseholdByName("Neighbor's Household")).thenReturn(Optional.of(householdToInvite));
     when(userRepository.findById(100L)).thenReturn(Optional.of(testUser));
-    when(householdRepository.getHouseholdById(200L)).thenReturn(Optional.of(testHousehold));
+    when(householdRepository.getEmergencyIdByHouseholdId(200L)).thenReturn(1L); // Mock group ID
 
     emergencyGroupService.inviteHouseholdByName("Neighbor's Household");
 
     verify(emergencyGroupInvitationsRepo, times(1)).addEmergencyGroupInvitation(any(EmergencyGroupInvitation.class));
   }
+
 
   @Test
   void inviteHouseholdByName_householdNotFound() {
@@ -198,12 +199,18 @@ class EmergencyGroupServiceTest {
     SecurityContextHolder.setContext(securityContext);
     when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("100");
 
+    // The household to invite exists
     when(householdRepository.getHouseholdByName("Neighbor's Household")).thenReturn(Optional.of(householdToInvite));
-    when(userRepository.findById(100L)).thenReturn(Optional.of(testUser));
-    when(householdRepository.getHouseholdById(200L)).thenReturn(Optional.empty());
 
-    assertThrows(NoSuchElementException.class, () -> emergencyGroupService.inviteHouseholdByName("Neighbor's Household"));
+    // But the requesting user is not found in the system
+    when(userRepository.findById(100L)).thenReturn(Optional.empty());
 
+    // Should throw due to user not being found
+    assertThrows(NoSuchElementException.class, () ->
+      emergencyGroupService.inviteHouseholdByName("Neighbor's Household")
+    );
+
+    // Verify no invitation was created
     verify(emergencyGroupInvitationsRepo, never()).addEmergencyGroupInvitation(any());
   }
 
