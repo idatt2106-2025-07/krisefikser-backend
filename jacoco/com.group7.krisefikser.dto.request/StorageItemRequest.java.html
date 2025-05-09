@@ -37,11 +37,25 @@ public class StorageItemRequest {
    * @return the StorageItem entity
    */
   public StorageItem toEntity() {
-<span class="fc" id="L40">    StorageItem storageItem = new StorageItem();</span>
-<span class="fc" id="L41">    storageItem.setExpirationDate(expirationDate);</span>
-<span class="fc" id="L42">    storageItem.setQuantity(quantity);</span>
-<span class="fc" id="L43">    storageItem.setItemId(itemId);</span>
-<span class="fc" id="L44">    return storageItem;</span>
+<span class="nc" id="L40">    StorageItem storageItem = new StorageItem();</span>
+<span class="nc" id="L41">    storageItem.setExpirationDate(expirationDate);</span>
+<span class="nc" id="L42">    storageItem.setQuantity(quantity);</span>
+<span class="nc" id="L43">    storageItem.setItemId(itemId);</span>
+<span class="nc" id="L44">    return storageItem;</span>
+  }
+
+  /**
+   * Updates an existing StorageItem entity with values from this request.
+   * This preserves properties not included in the request, such as shared status.
+   *
+   * @param existingItem the existing StorageItem to update
+   * @return the updated StorageItem entity
+   */
+  public StorageItem updateExistingEntity(StorageItem existingItem) {
+<span class="fc" id="L55">    existingItem.setExpirationDate(expirationDate);</span>
+<span class="fc" id="L56">    existingItem.setQuantity(quantity);</span>
+<span class="fc" id="L57">    existingItem.setItemId(itemId);</span>
+<span class="fc" id="L58">    return existingItem;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
