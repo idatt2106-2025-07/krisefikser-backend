@@ -25,7 +25,13 @@ VALUES ('Bottled Water', 'L', 0, 'drink'),
        ('Canned Soup', 'g', 250, 'food'),
        ('Battery Pack', 'piece', 0, 'accessories'),
        ('Granola Bar', 'g', 100, 'food'),
-       ('Cracker', 'piece', 10, 'food');
+       ('Cracker', 'piece', 10, 'food'),
+       ('Rice Pack', 'kg', 3600, 'food'),
+       ('Portable Stove', 'piece', 0, 'accessories'),
+       ('Blanket', 'piece', 0, 'accessories'),
+       ('Energy Drink', 'L', 150, 'drink'),
+       ('Peanut Butter Jar', 'g', 600, 'food'),
+       ('Multivitamin Pack', 'piece', 0, 'accessories');
 
 -- Insert users (references households)
 INSERT INTO users (email, name, household_id, password, role, verified)
@@ -57,43 +63,171 @@ VALUES ('Charlie', 'child', 1),
 -- Insert storage items (references households and items)
 INSERT INTO storage_items (expiration_date, quantity, household_id, item_id, is_shared)
 VALUES
--- Household 1
-    ('2025-12-31 00:00:00', 10, 1, 1, FALSE),  -- Bottled Water
-    ('2025-09-01 00:00:00', 5, 1, 2, TRUE),   -- Canned Beans
-    ('2030-01-01 00:00:00', 2, 1, 3, TRUE),   -- Flashlight
-    ('2025-12-15 00:00:00', 10, 1, 10, FALSE), -- Cracker
-    ('2026-03-01 00:00:00', 4, 1, 4, TRUE),   -- Tuna Can
-    ('2024-12-01 00:00:00', 3, 1, 9, FALSE),   -- Expired Granola Bar
+    -- Household 1 - Expanded Supplies
+    ('2025-12-31 00:00:00', 10, 1, 1, FALSE),  -- Bottled Water (original)
+    ('2026-06-15 00:00:00', 48, 1, 1, TRUE),   -- Bottled Water (additional)
+    ('2027-01-20 00:00:00', 24, 1, 1, FALSE),  -- Bottled Water (additional)
+    ('2025-09-01 00:00:00', 5, 1, 2, TRUE),    -- Canned Beans (original)
+    ('2026-05-10 00:00:00', 24, 1, 2, TRUE),   -- Canned Beans (additional)
+    ('2027-03-01 00:00:00', 15, 1, 2, FALSE),  -- Canned Beans (additional)
+    ('2030-01-01 00:00:00', 2, 1, 3, TRUE),    -- Flashlight (original)
+    ('2030-01-01 00:00:00', 3, 1, 3, FALSE),   -- Flashlight (additional)
+    ('2025-12-15 00:00:00', 10, 1, 10, FALSE), -- Cracker (original)
+    ('2026-08-20 00:00:00', 30, 1, 10, TRUE),  -- Cracker (additional)
+    ('2026-03-01 00:00:00', 4, 1, 4, TRUE),    -- Tuna Can (original)
+    ('2026-07-15 00:00:00', 36, 1, 4, FALSE),  -- Tuna Can (additional)
 
--- Household 2
-    ('2026-08-15 00:00:00', 20, 2, 4, TRUE),  -- Tuna Can
-    ('2027-11-01 00:00:00', 15, 2, 5, FALSE),  -- Soda Can
-    ('2026-02-01 00:00:00', 2, 2, 6, FALSE),   -- First Aid Kit
-    ('2025-11-30 00:00:00', 8, 2, 2, TRUE),   -- Canned Beans
-    ('2026-06-01 00:00:00', 10, 2, 7, FALSE),  -- Canned Soup
-    ('2026-08-01 00:00:00', 6, 2, 9, FALSE),   -- Granola Bar
 
--- Household 3
-    ('2026-10-01 00:00:00', 3, 3, 6, TRUE),   -- First Aid Kit
-    ('2026-01-20 00:00:00', 8, 3, 7, FALSE),   -- Canned Soup
-    ('2027-03-10 00:00:00', 12, 3, 1, FALSE),  -- Bottled Water
-    ('2027-05-05 00:00:00', 5, 3, 2, FALSE),   -- Canned Beans
-    ('2026-12-01 00:00:00', 5, 3, 4, FALSE),   -- Tuna Can
 
--- Household 4
-    ('2025-07-10 00:00:00', 50, 4, 8, TRUE),  -- Battery Pack
-    ('2026-09-01 00:00:00', 20, 4, 2, TRUE),  -- Canned Beans
-    ('2027-07-10 00:00:00', 30, 4, 10, FALSE), -- Cracker
-    ('2026-08-01 00:00:00', 10, 4, 4, TRUE),  -- Tuna Can
-    ('2026-10-01 00:00:00', 15, 4, 9, TRUE),  -- Granola Bar
+    -- Household 2 - Expanded Supplies
+    ('2026-08-15 00:00:00', 20, 2, 4, TRUE),   -- Tuna Can (original)
+    ('2027-02-01 00:00:00', 30, 2, 4, FALSE),  -- Tuna Can (additional)
+    ('2027-11-01 00:00:00', 15, 2, 5, FALSE),  -- Soda Can (original)
+    ('2026-12-15 00:00:00', 36, 2, 5, TRUE),   -- Soda Can (additional)
+    ('2026-02-01 00:00:00', 2, 2, 6, FALSE),   -- First Aid Kit (original)
+    ('2030-05-01 00:00:00', 5, 2, 6, TRUE),    -- First Aid Kit (additional)
+    ('2025-11-30 00:00:00', 8, 2, 2, TRUE),    -- Canned Beans (original)
+    ('2026-09-15 00:00:00', 36, 2, 2, FALSE),  -- Canned Beans (additional)
+    ('2027-05-01 00:00:00', 24, 2, 2, TRUE),   -- Canned Beans (additional)
+    ('2026-06-01 00:00:00', 10, 2, 7, FALSE),  -- Canned Soup (original)
+    ('2027-04-15 00:00:00', 30, 2, 7, TRUE),   -- Canned Soup (additional)
+    ('2026-08-01 00:00:00', 6, 2, 9, FALSE),   -- Granola Bar (original)
+    ('2027-01-20 00:00:00', 48, 2, 9, TRUE),   -- Granola Bar (additional)
+    ('2029-10-01 00:00:00', 1, 2, 12, TRUE),   -- Portable Stove (original)
+    ('2029-10-01 00:00:00', 2, 2, 12, FALSE),  -- Portable Stove (additional)
+    ('2026-05-15 00:00:00', 60, 2, 1, TRUE),   -- Bottled Water (new)
+    ('2027-02-28 00:00:00', 48, 2, 1, FALSE),  -- Bottled Water (new)
+    ('2026-07-10 00:00:00', 18, 2, 10, TRUE),  -- Cracker (new)
+    ('2027-03-15 00:00:00', 24, 2, 10, FALSE), -- Cracker (new)
+    ('2030-01-01 00:00:00', 4, 2, 3, TRUE),    -- Flashlight (new)
+    ('2026-04-20 00:00:00', 20, 2, 11, FALSE), -- Rice Pack (new)
+    ('2027-06-01 00:00:00', 15, 2, 11, TRUE),  -- Rice Pack (new)
+    ('2030-12-31 00:00:00', 8, 2, 13, FALSE),  -- Blanket (new)
+    ('2025-11-15 00:00:00', 24, 2, 14, TRUE),  -- Energy Drink (new)
+    ('2026-02-28 00:00:00', 8, 2, 15, FALSE),  -- Peanut Butter Jar (new)
+    ('2027-08-01 00:00:00', 10, 2, 16, TRUE),  -- Multivitamin Pack (new)
+    ('2026-09-30 00:00:00', 25, 2, 8, FALSE),  -- Battery Pack (new)
 
--- Household 5
-    ('2027-06-30 00:00:00', 6, 5, 9, FALSE),   -- Granola Bar
-    ('2026-03-15 00:00:00', 12, 5, 1, TRUE),  -- Bottled Water
-    ('2025-12-01 00:00:00', 5, 5, 4, FALSE),   -- Tuna Can
-    ('2027-01-01 00:00:00', 6, 5, 7, FALSE),   -- Canned Soup
-    ('2027-11-01 00:00:00', 8, 5, 5, FALSE);   -- Soda Can
+    -- Household 3 - Expanded Supplies
+    ('2026-10-01 00:00:00', 3, 3, 6, TRUE),    -- First Aid Kit (original)
+    ('2030-05-15 00:00:00', 4, 3, 6, FALSE),   -- First Aid Kit (additional)
+    ('2026-01-20 00:00:00', 8, 3, 7, FALSE),   -- Canned Soup (original)
+    ('2026-11-01 00:00:00', 36, 3, 7, TRUE),   -- Canned Soup (additional)
+    ('2027-06-15 00:00:00', 24, 3, 7, FALSE),  -- Canned Soup (additional)
+    ('2027-03-10 00:00:00', 12, 3, 1, FALSE),  -- Bottled Water (original)
+    ('2026-08-10 00:00:00', 72, 3, 1, TRUE),   -- Bottled Water (additional)
+    ('2027-12-01 00:00:00', 48, 3, 1, FALSE),  -- Bottled Water (additional)
+    ('2027-05-05 00:00:00', 5, 3, 2, FALSE),   -- Canned Beans (original)
+    ('2026-10-15 00:00:00', 48, 3, 2, TRUE),   -- Canned Beans (additional)
+    ('2027-08-01 00:00:00', 36, 3, 2, FALSE),  -- Canned Beans (additional)
+    ('2026-12-01 00:00:00', 5, 3, 4, FALSE),   -- Tuna Can (original)
+    ('2027-04-15 00:00:00', 36, 3, 4, TRUE),   -- Tuna Can (additional)
+    ('2027-09-01 00:00:00', 24, 3, 4, FALSE),  -- Tuna Can (additional)
+    ('2030-12-31 00:00:00', 4, 3, 13, TRUE),   -- Blanket (original)
+    ('2030-12-31 00:00:00', 6, 3, 13, FALSE),  -- Blanket (additional)
+    ('2026-05-01 00:00:00', 20, 3, 9, TRUE),   -- Granola Bar (new)
+    ('2027-01-15 00:00:00', 36, 3, 9, FALSE),  -- Granola Bar (new)
+    ('2026-07-20 00:00:00', 30, 3, 10, TRUE),  -- Cracker (new)
+    ('2027-04-01 00:00:00', 24, 3, 10, FALSE), -- Cracker (new)
+    ('2026-09-15 00:00:00', 10, 3, 5, TRUE),   -- Soda Can (new)
+    ('2027-02-15 00:00:00', 24, 3, 5, FALSE),  -- Soda Can (new)
+    ('2030-01-01 00:00:00', 5, 3, 3, TRUE),    -- Flashlight (new)
+    ('2026-06-01 00:00:00', 30, 3, 11, FALSE), -- Rice Pack (new)
+    ('2027-05-10 00:00:00', 20, 3, 11, TRUE),  -- Rice Pack (new)
+    ('2029-11-01 00:00:00', 2, 3, 12, FALSE),  -- Portable Stove (new)
+    ('2025-10-15 00:00:00', 36, 3, 14, TRUE),  -- Energy Drink (new)
+    ('2026-03-20 00:00:00', 6, 3, 15, FALSE),  -- Peanut Butter Jar (new)
+    ('2027-04-10 00:00:00', 12, 3, 16, TRUE),  -- Multivitamin Pack (new)
+    ('2026-12-20 00:00:00', 30, 3, 8, FALSE),  -- Battery Pack (new)
 
+    -- Household 4 - Expanded Supplies (Large Household)
+    ('2025-07-10 00:00:00', 50, 4, 8, TRUE),   -- Battery Pack (original)
+    ('2027-01-01 00:00:00', 100, 4, 8, FALSE), -- Battery Pack (additional)
+    ('2026-09-01 00:00:00', 20, 4, 2, TRUE),   -- Canned Beans (original)
+    ('2027-03-15 00:00:00', 72, 4, 2, FALSE),  -- Canned Beans (additional)
+    ('2028-01-01 00:00:00', 60, 4, 2, TRUE),   -- Canned Beans (additional)
+    ('2027-07-10 00:00:00', 30, 4, 10, FALSE), -- Cracker (original)
+    ('2026-10-10 00:00:00', 100, 4, 10, TRUE), -- Cracker (additional)
+    ('2027-11-15 00:00:00', 80, 4, 10, FALSE), -- Cracker (additional)
+    ('2026-08-01 00:00:00', 10, 4, 4, TRUE),   -- Tuna Can (original)
+    ('2027-02-15 00:00:00', 120, 4, 4, FALSE), -- Tuna Can (additional)
+    ('2028-04-01 00:00:00', 96, 4, 4, TRUE),   -- Tuna Can (additional)
+    ('2026-10-01 00:00:00', 15, 4, 9, TRUE),   -- Granola Bar (original)
+    ('2027-05-01 00:00:00', 100, 4, 9, FALSE), -- Granola Bar (additional)
+    ('2028-02-10 00:00:00', 80, 4, 9, TRUE),   -- Granola Bar (additional)
+    ('2025-08-01 00:00:00', 8, 4, 14, FALSE),  -- Energy Drink (original)
+    ('2026-06-15 00:00:00', 96, 4, 14, TRUE),  -- Energy Drink (additional)
+    ('2027-01-20 00:00:00', 72, 4, 14, FALSE), -- Energy Drink (additional)
+    ('2026-04-01 00:00:00', 150, 4, 1, TRUE),  -- Bottled Water (new)
+    ('2027-09-01 00:00:00', 200, 4, 1, FALSE), -- Bottled Water (new)
+    ('2028-03-15 00:00:00', 180, 4, 1, TRUE),  -- Bottled Water (new)
+    ('2030-01-01 00:00:00', 10, 4, 3, FALSE),  -- Flashlight (new)
+    ('2026-12-01 00:00:00', 15, 4, 5, TRUE),   -- Soda Can (new)
+    ('2027-08-15 00:00:00', 120, 4, 5, FALSE), -- Soda Can (new)
+    ('2030-06-01 00:00:00', 8, 4, 6, TRUE),    -- First Aid Kit (new)
+    ('2026-11-15 00:00:00', 60, 4, 7, FALSE),  -- Canned Soup (new)
+    ('2027-07-01 00:00:00', 120, 4, 7, TRUE),  -- Canned Soup (new)
+    ('2028-01-20 00:00:00', 90, 4, 7, FALSE),  -- Canned Soup (new)
+    ('2026-05-10 00:00:00', 80, 4, 11, TRUE),  -- Rice Pack (new)
+    ('2027-06-01 00:00:00', 60, 4, 11, FALSE), -- Rice Pack (new)
+    ('2028-04-15 00:00:00', 40, 4, 11, TRUE),  -- Rice Pack (new)
+    ('2029-10-01 00:00:00', 5, 4, 12, FALSE),  -- Portable Stove (new)
+    ('2030-12-31 00:00:00', 15, 4, 13, TRUE),  -- Blanket (new)
+    ('2026-09-15 00:00:00', 12, 4, 15, FALSE), -- Peanut Butter Jar (new)
+    ('2027-12-01 00:00:00', 24, 4, 15, TRUE),  -- Peanut Butter Jar (new)
+    ('2027-03-01 00:00:00', 30, 4, 16, FALSE), -- Multivitamin Pack (new)
+    ('2028-05-15 00:00:00', 25, 4, 16, TRUE),  -- Multivitamin Pack (new)
+
+    -- Household 5 - Expanded Supplies
+    ('2027-06-30 00:00:00', 6, 5, 9, FALSE),   -- Granola Bar (original)
+    ('2026-12-15 00:00:00', 48, 5, 9, TRUE),   -- Granola Bar (additional)
+    ('2027-11-01 00:00:00', 36, 5, 9, FALSE),  -- Granola Bar (additional)
+    ('2026-03-15 00:00:00', 12, 5, 1, TRUE),   -- Bottled Water (original)
+    ('2026-09-01 00:00:00', 72, 5, 1, FALSE),  -- Bottled Water (additional)
+    ('2027-06-15 00:00:00', 60, 5, 1, TRUE),   -- Bottled Water (additional)
+    ('2025-12-01 00:00:00', 5, 5, 4, FALSE),   -- Tuna Can (original)
+    ('2026-08-01 00:00:00', 36, 5, 4, TRUE),   -- Tuna Can (additional)
+    ('2027-05-15 00:00:00', 24, 5, 4, FALSE),  -- Tuna Can (additional)
+    ('2027-01-01 00:00:00', 6, 5, 7, FALSE),   -- Canned Soup (original)
+    ('2026-07-15 00:00:00', 36, 5, 7, TRUE),   -- Canned Soup (additional)
+    ('2027-12-01 00:00:00', 30, 5, 7, FALSE),  -- Canned Soup (additional)
+    ('2027-11-01 00:00:00', 8, 5, 5, FALSE),   -- Soda Can (original)
+    ('2026-11-15 00:00:00', 36, 5, 5, TRUE),   -- Soda Can (additional)
+    ('2026-05-01 00:00:00', 2, 5, 15, TRUE),   -- Peanut Butter Jar (original)
+    ('2026-11-01 00:00:00', 12, 5, 15, FALSE), -- Peanut Butter Jar (additional)
+    ('2027-08-15 00:00:00', 8, 5, 15, TRUE),   -- Peanut Butter Jar (additional)
+    ('2026-06-15 00:00:00', 40, 5, 2, FALSE),  -- Canned Beans (new)
+    ('2027-04-01 00:00:00', 30, 5, 2, TRUE),   -- Canned Beans (new)
+    ('2030-01-01 00:00:00', 4, 5, 3, FALSE),   -- Flashlight (new)
+    ('2026-05-15 00:00:00', 24, 5, 10, TRUE),  -- Cracker (new)
+    ('2027-02-01 00:00:00', 48, 5, 10, FALSE), -- Cracker (new)
+    ('2026-09-20 00:00:00', 30, 5, 11, TRUE),  -- Rice Pack (new)
+    ('2027-07-10 00:00:00', 25, 5, 11, FALSE), -- Rice Pack (new)
+    ('2029-08-01 00:00:00', 2, 5, 12, TRUE),   -- Portable Stove (new)
+    ('2030-12-31 00:00:00', 8, 5, 13, FALSE),  -- Blanket (new)
+    ('2025-11-10 00:00:00', 24, 5, 14, TRUE),  -- Energy Drink (new)
+    ('2026-08-15 00:00:00', 18, 5, 16, FALSE), -- Multivitamin Pack (new)
+    ('2027-09-01 00:00:00', 12, 5, 16, TRUE),  -- Multivitamin Pack (new)
+    ('2026-10-20 00:00:00', 30, 5, 8, FALSE),  -- Battery Pack (new)
+
+    ('2026-04-15 00:00:00', 5, 1, 11, FALSE), -- Rice Pack
+    ('2029-10-01 00:00:00', 1, 2, 12, TRUE),  -- Portable Stove
+    ('2030-12-31 00:00:00', 4, 3, 13, TRUE),  -- Blanket
+    ('2025-08-01 00:00:00', 8, 4, 14, FALSE), -- Energy Drink
+    ('2026-05-01 00:00:00', 2, 5, 15, TRUE),  -- Peanut Butter Jar
+    ('2027-02-02 00:00:00', 6, 1, 16, FALSE),-- Multivitamin Pack
+
+    -- More storage items for test data
+    ('2028-03-15 00:00:00', 6, 1, 15, TRUE),
+    ('2027-04-26 00:00:00', 17, 1, 5, FALSE),
+    ('2027-08-31 00:00:00', 7, 1, 6, FALSE),
+    ('2025-08-31 00:00:00', 20, 1, 5, FALSE),
+    ('2026-05-15 00:00:00', 21, 1, 4, TRUE),
+    ('2025-09-14 00:00:00', 2, 1, 4, TRUE),
+    ('2027-02-04 00:00:00', 11, 1, 3, FALSE),
+    ('2028-09-29 00:00:00', 18, 1, 16, FALSE),
+    ('2027-10-29 00:00:00', 13, 2, 7, TRUE),
+    ('2029-02-20 00:00:00', 24, 2, 8, FALSE);
 -- Insert points of interest (no foreign key dependencies)
 INSERT INTO points_of_interest (longitude, latitude, type, opens_at, closes_at, contact_number, description)
 VALUES (10.76, 59.91, 'shelter', '08:00:00', '18:00:00', '+47 123 45 678', 'A safe place to rest.'),
@@ -105,9 +239,13 @@ VALUES (10.76, 59.91, 'shelter', '08:00:00', '18:00:00', '+47 123 45 678', 'A sa
 
 -- Insert affected areas (no foreign key dependencies)
 INSERT INTO affected_areas (name, longitude, latitude, high_danger_radius_km, medium_danger_radius_km, low_danger_radius_km, severity_level, description, start_time)
-VALUES ('Chemical Spill', 10.77, 59.92, 1, 2, 3, 3, 'Evacuate immediately due to chemical spill.', '2023-10-01 12:00:00'),
-       ('Flooding risk', 10.90, 59.95, 2, 4, 7, 2, 'Flooding risk, move to higher ground.', '2023-10-02 14:00:00'),
-       ('Tornado', 10.85, 60.00, 3, 5.2, 5.7, 1, 'Tornado alert, stay inside.', '2023-10-03 16:00:00');
+VALUES ('Chemical Spill in Oslo Harbor', 10.77, 59.92, 1, 2, 3, 3,'Evacuate immediately due to a chemical spill at Oslo Harbor.','2023-10-01 12:00:00'),
+       ('Flooding Risk in Nydalen', 10.90, 59.95, 2, 4, 7, 2,'Flooding risk in Nydalen. Move to higher ground.','2023-10-02 14:00:00'),
+       ('Tornado near Gjøvik', 10.85, 60.00, 3, 5.2, 5.7, 1,'Tornado warning near Gjøvik. Stay indoors and seek shelter.','2023-10-03 16:00:00'),
+       ('Wildfire in Setesdal', 7.79, 58.67, 2.5, 5, 8, 3,'Large wildfire in Setesdal. Heavy smoke development. Evacuation in progress.','2024-07-10 13:45:00'),
+       ('Landslide near Flåm', 7.12, 60.86, 1.2, 2.5, 4, 2,'A landslide has blocked the road near Flåm. Avoid the area.','2024-11-05 07:20:00'),
+       ('Gas Leak in Orkanger', 9.85, 63.30, 0.8, 1.5, 3, 2,'Gas leak in the industrial park in Orkanger. Area is cordoned off.','2025-03-15 11:00:00'),
+       ('Storm in Hammerfest', 23.68, 70.66, 5, 10, 15, 1,'Severe storm in Hammerfest. Risk of power outages and closed roads.','2025-01-03 21:30:00');
 
 -- Insert join household request (references users and households)
 INSERT INTO join_household_requests (user_id, household_id)
