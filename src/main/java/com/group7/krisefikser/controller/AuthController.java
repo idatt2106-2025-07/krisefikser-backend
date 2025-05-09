@@ -347,7 +347,7 @@ public class AuthController {
       return ResponseEntity.ok("New password link sent to: " + email);
     } catch (IllegalArgumentException e) {
       logger.warning(e.getMessage());
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not sent new "
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not send new "
               + "password link to: " + email);
     } catch (Exception e) {
       logger.severe("Error sending new password link to " + email + ": " + e.getMessage());
