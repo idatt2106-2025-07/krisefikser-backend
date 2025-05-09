@@ -170,9 +170,8 @@ public class UserRepository {
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
-    jdbcTemplate.update(
-            "UPDATE users SET household_id = ? WHERE id = ?",
-            householdId, userId);
+    jdbcTemplate.update("DELETE FROM join_household_requests WHERE user_id = ?", userId);
+    jdbcTemplate.update("UPDATE users SET household_id = ? WHERE id = ?", householdId, userId);
   }
 
   /**
