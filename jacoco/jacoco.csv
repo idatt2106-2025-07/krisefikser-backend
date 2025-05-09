@@ -25,7 +25,7 @@ krisefikser,com.group7.krisefikser.controller,EmergencyGroupController,16,241,0,
 krisefikser,com.group7.krisefikser.controller,ItemController,105,200,3,3,26,51,4,10,1,10
 krisefikser,com.group7.krisefikser.controller,HouseholdInvitationController,109,65,6,4,30,17,5,4,0,4
 krisefikser,com.group7.krisefikser.controller,AdminController,6,61,2,2,2,17,2,3,0,3
-krisefikser,com.group7.krisefikser.controller,NotificationController,0,31,0,0,0,9,0,2,0,2
+krisefikser,com.group7.krisefikser.controller,NotificationController,0,39,0,0,0,11,0,2,0,2
 krisefikser,com.group7.krisefikser.controller,NonMemberUserController,9,77,3,3,3,22,3,4,0,4
 krisefikser,com.group7.krisefikser.controller,UserPositionController,36,70,1,1,10,23,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,PointOfInterestController,30,185,0,4,8,54,0,8,0,6
@@ -77,7 +77,7 @@ krisefikser,com.group7.krisefikser.service,EmailService,7,50,0,0,2,15,0,4,0,4
 krisefikser,com.group7.krisefikser.service,AffectedAreaService,0,77,0,8,0,21,0,8,0,4
 krisefikser,com.group7.krisefikser.service,HouseholdService,235,229,11,11,56,51,18,11,11,7
 krisefikser,com.group7.krisefikser.service,SuperAdminService,3,158,1,17,0,40,1,12,0,4
-krisefikser,com.group7.krisefikser.service,NotificationService,0,31,0,4,0,6,0,3,0,1
+krisefikser,com.group7.krisefikser.service,NotificationService,0,93,0,4,0,14,0,4,0,2
 krisefikser,com.group7.krisefikser.service,NonUserMemberService,46,0,0,0,15,0,3,0,3,0
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2

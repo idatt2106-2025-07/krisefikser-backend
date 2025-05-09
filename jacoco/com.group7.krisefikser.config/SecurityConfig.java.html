@@ -68,18 +68,18 @@ public class SecurityConfig {
                 &quot;/v3/api-docs/**&quot;,
                 &quot;/api/general-info/**&quot;, 
                 &quot;/api/auth/**&quot;,
-                &quot;/api/notification/**&quot;,
                 &quot;/api/privacy-policy/**&quot;,
                 &quot;/api/news/**&quot;,
                 &quot;/api/household-invitations/verify&quot;)
-<span class="fc" id="L75">            .permitAll()</span>
+<span class="fc" id="L74">            .permitAll()</span>
 
-<span class="fc" id="L77">            .requestMatchers(HttpMethod.POST,</span>
+<span class="fc" id="L76">            .requestMatchers(HttpMethod.POST,</span>
                 &quot;/api/auth/**&quot;,
                 &quot;/api/admin/register&quot;,
                 &quot;/api/admin/2fa&quot;,
                 &quot;/h2-console/**&quot;,
                 &quot;/api/hcaptcha/**&quot;,
+                &quot;/api/notification/**&quot;,
                 &quot;/api/household-invitations/accept&quot;)
 <span class="fc" id="L84">            .permitAll()</span>
 
