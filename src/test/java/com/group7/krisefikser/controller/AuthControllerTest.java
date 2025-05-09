@@ -42,7 +42,7 @@ class AuthControllerTest {
 
   @Test
   void registerUser_validRequest_returnsCreatedResponse() throws Exception {
-    RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "password123",
+    RegisterRequest request = new RegisterRequest("John Doe", "john@example.com", "password1HDH!23",
       new HouseholdRequest("Test Household", 0.0, 0.0)  // Add the missing parameter
     );
     AuthResponse response = new AuthResponse("User registered successfully", new Date(), Role.ROLE_NORMAL);
@@ -61,7 +61,7 @@ class AuthControllerTest {
 
   @Test
   void registerUser_serviceThrowsException_returnsInternalServerError() throws Exception {
-    RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "secret",
+    RegisterRequest request = new RegisterRequest("Jane Doe", "jane@example.com", "secretFJJD318764!",
       new HouseholdRequest("Test Household", 0.0, 0.0)  // Add the missing parameter
     );
 

@@ -9,6 +9,7 @@ import com.group7.krisefikser.dto.response.CurrentUserResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
 import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,6 +29,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,9 +72,13 @@ public class AuthController {
         schema = @Schema(implementation = AuthResponse.class)))
   })
   @PostMapping("/register")
-  public ResponseEntity<AuthResponse> registerUser(
-      @Valid @RequestBody RegisterRequest request) {
+  public ResponseEntity<?> registerUser(
+      @Valid @RequestBody RegisterRequest request, BindingResult bindingResult) {
     logger.info("Received register request for user: " + request.getEmail());
+
+    if (bindingResult.hasErrors()) {
+      return ValidationUtils.handleValidationErrors(bindingResult);
+    }
     try {
       AuthResponse authResponse = userService.registerUser(request);
 
