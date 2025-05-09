@@ -1,8 +1,8 @@
 package com.group7.krisefikser.controller.article;
 
-import com.group7.krisefikser.dto.request.user.TwoFactorLoginRequest;
 import com.group7.krisefikser.dto.request.article.UpdateRegisteredPrivacyPolicyRequest;
 import com.group7.krisefikser.dto.request.article.UpdateUnregisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.request.user.TwoFactorLoginRequest;
 import com.group7.krisefikser.dto.response.article.GetRegisteredPrivacyPolicyResponse;
 import com.group7.krisefikser.dto.response.article.GetUnregisteredPrivacyPolicyResponse;
 import com.group7.krisefikser.service.article.PrivacyPolicyService;

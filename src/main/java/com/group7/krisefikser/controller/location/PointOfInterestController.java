@@ -2,8 +2,8 @@ package com.group7.krisefikser.controller.location;
 
 import com.group7.krisefikser.dto.request.location.GetPointsOfInterestRequest;
 import com.group7.krisefikser.dto.request.location.PointOfInterestRequest;
-import com.group7.krisefikser.dto.response.other.ErrorResponse;
 import com.group7.krisefikser.dto.response.location.PointOfInterestResponse;
+import com.group7.krisefikser.dto.response.other.ErrorResponse;
 import com.group7.krisefikser.enums.PointOfInterestType;
 import com.group7.krisefikser.service.location.PointOfInterestService;
 import com.group7.krisefikser.utils.ValidationUtils;
