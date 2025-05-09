@@ -59,14 +59,13 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-                               
-            .requestMatchers(HttpMethod.GET,
+             .requestMatchers(HttpMethod.GET,
                 "/api/affected-area",
                 "/api/point-of-interest",
                 "/h2-console/**",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/api/general-info/**", 
+                "/api/general-info/**",
                 "/api/auth/**",
                 "/api/privacy-policy/**",
                 "/api/news/**",

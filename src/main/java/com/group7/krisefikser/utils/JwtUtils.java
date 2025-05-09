@@ -35,7 +35,6 @@ public class JwtUtils {
 
   private static final Duration JWT_VALIDITY = Duration.ofMinutes(120);
   private static final Duration JWT_INVITE_VALIDITY = Duration.ofMinutes(60);
-  private static final Duration JWT_VERIFICATION_VALIDITY = Duration.ofMinutes(10);
   private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
   /**
@@ -155,7 +154,7 @@ public class JwtUtils {
       .withSubject(email)
       .withIssuer("krisefikser")
       .withIssuedAt(now)
-      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+      .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
       .sign(getKey(verificationSecretKey));
   }
 
@@ -172,7 +171,7 @@ public class JwtUtils {
       .withSubject(email)
       .withIssuer("krisefikser")
       .withIssuedAt(now)
-      .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+      .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
       .sign(getKey(invitationSecretKey));
   }
 
@@ -208,7 +207,7 @@ public class JwtUtils {
         .withSubject(email)
         .withIssuer("krisefikser")
         .withIssuedAt(now)
-        .withExpiresAt(now.plusMillis(JWT_VERIFICATION_VALIDITY.toMillis()))
+        .withExpiresAt(now.plusMillis(JWT_INVITE_VALIDITY.toMillis()))
         .sign(getKey(resetPasswordSecretKey));
   }
 
