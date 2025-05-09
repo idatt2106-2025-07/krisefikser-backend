@@ -69,7 +69,8 @@ public class SecurityConfig {
                 "/api/auth/**",
                 "/api/notification/**",
                 "/api/privacy-policy/**",
-                "/api/news/**")
+                "/api/news/**",
+                "/api/household-invitations/verify")
             .permitAll()
 
             .requestMatchers(HttpMethod.POST,
@@ -77,7 +78,8 @@ public class SecurityConfig {
                 "/api/admin/register",
                 "/api/admin/2fa",
                 "/h2-console/**",
-                "/api/hcaptcha/**")
+                "/api/hcaptcha/**",
+                "/api/household-invitations/accept")
             .permitAll()
 
             .requestMatchers(HttpMethod.DELETE,

@@ -316,4 +316,18 @@ public class UserService implements UserDetailsService {
         isSharingLocation
     );
   }
+
+  /**
+   * Gets the user ID by email.
+   * This method retrieves the user ID associated with the given email address.
+   * If the user is not found, it throws a RuntimeException.
+   *
+   * @param email the email address of the user
+   * @return the user ID
+   */
+  public Long getUserIdByEmail(String email) {
+    return userRepo.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with email: " + email))
+        .getId();
+  }
 }
