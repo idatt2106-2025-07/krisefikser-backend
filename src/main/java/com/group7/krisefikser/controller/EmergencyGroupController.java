@@ -6,6 +6,7 @@ import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
 import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
 import com.group7.krisefikser.dto.response.ErrorResponse;
 import com.group7.krisefikser.service.EmergencyGroupService;
+import com.group7.krisefikser.service.UserService;
 import com.group7.krisefikser.utils.ValidationUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,11 +42,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmergencyGroupController {
   private final EmergencyGroupService emergencyGroupService;
   private final Logger logger = LoggerFactory.getLogger(EmergencyGroupController.class);
+  private final UserService userService;
 
   /**
    * Retrieves the EmergencyGroup object with the specified ID from the repository.
    *
-   * @param id the ID of the EmergencyGroup to retrieve
    * @return the EmergencyGroupResponse object with the specified ID
    */
   @Operation(
@@ -69,20 +70,21 @@ public class EmergencyGroupController {
                             schema = @Schema(implementation = ErrorResponse.class)))
           }
   )
-  @GetMapping("/{id}")
-  public ResponseEntity<Object> getEmergencyGroupById(@PathVariable Long id) {
+  @GetMapping
+  public ResponseEntity<Object> getEmergencyGroupById() {
     try {
-      EmergencyGroupResponse response = emergencyGroupService.getEmergencyGroupById(id);
-      logger.info("Emergency group with ID {} retrieved successfully.", id);
+      Long householdId = (long) userService.getCurrentUserHouseholdId();
+      Long emergencyGroupId = emergencyGroupService.getEmergencyGroupIdByHouseholdId(householdId);
+      EmergencyGroupResponse response = emergencyGroupService.getEmergencyGroupById(emergencyGroupId);
+      logger.info("Emergency group with ID {} retrieved successfully.", emergencyGroupId);
       return ResponseEntity.ok(response);
     } catch (NoSuchElementException e) {
-      logger.error("Emergency group with ID {} not found.", id);
+      logger.error("Emergency group not found." + e.getMessage());
       return ResponseEntity.status(404).body(new ErrorResponse("Emergency group not found. "
               + "The emergency group with the specified ID does not exist."
       ));
     } catch (Exception e) {
-      logger.error("An error occurred while retrieving emergency group with ID {}: {}",
-              id, e.getMessage());
+      logger.error("An error occurred while retrieving emergency group");
       return ResponseEntity.status(500).body("An error occurred while retrieving the "
               + "emergency group.");
     }
