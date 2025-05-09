@@ -3,24 +3,25 @@ package com.group7.krisefikser.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
-import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
-import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
-import com.group7.krisefikser.model.EmergencyGroup;
+import com.group7.krisefikser.dto.request.household.EmergencyGroupRequest;
+import com.group7.krisefikser.dto.response.household.EmergencyGroupInvitationResponse;
+import com.group7.krisefikser.dto.response.household.EmergencyGroupResponse;
+import com.group7.krisefikser.model.household.EmergencyGroup;
 
+import com.group7.krisefikser.service.household.EmergencyGroupService;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import com.group7.krisefikser.model.EmergencyGroupInvitation;
-import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.model.User;
-import com.group7.krisefikser.repository.EmergencyGroupInvitationsRepo;
-import com.group7.krisefikser.repository.EmergencyGroupRepo;
-import com.group7.krisefikser.repository.HouseholdRepository;
-import com.group7.krisefikser.repository.UserRepository;
+import com.group7.krisefikser.model.household.EmergencyGroupInvitation;
+import com.group7.krisefikser.model.household.Household;
+import com.group7.krisefikser.model.user.User;
+import com.group7.krisefikser.repository.household.EmergencyGroupInvitationsRepo;
+import com.group7.krisefikser.repository.household.EmergencyGroupRepo;
+import com.group7.krisefikser.repository.household.HouseholdRepository;
+import com.group7.krisefikser.repository.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

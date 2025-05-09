@@ -1,6 +1,7 @@
 package com.group7.krisefikser.model;
 
 import com.group7.krisefikser.enums.Theme;
+import com.group7.krisefikser.model.article.GeneralInfo;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

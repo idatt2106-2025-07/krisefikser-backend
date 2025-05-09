@@ -1,12 +1,15 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.response.AdminResponse;
+import com.group7.krisefikser.dto.request.user.InviteAdminRequest;
+import com.group7.krisefikser.dto.response.user.AdminResponse;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.UsernameGenerationException;
-import com.group7.krisefikser.model.User;
-import com.group7.krisefikser.repository.UserRepository;
+import com.group7.krisefikser.model.user.User;
+import com.group7.krisefikser.repository.user.UserRepository;
+import com.group7.krisefikser.service.other.EmailService;
+import com.group7.krisefikser.service.user.SuperAdminService;
+import com.group7.krisefikser.service.user.UserService;
 import com.group7.krisefikser.utils.JwtUtils;
 import com.group7.krisefikser.utils.UuidUtils;
 import org.junit.jupiter.api.Test;

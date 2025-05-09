@@ -1,9 +1,10 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.response.NewsArticleResponse;
-import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
-import com.group7.krisefikser.model.NewsArticle;
-import com.group7.krisefikser.repository.NewsArticleRepository;
+import com.group7.krisefikser.dto.response.article.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.article.ShortenedNewsArticleResponse;
+import com.group7.krisefikser.model.article.NewsArticle;
+import com.group7.krisefikser.repository.article.NewsArticleRepository;
+import com.group7.krisefikser.service.article.NewsArticleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

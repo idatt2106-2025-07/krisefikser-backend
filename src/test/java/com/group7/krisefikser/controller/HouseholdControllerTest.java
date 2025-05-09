@@ -1,12 +1,12 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
-import com.group7.krisefikser.dto.request.HouseholdRequest;
-import com.group7.krisefikser.dto.response.ReadinessResponse;
-import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
-import com.group7.krisefikser.service.HouseholdService;
+import com.group7.krisefikser.dto.request.household.HouseholdJoinRequest;
+import com.group7.krisefikser.dto.request.household.HouseholdRequest;
+import com.group7.krisefikser.dto.response.household.ReadinessResponse;
+import com.group7.krisefikser.model.household.Household;
+import com.group7.krisefikser.dto.request.household.JoinHouseholdRequest;
+import com.group7.krisefikser.service.household.HouseholdService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.Mockito.when;

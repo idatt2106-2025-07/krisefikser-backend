@@ -1,6 +1,8 @@
-package com.group7.krisefikser.service;
+package com.group7.krisefikser.service.other;
 
 import com.group7.krisefikser.enums.EmailTemplateType;
+import com.group7.krisefikser.service.other.EmailService;
+import com.group7.krisefikser.service.other.EmailTemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

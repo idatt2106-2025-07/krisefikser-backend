@@ -2,6 +2,7 @@ package com.group7.krisefikser.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.group7.krisefikser.service.user.LoginAttemptService;
 import java.lang.reflect.Field;
 
 

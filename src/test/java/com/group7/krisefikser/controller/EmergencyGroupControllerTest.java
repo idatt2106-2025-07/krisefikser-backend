@@ -1,13 +1,13 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.EmergencyGroupRequest;
-import com.group7.krisefikser.dto.request.InvitationReplyRequest;
-import com.group7.krisefikser.dto.response.EmergencyGroupInvitationResponse;
-import com.group7.krisefikser.dto.response.EmergencyGroupResponse;
-import com.group7.krisefikser.dto.response.ErrorResponse;
-import com.group7.krisefikser.service.EmergencyGroupService;
-import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.dto.request.household.EmergencyGroupRequest;
+import com.group7.krisefikser.dto.request.household.InvitationReplyRequest;
+import com.group7.krisefikser.dto.response.household.EmergencyGroupInvitationResponse;
+import com.group7.krisefikser.dto.response.household.EmergencyGroupResponse;
+import com.group7.krisefikser.dto.response.other.ErrorResponse;
+import com.group7.krisefikser.service.household.EmergencyGroupService;
+import com.group7.krisefikser.service.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

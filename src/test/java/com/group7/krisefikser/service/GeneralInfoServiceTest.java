@@ -1,11 +1,11 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.GeneralInfoRequest;
-import com.group7.krisefikser.dto.response.GeneralInfoResponse;
+import com.group7.krisefikser.dto.request.article.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.article.GeneralInfoResponse;
 import com.group7.krisefikser.enums.Theme;
-import com.group7.krisefikser.mapper.GeneralInfoMapper;
-import com.group7.krisefikser.model.GeneralInfo;
-import com.group7.krisefikser.repository.GeneralInfoRepository;
+import com.group7.krisefikser.model.article.GeneralInfo;
+import com.group7.krisefikser.repository.article.GeneralInfoRepository;
+import com.group7.krisefikser.service.article.GeneralInfoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

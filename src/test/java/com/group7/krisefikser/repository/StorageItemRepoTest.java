@@ -1,6 +1,7 @@
 package com.group7.krisefikser.repository;
 
-import com.group7.krisefikser.model.StorageItem;
+import com.group7.krisefikser.model.item.StorageItem;
+import com.group7.krisefikser.repository.item.StorageItemRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

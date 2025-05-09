@@ -1,6 +1,7 @@
 package com.group7.krisefikser.repository;
 
-import com.group7.krisefikser.model.HouseholdInvitation;
+import com.group7.krisefikser.model.household.HouseholdInvitation;
+import com.group7.krisefikser.repository.household.HouseholdInvitationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

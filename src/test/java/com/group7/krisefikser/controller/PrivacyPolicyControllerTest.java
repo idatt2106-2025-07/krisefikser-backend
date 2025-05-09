@@ -1,11 +1,11 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.UpdateRegisteredPrivacyPolicyRequest;
-import com.group7.krisefikser.dto.request.UpdateUnregisteredPrivacyPolicyRequest;
-import com.group7.krisefikser.dto.response.GetRegisteredPrivacyPolicyResponse;
-import com.group7.krisefikser.dto.response.GetUnregisteredPrivacyPolicyResponse;
-import com.group7.krisefikser.service.PrivacyPolicyService;
+import com.group7.krisefikser.dto.request.article.UpdateRegisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.request.article.UpdateUnregisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.response.article.GetRegisteredPrivacyPolicyResponse;
+import com.group7.krisefikser.dto.response.article.GetUnregisteredPrivacyPolicyResponse;
+import com.group7.krisefikser.service.article.PrivacyPolicyService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,8 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.HcaptchaRequest;
-import com.group7.krisefikser.dto.response.HcaptchaVerificationResponse;
+import com.group7.krisefikser.dto.request.other.HcaptchaRequest;
+import com.group7.krisefikser.dto.response.other.HcaptchaVerificationResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;

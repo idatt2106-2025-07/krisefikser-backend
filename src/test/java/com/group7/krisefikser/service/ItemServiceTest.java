@@ -1,10 +1,11 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.ItemRequest;
-import com.group7.krisefikser.dto.response.ItemResponse;
+import com.group7.krisefikser.dto.request.item.ItemRequest;
+import com.group7.krisefikser.dto.response.item.ItemResponse;
 import com.group7.krisefikser.enums.ItemType;
-import com.group7.krisefikser.model.Item;
-import com.group7.krisefikser.repository.ItemRepo;
+import com.group7.krisefikser.model.item.Item;
+import com.group7.krisefikser.repository.item.ItemRepo;
+import com.group7.krisefikser.service.item.ItemService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

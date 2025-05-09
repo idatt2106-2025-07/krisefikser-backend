@@ -6,14 +6,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.model.HouseholdInvitation;
-import com.group7.krisefikser.dto.request.InvitationRequest;
-import com.group7.krisefikser.service.HouseholdInvitationService;
-import com.group7.krisefikser.service.UserService;
-import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.model.household.HouseholdInvitation;
+import com.group7.krisefikser.dto.request.household.InvitationRequest;
+import com.group7.krisefikser.service.household.HouseholdInvitationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,8 +23,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @SpringBootTest
 @AutoConfigureMockMvc
