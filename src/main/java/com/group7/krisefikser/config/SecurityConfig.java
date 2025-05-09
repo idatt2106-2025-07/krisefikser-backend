@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -45,8 +46,9 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     CorsConfiguration corsConfiguration = new CorsConfiguration();
-    corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
-    corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173", "http://dev.krisefikser.localhost:5173"));
+    corsConfiguration.setAllowedMethods(
+        List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     corsConfiguration.setAllowedHeaders(List.of("*"));
     corsConfiguration.setAllowCredentials(true);
     corsConfiguration.setMaxAge(3600L);
@@ -55,21 +57,54 @@ public class SecurityConfig {
     source.registerCorsConfiguration("/**", corsConfiguration);
 
     http.cors(cors -> cors.configurationSource(source))
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(HttpMethod.GET, "/api/affected-area",
-                            "/api/point-of-interest", "/h2-console/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/auth/**", "/h2-console/**").permitAll()
-                    .requestMatchers("/api/point-of-interest/**", "/api/affected-area/**")
-                     .hasAnyRole("SUPER_ADMIN", "ADMIN")
-                    .anyRequest().authenticated())
-         .headers(
-            headers -> headers.frameOptions(frameOptionsConfig -> frameOptionsConfig.sameOrigin())
+        .csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(authorize -> authorize
+             .requestMatchers(HttpMethod.GET,
+                "/api/affected-area",
+                "/api/point-of-interest",
+                "/h2-console/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/api/general-info/**",
+                "/api/auth/**",
+                "/api/privacy-policy/**",
+                "/api/news/**",
+                "/api/household-invitations/verify")
+            .permitAll()
+
+            .requestMatchers(HttpMethod.POST,
+                "/api/auth/**",
+                "/api/admin/register",
+                "/api/admin/2fa",
+                "/h2-console/**",
+                "/api/hcaptcha/**",
+                "/api/notification/**",
+                "/api/household-invitations/accept")
+            .permitAll()
+
+            .requestMatchers(HttpMethod.DELETE,
+                "/api/items/**")
+            .hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+            .requestMatchers(
+                "/api/point-of-interest/**",
+                "/api/affected-area/**",
+                "/api/general-info/admin/**",
+                "/api/privacy-policy/**")
+            .hasAnyRole("SUPER_ADMIN", "ADMIN")
+
+            .requestMatchers(
+                "/api/super-admin/**"
+            ).hasRole("SUPER_ADMIN")
+
+            .anyRequest().authenticated())
+        .headers(
+            headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
         )
-            .sessionManagement(session -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
     http.addFilterBefore(
-            jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

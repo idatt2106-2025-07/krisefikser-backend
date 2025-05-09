@@ -2,13 +2,27 @@ package com.group7.krisefikser;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Main application class for the Krisefikser application.
  * This class serves as the entry point for the Spring Boot application.
  */
 @SpringBootApplication
+@EnableAsync
 public class KrisefikserApplication {
+
+  /**
+   * Bean for RestTemplate, used for making HTTP requests.
+   *
+   * @return a new instance of RestTemplate
+   */
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
 
   /**
    * Main method to run the Spring Boot application.

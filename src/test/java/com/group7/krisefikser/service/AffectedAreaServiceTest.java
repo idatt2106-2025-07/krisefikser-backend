@@ -1,10 +1,11 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.AffectedAreaRequest;
-import com.group7.krisefikser.dto.response.AffectedAreaResponse;
-import com.group7.krisefikser.mapper.AffectedAreaMapper;
-import com.group7.krisefikser.model.AffectedArea;
-import com.group7.krisefikser.repository.AffectedAreaRepo;
+import com.group7.krisefikser.dto.request.location.AffectedAreaRequest;
+import com.group7.krisefikser.dto.response.location.AffectedAreaResponse;
+import com.group7.krisefikser.mapper.location.AffectedAreaMapper;
+import com.group7.krisefikser.model.location.AffectedArea;
+import com.group7.krisefikser.repository.location.AffectedAreaRepo;
+import com.group7.krisefikser.service.location.AffectedAreaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,9 +70,9 @@ class AffectedAreaServiceTest {
   @Test
   void getAllAffectedAreas_shouldReturnListOfAffectedAreaResponses() {
     List<AffectedArea> affectedAreas = Arrays.asList(
-            new AffectedArea(1L, 10.0, 60.0, 5.0, 6.1, 7.0,
+            new AffectedArea(1L, "Name 1", 10.0, 60.0, 5.0, 6.1, 7.0,
                     1, "High danger area 1", LocalDateTime.now()),
-            new AffectedArea(2L, 11.0, 61.0, 3.0, 4.1, 4.9,
+            new AffectedArea(2L, "Name 2", 11.0, 61.0, 3.0, 4.1, 4.9,
                     2, "Medium danger area 2", LocalDateTime.now())
     );
     when(affectedAreaRepo.getAllAffectedAreas()).thenReturn(affectedAreas);
@@ -82,6 +83,7 @@ class AffectedAreaServiceTest {
 
     AffectedAreaResponse response1 = responses.get(0);
     assertEquals(1L, response1.getId());
+    assertEquals("Name 1", response1.getName());
     assertEquals(10.0, response1.getLongitude());
     assertEquals(60.0, response1.getLatitude());
     assertEquals(5.0, response1.getHighDangerRadiusKm());
@@ -94,6 +96,7 @@ class AffectedAreaServiceTest {
 
     AffectedAreaResponse response2 = responses.get(1);
     assertEquals(2L, response2.getId());
+    assertEquals("Name 2", response2.getName());
     assertEquals(11.0, response2.getLongitude());
     assertEquals(61.0, response2.getLatitude());
     assertEquals(3.0, response2.getHighDangerRadiusKm());

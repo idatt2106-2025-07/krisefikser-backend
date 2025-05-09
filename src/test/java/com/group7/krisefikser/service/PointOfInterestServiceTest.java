@@ -1,12 +1,12 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
-import com.group7.krisefikser.dto.request.PointOfInterestRequest;
-import com.group7.krisefikser.dto.response.PointOfInterestResponse;
+import com.group7.krisefikser.dto.request.location.GetPointsOfInterestRequest;
+import com.group7.krisefikser.dto.request.location.PointOfInterestRequest;
+import com.group7.krisefikser.dto.response.location.PointOfInterestResponse;
 import com.group7.krisefikser.enums.PointOfInterestType;
-import com.group7.krisefikser.model.PointOfInterest;
-import com.group7.krisefikser.repository.PointOfInterestRepo;
-import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.model.location.PointOfInterest;
+import com.group7.krisefikser.repository.location.PointOfInterestRepo;
+import com.group7.krisefikser.service.location.PointOfInterestService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

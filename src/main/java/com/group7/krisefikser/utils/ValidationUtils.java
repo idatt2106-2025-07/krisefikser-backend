@@ -1,6 +1,6 @@
 package com.group7.krisefikser.utils;
 
-import com.group7.krisefikser.dto.response.ErrorResponse;
+import com.group7.krisefikser.dto.response.other.ErrorResponse;
 import java.util.List;
 import java.util.logging.Logger;
 import org.springframework.http.ResponseEntity;

@@ -51,7 +51,7 @@ CREATE TABLE storage_items
 (
     id              INT PRIMARY KEY AUTO_INCREMENT,
     expiration_date TIMESTAMP NOT NULL,
-    quantity        INT       NOT NULL CHECK (quantity >= 0),
+    quantity        DOUBLE       NOT NULL CHECK (quantity >= 0),
     household_id    INT       NOT NULL,
     item_id         INT       NOT NULL,
     FOREIGN KEY (household_id) REFERENCES households (id) ON DELETE CASCADE,
@@ -80,6 +80,7 @@ CREATE TABLE points_of_interest
 CREATE TABLE affected_areas
 (
     id                      INT PRIMARY KEY AUTO_INCREMENT,
+    name                    VARCHAR(255) NOT NULL,
     longitude               DOUBLE NOT NULL,
     latitude                DOUBLE NOT NULL,
     high_danger_radius_km          DOUBLE NOT NULL,

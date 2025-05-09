@@ -1,6 +1,7 @@
 package com.group7.krisefikser.model;
 
 import com.group7.krisefikser.enums.Role;
+import com.group7.krisefikser.model.user.User;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

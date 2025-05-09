@@ -1,9 +1,9 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.AffectedAreaRequest;
-import com.group7.krisefikser.dto.response.AffectedAreaResponse;
-import com.group7.krisefikser.service.AffectedAreaService;
+import com.group7.krisefikser.dto.request.location.AffectedAreaRequest;
+import com.group7.krisefikser.dto.response.location.AffectedAreaResponse;
+import com.group7.krisefikser.service.location.AffectedAreaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +46,7 @@ class AffectedAreaControllerTest {
   @BeforeEach
   void setUp() {
     testAreaRequest1 = new AffectedAreaRequest();
+    testAreaRequest1.setName("Name");
     testAreaRequest1.setLongitude(11.5);
     testAreaRequest1.setLatitude(63.5);
     testAreaRequest1.setHighDangerRadiusKm(6.0);
@@ -58,6 +59,7 @@ class AffectedAreaControllerTest {
 
     testAreaResponse1 = new AffectedAreaResponse();
     testAreaResponse1.setId(testId);
+    testAreaResponse1.setName(testAreaRequest1.getName());
     testAreaResponse1.setLongitude(testAreaRequest1.getLongitude());
     testAreaResponse1.setLatitude(testAreaRequest1.getLatitude());
     testAreaResponse1.setHighDangerRadiusKm(testAreaRequest1.getHighDangerRadiusKm());
@@ -78,8 +80,8 @@ class AffectedAreaControllerTest {
   @Test
   void getAllAffectedAreas_shouldReturnOkAndJsonListOfAreas() throws Exception {
     List<AffectedAreaResponse> mockResponses = Arrays.asList(
-            new AffectedAreaResponse(1L, 10.0, 60.0, 5.0, 6.1, 7.0, 1, "High danger area 1", null),
-            new AffectedAreaResponse(2L, 11.0, 61.0, 3.0, 4.1, 4.9, 2, "Medium danger area 2", null)
+            new AffectedAreaResponse(1L, "Name 1", 10.0, 60.0, 5.0, 6.1, 7.0, 1, "High danger area 1", null),
+            new AffectedAreaResponse(2L, "Name 2", 11.0, 61.0, 3.0, 4.1, 4.9, 2, "Medium danger area 2", null)
     );
     when(affectedAreaService.getAllAffectedAreas()).thenReturn(mockResponses);
 

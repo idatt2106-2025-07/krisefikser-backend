@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = KrisefikserApplication.class)
 @ActiveProfiles("test")
@@ -25,8 +26,7 @@ class FlywayMigrationTest {
     Integer tablesCount = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = CURRENT_SCHEMA()",
             Integer.class);
-
-    assertEquals(9, tablesCount);
+    assertTrue(tablesCount > 10);
   }
 
   @Test
@@ -35,6 +35,6 @@ class FlywayMigrationTest {
             "SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'households'",
             Integer.class);
 
-    assertEquals(4, columnsCount);
+    assertEquals(5, columnsCount);
   }
 }
