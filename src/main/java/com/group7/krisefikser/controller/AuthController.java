@@ -76,8 +76,15 @@ public class AuthController {
     try {
       AuthResponse authResponse = userService.registerUser(request);
 
-      logger.info("User registered successfully: " + request.getEmail());
-      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+      if (authResponse.getMessage().equals(
+          AuthResponseMessage.USER_REGISTERED_SUCCESSFULLY.getMessage())) {
+        logger.info("User registered successfully: " + request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
+      } else {
+        logger.warning("Error registering user: " + authResponse.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);
+      }
+
 
     } catch (Exception e) {
       logger.warning("Error registering user: " + e.getMessage());
