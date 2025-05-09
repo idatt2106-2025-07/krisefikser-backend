@@ -33,7 +33,7 @@ krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2
 krisefikser,com.group7.krisefikser.controller,PrivacyPolicyController,54,50,2,2,14,16,2,4,0,4
 krisefikser,com.group7.krisefikser.controller,StorageItemController,162,479,4,4,48,128,5,16,1,16
 krisefikser,com.group7.krisefikser.controller,NewsArticleController,0,60,0,2,0,18,0,5,0,4
-krisefikser,com.group7.krisefikser.controller,AuthController,141,201,10,10,35,51,10,8,2,6
+krisefikser,com.group7.krisefikser.controller,AuthController,152,201,10,10,38,51,10,8,2,6
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,116,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,SuperAdminController,13,113,1,1,4,30,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,UserController,0,26,0,0,0,7,0,2,0,2
@@ -82,7 +82,7 @@ krisefikser,com.group7.krisefikser.service,NonUserMemberService,46,0,0,0,15,0,3,
 krisefikser,com.group7.krisefikser.service,PointOfInterestService,16,246,10,24,2,75,10,13,0,6
 krisefikser,com.group7.krisefikser.service,LoginAttemptService.new CacheLoader() {...},0,6,0,0,0,2,0,2,0,2
 krisefikser,com.group7.krisefikser.service,EmailTemplateService,6,47,2,8,3,15,2,9,0,3
-krisefikser,com.group7.krisefikser.service,UserService,231,335,11,19,54,72,15,14,7,7
+krisefikser,com.group7.krisefikser.service,UserService,236,339,12,20,55,73,16,14,7,7
 krisefikser,com.group7.krisefikser.service,LoginAttemptService,5,50,0,2,4,14,0,6,0,5
 krisefikser,com.group7.krisefikser.service,HouseholdInvitationService,58,76,2,0,9,18,5,3,4,3
 krisefikser,com.group7.krisefikser.service,EmergencyGroupService,35,188,7,7,7,52,6,12,1,10
@@ -90,7 +90,7 @@ krisefikser,com.group7.krisefikser.config,SecurityConfig,0,229,0,0,0,31,0,6,0,6
 krisefikser,com.group7.krisefikser.dto.request,ItemRequest,0,30,0,0,0,9,0,2,0,2
 krisefikser,com.group7.krisefikser.dto.request,StorageItemRequest,20,16,0,0,5,4,1,1,1,1
 krisefikser,com.group7.krisefikser.validation,EnumValidator,0,28,0,2,0,10,0,4,0,3
-krisefikser,com.group7.krisefikser.utils,JwtUtils,345,123,24,0,95,35,27,5,15,5
+krisefikser,com.group7.krisefikser.utils,JwtUtils,345,120,24,0,95,34,27,5,15,5
 krisefikser,com.group7.krisefikser.utils,PasswordUtil,19,8,4,0,3,2,4,1,2,1
 krisefikser,com.group7.krisefikser.utils,UuidUtils,17,0,0,0,6,0,2,0,2,0
 krisefikser,com.group7.krisefikser.utils,ValidationUtils,0,29,0,0,0,8,0,2,0,2

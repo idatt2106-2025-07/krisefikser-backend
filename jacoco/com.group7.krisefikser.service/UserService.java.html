@@ -245,15 +245,19 @@ public class UserService implements UserDetailsService {
 <span class="fc" id="L245">    Optional&lt;User&gt; userOpt = userRepo.findByEmail(email);</span>
 <span class="fc bfc" id="L246" title="All 2 branches covered.">    if (userOpt.isPresent()) {</span>
 <span class="fc" id="L247">      User user = userOpt.get();</span>
-<span class="fc" id="L248">      String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());</span>
-<span class="fc" id="L249">      String resetLink = frontendUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
-<span class="fc" id="L250">      Map&lt;String, String&gt; params = Map.of(&quot;resetLink&quot;, resetLink);</span>
-<span class="fc" id="L251">      emailService.sendTemplateMessage(</span>
-<span class="fc" id="L252">          user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);</span>
-<span class="fc" id="L253">    } else {</span>
-<span class="fc" id="L254">      throw new UsernameNotFoundException(&quot;User not found with email: &quot; + email);</span>
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">      if (user.getRole() == Role.ROLE_ADMIN) {</span>
+<span class="nc" id="L249">        throw new IllegalArgumentException(&quot;Admin users cannot reset their password&quot;);</span>
+      }
+
+<span class="fc" id="L252">      String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());</span>
+<span class="fc" id="L253">      String resetLink = frontendUrl + &quot;/reset-password?token=&quot; + resetToken;</span>
+<span class="fc" id="L254">      Map&lt;String, String&gt; params = Map.of(&quot;resetLink&quot;, resetLink);</span>
+<span class="fc" id="L255">      emailService.sendTemplateMessage(</span>
+<span class="fc" id="L256">          user.getEmail(), EmailTemplateType.PASSWORD_RESET, params);</span>
+<span class="fc" id="L257">    } else {</span>
+<span class="fc" id="L258">      throw new UsernameNotFoundException(&quot;User not found with email: &quot; + email);</span>
     }
-<span class="fc" id="L256">  }</span>
+<span class="fc" id="L260">  }</span>
 
   /**
    * Gets the current authenticated user's ID from the security context.
@@ -262,12 +266,12 @@ public class UserService implements UserDetailsService {
    * @throws RuntimeException if no authenticated user is found
    */
   public Long getCurrentUserId() {
-<span class="nc" id="L265">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="nc bnc" id="L266" title="All 4 branches missed.">    if (userIdStr == null || userIdStr.isEmpty()) {</span>
-<span class="nc" id="L267">      throw new RuntimeException(&quot;No authenticated user found&quot;);</span>
+<span class="nc" id="L269">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="nc bnc" id="L270" title="All 4 branches missed.">    if (userIdStr == null || userIdStr.isEmpty()) {</span>
+<span class="nc" id="L271">      throw new RuntimeException(&quot;No authenticated user found&quot;);</span>
     }
 
-<span class="nc" id="L270">    return Long.parseLong(userIdStr);</span>
+<span class="nc" id="L274">    return Long.parseLong(userIdStr);</span>
   }
 
   /**
@@ -277,9 +281,9 @@ public class UserService implements UserDetailsService {
    * @throws RuntimeException if the user is not found
    */
   public User getCurrentUser() {
-<span class="nc" id="L280">    Long userId = getCurrentUserId();</span>
-<span class="nc" id="L281">    return userRepo.findById(userId)</span>
-<span class="nc" id="L282">      .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with id: &quot; + userId));</span>
+<span class="nc" id="L284">    Long userId = getCurrentUserId();</span>
+<span class="nc" id="L285">    return userRepo.findById(userId)</span>
+<span class="nc" id="L286">      .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with id: &quot; + userId));</span>
   }
 
   /**
@@ -289,13 +293,13 @@ public class UserService implements UserDetailsService {
    * @throws RuntimeException if the user or their household is not found
    */
   public int getCurrentUserHouseholdId() {
-<span class="nc" id="L292">    User user = getCurrentUser();</span>
+<span class="nc" id="L296">    User user = getCurrentUser();</span>
 
-<span class="nc bnc" id="L294" title="All 2 branches missed.">    if (user.getHouseholdId() == null) {</span>
-<span class="nc" id="L295">      throw new RuntimeException(&quot;User does not belong to any household&quot;);</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">    if (user.getHouseholdId() == null) {</span>
+<span class="nc" id="L299">      throw new RuntimeException(&quot;User does not belong to any household&quot;);</span>
     }
 
-<span class="nc" id="L298">    return user.getHouseholdId().intValue();</span>
+<span class="nc" id="L302">    return user.getHouseholdId().intValue();</span>
   }
 
   /**
@@ -304,15 +308,15 @@ public class UserService implements UserDetailsService {
    * @return a UserInfoResponse object containing user details
    */
   public UserInfoResponse getUserInfo() {
-<span class="nc" id="L307">    User user = getCurrentUser();</span>
-<span class="nc" id="L308">    Household household = householdService.getHouseholdById(user.getHouseholdId());</span>
-<span class="nc" id="L309">    boolean isSharingLocation = userPositionService.isSharingPosition();</span>
-<span class="nc" id="L310">    return new UserInfoResponse(</span>
-<span class="nc" id="L311">        user.getEmail(),</span>
-<span class="nc" id="L312">        user.getName(),</span>
-<span class="nc" id="L313">        user.getRole(),</span>
-<span class="nc" id="L314">        household.getLatitude(),</span>
-<span class="nc" id="L315">        household.getLongitude(),</span>
+<span class="nc" id="L311">    User user = getCurrentUser();</span>
+<span class="nc" id="L312">    Household household = householdService.getHouseholdById(user.getHouseholdId());</span>
+<span class="nc" id="L313">    boolean isSharingLocation = userPositionService.isSharingPosition();</span>
+<span class="nc" id="L314">    return new UserInfoResponse(</span>
+<span class="nc" id="L315">        user.getEmail(),</span>
+<span class="nc" id="L316">        user.getName(),</span>
+<span class="nc" id="L317">        user.getRole(),</span>
+<span class="nc" id="L318">        household.getLatitude(),</span>
+<span class="nc" id="L319">        household.getLongitude(),</span>
         isSharingLocation
     );
   }
@@ -326,9 +330,9 @@ public class UserService implements UserDetailsService {
    * @return the user ID
    */
   public Long getUserIdByEmail(String email) {
-<span class="nc" id="L329">    return userRepo.findByEmail(email)</span>
-<span class="nc" id="L330">        .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with email: &quot; + email))</span>
-<span class="nc" id="L331">        .getId();</span>
+<span class="nc" id="L333">    return userRepo.findByEmail(email)</span>
+<span class="nc" id="L334">        .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with email: &quot; + email))</span>
+<span class="nc" id="L335">        .getId();</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

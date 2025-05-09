@@ -339,16 +339,19 @@ public class AuthController {
   @PostMapping(&quot;/new-password-link&quot;)
   public ResponseEntity&lt;Object&gt; sendNewPasswordLink(
       @Valid @RequestBody ResetPasswordLinkRequest request) {
-    
-<span class="nc" id="L343">    String email = request.getEmail();</span>
-<span class="nc" id="L344">    logger.info(&quot;Trying to send new password link to: &quot; + email);</span>
+<span class="nc" id="L342">    String email = request.getEmail();</span>
+<span class="nc" id="L343">    logger.info(&quot;Trying to send new password link to: &quot; + email);</span>
     try {
-<span class="nc" id="L346">      userService.sendResetPasswordLink(email);</span>
-<span class="nc" id="L347">      logger.info(&quot;New password link sent to: &quot; + email);</span>
-<span class="nc" id="L348">      return ResponseEntity.ok(&quot;New password link sent to: &quot; + email);</span>
-<span class="nc" id="L349">    } catch (Exception e) {</span>
-<span class="nc" id="L350">      logger.severe(&quot;Error sending new password link to &quot; + email + &quot;: &quot; + e.getMessage());</span>
-<span class="nc" id="L351">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="nc" id="L345">      userService.sendResetPasswordLink(email);</span>
+<span class="nc" id="L346">      logger.info(&quot;New password link sent to: &quot; + email);</span>
+<span class="nc" id="L347">      return ResponseEntity.ok(&quot;New password link sent to: &quot; + email);</span>
+<span class="nc" id="L348">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L349">      logger.warning(e.getMessage());</span>
+<span class="nc" id="L350">      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(&quot;Could not send new &quot;</span>
+              + &quot;password link to: &quot; + email);
+<span class="nc" id="L352">    } catch (Exception e) {</span>
+<span class="nc" id="L353">      logger.severe(&quot;Error sending new password link to &quot; + email + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L354">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 }
