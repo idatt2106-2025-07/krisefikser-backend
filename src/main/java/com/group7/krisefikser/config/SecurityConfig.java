@@ -59,10 +59,7 @@ public class SecurityConfig {
     http.cors(cors -> cors.configurationSource(source))
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers(HttpMethod.POST, "/api/auth/new-password-link")
-                .hasAnyRole("NORMAL")
-
-            .requestMatchers(HttpMethod.GET,
+             .requestMatchers(HttpMethod.GET,
                 "/api/affected-area",
                 "/api/point-of-interest",
                 "/h2-console/**",
