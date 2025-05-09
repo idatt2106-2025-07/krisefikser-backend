@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -36,7 +37,7 @@ class NotificationControllerTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
-  @DisplayName("GET /api/notification/incidents - Success in danger zone")
+  @DisplayName("POST /api/notification/incidents - Success within danger zone")
   void testGetIncidentsNotificationsSuccess() throws Exception {
     NotificationRequest request = new NotificationRequest();
     request.setLatitude(60.0);
@@ -50,14 +51,9 @@ class NotificationControllerTest {
     when(notificationService.withinDangerZone(60.0, 10.85)).thenReturn(true);
     when(notificationService.getIncidentsNotification()).thenReturn(mockNotifications);
 
-    mockMvc.perform(get("/api/notification/incidents")
+    mockMvc.perform(post("/api/notification/incidents")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-              {
-                "latitude": 60.0,
-                "longitude": 10.85
-              }
-              """))
+            .content(new ObjectMapper().writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.size()").value(mockNotifications.size()))
@@ -66,36 +62,35 @@ class NotificationControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/notification/incidents - Outside danger zone")
+  @DisplayName("POST /api/notification/incidents - Success outside danger zone (empty list)")
   void testGetIncidentsNotificationsOutsideDangerZone() throws Exception {
+    NotificationRequest request = new NotificationRequest();
+    request.setLatitude(60.0);
+    request.setLongitude(10.85);
+
     when(notificationService.withinDangerZone(60.0, 10.85)).thenReturn(false);
 
-    mockMvc.perform(get("/api/notification/incidents")
+    mockMvc.perform(post("/api/notification/incidents")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-              {
-                "latitude": 60.0,
-                "longitude": 10.85
-              }
-              """))
+            .content(new ObjectMapper().writeValueAsString(request)))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.size()").value(0));
   }
 
   @Test
-  @DisplayName("GET /api/notification/incidents - Internal Server Error")
+  @DisplayName("POST /api/notification/incidents - Internal Server Error")
   void testGetIncidentsNotificationsFailure() throws Exception {
-    when(notificationService.withinDangerZone(60.0, 10.85)).thenThrow(new RuntimeException("Database error"));
+    NotificationRequest request = new NotificationRequest();
+    request.setLatitude(60.0);
+    request.setLongitude(10.85);
 
-    mockMvc.perform(get("/api/notification/incidents")
+    when(notificationService.withinDangerZone(60.0, 10.85))
+        .thenThrow(new RuntimeException("Database error"));
+
+    mockMvc.perform(post("/api/notification/incidents")
             .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-              {
-                "latitude": 60.0,
-                "longitude": 10.85
-              }
-              """))
+            .content(new ObjectMapper().writeValueAsString(request)))
         .andExpect(status().isInternalServerError());
   }
 }
