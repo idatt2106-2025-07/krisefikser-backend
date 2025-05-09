@@ -8,7 +8,7 @@ files to build and run the backend of the application, including Docker configur
 ## Table of Contents
 - [Overview](#overview)
 - [Installation](#installation)
-- [Requirements](#requirements)
+- [Requirements](#prerequisites)
 - [How to run](#how-to-run)
 - [Configuration](#configuration)
 
@@ -19,12 +19,12 @@ git clone https://github.com/idatt2106-2025-07/krisefikser-backend.git
 ```
 
 ## Prerequisites
-- Docker desktop installed and running
+- Docker installed and running
 - Env file with necessary environment variables (see .env.example)
 
 ## How to run
 NB! first run might take some time (3-5 minutes)
-Ensure that Docker desktop is running
+Ensure that Docker is running
 ```
 cd krisefikser-backend
 docker-compose up --build
