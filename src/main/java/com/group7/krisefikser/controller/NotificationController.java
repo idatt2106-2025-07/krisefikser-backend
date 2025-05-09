@@ -1,5 +1,6 @@
 package com.group7.krisefikser.controller;
 
+import com.group7.krisefikser.dto.request.NotificationRequest;
 import com.group7.krisefikser.dto.response.NotificationResponse;
 import com.group7.krisefikser.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import java.util.logging.Logger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,13 +59,21 @@ public class NotificationController {
       }
   )
   @GetMapping("/incidents")
-  public ResponseEntity<List<NotificationResponse>> getIncidentsNotifications() {
+  public ResponseEntity<List<NotificationResponse>> getIncidentsNotifications(@RequestBody
+                        NotificationRequest request) {
+    double latitude = request.getLatitude();
+    double longitude = request.getLongitude();
     try {
       logger.info("Retrieving incident notifications");
-      List<NotificationResponse> notifications =
-          notificationService.getIncidentsNotification();
-      logger.info("Retrieved " + notifications.size() + " incident notifications");
-      return ResponseEntity.ok(notifications);
+      if (notificationService.withinDangerZone(latitude, longitude)) {
+        List<NotificationResponse> notifications =
+            notificationService.getIncidentsNotification();
+        logger.info("Retrieved " + notifications.size() + " incident notifications");
+        return ResponseEntity.ok(notifications);
+      } else {
+        logger.info("No incident notifications found within the danger zone");
+        return ResponseEntity.ok(List.of());
+      }
     } catch (Exception e) {
       logger.severe("Error retrieving incident notifications: " + e.getMessage());
       return ResponseEntity.status(500).body(null);
