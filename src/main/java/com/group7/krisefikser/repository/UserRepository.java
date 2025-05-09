@@ -170,9 +170,14 @@ public class UserRepository {
    * @param householdId the ID of the household to associate with the user
    */
   public void updateUserHousehold(Long userId, Long householdId) {
-    jdbcTemplate.update(
-            "UPDATE users SET household_id = ? WHERE id = ?",
-            householdId, userId);
+    String countSql = "SELECT COUNT(*) FROM join_household_requests WHERE user_id = ?";
+    Integer count = jdbcTemplate.queryForObject(countSql, Integer.class, userId);
+
+    if (count != null && count > 0) {
+      jdbcTemplate.update("DELETE FROM join_household_requests WHERE user_id = ?", userId);
+    }
+
+    jdbcTemplate.update("UPDATE users SET household_id = ? WHERE id = ?", householdId, userId);
   }
 
   /**
