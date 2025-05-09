@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SuperAdminController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller.user</a> &gt; <span class="el_source">SuperAdminController.java</span></div><h1>SuperAdminController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller.user;
+
+import com.group7.krisefikser.dto.request.user.InviteAdminRequest;
+import com.group7.krisefikser.dto.response.user.AdminResponse;
+import com.group7.krisefikser.service.user.SuperAdminService;
+import com.group7.krisefikser.utils.ValidationUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import java.util.List;
+import java.util.logging.Logger;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Controller class for handling requests related to super admin operations.
+ * This class provides endpoints to invite admins,
+ * retrieve all admins,
+ * delete admins,
+ * and send reset password emails to admins.
+ */
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(&quot;/api/super-admin&quot;)
+public class SuperAdminController {
+
+<span class="fc" id="L38">  private static final Logger logger = Logger.getLogger(SuperAdminController.class.getName());</span>
+  private final SuperAdminService superAdminService;
+
+  /**
+   * Endpoint to invite an admin.
+   * This endpoint will accept a request containing the email of the admin to be invited.
+   *
+   * @param request The request containing the email of the admin to be invited.
+   * @return ResponseEntity indicating the result of the operation.
+   */
+  @Operation(
+      summary = &quot;Invite an admin&quot;,
+      description = &quot;Sends an invitation to a new admin by email. &quot;
+          + &quot;The system generates an invite token and sends it as a link to the specified email.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = &quot;InviteAdminRequest containing a valid email address&quot;,
+          required = true,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = InviteAdminRequest.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Admin invited successfully&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;,
+                  schema = @Schema(implementation = String.class))
+          ),
+          @ApiResponse(
+              responseCode = &quot;400&quot;,
+              description = &quot;Validation failed for the email format&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Internal server error&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          )
+      }
+  )
+  @PostMapping(&quot;/invite&quot;)
+  public ResponseEntity&lt;Object&gt; invite(@RequestBody @Valid InviteAdminRequest request,
+                                       BindingResult bindingResult) {
+<span class="fc" id="L82">    logger.info(&quot;Inviting admin request&quot;);</span>
+
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    if (bindingResult.hasErrors()) {</span>
+<span class="nc" id="L85">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
+    }
+
+    try {
+<span class="fc" id="L89">      superAdminService.inviteAdmin(request);</span>
+<span class="fc" id="L90">      logger.info(&quot;Admin invited successfully&quot;);</span>
+<span class="fc" id="L91">      return ResponseEntity.ok(&quot;Admin invited successfully&quot;);</span>
+<span class="fc" id="L92">    } catch (Exception e) {</span>
+<span class="fc" id="L93">      logger.severe(&quot;Error inviting admin: &quot; + e.getMessage());</span>
+<span class="fc" id="L94">      return ResponseEntity.status(500).body(&quot;Error inviting admin&quot;);</span>
+    }
+  }
+
+  /**
+   * Endpoint to retrieve all admins.
+   * This endpoint fetches the list of all admins from the system.
+   *
+   * @return ResponseEntity containing the list of admins.
+   */
+  @Operation(
+      summary = &quot;Get all admins&quot;,
+      description = &quot;Retrieves a list of all admins currently registered in the system.&quot;,
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;List of admins retrieved successfully&quot;,
+              content = @Content(
+                  mediaType = &quot;application/json&quot;,
+                  schema = @Schema(implementation = AdminResponse.class)
+              )
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Internal server error while retrieving admins&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          )
+      }
+  )
+  @GetMapping(&quot;/admins&quot;)
+  public ResponseEntity&lt;List&lt;AdminResponse&gt;&gt; getAllAdmins() {
+<span class="fc" id="L125">    logger.info(&quot;Fetching all admins&quot;);</span>
+    try {
+<span class="fc" id="L127">      List&lt;AdminResponse&gt; admins = superAdminService.getAllAdmins();</span>
+<span class="fc" id="L128">      logger.info(&quot;Fetched &quot; + admins.size() + &quot; admins successfully.&quot;);</span>
+<span class="fc" id="L129">      return new ResponseEntity&lt;&gt;(admins, HttpStatus.OK);</span>
+<span class="fc" id="L130">    } catch (Exception e) {</span>
+<span class="fc" id="L131">      logger.severe(&quot;Error fetching admins: &quot; + e.getMessage());</span>
+<span class="fc" id="L132">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to delete an admin.
+   * This endpoint will accept the ID of the admin to be deleted.
+   *
+   * @param adminId The ID of the admin to be deleted.
+   * @return ResponseEntity indicating the result of the operation.
+   */
+  @Operation(
+      summary = &quot;Delete an admin&quot;,
+      description = &quot;Deletes an admin based on the provided admin ID.&quot;,
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;204&quot;,
+              description = &quot;Admin deleted successfully&quot;
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Internal server error while deleting admin&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          )
+      }
+  )
+  @DeleteMapping(&quot;/delete/{adminId}&quot;)
+  public ResponseEntity&lt;Void&gt; deleteAdmin(@PathVariable Long adminId) {
+<span class="fc" id="L160">    logger.info(&quot;Trying to delete admin with ID: &quot; + adminId);</span>
+    try {
+<span class="fc" id="L162">      superAdminService.deleteAdmin(adminId);</span>
+<span class="fc" id="L163">      logger.info(&quot;Admin with ID &quot; + adminId + &quot; deleted successfully.&quot;);</span>
+<span class="fc" id="L164">      return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L165">    } catch (Exception e) {</span>
+<span class="fc" id="L166">      logger.severe(&quot;Error deleting admin with ID &quot; + adminId + &quot;: &quot; + e.getMessage());</span>
+<span class="fc" id="L167">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to send a new password link to an admin.
+   * This endpoint will accept the email of the admin
+   * to whom the new password link will be sent.
+   *
+   * @param email The email of the admin to whom the new password link will be sent.
+   * @return ResponseEntity indicating the result of the operation.
+   */
+  @Operation(
+      summary = &quot;Send new password link to admin&quot;,
+      description = &quot;Sends a password reset link to the admin's email address.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = &quot;The email of the admin to send the reset link to&quot;,
+          required = true,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = String.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Password reset link sent successfully&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Internal server error while sending reset link&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          )
+      }
+  )
+  @PostMapping(&quot;/admins/new-password-link&quot;)
+  public ResponseEntity&lt;Object&gt; sendNewPasswordLink(@RequestBody String email) {
+<span class="fc" id="L205">    logger.info(&quot;Trying to send new password link to: &quot; + email);</span>
+    try {
+<span class="fc" id="L207">      superAdminService.sendResetPasswordEmailToAdmin(email);</span>
+<span class="fc" id="L208">      logger.info(&quot;New password link sent to: &quot; + email);</span>
+<span class="fc" id="L209">      return ResponseEntity.ok(&quot;New password link sent to: &quot; + email);</span>
+<span class="nc" id="L210">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L211">      logger.warning(&quot;Invalid email format: &quot; + e.getMessage());</span>
+<span class="nc" id="L212">      return ResponseEntity.badRequest().body(&quot;Invalid email format&quot;);</span>
+<span class="fc" id="L213">    } catch (Exception e) {</span>
+<span class="fc" id="L214">      logger.severe(&quot;Error sending new password link to &quot; + email + &quot;: &quot; + e.getMessage());</span>
+<span class="fc" id="L215">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

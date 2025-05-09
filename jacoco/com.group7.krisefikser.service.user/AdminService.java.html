@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service.user</a> &gt; <span class="el_source">AdminService.java</span></div><h1>AdminService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service.user;
+
+import com.group7.krisefikser.dto.request.user.RegisterAdminRequest;
+import com.group7.krisefikser.enums.Role;
+import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.exception.UsernameGenerationException;
+import com.group7.krisefikser.model.user.User;
+import com.group7.krisefikser.repository.user.UserRepository;
+import com.group7.krisefikser.service.household.HouseholdService;
+import com.group7.krisefikser.utils.JwtUtils;
+import com.group7.krisefikser.utils.PasswordUtil;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Service class for handling admin-related operations.
+ * The role of this service is to manage the business logic related to
+ * admin operations, such as inviting and registering admins.
+ */
+@Service
+@RequiredArgsConstructor
+public class AdminService {
+
+  private final JwtUtils jwtUtils;
+
+  private final UserRepository userRepository;
+
+  private final HouseholdService householdService;
+
+  /**
+   * Registers an admin by validating the invite token and creating a new admin account.
+   *
+   * @param request The request containing the invite token and other registration details.
+   * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
+   */
+  @Transactional
+  public void registerAdmin(RegisterAdminRequest request)
+      throws JwtMissingPropertyException, UsernameGenerationException {
+<span class="fc" id="L41">    String username = jwtUtils.validateInviteAdminTokenAndGetUsername(request.getToken());</span>
+<span class="fc" id="L42">    User user = new User();</span>
+<span class="fc" id="L43">    user.setEmail(request.getEmail());</span>
+<span class="fc" id="L44">    user.setName(username);</span>
+<span class="fc" id="L45">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
+<span class="fc" id="L46">    user.setRole(Role.ROLE_ADMIN);</span>
+
+<span class="fc bfc" id="L48" title="All 2 branches covered.">    if (userRepository.existAdminByUsername(username)) {</span>
+<span class="fc" id="L49">      throw new UsernameGenerationException(&quot;Username already taken&quot;);</span>
+    }
+<span class="fc" id="L51">    Long householdId = householdService.createHouseholdForUser(username);</span>
+<span class="fc" id="L52">    user.setHouseholdId(householdId);</span>
+<span class="fc" id="L53">    userRepository.save(user);</span>
+<span class="fc" id="L54">    user.setVerified(true);</span>
+<span class="fc" id="L55">    userRepository.setVerified(user);</span>
+<span class="fc" id="L56">  }</span>
+
+  /**
+   * Verifies the two-factor authentication token and generates a JWT token for the admin.
+   *
+   * @param twoFactorToken The two-factor authentication token.
+   * @param response      The HTTP response object to set the JWT cookie.
+   * @throws JwtMissingPropertyException if there is an issue with the JWT properties.
+   */
+  public void verifyTwoFactor(String twoFactorToken, HttpServletResponse response)
+      throws JwtMissingPropertyException {
+<span class="fc" id="L67">    String userId = jwtUtils.validate2faTokenAndGetUserId(twoFactorToken);</span>
+<span class="fc" id="L68">    String token = jwtUtils.generateToken(Long.parseLong(userId), Role.ROLE_ADMIN);</span>
+<span class="fc" id="L69">    jwtUtils.setJwtCookie(token, response);</span>
+<span class="fc" id="L70">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

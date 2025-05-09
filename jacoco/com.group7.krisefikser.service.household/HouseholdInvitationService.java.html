@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HouseholdInvitationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service.household</a> &gt; <span class="el_source">HouseholdInvitationService.java</span></div><h1>HouseholdInvitationService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service.household;
+
+import static com.group7.krisefikser.enums.EmailTemplateType.HOUSEHOLD_INVITE;
+
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.model.household.HouseholdInvitation;
+import com.group7.krisefikser.model.user.User;
+import com.group7.krisefikser.repository.household.HouseholdInvitationRepository;
+import com.group7.krisefikser.repository.household.HouseholdRepository;
+import com.group7.krisefikser.repository.user.UserRepository;
+import com.group7.krisefikser.service.other.EmailService;
+import com.group7.krisefikser.utils.JwtUtils;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service class for managing household invitations.
+ * Handles the creation and acceptance of invitations.
+ */
+@Service
+@RequiredArgsConstructor
+public class HouseholdInvitationService {
+  private final HouseholdInvitationRepository invitationRepository;
+  private final EmailService emailService;
+  private final HouseholdRepository householdRepository;
+  private final UserRepository userRepository;
+  private final JwtUtils jwtUtils;
+  private final Logger logger = LoggerFactory.getLogger(HouseholdInvitationService.class);
+
+
+  /**
+   * Creates a new household invitation and sends an email to the invitee.
+   *
+   * @param userId The ID of the user sending the invitation.
+   * @param email The email address of the invitee.
+   * @return The created HouseholdInvitation object.
+   */
+  public HouseholdInvitation createInvitation(Long userId, String email) {
+<span class="fc" id="L43">    HouseholdInvitation invitation = new HouseholdInvitation();</span>
+<span class="fc" id="L44">    User user = userRepository.findById(userId)</span>
+<span class="pc" id="L45">        .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="fc" id="L46">    invitation.setHouseholdId(user.getHouseholdId());</span>
+<span class="fc" id="L47">    invitation.setInvitedByUserId(userId);</span>
+<span class="fc" id="L48">    invitation.setInvitedEmail(email);</span>
+<span class="fc" id="L49">    invitation = invitationRepository.save(invitation);</span>
+
+    // Send invitation email
+<span class="fc" id="L52">    String inviteLink = &quot;http://localhost:5173/invitation/verify?token=&quot; + invitation.getInvitationToken();</span>
+<span class="fc" id="L53">    Map&lt;String, String&gt; params = Map.of(&quot;inviteLink&quot;, inviteLink);</span>
+<span class="fc" id="L54">    emailService.sendTemplateMessage(email, HOUSEHOLD_INVITE, params);</span>
+
+<span class="fc" id="L56">    return invitation;</span>
+  }
+
+  /**
+   * Accepts a household invitation using a token and adds the user to the household.
+   *
+   * @param token The unique token associated with the invitation.
+   * @param userId The ID of the user accepting the invitation.
+   * @return The ID of the household the user was added to.
+   * @throws RuntimeException if the invitation is not found or has expired.
+   */
+  public Long acceptInvitation(String token, Long userId) throws JwtMissingPropertyException {
+    try {
+<span class="fc" id="L69">      String email = jwtUtils.validateInvitationTokenAndGetEmail(token);</span>
+<span class="fc" id="L70">      logger.info(&quot;Validated invitation token for email: {}&quot;, email);</span>
+
+<span class="fc" id="L72">      HouseholdInvitation invitation = invitationRepository.findByToken(token)</span>
+<span class="pc" id="L73">          .orElseThrow(() -&gt; new RuntimeException(&quot;Invitation not found in database&quot;));</span>
+
+<span class="nc" id="L75">      User user = userRepository.findById(userId)</span>
+<span class="nc" id="L76">          .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">      if (!user.getEmail().equalsIgnoreCase(email)) {</span>
+<span class="nc" id="L78">        throw new RuntimeException(&quot;You are not authorized to accept this invitation.&quot;);</span>
+      }
+
+<span class="nc" id="L81">      userRepository.updateUserHousehold(userId, invitation.getHouseholdId());</span>
+
+<span class="nc" id="L83">      invitationRepository.delete(invitation.getId());</span>
+
+<span class="nc" id="L85">      return invitation.getHouseholdId();</span>
+<span class="fc" id="L86">    } catch (JWTVerificationException | JwtMissingPropertyException e) {</span>
+<span class="fc" id="L87">      logger.error(&quot;Failed to validate invitation token: {}&quot;, e.getMessage());</span>
+<span class="fc" id="L88">      throw new RuntimeException(&quot;Invalid or expired invitation token&quot;, e);</span>
+    }
+  }
+
+  /**
+   * Verifies a household invitation using a token.
+   *
+   * @param token The unique token associated with the invitation.
+   * @return The HouseholdInvitation object if found and valid.
+   * @throws RuntimeException if the invitation is not found or has expired.
+   */
+  public HouseholdInvitation verifyInvitation(String token) {
+<span class="nc" id="L100">    return invitationRepository.findByToken(token)</span>
+<span class="nc" id="L101">        .orElseThrow(() -&gt; new RuntimeException(&quot;Invitation not found or expired&quot;));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StorageItemResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.dto.response.item</a> &gt; <span class="el_source">StorageItemResponse.java</span></div><h1>StorageItemResponse.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.dto.response.item;
+
+import com.group7.krisefikser.model.item.StorageItem;
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+/**
+ * Response class for storage item details.
+ * This class can be used to encapsulate the response data for a storage item.
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class StorageItemResponse {
+  private int id;
+  private LocalDateTime expirationDate;
+  private double quantity;
+  private int householdId;
+  private int itemId;
+  private boolean isShared;
+  private ItemResponse item;
+
+  /**
+   * Converts a StorageItem entity to a StorageItemResponse.
+   *
+   * @param storageItem the StorageItem entity
+   * @return the StorageItemResponse
+   */
+  public static StorageItemResponse fromEntity(StorageItem storageItem) {
+<span class="nc" id="L33">    return new StorageItemResponse(</span>
+<span class="nc" id="L34">            storageItem.getId(),</span>
+<span class="nc" id="L35">            storageItem.getExpirationDate(),</span>
+<span class="nc" id="L36">            storageItem.getQuantity(),</span>
+<span class="nc" id="L37">            storageItem.getHouseholdId(),</span>
+<span class="nc" id="L38">            storageItem.getItemId(),</span>
+<span class="nc" id="L39">            storageItem.isShared(),</span>
+            null
+    );
+  }
+
+  /**
+   * Converts a StorageItem entity to a StorageItemResponse with item details.
+   *
+   * @param storageItem  the StorageItem entity
+   * @param itemResponse the ItemResponse for the associated item
+   * @return the StorageItemResponse with item details
+   */
+  public static StorageItemResponse fromEntityWithItem(StorageItem storageItem,
+                                                       ItemResponse itemResponse) {
+<span class="fc" id="L53">    return new StorageItemResponse(</span>
+<span class="fc" id="L54">            storageItem.getId(),</span>
+<span class="fc" id="L55">            storageItem.getExpirationDate(),</span>
+<span class="fc" id="L56">            storageItem.getQuantity(),</span>
+<span class="fc" id="L57">            storageItem.getHouseholdId(),</span>
+<span class="fc" id="L58">            storageItem.getItemId(),</span>
+<span class="fc" id="L59">            storageItem.isShared(),</span>
+            itemResponse
+    );
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginAttemptService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.service.user</a> &gt; <span class="el_source">LoginAttemptService.java</span></div><h1>LoginAttemptService.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.service.user;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import jakarta.annotation.PostConstruct;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service class for managing login attempts.
+ * This class provides methods to track and manage login attempts for users.
+ * It uses a cache to store the number of attempts and locks the user
+ * after a certain number of failed attempts.
+ */
+@Service
+<span class="fc" id="L18">public class LoginAttemptService {</span>
+
+  private static final int MAX_ATTEMPT = 4;
+  private static final int LOCK_TIME_MINUTES = 10;
+  private LoadingCache&lt;String, Integer&gt; attemptsCache;
+
+  /**
+   * Initializes the cache for tracking login attempts.
+   * The cache expires after a specified time and initializes the attempt count to 0.
+   */
+  @PostConstruct
+  public void init() {
+<span class="fc" id="L30">    attemptsCache = CacheBuilder.newBuilder()</span>
+<span class="fc" id="L31">        .expireAfterWrite(LOCK_TIME_MINUTES, TimeUnit.MINUTES)</span>
+<span class="fc" id="L32">        .build(new CacheLoader&lt;String, Integer&gt;() {</span>
+            @Override
+            public Integer load(String key) {
+<span class="fc" id="L35">                return 0;</span>
+            }
+        });
+<span class="fc" id="L38">  }</span>
+
+  /**
+   * Resets the login attempts for a user.
+   * This method is called when a user successfully logs in.
+   *
+   * @param username the username of the user
+   */
+  public void loginSucceeded(String username) {
+<span class="fc" id="L47">    attemptsCache.invalidate(username);</span>
+<span class="fc" id="L48">  }</span>
+
+  /**
+   * Increments the login attempts for a user.
+   * This method is called when a user fails to log in.
+   *
+   * @param username the username of the user
+   */
+  public void loginFailed(String username) {
+<span class="fc" id="L57">    int attempts = 0;</span>
+    try {
+<span class="fc" id="L59">      attempts = attemptsCache.get(username);</span>
+<span class="nc" id="L60">    } catch (ExecutionException e) {</span>
+<span class="nc" id="L61">      return;</span>
+<span class="fc" id="L62">    }</span>
+<span class="fc" id="L63">    attempts++;</span>
+<span class="fc" id="L64">    attemptsCache.put(username, attempts);</span>
+<span class="fc" id="L65">  }</span>
+
+  /**
+   * Checks if a user is blocked from logging in.
+   * A user is blocked if they have exceeded the maximum number of login attempts.
+   *
+   * @param username the username of the user
+   * @return true if the user is blocked, false otherwise
+   */
+  public boolean isBlocked(String username) {
+    try {
+<span class="fc bfc" id="L76" title="All 2 branches covered.">      return attemptsCache.get(username) &gt;= MAX_ATTEMPT;</span>
+<span class="nc" id="L77">    } catch (ExecutionException e) {</span>
+<span class="nc" id="L78">      return false;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

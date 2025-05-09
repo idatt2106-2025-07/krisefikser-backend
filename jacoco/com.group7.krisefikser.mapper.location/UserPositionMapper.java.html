@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserPositionMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.mapper.location</a> &gt; <span class="el_source">UserPositionMapper.java</span></div><h1>UserPositionMapper.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.mapper.location;
+
+import com.group7.krisefikser.dto.request.location.SharePositionRequest;
+import com.group7.krisefikser.dto.response.location.GroupMemberPositionResponse;
+import com.group7.krisefikser.dto.response.location.HouseholdMemberPositionResponse;
+import com.group7.krisefikser.model.location.UserPosition;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+/**
+ * Mapper interface for converting between SharePositionRequest,
+ * UserPosition, and HouseholdMemberPositionResponse.
+ * Uses MapStruct for automatic implementation generation.
+ */
+@Mapper
+public interface UserPositionMapper {
+<span class="fc" id="L18">  UserPositionMapper INSTANCE = Mappers.getMapper(UserPositionMapper.class);</span>
+
+  /**
+   * Converts a SharePositionRequest to a UserPosition.
+   *
+   * @param request the SharePositionRequest to convert
+   * @return the converted UserPosition
+   */
+  @Mapping(source = &quot;latitude&quot;, target = &quot;latitude&quot;)
+  @Mapping(source = &quot;longitude&quot;, target = &quot;longitude&quot;)
+  UserPosition sharePositionRequestToUserPosition(SharePositionRequest request);
+
+  /**
+   * Converts a UserPosition to a HouseholdMemberPositionResponse.
+   *
+   * @param userPosition the UserPosition to convert
+   * @return the converted HouseholdMemberPositionResponse
+   */
+  @Mapping(source = &quot;latitude&quot;, target = &quot;latitude&quot;)
+  @Mapping(source = &quot;longitude&quot;, target = &quot;longitude&quot;)
+  @Mapping(source = &quot;name&quot;, target = &quot;name&quot;)
+  HouseholdMemberPositionResponse userPositionToHouseholdMemberPositionResponse(
+      UserPosition userPosition);
+
+  /**
+   * Converts an array of UserPosition to an array of HouseholdMemberPositionResponse.
+   *
+   * @param userPositions the array of UserPosition to convert
+   * @return the converted array of HouseholdMemberPositionResponse
+   */
+  HouseholdMemberPositionResponse[] userPositionArrayToHouseholdMemberPositionResponseArray(
+      UserPosition[] userPositions);
+
+  /**
+   * Converts a UserPosition to a GroupMemberPositionResponse.
+   *
+   * @param userPosition the UserPosition to convert
+   * @return the converted GroupMemberPositionResponse
+   */
+  @Mapping(source = &quot;latitude&quot;, target = &quot;latitude&quot;)
+  @Mapping(source = &quot;longitude&quot;, target = &quot;longitude&quot;)
+  @Mapping(source = &quot;name&quot;, target = &quot;name&quot;)
+  GroupMemberPositionResponse userPositionToGroupMemberPositionResponse(
+      UserPosition userPosition);
+
+  /**
+   * Converts an array of UserPosition to an array of GroupMemberPositionResponse.
+   *
+   * @param userPositions the array of UserPosition to convert
+   * @return the converted array of GroupMemberPositionResponse
+   */
+  GroupMemberPositionResponse[] userPositionArrayToGroupMemberPositionResponseArray(
+      UserPosition[] userPositions);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

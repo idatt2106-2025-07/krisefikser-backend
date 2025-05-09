@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneralInfoMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.mapper.article</a> &gt; <span class="el_source">GeneralInfoMapperImpl.java</span></div><h1>GeneralInfoMapperImpl.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.mapper.article;
+
+import com.group7.krisefikser.dto.request.article.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.article.GeneralInfoResponse;
+import com.group7.krisefikser.model.article.GeneralInfo;
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.processing.Generated;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2025-05-09T19:50:26+0000&quot;,
+    comments = &quot;version: 1.6.3, compiler: javac, environment: Java 21.0.7 (Eclipse Adoptium)&quot;
+)
+<span class="fc" id="L15">public class GeneralInfoMapperImpl implements GeneralInfoMapper {</span>
+
+    @Override
+    public GeneralInfo requestToGeneralInfo(GeneralInfoRequest generalInfoRequest) {
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">        if ( generalInfoRequest == null ) {</span>
+<span class="nc" id="L20">            return null;</span>
+        }
+
+<span class="fc" id="L23">        GeneralInfo generalInfo = new GeneralInfo();</span>
+
+<span class="fc" id="L25">        generalInfo.setTheme( stringToTheme( generalInfoRequest.getTheme() ) );</span>
+<span class="fc" id="L26">        generalInfo.setTitle( generalInfoRequest.getTitle() );</span>
+<span class="fc" id="L27">        generalInfo.setContent( generalInfoRequest.getContent() );</span>
+
+<span class="fc" id="L29">        return generalInfo;</span>
+    }
+
+    @Override
+    public List&lt;GeneralInfoResponse&gt; generalInfoToResponseList(List&lt;GeneralInfo&gt; generalInfoList) {
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        if ( generalInfoList == null ) {</span>
+<span class="nc" id="L35">            return null;</span>
+        }
+
+<span class="fc" id="L38">        List&lt;GeneralInfoResponse&gt; list = new ArrayList&lt;GeneralInfoResponse&gt;( generalInfoList.size() );</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        for ( GeneralInfo generalInfo : generalInfoList ) {</span>
+<span class="fc" id="L40">            list.add( generalInfoToResponse( generalInfo ) );</span>
+<span class="fc" id="L41">        }</span>
+
+<span class="fc" id="L43">        return list;</span>
+    }
+
+    @Override
+    public GeneralInfoResponse generalInfoToResponse(GeneralInfo generalInfo) {
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if ( generalInfo == null ) {</span>
+<span class="fc" id="L49">            return null;</span>
+        }
+
+<span class="fc" id="L52">        GeneralInfoResponse generalInfoResponse = new GeneralInfoResponse();</span>
+
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if ( generalInfo.getId() != null ) {</span>
+<span class="fc" id="L55">            generalInfoResponse.setId( String.valueOf( generalInfo.getId() ) );</span>
+        }
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if ( generalInfo.getTheme() != null ) {</span>
+<span class="fc" id="L58">            generalInfoResponse.setTheme( generalInfo.getTheme().name() );</span>
+        }
+<span class="fc" id="L60">        generalInfoResponse.setTitle( generalInfo.getTitle() );</span>
+<span class="fc" id="L61">        generalInfoResponse.setContent( generalInfo.getContent() );</span>
+
+<span class="fc" id="L63">        return generalInfoResponse;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

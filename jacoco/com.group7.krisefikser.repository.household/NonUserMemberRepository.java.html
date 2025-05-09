@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NonUserMemberRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.repository.household</a> &gt; <span class="el_source">NonUserMemberRepository.java</span></div><h1>NonUserMemberRepository.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.repository.household;
+
+import com.group7.krisefikser.enums.NonUserMemberType;
+import com.group7.krisefikser.model.household.NonUserMember;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository class for managing non-user members in the database.
+ * This class provides methods to add, update, delete, and retrieve non-user members.
+ */
+@Repository
+@RequiredArgsConstructor
+public class NonUserMemberRepository {
+
+  private final JdbcTemplate jdbcTemplate;
+
+  /**
+   * Adds a non-user member to the database.
+   *
+   * @param nonUserMember The NonUserMember object to be added.
+   */
+  public void addNonUserMember(NonUserMember nonUserMember) {
+<span class="fc" id="L26">    String sql = &quot;INSERT INTO non_user_members (name, type, household_id) VALUES (?, ?, ?)&quot;;</span>
+<span class="fc" id="L27">    jdbcTemplate.update(</span>
+        sql,
+<span class="fc" id="L29">        nonUserMember.getName(),</span>
+<span class="fc" id="L30">        nonUserMember.getType().toString(),</span>
+<span class="fc" id="L31">        nonUserMember.getHouseholdId());</span>
+<span class="fc" id="L32">  }</span>
+
+  /**
+   * Updates a non-user member by its ID and household ID.
+   *
+   * @param nonUserMember The NonUserMember object containing the ID and household ID.
+   */
+  public void updateNonUserMember(NonUserMember nonUserMember) {
+<span class="fc" id="L40">    String sql = &quot;UPDATE non_user_members SET type = ?, name = ? WHERE id = ? AND household_id = ?&quot;;</span>
+<span class="fc" id="L41">    jdbcTemplate.update(</span>
+        sql,
+<span class="fc" id="L43">        nonUserMember.getType().toString(),</span>
+<span class="fc" id="L44">        nonUserMember.getName(),</span>
+<span class="fc" id="L45">        nonUserMember.getId(),</span>
+<span class="fc" id="L46">        nonUserMember.getHouseholdId());</span>
+<span class="fc" id="L47">  }</span>
+
+  /**
+   * Deletes a non-user member from the database.
+   *
+   * @param id The ID of the non-user member to be deleted.
+   * @param householdId The ID of the household to which the non-user member belongs.
+   */
+  public void deleteNonUserMember(long id, long householdId) {
+<span class="fc" id="L56">    String sql = &quot;DELETE FROM non_user_members WHERE id = ? AND household_id = ?&quot;;</span>
+<span class="fc" id="L57">    jdbcTemplate.update(sql, id, householdId);</span>
+<span class="fc" id="L58">  }</span>
+
+  /**
+   * Retrieves a list of non-user members associated with a specific household.
+   *
+   * @param householdId The ID of the household for which to retrieve non-user members.
+   * @return A list of NonUserMember objects associated with the specified household.
+   */
+  public List&lt;NonUserMember&gt; getNonUserMembersByHousehold(long householdId) {
+<span class="fc" id="L67">    String sql = &quot;SELECT * FROM non_user_members WHERE household_id = ?&quot;;</span>
+
+<span class="fc" id="L69">    return jdbcTemplate.query(</span>
+        sql,
+<span class="fc" id="L71">        new Object[] {householdId},</span>
+        (rs, rowNum) -&gt; {
+<span class="fc" id="L73">          NonUserMember member = new NonUserMember();</span>
+<span class="fc" id="L74">          member.setId(rs.getLong(&quot;id&quot;));</span>
+<span class="fc" id="L75">          member.setName(rs.getString(&quot;name&quot;));</span>
+<span class="fc" id="L76">          member.setHouseholdId(rs.getLong(&quot;household_id&quot;));</span>
+<span class="fc" id="L77">          member.setType(NonUserMemberType.valueOf(rs.getString(&quot;type&quot;).toUpperCase()));</span>
+<span class="fc" id="L78">          return member;</span>
+        });
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

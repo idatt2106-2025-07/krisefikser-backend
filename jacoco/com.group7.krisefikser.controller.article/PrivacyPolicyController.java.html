@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrivacyPolicyController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller.article</a> &gt; <span class="el_source">PrivacyPolicyController.java</span></div><h1>PrivacyPolicyController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller.article;
+
+import com.group7.krisefikser.dto.request.article.UpdateRegisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.request.article.UpdateUnregisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.request.user.TwoFactorLoginRequest;
+import com.group7.krisefikser.dto.response.article.GetRegisteredPrivacyPolicyResponse;
+import com.group7.krisefikser.dto.response.article.GetUnregisteredPrivacyPolicyResponse;
+import com.group7.krisefikser.service.article.PrivacyPolicyService;
+import com.group7.krisefikser.utils.ValidationUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.logging.Logger;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+/**
+ *  Controller class for handling requests related to privacy policy.
+ *  This class provides endpoints to getting and updating privacy policy.
+ */
+@Controller
+@RequestMapping(&quot;/api/privacy-policy&quot;)
+@Tag(name = &quot;Privacy Policy&quot;, description = &quot;Privacy policy management&quot;)
+@RequiredArgsConstructor
+public class PrivacyPolicyController {
+
+  private final PrivacyPolicyService privacyPolicyService;
+
+  Logger logger = Logger.getLogger(PrivacyPolicyController.class.getName());
+
+  /**
+   * Endpoint to get the registered privacy policy.
+   *
+   * @return ResponseEntity containing the registered privacy policy.
+   */
+  @Operation(
+      summary = &quot;Get the registered privacy policy&quot;,
+      description =
+          &quot;Fetches the currently registered privacy policy document for the user or system.&quot;,
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Successfully retrieved the registered privacy policy&quot;,
+              content =
+              @Content(schema = @Schema(implementation = GetRegisteredPrivacyPolicyResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Server error while fetching the registered privacy policy&quot;,
+              content = @Content(schema =
+              @Schema(example = &quot;Error fetching registered privacy policy&quot;))
+          )
+      }
+  )
+  @GetMapping(&quot;/registered&quot;)
+  public ResponseEntity&lt;?&gt; getRegisteredPrivacyPolicy() {
+<span class="fc" id="L66">    logger.info(&quot;Fetching registered privacy policy&quot;);</span>
+
+    try {
+<span class="fc" id="L69">      GetRegisteredPrivacyPolicyResponse response =</span>
+<span class="fc" id="L70">          privacyPolicyService.getRegisteredPrivacyPolicy();</span>
+<span class="fc" id="L71">      return ResponseEntity.ok(response);</span>
+<span class="nc" id="L72">    } catch (Exception e) {</span>
+<span class="nc" id="L73">      logger.severe(&quot;Error fetching registered privacy policy: &quot; + e.getMessage());</span>
+<span class="nc" id="L74">      return ResponseEntity.status(500).body(&quot;Error fetching registered privacy policy&quot;);</span>
+    }
+  }
+
+  /**
+   * Endpoint to get the unregistered privacy policy.
+   *
+   * @return ResponseEntity containing the unregistered privacy policy.
+   */
+  @Operation(
+      summary = &quot;Get the unregistered privacy policy&quot;,
+      description = &quot;Retrieves the current privacy policy that has not yet been &quot;
+          + &quot;registered or accepted by the user or system.&quot;,
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Successfully retrieved the unregistered privacy policy&quot;,
+              content = @Content(schema = @Schema(implementation =
+                  GetUnregisteredPrivacyPolicyResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Server error while fetching the unregistered privacy policy&quot;,
+              content = @Content(schema = @Schema(example =
+                  &quot;Error fetching unregistered privacy policy&quot;))
+          )
+      }
+  )
+  @GetMapping(&quot;/unregistered&quot;)
+  public ResponseEntity&lt;?&gt; getUnregisteredPrivacyPolicy() {
+<span class="fc" id="L104">    logger.info(&quot;Fetching unregistered privacy policy&quot;);</span>
+    try {
+<span class="fc" id="L106">      GetUnregisteredPrivacyPolicyResponse response =</span>
+<span class="fc" id="L107">          privacyPolicyService.getUnregisteredPrivacyPolicy();</span>
+<span class="fc" id="L108">      return ResponseEntity.ok(response);</span>
+<span class="nc" id="L109">    } catch (Exception e) {</span>
+<span class="nc" id="L110">      logger.severe(&quot;Error fetching unregistered privacy policy: &quot; + e.getMessage());</span>
+<span class="nc" id="L111">      return ResponseEntity.status(500).body(&quot;Error fetching unregistered privacy policy&quot;);</span>
+    }
+  }
+
+  /**
+   * Endpoint to update the registered privacy policy.
+   *
+   * @param request the request body containing the updated privacy policy.
+   * @param bindingResult the result of the validation.
+   * @return ResponseEntity indicating the success or failure of the operation.
+   */
+  @Operation(
+      summary = &quot;Update the registered privacy policy&quot;,
+      description = &quot;Updates the currently registered privacy policy with &quot;
+          + &quot;new content provided in the request body.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = &quot;UpdateUnregisteredPrivacyPolicyRequest containing privacy policy&quot;,
+          required = true,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = TwoFactorLoginRequest.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Registered privacy policy updated successfully&quot;,
+              content =
+              @Content(schema = @Schema(example = &quot;Registered privacy policy updated successfully&quot;))
+          ),
+          @ApiResponse(
+              responseCode = &quot;400&quot;,
+              description = &quot;Validation error in request data&quot;,
+              content = @Content(schema = @Schema(example = &quot;Validation error details&quot;))
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Server error while updating the registered privacy policy&quot;,
+              content = @Content(schema =
+              @Schema(example = &quot;Error updating registered privacy policy&quot;))
+          )
+      }
+  )
+  @PostMapping(&quot;/registered&quot;)
+  public ResponseEntity&lt;?&gt; updateRegisteredPrivacyPolicy(
+      @RequestBody @Valid UpdateRegisteredPrivacyPolicyRequest request,
+      BindingResult bindingResult) {
+<span class="fc" id="L158">    logger.info(&quot;Updating registered privacy policy&quot;);</span>
+
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">    if (bindingResult.hasErrors()) {</span>
+<span class="nc" id="L161">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
+    }
+
+    try {
+<span class="fc" id="L165">      privacyPolicyService.updateRegisteredPrivacyPolicy(request);</span>
+<span class="fc" id="L166">      return ResponseEntity.ok(&quot;Registered privacy policy updated successfully&quot;);</span>
+<span class="nc" id="L167">    } catch (Exception e) {</span>
+<span class="nc" id="L168">      logger.severe(&quot;Error updating registered privacy policy: &quot; + e.getMessage());</span>
+<span class="nc" id="L169">      return ResponseEntity.status(500).body(&quot;Error updating registered privacy policy&quot;);</span>
+    }
+  }
+
+  /**
+   * Endpoint to update the unregistered privacy policy.
+   *
+   * @param request the request body containing the updated privacy policy.
+   * @param bindingResult the result of the validation.
+   * @return ResponseEntity indicating the success or failure of the operation.
+   */
+  @Operation(
+      summary = &quot;Update the unregistered privacy policy&quot;,
+      description = &quot;Updates the unregistered privacy policy content for users &quot;
+          + &quot;who are not registered in the system.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = &quot;UpdateUnregisteredPrivacyPolicyRequest containing privacy policy&quot;,
+          required = true,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = TwoFactorLoginRequest.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Unregistered privacy policy updated successfully&quot;,
+              content = @Content(schema = @Schema(example =
+                  &quot;Unregistered privacy policy updated successfully&quot;))
+          ),
+          @ApiResponse(
+              responseCode = &quot;400&quot;,
+              description = &quot;Validation error in request data&quot;,
+              content = @Content(schema = @Schema(example = &quot;Validation error details&quot;))
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Server error while updating the unregistered privacy policy&quot;,
+              content = @Content(schema =
+              @Schema(example = &quot;Error updating unregistered privacy policy&quot;))
+          )
+      }
+  )
+  @PostMapping(&quot;/unregistered&quot;)
+  public ResponseEntity&lt;?&gt; updateUnregisteredPrivacyPolicy(
+      @RequestBody @Valid UpdateUnregisteredPrivacyPolicyRequest request,
+      BindingResult bindingResult) {
+<span class="fc" id="L216">    logger.info(&quot;Updating unregistered privacy policy&quot;);</span>
+
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">    if (bindingResult.hasErrors()) {</span>
+<span class="nc" id="L219">      return ValidationUtils.handleValidationErrors(bindingResult);</span>
+    }
+
+    try {
+<span class="fc" id="L223">      privacyPolicyService.updateUnregisteredPrivacyPolicy(request);</span>
+<span class="fc" id="L224">      return ResponseEntity.ok(&quot;Unregistered privacy policy updated successfully&quot;);</span>
+<span class="nc" id="L225">    } catch (Exception e) {</span>
+<span class="nc" id="L226">      logger.severe(&quot;Error updating unregistered privacy policy: &quot; + e.getMessage());</span>
+<span class="nc" id="L227">      return ResponseEntity.status(500).body(&quot;Error updating unregistered privacy policy&quot;);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneralInfoController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller.article</a> &gt; <span class="el_source">GeneralInfoController.java</span></div><h1>GeneralInfoController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller.article;
+
+import com.group7.krisefikser.dto.request.article.GeneralInfoRequest;
+import com.group7.krisefikser.dto.response.article.GeneralInfoResponse;
+import com.group7.krisefikser.enums.Theme;
+import com.group7.krisefikser.model.article.GeneralInfo;
+import com.group7.krisefikser.service.article.GeneralInfoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import java.util.List;
+import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+/**
+ * Controller class for handling general information requests.
+ * This class provides endpoints for retrieving, adding, updating, and deleting general information.
+ * It uses the GeneralInfoService to perform the operations.
+ */
+@RestController
+@RequestMapping(&quot;/api/general-info&quot;)
+<span class="fc" id="L39">public class GeneralInfoController {</span>
+  @Autowired
+  private GeneralInfoService generalInfoService;
+<span class="fc" id="L42">  private static final Logger logger = Logger.getLogger(GeneralInfoController.class.getName());</span>
+
+  /**
+   * Endpoint to get all general information.
+   * This method retrieves all general information from the system.
+   * It returns a list of GeneralInfo objects.
+   *
+   * @return a list of GeneralInfo objects
+   */
+  @Operation(
+      summary = &quot;Get all general information&quot;,
+      description = &quot;Retrieves all general information entries visible to users.&quot;,
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Successfully retrieved general information&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Internal server error&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;))
+      }
+  )
+  @GetMapping(&quot;/all&quot;)
+  public ResponseEntity&lt;List&lt;GeneralInfoResponse&gt;&gt; getAllGeneralInfo() {
+<span class="fc" id="L67">    logger.info(&quot;Received request to get all general information&quot;);</span>
+    try {
+<span class="fc" id="L69">      List&lt;GeneralInfoResponse&gt; allGeneralInfo = generalInfoService.getAllGeneralInfo();</span>
+<span class="fc" id="L70">      logger.info(&quot;Successfully retrieved all general information&quot;);</span>
+<span class="fc" id="L71">      return new ResponseEntity&lt;&gt;(allGeneralInfo, HttpStatus.OK);</span>
+<span class="nc" id="L72">    } catch (Exception e) {</span>
+<span class="nc" id="L73">      logger.severe(&quot;Error retrieving all general information: &quot; + e.getMessage());</span>
+<span class="nc" id="L74">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);</span>
+    }
+  }
+
+  /**
+   * Endpoint to get general information by theme.
+   * This method retrieves general information based on the specified theme.
+   * It accepts a theme as a path variable and returns a list of GeneralInfo objects.
+   *
+   * @param theme the theme to filter the general information
+   * @return a list of GeneralInfo objects matching the specified theme
+   */
+  @Operation(summary = &quot;Get general information by theme&quot;)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved general information&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = GeneralInfo.class))),
+      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid theme provided&quot;,
+          content = @Content)
+  })
+  @GetMapping(&quot;/{theme}&quot;)
+  public ResponseEntity&lt;List&lt;GeneralInfoResponse&gt;&gt; getGeneralInfoByTheme(
+      @Valid @PathVariable String theme) {
+<span class="fc" id="L97">    logger.info(&quot;Received request to get general information by theme: &quot; + theme);</span>
+    try {
+      Theme parsedTheme;
+      try {
+<span class="fc" id="L101">        parsedTheme = Theme.valueOf(theme.toUpperCase());</span>
+<span class="fc" id="L102">      } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L103">        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;Invalid theme: &quot; + theme);</span>
+<span class="fc" id="L104">      }</span>
+<span class="fc" id="L105">      List&lt;GeneralInfoResponse&gt; generalInfoByTheme =</span>
+<span class="fc" id="L106">          generalInfoService.getGeneralInfoByTheme(parsedTheme);</span>
+<span class="fc" id="L107">      logger.info(&quot;Successfully retrieved general information for theme: &quot; + theme);</span>
+<span class="fc" id="L108">      return new ResponseEntity&lt;&gt;(</span>
+          generalInfoByTheme, HttpStatus.OK);
+<span class="fc" id="L110">    } catch (ResponseStatusException e) {</span>
+<span class="fc" id="L111">      logger.warning(&quot;Error retrieving general information by theme: &quot; + e.getMessage());</span>
+<span class="fc" id="L112">      return ResponseEntity.status(e.getStatusCode()).body(null);</span>
+<span class="nc" id="L113">    } catch (Exception e) {</span>
+<span class="nc" id="L114">      logger.severe(&quot;Unexpected error: &quot; + e.getMessage());</span>
+<span class="nc" id="L115">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);</span>
+    }
+  }
+
+  /**
+   * Endpoint to add general information.
+   * This method adds a new GeneralInfo object to the system.
+   * It accepts a GeneralInfo object in the request body.
+   *
+   * @param request the GeneralInfoRequest object containing the information to be added
+   */
+  @Operation(
+      summary = &quot;Add general information (admin only)&quot;,
+      description = &quot;Allows administrators to add new general information content &quot;
+          + &quot;such as guidelines, announcements, etc.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = &quot;General information details&quot;,
+          required = true,
+          content = @Content(
+              mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = GeneralInfoRequest.class)
+          )
+      ),
+      responses = {
+          @ApiResponse(
+              responseCode = &quot;200&quot;,
+              description = &quot;Successfully added general information&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          ),
+          @ApiResponse(
+              responseCode = &quot;400&quot;,
+              description = &quot;Invalid input data&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;,
+                  schema = @Schema(implementation = ErrorResponse.class))
+          ),
+          @ApiResponse(
+              responseCode = &quot;403&quot;,
+              description = &quot;Forbidden – user does not have admin privileges&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          ),
+          @ApiResponse(
+              responseCode = &quot;500&quot;,
+              description = &quot;Internal server error&quot;,
+              content = @Content(mediaType = &quot;application/json&quot;)
+          )
+      }
+  )
+  @PostMapping(&quot;/admin/add&quot;)
+  public ResponseEntity&lt;GeneralInfoResponse&gt; addGeneralInfo(
+      @Valid @RequestBody GeneralInfoRequest request) {
+<span class="fc" id="L165">    logger.info(&quot;Received request to add general information&quot;);</span>
+    try {
+<span class="fc" id="L167">      GeneralInfoResponse response = generalInfoService.addGeneralInfo(request);</span>
+<span class="fc" id="L168">      logger.info(&quot;Successfully added general information&quot;);</span>
+<span class="fc" id="L169">      return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+<span class="nc" id="L170">    } catch (Exception e) {</span>
+<span class="nc" id="L171">      logger.severe(&quot;Error adding general information: &quot; + e.getMessage());</span>
+<span class="nc" id="L172">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to update general information.
+   * This method updates an existing GeneralInfo object in the system.
+   * It accepts a GeneralInfo object in the request body.
+   *
+   * @param request the GeneralInfoRequest object containing the updated information
+   * @param id the ID of the GeneralInfo object to be updated
+   */
+  @Operation(
+      summary = &quot;Update general information (admin only)&quot;,
+      description = &quot;Updates the content of an existing general information item.&quot;,
+      parameters = {
+          @Parameter(name = &quot;id&quot;, in = ParameterIn.PATH, required = true,
+              description = &quot;ID of the general information to update&quot;,
+              schema = @Schema(type = &quot;integer&quot;, format = &quot;int64&quot;))
+      },
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+          description = &quot;Updated general information content&quot;,
+          required = true,
+          content = @Content(mediaType = &quot;application/json&quot;,
+              schema = @Schema(implementation = GeneralInfoRequest.class))
+      ),
+      responses = {
+          @ApiResponse(responseCode = &quot;200&quot;, description =
+              &quot;Successfully updated general information&quot;),
+          @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid input data&quot;),
+          @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Forbidden – insufficient privileges&quot;),
+          @ApiResponse(responseCode = &quot;404&quot;, description = &quot;General information not found&quot;),
+          @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @PutMapping(&quot;/admin/update/{id}&quot;)
+  public ResponseEntity&lt;GeneralInfoResponse&gt; updateGeneralInfo(
+      @Valid @RequestBody GeneralInfoRequest request,
+                                @PathVariable Long id) {
+<span class="fc" id="L211">    logger.info(&quot;Received request to update general information with ID: &quot; + id);</span>
+    try {
+<span class="fc" id="L213">      GeneralInfoResponse response = generalInfoService.updateGeneralInfo(request, id);</span>
+<span class="fc" id="L214">      logger.info(&quot;Successfully updated general information with ID: &quot; + id);</span>
+<span class="fc" id="L215">      return ResponseEntity.ok(response);</span>
+<span class="nc" id="L216">    } catch (Exception e) {</span>
+<span class="nc" id="L217">      logger.severe(&quot;Error updating general information: &quot; + e.getMessage());</span>
+<span class="nc" id="L218">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to delete general information.
+   * This method deletes a GeneralInfo object from the system based on its ID.
+   * It accepts the ID of the GeneralInfo object as a path variable.
+   *
+   * @param id the ID of the GeneralInfo object to be deleted
+   */
+  @Operation(
+      summary = &quot;Delete general information (admin only)&quot;,
+      description = &quot;Deletes an existing general information item by its ID.&quot;,
+      parameters = {
+          @Parameter(name = &quot;id&quot;, in = ParameterIn.PATH, required = true,
+              description = &quot;ID of the general information to delete&quot;,
+              schema = @Schema(type = &quot;integer&quot;, format = &quot;int64&quot;))
+      },
+      responses = {
+          @ApiResponse(responseCode = &quot;204&quot;, description =
+              &quot;Successfully deleted general information&quot;),
+          @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Forbidden – insufficient privileges&quot;),
+          @ApiResponse(responseCode = &quot;404&quot;, description = &quot;General information not found&quot;),
+          @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @DeleteMapping(&quot;/admin/delete/{id}&quot;)
+  public ResponseEntity&lt;Void&gt; deleteGeneralInfo(@PathVariable Long id) {
+<span class="fc" id="L247">    logger.info(&quot;Received request to delete general information with ID: &quot; + id);</span>
+    try {
+<span class="fc" id="L249">      generalInfoService.deleteGeneralInfo(id);</span>
+<span class="fc" id="L250">      logger.info(&quot;Successfully deleted general information with ID: &quot; + id);</span>
+<span class="fc" id="L251">      return ResponseEntity.noContent().build();</span>
+<span class="nc" id="L252">    } catch (Exception e) {</span>
+<span class="nc" id="L253">      logger.severe(&quot;Error deleting general information: &quot; + e.getMessage());</span>
+<span class="nc" id="L254">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

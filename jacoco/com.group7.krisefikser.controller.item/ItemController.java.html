@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.controller.item</a> &gt; <span class="el_source">ItemController.java</span></div><h1>ItemController.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.controller.item;
+
+import com.group7.krisefikser.dto.request.item.ItemFilterRequest;
+import com.group7.krisefikser.dto.request.item.ItemRequest;
+import com.group7.krisefikser.dto.request.item.ItemSortRequest;
+import com.group7.krisefikser.dto.response.item.ItemResponse;
+import com.group7.krisefikser.enums.ItemType;
+import com.group7.krisefikser.model.item.Item;
+import com.group7.krisefikser.service.item.ItemService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * ItemController handles HTTP requests related to items.
+ * It provides endpoints for CRUD operations and filtering/sorting items.
+ */
+@RestController
+@RequestMapping(&quot;/api/items&quot;)
+@Tag(name = &quot;Item&quot;, description = &quot;Endpoints for managing Items&quot;)
+public class ItemController {
+  private final ItemService itemService;
+<span class="fc" id="L43">  private static final Logger logger = Logger.getLogger(ItemController.class.getName());</span>
+
+
+  @Autowired
+<span class="fc" id="L47">  public ItemController(ItemService itemService) {</span>
+<span class="fc" id="L48">    this.itemService = itemService;</span>
+<span class="fc" id="L49">  }</span>
+
+  /**
+   * Endpoint to fetch all items.
+   *
+   * @return a list of all items
+   */
+
+  @Operation(
+      summary = &quot;Fetch all items&quot;,
+      description = &quot;Retrieves a list of all items in the database.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved items&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+    )
+  @GetMapping
+  public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; getAllItems() {
+<span class="fc" id="L69">    List&lt;Item&gt; items = itemService.getAllItems();</span>
+<span class="fc" id="L70">    List&lt;ItemResponse&gt; itemResponses = itemService.convertToItemResponses(items);</span>
+<span class="fc" id="L71">    return ResponseEntity.ok(itemResponses);</span>
+  }
+
+  /**
+   * Endpoint to fetch an item by its ID.
+   *
+   * @param id the ID of the item
+   * @return the item with the specified ID
+   */
+  @Operation(
+      summary = &quot;Fetch an item by ID&quot;,
+      description = &quot;Retrieves an item by its unique ID.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved the item&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Item not found&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+    )
+  @GetMapping(&quot;/{id}&quot;)
+  public ResponseEntity&lt;ItemResponse&gt; getItemById(@PathVariable int id) {
+    try {
+<span class="fc" id="L94">      Item item = itemService.getItemById(id);</span>
+<span class="fc" id="L95">      return ResponseEntity.ok(ItemResponse.fromEntity(item));</span>
+<span class="fc" id="L96">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L98">        return ResponseEntity.notFound().build();</span>
+      }
+<span class="nc" id="L100">      logger.severe(&quot;Unexpected error retrieving item with ID &quot; + id + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L101">      return ResponseEntity.status(500).body(null);</span>
+    }
+  }
+
+  /**
+   * Endpoint to filter items based on their types.
+   * This endpoint accepts a request containing a list of item types to filter by
+   * and returns a list of items that match those types. If no types are provided,
+   * it returns all items.
+   *
+   * @param request The GetItemsByTypesRequest containing the types to filter by
+   * @return A ResponseEntity containing a list of filtered ItemResponse objects
+   */
+  @Operation(
+      summary = &quot;Filter items by type&quot;,
+      description = &quot;Retrieves a list of items filtered by the specified types. &quot;
+      + &quot;If no types are provided, returns all items.&quot;,
+      parameters = @Parameter(
+      name = &quot;types&quot;,
+      description = &quot;Item types to filter by (e.g., FOOD, DRINK, ACCESSORIES)&quot;,
+      example = &quot;FOOD&quot;,
+      schema = @Schema(type = &quot;array&quot;, implementation = String.class)
+      ),
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved filtered items&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @GetMapping(&quot;/filter&quot;)
+  public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; filterItems(
+      @Valid @ModelAttribute ItemFilterRequest request) {
+
+<span class="fc" id="L135">    logger.info(&quot;Received request to filter items by types: &quot; + request.getTypes());</span>
+    try {
+      // Use the service method to convert strings to ItemTypes
+<span class="fc" id="L138">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(request.getTypes());</span>
+
+<span class="fc" id="L140">      List&lt;Item&gt; items = itemService.getItemsByTypes(itemTypes);</span>
+<span class="fc" id="L141">      logger.info(&quot;Successfully retrieved filtered items&quot;);</span>
+<span class="fc" id="L142">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
+<span class="nc" id="L143">    } catch (Exception e) {</span>
+<span class="nc" id="L144">      logger.severe(&quot;Unexpected error filtering items: &quot; + e.getMessage());</span>
+<span class="nc" id="L145">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+    }
+  }
+
+  /**
+   * Endpoint to sort items based on a specified field and direction.
+   * This endpoint accepts a request object containing sort parameters and returns
+   * a list of items sorted according to these parameters. The sorting is handled
+   * by the ItemService, with validation performed through Jakarta validation annotations.
+   *
+   * @param request The ItemSortRequest object containing sortBy and sortDirection parameters
+   * @return ResponseEntity containing a list of sorted ItemResponse objects
+   */
+  @Operation(
+      summary = &quot;Sort items&quot;,
+      description = &quot;Retrieves all items sorted by the specified field and direction. &quot;
+      + &quot;Valid sort fields: name, calories. Valid directions: asc, desc.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved sorted items&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid sort parameters&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @GetMapping(&quot;/sort&quot;)
+  public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; sortItems(
+      @Valid @ModelAttribute ItemSortRequest request) {
+<span class="fc" id="L173">    logger.info(&quot;Received request to sort items by: &quot; + request.getSortBy()</span>
+<span class="fc" id="L174">        + &quot; in direction: &quot; + request.getSortDirection());</span>
+    try {
+<span class="fc" id="L176">      List&lt;Item&gt; items = itemService.getSortedItems(</span>
+<span class="fc" id="L177">          request.getSortBy().toLowerCase(),</span>
+<span class="fc" id="L178">          request.getSortDirection().toLowerCase());</span>
+<span class="fc" id="L179">      logger.info(&quot;Successfully sorted items&quot;);</span>
+<span class="fc" id="L180">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
+<span class="nc" id="L181">    } catch (Exception e) {</span>
+<span class="nc" id="L182">      logger.severe(&quot;Unexpected error sorting items: &quot; + e.getMessage());</span>
+<span class="nc" id="L183">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+    }
+  }
+
+  /**
+   * Endpoint to filter and sort items based on specified criteria.
+   * This endpoint accepts separate filter and sort request objects and returns
+   * a list of items that are both filtered by the specified types and sorted
+   * according to the provided sort parameters. The filtering and sorting is
+   * performed by the ItemService.
+   *
+   * @param filterRequest The ItemFilterRequest containing the types to filter by
+   * @param sortRequest The ItemSortRequest containing sortBy and sortDirection parameters
+   * @return ResponseEntity containing a list of filtered and sorted ItemResponse objects
+   */
+  @Operation(
+      summary = &quot;Filter and sort items&quot;,
+        description = &quot;Retrieves a list of items filtered by the specified types and &quot;
+      + &quot;sorted by the specified criteria. If no types are provided, returns all items sorted. &quot;
+      + &quot;Valid sort fields: name, calories. Valid directions: asc, desc.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved&quot;
+          + &quot; filtered and sorted items&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid filter or sort parameters&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @GetMapping(&quot;/filter-and-sort&quot;)
+  public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; filterAndSortItems(
+      @Valid @ModelAttribute ItemFilterRequest filterRequest,
+      @Valid @ModelAttribute ItemSortRequest sortRequest) {
+
+<span class="fc" id="L217">    logger.info(&quot;Received request to filter and sort items&quot;);</span>
+    try {
+      // Use the service method to convert strings to ItemTypes
+<span class="fc" id="L220">      List&lt;ItemType&gt; itemTypes = itemService.convertToItemTypes(filterRequest.getTypes());</span>
+
+<span class="fc" id="L222">      List&lt;Item&gt; items = itemService.getFilteredAndSortedItems(</span>
+          itemTypes,
+<span class="fc" id="L224">          sortRequest.getSortBy().toLowerCase(),</span>
+<span class="fc" id="L225">          sortRequest.getSortDirection().toLowerCase());</span>
+<span class="fc" id="L226">      logger.info(&quot;Successfully filtered and sorted items&quot;);</span>
+<span class="fc" id="L227">      return ResponseEntity.ok(itemService.convertToItemResponses(items));</span>
+<span class="nc" id="L228">    } catch (Exception e) {</span>
+<span class="nc" id="L229">      logger.severe(&quot;Unexpected error filtering and sorting items: &quot; + e.getMessage());</span>
+<span class="nc" id="L230">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+    }
+  }
+
+  /**
+   * Endpoint to search for items by name.
+   * This endpoint searches for items whose names contain the provided search term.
+   * The search is case-insensitive and matches partial item names.
+   *
+   * @param searchTerm The term to search for in item names
+   * @return A list of items that match the search term
+   */
+  @Operation(
+      summary = &quot;Search items by name&quot;,
+      description = &quot;Searches for items whose names contain the provided search term. &quot;
+        + &quot;The search is case-insensitive and matches partial item names.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Successfully retrieved matching items&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @GetMapping(&quot;/search&quot;)
+  public ResponseEntity&lt;List&lt;ItemResponse&gt;&gt; searchItems(
+      @RequestParam(required = false) String searchTerm) {
+
+<span class="nc" id="L257">    logger.info(&quot;Searching for items with search term: &quot; + searchTerm);</span>
+    try {
+<span class="nc" id="L259">      List&lt;Item&gt; matchingItems = itemService.searchItemsByName(searchTerm);</span>
+<span class="nc" id="L260">      List&lt;ItemResponse&gt; itemResponses = itemService.convertToItemResponses(matchingItems);</span>
+<span class="nc" id="L261">      logger.info(&quot;Found &quot; + matchingItems.size() + &quot; matching items&quot;);</span>
+<span class="nc" id="L262">      return ResponseEntity.ok(itemResponses);</span>
+<span class="nc" id="L263">    } catch (Exception e) {</span>
+<span class="nc" id="L264">      logger.severe(&quot;Unexpected error searching items: &quot; + e.getMessage());</span>
+<span class="nc" id="L265">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());</span>
+    }
+  }
+
+  /**
+   * Endpoint to add a new item.
+   *
+   * @param itemRequest The request containing the item details
+   * @return The created item
+   */
+
+  @Operation(
+      summary = &quot;Add a new item&quot;,
+      description = &quot;Creates a new item in the database.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = &quot;Details of the item to be created&quot;,
+        required = true,
+        content = @Content(mediaType = &quot;application/json&quot;,
+          schema = @Schema(implementation = ItemRequest.class))
+      ),
+      responses = {
+        @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Item successfully created&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+    )
+  @PostMapping
+  public ResponseEntity&lt;ItemResponse&gt; addItem(@Valid @RequestBody ItemRequest itemRequest) {
+<span class="fc" id="L295">    logger.info(&quot;Received request to add a new item: &quot; + itemRequest.getName());</span>
+    try {
+<span class="fc" id="L297">      ItemResponse createdItemResponse = itemService.addItemFromRequest(itemRequest);</span>
+<span class="fc" id="L298">      logger.info(&quot;Successfully added item with ID: &quot; + createdItemResponse.getId());</span>
+<span class="fc" id="L299">      return ResponseEntity.status(HttpStatus.CREATED).body(createdItemResponse);</span>
+<span class="nc" id="L300">    } catch (Exception e) {</span>
+<span class="nc" id="L301">      logger.severe(&quot;Error adding item: &quot; + e.getMessage());</span>
+<span class="nc" id="L302">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to update an existing item.
+   *
+   * @param id          The ID of the item to update
+   * @param itemRequest The request containing the updated item details
+   * @return The updated item
+   */
+  @Operation(
+      summary = &quot;Update an existing item&quot;,
+      description = &quot;Updates an item with the specified ID using the provided item details.&quot;,
+      requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+      description = &quot;Updated details of the item&quot;,
+      required = true,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = ItemRequest.class))
+       ),
+      responses = {
+        @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Item successfully updated&quot;,
+          content = @Content(mediaType = &quot;application/json&quot;,
+            schema = @Schema(implementation = ItemResponse.class))),
+        @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid request data&quot;),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Item not found&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+  )
+  @PutMapping(&quot;/{id}&quot;)
+  public ResponseEntity&lt;ItemResponse&gt; updateItem(
+      @Parameter(description = &quot;ID of the item to update&quot;, required = true, example = &quot;1&quot;)
+      @PathVariable int id,
+      @Valid @RequestBody ItemRequest itemRequest) {
+<span class="fc" id="L336">    logger.info(&quot;Received request to update item with ID: &quot; + id);</span>
+    try {
+<span class="fc" id="L338">      ItemResponse updatedItemResponse = itemService.updateItemFromRequest(id, itemRequest);</span>
+<span class="fc" id="L339">      logger.info(&quot;Successfully updated item with ID: &quot; + id);</span>
+<span class="fc" id="L340">      return ResponseEntity.ok(updatedItemResponse);</span>
+<span class="fc" id="L341">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L343">        logger.info(&quot;Item not found with ID: &quot; + id);</span>
+<span class="fc" id="L344">        return ResponseEntity.notFound().build();</span>
+      }
+<span class="nc" id="L346">      logger.severe(&quot;Error updating item: &quot; + e.getMessage());</span>
+<span class="nc" id="L347">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+
+  /**
+   * Endpoint to delete an item by its ID.
+   *
+   * @param id The ID of the item to delete
+   * @return No content if successful, or an error status
+   */
+  @Operation(
+      summary = &quot;Delete an item&quot;,
+      description = &quot;Deletes an item with the specified ID. Returns no content if successful.&quot;,
+      responses = {
+        @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Item successfully deleted&quot;),
+        @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Item not found&quot;),
+        @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Internal server error&quot;)
+      }
+      )
+  @DeleteMapping(&quot;/{id}&quot;)
+  public ResponseEntity&lt;Void&gt; deleteItem(
+      @Parameter(description = &quot;ID of the item to delete&quot;, required = true, example = &quot;1&quot;)
+      @PathVariable int id) {
+<span class="fc" id="L370">    logger.info(&quot;Received request to delete item with ID: &quot; + id);</span>
+    try {
+<span class="fc" id="L372">      itemService.deleteItem(id);</span>
+<span class="fc" id="L373">      logger.info(&quot;Successfully deleted item with ID: &quot; + id);</span>
+<span class="fc" id="L374">      return ResponseEntity.noContent().build();</span>
+<span class="fc" id="L375">    } catch (RuntimeException e) {</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">      if (e.getMessage().contains(&quot;not found&quot;)) {</span>
+<span class="fc" id="L377">        logger.info(&quot;Item not found with ID: &quot; + id);</span>
+<span class="fc" id="L378">        return ResponseEntity.notFound().build();</span>
+      }
+<span class="nc" id="L380">      logger.severe(&quot;Error deleting item: &quot; + e.getMessage());</span>
+<span class="nc" id="L381">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

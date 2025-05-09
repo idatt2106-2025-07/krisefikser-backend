@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GeneralInfoRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">krisefikser</a> &gt; <a href="index.source.html" class="el_package">com.group7.krisefikser.repository.article</a> &gt; <span class="el_source">GeneralInfoRepository.java</span></div><h1>GeneralInfoRepository.java</h1><pre class="source lang-java linenums">package com.group7.krisefikser.repository.article;
+
+import com.group7.krisefikser.enums.Theme;
+import com.group7.krisefikser.model.article.GeneralInfo;
+import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository class for managing general information in the database.
+ * This class provides methods to perform CRUD operations
+ * on the general_info table.
+ * It uses JdbcTemplate for database interactions.
+ */
+@Repository
+public class GeneralInfoRepository {
+  private final JdbcTemplate jdbcTemplate;
+
+  /**
+   * Constructor for GeneralInfoRepository.
+   * Initializes the JdbcTemplate for database operations.
+   *
+   * @param jdbcTemplate the JdbcTemplate to be used for database operations
+   */
+<span class="fc" id="L25">  public GeneralInfoRepository(JdbcTemplate jdbcTemplate) {</span>
+<span class="fc" id="L26">    this.jdbcTemplate = jdbcTemplate;</span>
+<span class="fc" id="L27">  }</span>
+
+  /**
+   * Retrieves all general information from the database.
+   *
+   * @return a list of GeneralInfo objects containing details of all general information
+   */
+  public List&lt;GeneralInfo&gt; getAllGeneralInfo() {
+<span class="nc" id="L35">    String sql = &quot;SELECT * FROM general_info&quot;;</span>
+<span class="nc" id="L36">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="nc" id="L37">      GeneralInfo info = new GeneralInfo();</span>
+<span class="nc" id="L38">      info.setId(rs.getLong(&quot;id&quot;));</span>
+<span class="nc" id="L39">      String themeString = rs.getString(&quot;theme&quot;).toUpperCase();</span>
+<span class="nc" id="L40">      Theme theme = Theme.valueOf(themeString);</span>
+<span class="nc" id="L41">      info.setTheme(theme);</span>
+<span class="nc" id="L42">      info.setTitle(rs.getString(&quot;title&quot;));</span>
+<span class="nc" id="L43">      info.setContent(rs.getString(&quot;content&quot;));</span>
+<span class="nc" id="L44">      return info;</span>
+    });
+  }
+
+  /**
+   * Adds a new general information entry to the database.
+   * This method inserts a new record into the general_info table.
+   *
+   * @param info the GeneralInfo object containing details of the general information to be added
+   * @return the added GeneralInfo object with the generated ID
+   */
+  public GeneralInfo addGeneralInfo(GeneralInfo info) {
+<span class="nc" id="L56">    String sql = &quot;INSERT INTO general_info (theme, title, content) VALUES (?, ?, ?)&quot;;</span>
+<span class="nc" id="L57">    jdbcTemplate.update(sql, info.getTheme().name(),</span>
+<span class="nc" id="L58">        info.getTitle(), info.getContent());</span>
+<span class="nc" id="L59">    Long id = jdbcTemplate.queryForObject(&quot;SELECT LAST_INSERT_ID()&quot;, Long.class);</span>
+<span class="nc" id="L60">    info.setId(id);</span>
+<span class="nc" id="L61">    return info;</span>
+  }
+
+  /**
+   * Updates an existing general information entry in the database.
+   * This method modifies an existing record in the general_info table.
+   *
+   * @param info the GeneralInfo object containing updated details of the general information
+   *             to be updated
+   * @param id   the ID of the general information entry to be updated
+   * @return the updated GeneralInfo object
+   */
+  public GeneralInfo updateGeneralInfo(GeneralInfo info, Long id) {
+<span class="nc" id="L74">    String sql = &quot;UPDATE general_info SET theme = ?, title = ?, content = ? WHERE id = ?&quot;;</span>
+<span class="nc" id="L75">    jdbcTemplate.update(sql, info.getTheme().name(),</span>
+<span class="nc" id="L76">        info.getTitle(), info.getContent(), id);</span>
+<span class="nc" id="L77">    info.setId(id);</span>
+<span class="nc" id="L78">    return info;</span>
+  }
+
+  /**
+   * Deletes a general information entry from the database.
+   * This method removes a record from the general_info table
+   * based on the provided ID.
+   *
+   * @param id the ID of the general information entry to be deleted
+   */
+  public void deleteGeneralInfo(Long id) {
+<span class="nc" id="L89">    String sql = &quot;DELETE FROM general_info WHERE id = ?&quot;;</span>
+<span class="nc" id="L90">    jdbcTemplate.update(sql, id);</span>
+<span class="nc" id="L91">  }</span>
+
+  /**
+   * Retrieves general information entries from the database
+   * based on the specified theme.
+   * This method returns a list of GeneralInfo objects
+   * that match the provided theme.
+   *
+   * @param themeSearched the theme to search for in the general information
+   * @return a list of GeneralInfo objects containing details of the matching general information
+   */
+  public List&lt;GeneralInfo&gt; getGeneralInfoByTheme(Theme themeSearched) {
+<span class="nc" id="L103">    String sql = &quot;SELECT * FROM general_info WHERE theme = ?&quot;;</span>
+<span class="nc" id="L104">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt; {</span>
+<span class="nc" id="L105">      GeneralInfo info = new GeneralInfo();</span>
+<span class="nc" id="L106">      info.setId(rs.getLong(&quot;id&quot;));</span>
+<span class="nc" id="L107">      String themeString = rs.getString(&quot;theme&quot;).toUpperCase();</span>
+<span class="nc" id="L108">      Theme theme = Theme.valueOf(themeString);</span>
+<span class="nc" id="L109">      info.setTheme(theme);</span>
+<span class="nc" id="L110">      info.setTitle(rs.getString(&quot;title&quot;));</span>
+<span class="nc" id="L111">      info.setContent(rs.getString(&quot;content&quot;));</span>
+<span class="nc" id="L112">      return info;</span>
+<span class="nc" id="L113">    }, themeSearched.name());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
