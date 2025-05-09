@@ -3,6 +3,7 @@
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -10,7 +11,8 @@ import org.springframework.web.client.RestTemplate;
  * This class serves as the entry point for the Spring Boot application.
  */
 @SpringBootApplication
-<span class="fc" id="L13">public class KrisefikserApplication {</span>
+@EnableAsync
+<span class="fc" id="L15">public class KrisefikserApplication {</span>
 
   /**
    * Bean for RestTemplate, used for making HTTP requests.
@@ -19,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
    */
   @Bean
   public RestTemplate restTemplate() {
-<span class="fc" id="L22">    return new RestTemplate();</span>
+<span class="fc" id="L24">    return new RestTemplate();</span>
   }
 
   /**
@@ -28,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
    * @param args command line arguments
    */
   public static void main(String[] args) {
-<span class="nc" id="L31">    SpringApplication.run(KrisefikserApplication.class, args);</span>
-<span class="nc" id="L32">  }</span>
+<span class="nc" id="L33">    SpringApplication.run(KrisefikserApplication.class, args);</span>
+<span class="nc" id="L34">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

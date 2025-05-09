@@ -9,6 +9,7 @@ import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.EmailTemplateType;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
+import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.mapper.UserMapper;
 import com.group7.krisefikser.model.Household;
 import com.group7.krisefikser.model.User;
@@ -51,13 +52,13 @@ public class UserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-<span class="fc" id="L54">    User user = userRepo.findByEmail(email)</span>
-<span class="fc" id="L55">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
-<span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (user == null) {</span>
-<span class="nc" id="L57">      throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
+<span class="fc" id="L55">    User user = userRepo.findByEmail(email)</span>
+<span class="fc" id="L56">        .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User not found with username: &quot; + email));</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">    if (user == null) {</span>
+<span class="nc" id="L58">      throw new UsernameNotFoundException(&quot;User not found&quot;);</span>
     }
-<span class="fc" id="L59">    return new org.springframework.security.core.userdetails.User(</span>
-<span class="fc" id="L60">        user.getEmail(), user.getPassword(),</span>
+<span class="fc" id="L60">    return new org.springframework.security.core.userdetails.User(</span>
+<span class="fc" id="L61">        user.getEmail(), user.getPassword(),</span>
         new ArrayList&lt;&gt;());
   }
 
@@ -71,36 +72,35 @@ public class UserService implements UserDetailsService {
    */
   @Transactional
   public AuthResponse registerUser(RegisterRequest request) {
-<span class="fc" id="L74">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
-<span class="fc" id="L75">    user.setRole(Role.ROLE_NORMAL);</span>
-<span class="fc" id="L76">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
+<span class="fc" id="L75">    User user = UserMapper.INSTANCE.registerRequestToUser(request);</span>
+<span class="fc" id="L76">    Household household =</span>
+<span class="fc" id="L77">        HouseholdMapper.INSTANCE.householdRequestToHousehold(request.getHouseholdRequest());</span>
+<span class="fc" id="L78">    user.setRole(Role.ROLE_NORMAL);</span>
+<span class="fc" id="L79">    user.setPassword(PasswordUtil.hashPassword(request.getPassword()));</span>
     Long householdId;
-<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
-<span class="fc" id="L79">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L80">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if (userRepo.findByEmail(user.getEmail()).isPresent()) {</span>
+<span class="fc" id="L82">      return new AuthResponse(AuthResponseMessage</span>
+<span class="fc" id="L83">          .USER_ALREADY_EXISTS.getMessage(), null, null);</span>
     }
 
-    // When the user is created, we also create a household for them
-    // This is for when the user waits for the request to join a household to be accepted
-    // This is a temporary solution, in the future the user should be able to create a household
     try {
-<span class="fc" id="L87">      householdId = householdService.createHouseholdForUser(user.getName());</span>
-<span class="fc" id="L88">    } catch (Exception e) {</span>
-<span class="fc" id="L89">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L90">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
-<span class="fc" id="L91">    }</span>
+<span class="nc" id="L87">      householdId = householdService.createHousehold(household);</span>
+<span class="nc" id="L88">    } catch (Exception e) {</span>
+<span class="nc" id="L89">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L90">          .HOUSEHOLD_FAILURE.getMessage() + e.getMessage(), null, null);</span>
+<span class="nc" id="L91">    }</span>
     try {
-<span class="fc" id="L93">      user.setHouseholdId(householdId);</span>
-<span class="fc" id="L94">      userRepo.save(user);</span>
-<span class="fc" id="L95">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
-<span class="fc" id="L96">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
-<span class="fc" id="L97">      String verificationLink = frontendUrl + &quot;/verify-email?token=&quot; + emailVerificationToken;</span>
-<span class="fc" id="L98">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
-<span class="fc" id="L99">      emailService.sendTemplateMessage(</span>
-<span class="fc" id="L100">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
+<span class="nc" id="L93">      user.setHouseholdId(householdId);</span>
+<span class="nc" id="L94">      userRepo.save(user);</span>
+<span class="nc" id="L95">      Optional&lt;User&gt; byEmail = userRepo.findByEmail(user.getEmail());</span>
+<span class="nc" id="L96">      String emailVerificationToken = jwtUtils.generateVerificationToken(byEmail.get().getEmail());</span>
+<span class="nc" id="L97">      String verificationLink = frontendUrl + &quot;/verify-email?token=&quot; + emailVerificationToken;</span>
+<span class="nc" id="L98">      Map&lt;String, String&gt; params = Map.of(&quot;verificationLink&quot;, verificationLink);</span>
+<span class="nc" id="L99">      emailService.sendTemplateMessage(</span>
+<span class="nc" id="L100">          byEmail.get().getEmail(), EmailTemplateType.VERIFY_EMAIL, params);</span>
 
-<span class="fc" id="L102">      return new AuthResponse(AuthResponseMessage</span>
-<span class="fc" id="L103">          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());</span>
+<span class="nc" id="L102">      return new AuthResponse(AuthResponseMessage</span>
+<span class="nc" id="L103">          .USER_REGISTERED_SUCCESSFULLY.getMessage(), null, byEmail.get().getRole());</span>
 <span class="nc" id="L104">    } catch (Exception e) {</span>
 <span class="nc" id="L105">      return new AuthResponse(AuthResponseMessage</span>
 <span class="nc" id="L106">          .SAVING_USER_ERROR.getMessage() + e.getMessage(), null, null);</span>

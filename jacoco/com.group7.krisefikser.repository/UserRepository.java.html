@@ -176,6 +176,36 @@ public class UserRepository {
 <span class="nc" id="L176">  }</span>
 
   /**
+   * Finds the household ID associated with a user.
+   *
+   * @param userId the ID of the user
+   * @return the ID of the user's household, or null if not found
+   */
+  public Long findHouseholdIdByUserId(Long userId) {
+<span class="nc" id="L185">    String sql = &quot;SELECT household_id FROM users WHERE id = ?&quot;;</span>
+    try {
+<span class="nc" id="L187">      return jdbcTemplate.queryForObject(sql, Long.class, userId);</span>
+<span class="nc" id="L188">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L189">      return null;</span>
+    }
+  }
+
+  /**
+   * Finds the name associated with a user ID.
+   *
+   * @param userId the ID of the user
+   * @return the name of the user, or null if not found
+   */
+  public String findNameById(Long userId) {
+<span class="nc" id="L200">    String sql = &quot;SELECT name FROM users WHERE id = ?&quot;;</span>
+    try {
+<span class="nc" id="L202">      return jdbcTemplate.queryForObject(sql, String.class, userId);</span>
+<span class="nc" id="L203">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L204">      return null;</span>
+    }
+  }
+  
+  /**
    * Deletes a user from the database by their ID.
    * This method removes the user from the users table
    * and also deletes any associated records
@@ -184,9 +214,9 @@ public class UserRepository {
    * @param id the ID of the user to be deleted
    */
   public void deleteById(Long id) {
-<span class="fc" id="L187">    jdbcTemplate.update(&quot;DELETE FROM join_household_requests WHERE user_id = ?&quot;, id);</span>
-<span class="fc" id="L188">    jdbcTemplate.update(&quot;DELETE FROM users WHERE id = ?&quot;, id);</span>
-<span class="fc" id="L189">  }</span>
+<span class="fc" id="L217">    jdbcTemplate.update(&quot;DELETE FROM join_household_requests WHERE user_id = ?&quot;, id);</span>
+<span class="fc" id="L218">    jdbcTemplate.update(&quot;DELETE FROM users WHERE id = ?&quot;, id);</span>
+<span class="fc" id="L219">  }</span>
 
   /**
    * Finds users by their role.
@@ -198,13 +228,13 @@ public class UserRepository {
    * @return a list of users with the specified role, or an empty list if none are found
    */
   public List&lt;User&gt; findByRole(Role role) {
-<span class="fc" id="L201">    String sql = &quot;SELECT * FROM users WHERE role = ?&quot;;</span>
+<span class="fc" id="L231">    String sql = &quot;SELECT * FROM users WHERE role = ?&quot;;</span>
     try {
-<span class="fc" id="L203">      return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
-<span class="fc" id="L204">          mapRowToUser(rs), role.toString());</span>
-<span class="nc" id="L205">    } catch (EmptyResultDataAccessException e) {</span>
-<span class="nc" id="L206">      logger.info(&quot;No users found with role: &quot; + role);</span>
-<span class="nc" id="L207">      return List.of();</span>
+<span class="fc" id="L233">      return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
+<span class="fc" id="L234">          mapRowToUser(rs), role.toString());</span>
+<span class="nc" id="L235">    } catch (EmptyResultDataAccessException e) {</span>
+<span class="nc" id="L236">      logger.info(&quot;No users found with role: &quot; + role);</span>
+<span class="nc" id="L237">      return List.of();</span>
     }
   }
 
@@ -218,9 +248,9 @@ public class UserRepository {
    * @param hashedPassword the new hashed password to be set
    */
   public void updatePasswordByEmail(String email, String hashedPassword) {
-<span class="fc" id="L221">    String sql = &quot;UPDATE users SET password = ? WHERE email = ?&quot;;</span>
-<span class="fc" id="L222">    jdbcTemplate.update(sql, hashedPassword, email);</span>
-<span class="fc" id="L223">  }</span>
+<span class="fc" id="L251">    String sql = &quot;UPDATE users SET password = ? WHERE email = ?&quot;;</span>
+<span class="fc" id="L252">    jdbcTemplate.update(sql, hashedPassword, email);</span>
+<span class="fc" id="L253">  }</span>
 
   /**
    * Retrieves a list of users associated with a specific household ID.
@@ -233,9 +263,9 @@ public class UserRepository {
    *         or an empty list if none are found
    */
   public List&lt;User&gt; getUsersByHouseholdId(Long householdId) {
-<span class="nc" id="L236">    String sql = &quot;SELECT * FROM users WHERE household_id = ?&quot;;</span>
-<span class="nc" id="L237">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
-<span class="nc" id="L238">            mapRowToUser(rs), householdId);</span>
+<span class="nc" id="L266">    String sql = &quot;SELECT * FROM users WHERE household_id = ?&quot;;</span>
+<span class="nc" id="L267">    return jdbcTemplate.query(sql, (rs, rowNum) -&gt;</span>
+<span class="nc" id="L268">            mapRowToUser(rs), householdId);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -5,6 +5,7 @@ import com.group7.krisefikser.dto.request.RegisterRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordLinkRequest;
 import com.group7.krisefikser.dto.request.ResetPasswordRequest;
 import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.response.CurrentUserResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.service.UserService;
 import com.group7.krisefikser.utils.JwtUtils;
@@ -25,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,7 +46,7 @@ public class AuthController {
 
   private final UserService userService;
   private final JwtUtils jwtUtils;
-<span class="fc" id="L47">  private static final Logger logger = Logger.getLogger(AuthController.class.getName());</span>
+<span class="fc" id="L49">  private static final Logger logger = Logger.getLogger(AuthController.class.getName());</span>
 
   /**
    * Endpoint for user registration.
@@ -57,31 +59,31 @@ public class AuthController {
   @Operation(
       summary = &quot;Register a new user&quot;,
       description = &quot;Registers a new user account using the provided email, name and password. &quot;
-          + &quot;A verification email is sent to the provided email address.&quot;
+      + &quot;A verification email is sent to the provided email address.&quot;
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;201&quot;, description = &quot;User registered successfully&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error while saving the user&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = &quot;201&quot;, description = &quot;User registered successfully&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error while saving the user&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class)))
   })
   @PostMapping(&quot;/register&quot;)
   public ResponseEntity&lt;AuthResponse&gt; registerUser(
       @Valid @RequestBody RegisterRequest request) {
-<span class="fc" id="L73">    logger.info(&quot;Received register request for user: &quot; + request.getEmail());</span>
+<span class="fc" id="L75">    logger.info(&quot;Received register request for user: &quot; + request.getEmail());</span>
     try {
-<span class="fc" id="L75">      AuthResponse authResponse = userService.registerUser(request);</span>
+<span class="fc" id="L77">      AuthResponse authResponse = userService.registerUser(request);</span>
 
-<span class="fc" id="L77">      logger.info(&quot;User registered successfully: &quot; + request.getEmail());</span>
-<span class="fc" id="L78">      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);</span>
+<span class="fc" id="L79">      logger.info(&quot;User registered successfully: &quot; + request.getEmail());</span>
+<span class="fc" id="L80">      return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);</span>
 
-<span class="fc" id="L80">    } catch (Exception e) {</span>
-<span class="fc" id="L81">      logger.warning(&quot;Error registering user: &quot; + e.getMessage());</span>
-<span class="fc" id="L82">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L83">          new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()</span>
-<span class="fc" id="L84">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L82">    } catch (Exception e) {</span>
+<span class="fc" id="L83">      logger.warning(&quot;Error registering user: &quot; + e.getMessage());</span>
+<span class="fc" id="L84">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L85">        new AuthResponse(AuthResponseMessage.SAVING_USER_ERROR.getMessage()</span>
+<span class="fc" id="L86">          + e.getMessage(), null, null));</span>
     }
   }
 
@@ -90,45 +92,45 @@ public class AuthController {
    * This method handles the login of an existing user.
    * It accepts a LoginRequest object containing user credentials.
    *
-   * @param request the login request containing user credentials
+   * @param request  the login request containing user credentials
    * @param response the HTTP response object
    * @return a ResponseEntity containing the authentication response
    */
   @Operation(
       summary = &quot;Log in a user&quot;,
       description = &quot;Logs in a user using their email and password. &quot;
-          + &quot;If the credentials are valid and the user is verified, a JWT token is returned.&quot;
+      + &quot;If the credentials are valid and the user is verified, a JWT token is returned.&quot;
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;User logged in successfully&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error during login process&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;User logged in successfully&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error during login process&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class)))
   })
   @PostMapping(&quot;/login&quot;)
   public ResponseEntity&lt;AuthResponse&gt; loginUser(
       @Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-<span class="fc" id="L113">    logger.info(&quot;Received login request for user: &quot; + request.getEmail());</span>
+<span class="fc" id="L115">    logger.info(&quot;Received login request for user: &quot; + request.getEmail());</span>
     try {
-<span class="fc" id="L115">      AuthResponse authResponse = userService.loginUser(request, response);</span>
+<span class="fc" id="L117">      AuthResponse authResponse = userService.loginUser(request, response);</span>
 
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">      if (!authResponse.getMessage().equals(AuthResponseMessage</span>
-<span class="fc" id="L118">          .USER_LOGGED_IN_SUCCESSFULLY.getMessage())</span>
-<span class="nc bnc" id="L119" title="All 2 branches missed.">          &amp;&amp; !authResponse.getMessage().equals(AuthResponseMessage.TWO_FACTOR_SENT.getMessage())) {</span>
-<span class="nc" id="L120">        logger.warning(&quot;Invalid credentials for user: &quot; + request.getEmail());</span>
-<span class="nc" id="L121">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">      if (!authResponse.getMessage().equals(AuthResponseMessage</span>
+<span class="fc" id="L120">          .USER_LOGGED_IN_SUCCESSFULLY.getMessage())</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">          &amp;&amp; !authResponse.getMessage().equals(AuthResponseMessage.TWO_FACTOR_SENT.getMessage())) {</span>
+<span class="nc" id="L122">        logger.warning(&quot;Invalid credentials for user: &quot; + request.getEmail());</span>
+<span class="nc" id="L123">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(authResponse);</span>
       }
 
-<span class="fc" id="L124">      logger.info(&quot;User logged in successfully: &quot; + request.getEmail());</span>
-<span class="fc" id="L125">      return ResponseEntity.ok(authResponse);</span>
+<span class="fc" id="L126">      logger.info(&quot;User logged in successfully: &quot; + request.getEmail());</span>
+<span class="fc" id="L127">      return ResponseEntity.ok(authResponse);</span>
 
-<span class="fc" id="L127">    } catch (Exception e) {</span>
-<span class="fc" id="L128">      logger.warning(&quot;Error logging in user: &quot; + e.getMessage());</span>
-<span class="fc" id="L129">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L130">          new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()</span>
-<span class="fc" id="L131">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L129">    } catch (Exception e) {</span>
+<span class="fc" id="L130">      logger.warning(&quot;Error logging in user: &quot; + e.getMessage());</span>
+<span class="fc" id="L131">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L132">        new AuthResponse(AuthResponseMessage.USER_LOGIN_ERROR.getMessage()</span>
+<span class="fc" id="L133">          + e.getMessage(), null, null));</span>
     }
   }
 
@@ -143,83 +145,93 @@ public class AuthController {
   @Operation(
       summary = &quot;Verify user email&quot;,
       description = &quot;Verifies a user's email address using a token sent &quot;
-          + &quot;to them via email after registration.&quot;,
+      + &quot;to them via email after registration.&quot;,
       parameters = @Parameter(
-          name = &quot;token&quot;,
-          description = &quot;Verification token received by email. &quot;
-              + &quot;Must match a token issued during registration.&quot;,
-          required = true,
-          schema = @Schema(type = &quot;string&quot;)
+      name = &quot;token&quot;,
+      description = &quot;Verification token received by email. &quot;
+        + &quot;Must match a token issued during registration.&quot;,
+      required = true,
+      schema = @Schema(type = &quot;string&quot;)
       )
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;User verified successfully&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid or expired verification token&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class))),
-      @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error during email verification&quot;,
-          content = @Content(mediaType = &quot;application/json&quot;,
-              schema = @Schema(implementation = AuthResponse.class)))
+    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;User verified successfully&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Invalid or expired verification token&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class))),
+    @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Server error during email verification&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = AuthResponse.class)))
   })
   @GetMapping(&quot;/verify-email&quot;)
   public ResponseEntity&lt;AuthResponse&gt; verifyEmail(@Valid @RequestParam String token) {
-<span class="fc" id="L168">    logger.info(&quot;Received email verification request with token: &quot; + token);</span>
+<span class="fc" id="L170">    logger.info(&quot;Received email verification request with token: &quot; + token);</span>
     try {
-<span class="fc" id="L170">      AuthResponse authResponse = userService.verifyEmail(token);</span>
+<span class="fc" id="L172">      AuthResponse authResponse = userService.verifyEmail(token);</span>
 
-<span class="fc bfc" id="L172" title="All 2 branches covered.">      if (authResponse.getMessage().equals(</span>
-<span class="fc" id="L173">          AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage())) {</span>
-<span class="fc" id="L174">        logger.info(&quot;User verified successfully with token: &quot; + token);</span>
-<span class="fc" id="L175">        return ResponseEntity.ok(authResponse);</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">      if (authResponse.getMessage().equals(</span>
+<span class="fc" id="L175">          AuthResponseMessage.USER_VERIFIED_SUCCESSFULLY.getMessage())) {</span>
+<span class="fc" id="L176">        logger.info(&quot;User verified successfully with token: &quot; + token);</span>
+<span class="fc" id="L177">        return ResponseEntity.ok(authResponse);</span>
       } else {
-<span class="fc" id="L177">        logger.warning(&quot;Error verifying user: &quot; + authResponse.getMessage());</span>
-<span class="fc" id="L178">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
+<span class="fc" id="L179">        logger.warning(&quot;Error verifying user: &quot; + authResponse.getMessage());</span>
+<span class="fc" id="L180">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
       }
-<span class="fc" id="L180">    } catch (Exception e) {</span>
-<span class="fc" id="L181">      logger.warning(&quot;Error verifying email: &quot; + e.getMessage());</span>
-<span class="fc" id="L182">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="fc" id="L183">          new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()</span>
-<span class="fc" id="L184">                  + e.getMessage(), null, null));</span>
+<span class="fc" id="L182">    } catch (Exception e) {</span>
+<span class="fc" id="L183">      logger.warning(&quot;Error verifying email: &quot; + e.getMessage());</span>
+<span class="fc" id="L184">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="fc" id="L185">        new AuthResponse(AuthResponseMessage.EMAIL_VERIFICATION_ERROR.getMessage()</span>
+<span class="fc" id="L186">          + e.getMessage(), null, null));</span>
     }
   }
 
   /**
-   * Endpoint for getting the current user's info.
-   * This method retrieves the email and role of the currently authenticated user.
+   * Endpoint to get the current user's information.
+   * This method retrieves the email and name of the currently authenticated user.
    *
-   * @return a ResponseEntity containing the user's info or no content if not authenticated
+   * @return a ResponseEntity containing the current user's information
    */
   @Operation(
       summary = &quot;Get current user info&quot;,
-      description = &quot;Returns the email and role of the currently authenticated user,&quot;
-      + &quot;or no content if not authenticated.&quot;
+      description = &quot;Returns the email and name of the currently&quot;
+         + &quot; authenticated user, or no content if not authenticated.&quot;
   )
   @ApiResponses({
-      @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Authenticated – returns user info&quot;),
-      @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Not authenticated – no content&quot;)
+    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Authenticated – returns email and name&quot;,
+      content = @Content(mediaType = &quot;application/json&quot;,
+        schema = @Schema(implementation = CurrentUserResponse.class))),
+    @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Not authenticated – no content&quot;)
   })
   @GetMapping(&quot;/me&quot;)
-  public ResponseEntity&lt;Map&lt;String, String&gt;&gt; getCurrentUserInfo() {
-<span class="fc" id="L205">    Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
-<span class="pc bpc" id="L206" title="2 of 6 branches missed.">    if (auth != null &amp;&amp; auth.isAuthenticated() &amp;&amp; !(auth instanceof AnonymousAuthenticationToken)) {</span>
-<span class="fc" id="L207">      Map&lt;String, String&gt; userInfo = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L208">      userInfo.put(&quot;email&quot;, auth.getName());</span>
-        
-      // Extract role from authorities
-<span class="fc" id="L211">      String role = auth.getAuthorities().stream()</span>
-<span class="fc" id="L212">          .findFirst()</span>
-<span class="fc" id="L213">          .map(authority -&gt; authority.getAuthority())</span>
-<span class="fc" id="L214">          .orElse(&quot;ROLE_UNKNOWN&quot;);</span>
-        
-<span class="fc" id="L216">      userInfo.put(&quot;role&quot;, role);</span>
-<span class="fc" id="L217">      return ResponseEntity.ok(userInfo);</span>
+  public ResponseEntity&lt;CurrentUserResponse&gt; getCurrentUserInfo() {
+<span class="fc" id="L209">    Authentication auth = SecurityContextHolder.getContext().getAuthentication();</span>
+<span class="pc bpc" id="L210" title="2 of 6 branches missed.">    if (auth != null &amp;&amp; auth.isAuthenticated()</span>
+        &amp;&amp; !(auth instanceof AnonymousAuthenticationToken)) {
+      try {
+<span class="fc" id="L213">        com.group7.krisefikser.model.User user = userService.getCurrentUser();</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if (user != null) {</span>
+<span class="fc" id="L215">          String role = auth.getAuthorities().stream()</span>
+<span class="fc" id="L216">              .findFirst()</span>
+<span class="fc" id="L217">              .map(GrantedAuthority::getAuthority)</span>
+<span class="fc" id="L218">              .orElse(&quot;ROLE_UNKNOWN&quot;);</span>
+
+<span class="fc" id="L220">          return ResponseEntity.ok(new CurrentUserResponse(</span>
+<span class="fc" id="L221">            user.getEmail(), user.getName(), role));</span>
+        }
+<span class="nc" id="L223">      } catch (Exception e) {</span>
+<span class="nc" id="L224">        logger.warning(&quot;Error retrieving current user: &quot; + e.getMessage());</span>
+<span class="nc" id="L225">        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+          new CurrentUserResponse(
+<span class="nc" id="L227">            AuthResponseMessage.USER_NOT_FOUND.getMessage(), null, &quot;ROLE_UNKNOWN&quot;));</span>
+<span class="nc" id="L228">      }</span>
     }
-    
-<span class="fc" id="L220">    logger.info(&quot;GET /me - No authenticated user found&quot;);</span>
-<span class="fc" id="L221">    return ResponseEntity.noContent().build();</span>
+
+<span class="fc" id="L231">    logger.info(&quot;GET /me - No authenticated user found&quot;);</span>
+<span class="fc" id="L232">    return ResponseEntity.noContent().build();</span>
   }
+
 
   /**
    * Endpoint for logging out a user.
@@ -240,11 +252,11 @@ public class AuthController {
   @PostMapping(&quot;/logout&quot;)
   public ResponseEntity&lt;Void&gt; logout(HttpServletResponse response) {
     try {
-<span class="fc" id="L243">      jwtUtils.setLogOutJwtCookie(response);</span>
-<span class="fc" id="L244">      return ResponseEntity.ok().build();</span>
-<span class="nc" id="L245">    } catch (Exception e) {</span>
-<span class="nc" id="L246">      logger.warning(&quot;Error during logout: &quot; + e.getMessage());</span>
-<span class="nc" id="L247">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="fc" id="L255">      jwtUtils.setLogOutJwtCookie(response);</span>
+<span class="fc" id="L256">      return ResponseEntity.ok().build();</span>
+<span class="nc" id="L257">    } catch (Exception e) {</span>
+<span class="nc" id="L258">      logger.warning(&quot;Error during logout: &quot; + e.getMessage());</span>
+<span class="nc" id="L259">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 
@@ -272,22 +284,22 @@ public class AuthController {
   @PostMapping(&quot;/reset-password&quot;)
   public ResponseEntity&lt;AuthResponse&gt; resetPassword(
       @Valid @RequestBody ResetPasswordRequest resetPasswordRequest) {
-<span class="nc" id="L275">    logger.info(&quot;Received password reset request for user: &quot; + resetPasswordRequest.getEmail());</span>
+<span class="nc" id="L287">    logger.info(&quot;Received password reset request for user: &quot; + resetPasswordRequest.getEmail());</span>
     try {
-<span class="nc" id="L277">      AuthResponse authResponse = userService.resetPassword(resetPasswordRequest);</span>
-<span class="nc bnc" id="L278" title="All 2 branches missed.">      if (authResponse.getMessage().equals(</span>
-<span class="nc" id="L279">          AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage())) {</span>
-<span class="nc" id="L280">        logger.info(&quot;Password reset successfully for user: &quot; + resetPasswordRequest.getEmail());</span>
-<span class="nc" id="L281">        return ResponseEntity.ok(authResponse);</span>
+<span class="nc" id="L289">      AuthResponse authResponse = userService.resetPassword(resetPasswordRequest);</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">      if (authResponse.getMessage().equals(</span>
+<span class="nc" id="L291">          AuthResponseMessage.PASSWORD_RESET_SUCCESS.getMessage())) {</span>
+<span class="nc" id="L292">        logger.info(&quot;Password reset successfully for user: &quot; + resetPasswordRequest.getEmail());</span>
+<span class="nc" id="L293">        return ResponseEntity.ok(authResponse);</span>
       } else {
-<span class="nc" id="L283">        logger.warning(&quot;Error resetting password: &quot; + authResponse.getMessage());</span>
-<span class="nc" id="L284">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
+<span class="nc" id="L295">        logger.warning(&quot;Error resetting password: &quot; + authResponse.getMessage());</span>
+<span class="nc" id="L296">        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(authResponse);</span>
       }
-<span class="nc" id="L286">    } catch (Exception e) {</span>
-<span class="nc" id="L287">      logger.warning(&quot;Error resetting password: &quot; + e.getMessage());</span>
-<span class="nc" id="L288">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
-<span class="nc" id="L289">          new AuthResponse(AuthResponseMessage.PASSWORD_RESET_ERROR.getMessage()</span>
-<span class="nc" id="L290">                  + e.getMessage(), null, null));</span>
+<span class="nc" id="L298">    } catch (Exception e) {</span>
+<span class="nc" id="L299">      logger.warning(&quot;Error resetting password: &quot; + e.getMessage());</span>
+<span class="nc" id="L300">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(</span>
+<span class="nc" id="L301">          new AuthResponse(AuthResponseMessage.PASSWORD_RESET_ERROR.getMessage()</span>
+<span class="nc" id="L302">                  + e.getMessage(), null, null));</span>
     }
   }
 
@@ -315,15 +327,15 @@ public class AuthController {
   public ResponseEntity&lt;Object&gt; sendNewPasswordLink(
       @Valid @RequestBody ResetPasswordLinkRequest request) {
     
-<span class="nc" id="L318">    String email = request.getEmail();</span>
-<span class="nc" id="L319">    logger.info(&quot;Trying to send new password link to: &quot; + email);</span>
+<span class="nc" id="L330">    String email = request.getEmail();</span>
+<span class="nc" id="L331">    logger.info(&quot;Trying to send new password link to: &quot; + email);</span>
     try {
-<span class="nc" id="L321">      userService.sendResetPasswordLink(email);</span>
-<span class="nc" id="L322">      logger.info(&quot;New password link sent to: &quot; + email);</span>
-<span class="nc" id="L323">      return ResponseEntity.ok(&quot;New password link sent to: &quot; + email);</span>
-<span class="nc" id="L324">    } catch (Exception e) {</span>
-<span class="nc" id="L325">      logger.severe(&quot;Error sending new password link to &quot; + email + &quot;: &quot; + e.getMessage());</span>
-<span class="nc" id="L326">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
+<span class="nc" id="L333">      userService.sendResetPasswordLink(email);</span>
+<span class="nc" id="L334">      logger.info(&quot;New password link sent to: &quot; + email);</span>
+<span class="nc" id="L335">      return ResponseEntity.ok(&quot;New password link sent to: &quot; + email);</span>
+<span class="nc" id="L336">    } catch (Exception e) {</span>
+<span class="nc" id="L337">      logger.severe(&quot;Error sending new password link to &quot; + email + &quot;: &quot; + e.getMessage());</span>
+<span class="nc" id="L338">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();</span>
     }
   }
 }

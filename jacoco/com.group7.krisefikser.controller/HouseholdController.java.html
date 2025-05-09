@@ -2,15 +2,17 @@
 
 import com.group7.krisefikser.dto.request.HouseholdJoinRequest;
 import com.group7.krisefikser.dto.request.HouseholdRequest;
+import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
 import com.group7.krisefikser.dto.response.GetHouseholdMembersResponse;
+import com.group7.krisefikser.dto.response.HouseholdDetailsResponse;
 import com.group7.krisefikser.dto.response.HouseholdResponse;
 import com.group7.krisefikser.dto.response.JoinHouseholdRequestResponse;
 import com.group7.krisefikser.dto.response.ReadinessResponse;
 import com.group7.krisefikser.mapper.HouseholdMapper;
 import com.group7.krisefikser.mapper.JoinRequestMapper;
 import com.group7.krisefikser.model.Household;
-import com.group7.krisefikser.model.JoinHouseholdRequest;
 import com.group7.krisefikser.service.HouseholdService;
+import com.group7.krisefikser.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +22,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.logging.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +43,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(&quot;/api/households&quot;)
 @Tag(name = &quot;Household Management&quot;, description = &quot;APIs for household operations and membership&quot;)
 public class HouseholdController {
-<span class="fc" id="L45">  private static final org.slf4j.Logger log = LoggerFactory.getLogger(HouseholdController.class);</span>
   private final HouseholdService householdService;
 <span class="fc" id="L47">  private static final Logger logger = Logger.getLogger(HouseholdController.class.getName());</span>
+  private final UserService userService;
 
   /**
    * Constructor for injecting the HouseholdService dependency.
@@ -52,9 +53,33 @@ public class HouseholdController {
    * @param householdService the service layer for household-related operations
    */
   @Autowired
-<span class="fc" id="L55">  public HouseholdController(HouseholdService householdService) {</span>
-<span class="fc" id="L56">    this.householdService = householdService;</span>
-<span class="fc" id="L57">  }</span>
+<span class="fc" id="L56">  public HouseholdController(HouseholdService householdService, UserService userService) {</span>
+<span class="fc" id="L57">    this.householdService = householdService;</span>
+<span class="fc" id="L58">    this.userService = userService;</span>
+<span class="fc" id="L59">  }</span>
+
+  /**
+   * Endpoint to retrieve the details of the authenticated user's household.
+   *
+   * @return a ResponseEntity containing the household details
+   */
+  @GetMapping
+  @Operation(summary = &quot;Get details of user's household&quot;,
+      description = &quot;Retrieves details of the authenticated user's household including all members&quot;)
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Household details retrieved successfully&quot;,
+      content = @Content(schema = @Schema(implementation = HouseholdDetailsResponse.class))),
+    @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Household not found&quot;)
+  })
+  public ResponseEntity&lt;HouseholdDetailsResponse&gt; getMyHouseholdDetails() {
+<span class="nc" id="L75">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="nc" id="L76">    Long userId = Long.parseLong(userIdStr);</span>
+<span class="nc" id="L77">    logger.info(&quot;Fetching household details for user ID: &quot; + userId);</span>
+
+<span class="nc" id="L79">    HouseholdDetailsResponse householdDetails =</span>
+<span class="nc" id="L80">        householdService.getHouseholdDetailsByUserId(userId);</span>
+<span class="nc" id="L81">    return ResponseEntity.ok(householdDetails);</span>
+  }
 
   /**
    * Creates a new household and associates it with a user.
@@ -73,14 +98,14 @@ public class HouseholdController {
   @PostMapping
   public ResponseEntity&lt;HouseholdResponse&gt; createHousehold(
       @Valid @RequestBody HouseholdRequest householdRequest) {
-<span class="fc" id="L76">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="fc" id="L77">    Long userId = Long.parseLong(userIdStr);</span>
-<span class="fc" id="L78">    Household household = HouseholdMapper.INSTANCE.householdRequestToHousehold(householdRequest);</span>
-<span class="fc" id="L79">    Household created = householdService.createHousehold(household, userId);</span>
-<span class="fc" id="L80">    logger.info(&quot;Creating household for userId:&quot; + userId);</span>
+<span class="fc" id="L101">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="fc" id="L102">    Long userId = Long.parseLong(userIdStr);</span>
+<span class="fc" id="L103">    Household household = HouseholdMapper.INSTANCE.householdRequestToHousehold(householdRequest);</span>
+<span class="fc" id="L104">    Household created = householdService.createHousehold(household, userId);</span>
+<span class="fc" id="L105">    logger.info(&quot;Creating household for userId:&quot; + userId);</span>
 
-<span class="fc" id="L82">    return ResponseEntity.status(HttpStatus.CREATED)</span>
-<span class="fc" id="L83">      .body(HouseholdMapper.INSTANCE.householdToHouseholdResponse(created));</span>
+<span class="fc" id="L107">    return ResponseEntity.status(HttpStatus.CREATED)</span>
+<span class="fc" id="L108">      .body(HouseholdMapper.INSTANCE.householdToHouseholdResponse(created));</span>
   }
 
   /**
@@ -97,23 +122,22 @@ public class HouseholdController {
   })
   public ResponseEntity&lt;JoinHouseholdRequestResponse&gt; requestToJoin(
       @Valid @RequestBody HouseholdJoinRequest request) {
-<span class="fc" id="L100">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="fc" id="L101">    Long userId = Long.parseLong(userIdStr);</span>
-<span class="fc" id="L102">    logger.info(&quot;Requesting to join household: &quot;</span>
-<span class="fc" id="L103">        + request.getHouseholdId() + &quot; for userId: &quot; + userId);</span>
+<span class="fc" id="L125">    String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="fc" id="L126">    Long userId = Long.parseLong(userIdStr);</span>
+<span class="fc" id="L127">    logger.info(&quot;Requesting to join household: &quot;</span>
+<span class="fc" id="L128">        + request.getHouseholdId() + &quot; for userId: &quot; + userId);</span>
 
-<span class="fc" id="L105">    JoinHouseholdRequest joinRequest = householdService.requestToJoin(</span>
-<span class="fc" id="L106">        request.getHouseholdId(), userId);</span>
-<span class="fc" id="L107">    return ResponseEntity.ok(JoinRequestMapper.INSTANCE.joinRequestToResponse(joinRequest));</span>
+<span class="fc" id="L130">    JoinHouseholdRequest joinRequest = householdService.requestToJoin(</span>
+<span class="fc" id="L131">        request.getHouseholdId(), userId);</span>
+<span class="fc" id="L132">    return ResponseEntity.ok(JoinRequestMapper.INSTANCE.joinRequestToResponse(joinRequest));</span>
   }
 
   /**
    * Endpoint to retrieve all join requests for a specific household.
    *
-   * @param householdId the ID of the household
    * @return a ResponseEntity containing a list of JoinHouseholdRequest objects
    */
-  @GetMapping(&quot;/{householdId}/requests&quot;)
+  @GetMapping(&quot;/requests&quot;)
   @Operation(summary = &quot;Get all join requests for a household&quot;,
       description = &quot;Retrieves all pending join requests for a specific household&quot;)
   @ApiResponses(value = {
@@ -123,14 +147,14 @@ public class HouseholdController {
         &quot;Forbidden - User not authorized for this household&quot;),
     @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Household not found&quot;)
   })
-  public ResponseEntity&lt;List&lt;JoinHouseholdRequestResponse&gt;&gt; getJoinRequests(
-      @PathVariable Long householdId) {
-<span class="fc" id="L128">    logger.info(&quot;Retrieving requests for household ID: &quot; + householdId);</span>
+  public ResponseEntity&lt;List&lt;JoinHouseholdRequestResponse&gt;&gt; getJoinRequests() {
+<span class="nc" id="L151">    Long householdId = (long) userService.getCurrentUserHouseholdId();</span>
+<span class="nc" id="L152">    logger.info(&quot;Retrieving requests for household ID: &quot; + householdId);</span>
 
-<span class="fc" id="L130">    List&lt;JoinHouseholdRequest&gt; joinRequests =</span>
-<span class="fc" id="L131">        householdService.getRequestsForHousehold(householdId);</span>
-<span class="fc" id="L132">    return ResponseEntity.ok(JoinRequestMapper.INSTANCE</span>
-<span class="fc" id="L133">        .joinRequestListToResponseList(joinRequests));</span>
+<span class="nc" id="L154">    List&lt;JoinHouseholdRequest&gt; joinRequests =</span>
+<span class="nc" id="L155">        householdService.getRequestsForHousehold(householdId);</span>
+<span class="nc" id="L156">    return ResponseEntity.ok(JoinRequestMapper.INSTANCE</span>
+<span class="nc" id="L157">        .joinRequestListToResponseList(joinRequests));</span>
   }
 
   /**
@@ -149,9 +173,9 @@ public class HouseholdController {
   })
   @PutMapping(&quot;/requests/{requestId}/accept&quot;)
   public ResponseEntity&lt;Void&gt; acceptJoinRequest(@PathVariable Long requestId) {
-<span class="fc" id="L152">    householdService.acceptJoinRequest(requestId);</span>
-<span class="fc" id="L153">    logger.info(&quot;Accepting join request: &quot; + requestId);</span>
-<span class="fc" id="L154">    return ResponseEntity.ok().build();</span>
+<span class="fc" id="L176">    householdService.acceptJoinRequest(requestId);</span>
+<span class="fc" id="L177">    logger.info(&quot;Accepting join request: &quot; + requestId);</span>
+<span class="fc" id="L178">    return ResponseEntity.ok().build();</span>
   }
 
   /**
@@ -170,9 +194,9 @@ public class HouseholdController {
   })
   @PutMapping(&quot;/requests/{requestId}/decline&quot;)
   public ResponseEntity&lt;Void&gt; declineJoinRequest(@PathVariable Long requestId) {
-<span class="fc" id="L173">    householdService.declineJoinRequest(requestId);</span>
-<span class="fc" id="L174">    logger.info(&quot;Declining join request: &quot; + requestId);</span>
-<span class="fc" id="L175">    return ResponseEntity.ok().build();</span>
+<span class="fc" id="L197">    householdService.declineJoinRequest(requestId);</span>
+<span class="fc" id="L198">    logger.info(&quot;Declining join request: &quot; + requestId);</span>
+<span class="fc" id="L199">    return ResponseEntity.ok().build();</span>
   }
 
   /**
@@ -192,15 +216,15 @@ public class HouseholdController {
       })
   @GetMapping(&quot;/members&quot;)
   public ResponseEntity&lt;?&gt; getHouseholdMembers() {
-<span class="nc" id="L195">    logger.info(&quot;Retrieving household members&quot;);</span>
+<span class="nc" id="L219">    logger.info(&quot;Retrieving household members&quot;);</span>
 
     try {
-<span class="nc" id="L198">      List&lt;GetHouseholdMembersResponse&gt; responses = householdService.getHouseholdMembers();</span>
-<span class="nc" id="L199">      return ResponseEntity.ok(responses);</span>
-<span class="nc" id="L200">    } catch (Exception e) {</span>
-<span class="nc" id="L201">      logger.severe(&quot;Error retrieving household members: &quot; + e.getMessage());</span>
-<span class="nc" id="L202">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L203">          .body(&quot;Error retrieving household members&quot;);</span>
+<span class="nc" id="L222">      List&lt;GetHouseholdMembersResponse&gt; responses = householdService.getHouseholdMembers();</span>
+<span class="nc" id="L223">      return ResponseEntity.ok(responses);</span>
+<span class="nc" id="L224">    } catch (Exception e) {</span>
+<span class="nc" id="L225">      logger.severe(&quot;Error retrieving household members: &quot; + e.getMessage());</span>
+<span class="nc" id="L226">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L227">          .body(&quot;Error retrieving household members&quot;);</span>
     }
   }
 
@@ -221,18 +245,18 @@ public class HouseholdController {
   })
   @GetMapping(&quot;/readiness&quot;)
   public ResponseEntity&lt;ReadinessResponse&gt; getReadiness() {
-<span class="fc" id="L224">    logger.info(&quot;Calculating readiness for household&quot;);</span>
+<span class="fc" id="L248">    logger.info(&quot;Calculating readiness for household&quot;);</span>
     try {
-<span class="fc" id="L226">      ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold();</span>
-<span class="pc bpc" id="L227" title="1 of 2 branches missed.">      if (readinessResponse != null) {</span>
-<span class="fc" id="L228">        return ResponseEntity.ok(readinessResponse);</span>
+<span class="fc" id="L250">      ReadinessResponse readinessResponse = householdService.calculateReadinessForHousehold();</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">      if (readinessResponse != null) {</span>
+<span class="fc" id="L252">        return ResponseEntity.ok(readinessResponse);</span>
       } else {
-<span class="nc" id="L230">        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();</span>
+<span class="nc" id="L254">        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();</span>
       }
-<span class="nc" id="L232">    } catch (Exception e) {</span>
-<span class="nc" id="L233">      logger.severe(&quot;Error calculating readiness: &quot; + e.getMessage());</span>
-<span class="nc" id="L234">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L235">          .body(new ReadinessResponse(0, 0));</span>
+<span class="nc" id="L256">    } catch (Exception e) {</span>
+<span class="nc" id="L257">      logger.severe(&quot;Error calculating readiness: &quot; + e.getMessage());</span>
+<span class="nc" id="L258">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L259">          .body(new ReadinessResponse(0, 0));</span>
     }
   }
 }
