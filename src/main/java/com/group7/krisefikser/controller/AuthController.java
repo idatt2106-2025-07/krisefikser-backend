@@ -339,13 +339,16 @@ public class AuthController {
   @PostMapping("/new-password-link")
   public ResponseEntity<Object> sendNewPasswordLink(
       @Valid @RequestBody ResetPasswordLinkRequest request) {
-    
     String email = request.getEmail();
     logger.info("Trying to send new password link to: " + email);
     try {
       userService.sendResetPasswordLink(email);
       logger.info("New password link sent to: " + email);
       return ResponseEntity.ok("New password link sent to: " + email);
+    } catch (IllegalArgumentException e) {
+      logger.warning(e.getMessage());
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Could not sent new "
+              + "password link to: " + email);
     } catch (Exception e) {
       logger.severe("Error sending new password link to " + email + ": " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

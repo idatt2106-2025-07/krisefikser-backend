@@ -245,6 +245,10 @@ public class UserService implements UserDetailsService {
     Optional<User> userOpt = userRepo.findByEmail(email);
     if (userOpt.isPresent()) {
       User user = userOpt.get();
+      if (user.getRole() == Role.ROLE_ADMIN) {
+        throw new IllegalArgumentException("Admin users cannot reset their password");
+      }
+
       String resetToken = jwtUtils.generateResetPasswordToken(user.getEmail());
       String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
       Map<String, String> params = Map.of("resetLink", resetLink);
