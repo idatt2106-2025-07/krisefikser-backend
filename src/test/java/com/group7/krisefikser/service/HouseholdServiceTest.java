@@ -1,11 +1,20 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.JoinHouseholdRequest;
-import com.group7.krisefikser.dto.response.ReadinessResponse;
+import com.group7.krisefikser.dto.request.household.JoinHouseholdRequest;
+import com.group7.krisefikser.dto.response.household.ReadinessResponse;
 import com.group7.krisefikser.enums.ItemType;
-import com.group7.krisefikser.model.*;
-import com.group7.krisefikser.repository.*;
+import com.group7.krisefikser.model.household.Household;
+import com.group7.krisefikser.model.item.Item;
+import com.group7.krisefikser.model.item.StorageItem;
+import com.group7.krisefikser.model.user.User;
 
+import com.group7.krisefikser.repository.household.HouseholdRepository;
+import com.group7.krisefikser.repository.household.JoinHouseholdRequestRepo;
+import com.group7.krisefikser.repository.household.NonUserMemberRepository;
+import com.group7.krisefikser.repository.item.ItemRepo;
+import com.group7.krisefikser.repository.item.StorageItemRepo;
+import com.group7.krisefikser.repository.user.UserRepository;
+import com.group7.krisefikser.service.household.HouseholdService;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -18,7 +27,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.List;
 

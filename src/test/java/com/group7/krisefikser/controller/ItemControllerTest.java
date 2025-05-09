@@ -2,11 +2,11 @@ package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.ItemRequest;
-import com.group7.krisefikser.dto.response.ItemResponse;
+import com.group7.krisefikser.dto.request.item.ItemRequest;
+import com.group7.krisefikser.dto.response.item.ItemResponse;
 import com.group7.krisefikser.enums.ItemType;
-import com.group7.krisefikser.model.Item;
-import com.group7.krisefikser.service.ItemService;
+import com.group7.krisefikser.model.item.Item;
+import com.group7.krisefikser.service.item.ItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

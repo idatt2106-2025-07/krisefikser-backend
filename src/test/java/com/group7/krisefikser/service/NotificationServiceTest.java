@@ -1,7 +1,9 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.response.AffectedAreaResponse;
-import com.group7.krisefikser.dto.response.NotificationResponse;
+import com.group7.krisefikser.dto.response.location.AffectedAreaResponse;
+import com.group7.krisefikser.dto.response.other.NotificationResponse;
+import com.group7.krisefikser.service.location.AffectedAreaService;
+import com.group7.krisefikser.service.other.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

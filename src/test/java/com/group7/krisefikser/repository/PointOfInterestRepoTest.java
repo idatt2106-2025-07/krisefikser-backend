@@ -1,7 +1,8 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.PointOfInterestType;
-import com.group7.krisefikser.model.PointOfInterest;
+import com.group7.krisefikser.model.location.PointOfInterest;
+import com.group7.krisefikser.repository.location.PointOfInterestRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

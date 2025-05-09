@@ -1,7 +1,8 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.NonUserMemberType;
-import com.group7.krisefikser.model.NonUserMember;
+import com.group7.krisefikser.model.household.NonUserMember;
+import com.group7.krisefikser.repository.household.NonUserMemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

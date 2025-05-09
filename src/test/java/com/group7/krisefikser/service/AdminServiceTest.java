@@ -1,19 +1,18 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.request.RegisterAdminRequest;
-import com.group7.krisefikser.enums.EmailTemplateType;
+import com.group7.krisefikser.dto.request.user.RegisterAdminRequest;
 import com.group7.krisefikser.enums.Role;
 import com.group7.krisefikser.exception.UsernameGenerationException;
-import com.group7.krisefikser.repository.UserRepository;
+import com.group7.krisefikser.repository.user.UserRepository;
+import com.group7.krisefikser.service.household.HouseholdService;
+import com.group7.krisefikser.service.other.EmailService;
+import com.group7.krisefikser.service.user.AdminService;
 import com.group7.krisefikser.utils.JwtUtils;
-import com.group7.krisefikser.utils.UuidUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 
-import java.util.Map;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;

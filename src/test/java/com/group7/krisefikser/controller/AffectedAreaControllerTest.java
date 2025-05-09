@@ -1,9 +1,9 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.AffectedAreaRequest;
-import com.group7.krisefikser.dto.response.AffectedAreaResponse;
-import com.group7.krisefikser.service.AffectedAreaService;
+import com.group7.krisefikser.dto.request.location.AffectedAreaRequest;
+import com.group7.krisefikser.dto.response.location.AffectedAreaResponse;
+import com.group7.krisefikser.service.location.AffectedAreaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

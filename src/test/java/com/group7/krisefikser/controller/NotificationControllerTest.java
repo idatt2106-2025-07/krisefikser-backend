@@ -1,14 +1,13 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.NotificationRequest;
-import com.group7.krisefikser.dto.response.NotificationResponse;
-import com.group7.krisefikser.service.NotificationService;
+import com.group7.krisefikser.dto.request.other.NotificationRequest;
+import com.group7.krisefikser.dto.response.other.NotificationResponse;
+import com.group7.krisefikser.service.other.NotificationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;

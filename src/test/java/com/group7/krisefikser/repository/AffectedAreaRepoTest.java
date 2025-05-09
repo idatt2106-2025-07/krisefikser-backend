@@ -1,6 +1,7 @@
 package com.group7.krisefikser.repository;
 
-import com.group7.krisefikser.model.AffectedArea;
+import com.group7.krisefikser.model.location.AffectedArea;
+import com.group7.krisefikser.repository.location.AffectedAreaRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,11 +1,11 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.AddNonUserMemberRequest;
-import com.group7.krisefikser.dto.request.DeleteNonUserMemberRequest;
-import com.group7.krisefikser.dto.request.UpdateNonUserMemberRequest;
+import com.group7.krisefikser.dto.request.household.AddNonUserMemberRequest;
+import com.group7.krisefikser.dto.request.household.DeleteNonUserMemberRequest;
+import com.group7.krisefikser.dto.request.household.UpdateNonUserMemberRequest;
 import com.group7.krisefikser.enums.NonUserMemberType;
-import com.group7.krisefikser.service.NonUserMemberService;
+import com.group7.krisefikser.service.household.NonUserMemberService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

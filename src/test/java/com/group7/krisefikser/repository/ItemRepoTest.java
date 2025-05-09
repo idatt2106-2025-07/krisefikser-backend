@@ -1,7 +1,8 @@
 package com.group7.krisefikser.repository;
 
 import com.group7.krisefikser.enums.ItemType;
-import com.group7.krisefikser.model.Item;
+import com.group7.krisefikser.model.item.Item;
+import com.group7.krisefikser.repository.item.ItemRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

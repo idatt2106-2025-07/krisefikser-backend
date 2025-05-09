@@ -1,14 +1,12 @@
 package com.group7.krisefikser.controller;
 
-import com.group7.krisefikser.dto.response.NewsArticleResponse;
-import com.group7.krisefikser.dto.response.ShortenedNewsArticleResponse;
-import com.group7.krisefikser.service.NewsArticleService;
+import com.group7.krisefikser.dto.response.article.NewsArticleResponse;
+import com.group7.krisefikser.dto.response.article.ShortenedNewsArticleResponse;
+import com.group7.krisefikser.service.article.NewsArticleService;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;

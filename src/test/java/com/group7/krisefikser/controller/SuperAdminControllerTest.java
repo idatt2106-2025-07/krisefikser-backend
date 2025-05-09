@@ -1,9 +1,9 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.response.AdminResponse;
-import com.group7.krisefikser.service.SuperAdminService;
+import com.group7.krisefikser.dto.request.user.InviteAdminRequest;
+import com.group7.krisefikser.dto.response.user.AdminResponse;
+import com.group7.krisefikser.service.user.SuperAdminService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

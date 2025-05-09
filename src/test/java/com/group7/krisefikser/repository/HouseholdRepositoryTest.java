@@ -1,6 +1,7 @@
 package com.group7.krisefikser.repository;
 
-import com.group7.krisefikser.model.Household;
+import com.group7.krisefikser.model.household.Household;
+import com.group7.krisefikser.repository.household.HouseholdRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

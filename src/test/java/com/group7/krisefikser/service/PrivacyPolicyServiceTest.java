@@ -1,10 +1,11 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.UpdateRegisteredPrivacyPolicyRequest;
-import com.group7.krisefikser.dto.request.UpdateUnregisteredPrivacyPolicyRequest;
-import com.group7.krisefikser.dto.response.GetRegisteredPrivacyPolicyResponse;
-import com.group7.krisefikser.dto.response.GetUnregisteredPrivacyPolicyResponse;
-import com.group7.krisefikser.repository.PrivacyPolicyRepository;
+import com.group7.krisefikser.dto.request.article.UpdateRegisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.request.article.UpdateUnregisteredPrivacyPolicyRequest;
+import com.group7.krisefikser.dto.response.article.GetRegisteredPrivacyPolicyResponse;
+import com.group7.krisefikser.dto.response.article.GetUnregisteredPrivacyPolicyResponse;
+import com.group7.krisefikser.repository.article.PrivacyPolicyRepository;
+import com.group7.krisefikser.service.article.PrivacyPolicyService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

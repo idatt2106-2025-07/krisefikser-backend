@@ -2,10 +2,10 @@ package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.GetPointsOfInterestRequest;
-import com.group7.krisefikser.dto.request.PointOfInterestRequest;
-import com.group7.krisefikser.dto.response.PointOfInterestResponse;
-import com.group7.krisefikser.service.PointOfInterestService;
+import com.group7.krisefikser.dto.request.location.GetPointsOfInterestRequest;
+import com.group7.krisefikser.dto.request.location.PointOfInterestRequest;
+import com.group7.krisefikser.dto.response.location.PointOfInterestResponse;
+import com.group7.krisefikser.service.location.PointOfInterestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

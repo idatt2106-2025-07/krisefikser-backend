@@ -1,17 +1,15 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.InviteAdminRequest;
-import com.group7.krisefikser.dto.request.RegisterAdminRequest;
-import com.group7.krisefikser.dto.request.TwoFactorLoginRequest;
-import com.group7.krisefikser.service.AdminService;
+import com.group7.krisefikser.dto.request.user.RegisterAdminRequest;
+import com.group7.krisefikser.dto.request.user.TwoFactorLoginRequest;
+import com.group7.krisefikser.service.user.AdminService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;

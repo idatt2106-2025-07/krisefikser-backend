@@ -1,13 +1,12 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.SharePositionRequest;
-import com.group7.krisefikser.dto.response.GroupMemberPositionResponse;
-import com.group7.krisefikser.dto.response.HouseholdMemberPositionResponse;
-import com.group7.krisefikser.service.UserPositionService;
+import com.group7.krisefikser.dto.request.location.SharePositionRequest;
+import com.group7.krisefikser.dto.response.location.GroupMemberPositionResponse;
+import com.group7.krisefikser.dto.response.location.HouseholdMemberPositionResponse;
+import com.group7.krisefikser.service.location.UserPositionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.UpperCase;
 import org.mockito.Mockito;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;

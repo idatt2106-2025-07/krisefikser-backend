@@ -1,10 +1,11 @@
 package com.group7.krisefikser.service;
 
-import com.group7.krisefikser.dto.request.AffectedAreaRequest;
-import com.group7.krisefikser.dto.response.AffectedAreaResponse;
-import com.group7.krisefikser.mapper.AffectedAreaMapper;
-import com.group7.krisefikser.model.AffectedArea;
-import com.group7.krisefikser.repository.AffectedAreaRepo;
+import com.group7.krisefikser.dto.request.location.AffectedAreaRequest;
+import com.group7.krisefikser.dto.response.location.AffectedAreaResponse;
+import com.group7.krisefikser.mapper.location.AffectedAreaMapper;
+import com.group7.krisefikser.model.location.AffectedArea;
+import com.group7.krisefikser.repository.location.AffectedAreaRepo;
+import com.group7.krisefikser.service.location.AffectedAreaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

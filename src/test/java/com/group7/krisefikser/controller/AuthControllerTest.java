@@ -1,13 +1,14 @@
 package com.group7.krisefikser.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.group7.krisefikser.dto.request.HouseholdRequest;
-import com.group7.krisefikser.dto.request.LoginRequest;
-import com.group7.krisefikser.dto.request.RegisterRequest;
-import com.group7.krisefikser.dto.response.AuthResponse;
+import com.group7.krisefikser.dto.request.household.HouseholdRequest;
+import com.group7.krisefikser.dto.request.user.LoginRequest;
+import com.group7.krisefikser.dto.request.user.RegisterRequest;
+import com.group7.krisefikser.dto.response.user.AuthResponse;
 import com.group7.krisefikser.enums.AuthResponseMessage;
 import com.group7.krisefikser.enums.Role;
-import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.model.user.User;
+import com.group7.krisefikser.service.user.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -161,7 +162,7 @@ class AuthControllerTest {
   @WithMockUser(username = "johndoe@test.com", roles = "USER")
   @Test
   void getCurrentUserEmail_authenticated_returnsEmail() throws Exception {
-    com.group7.krisefikser.model.User mockUser = new com.group7.krisefikser.model.User();
+    User mockUser = new User();
     mockUser.setEmail("johndoe@test.com");
     mockUser.setName("John Doe");
     Mockito.when(userService.getCurrentUser()).thenReturn(mockUser);

@@ -1,6 +1,7 @@
 package com.group7.krisefikser.repository;
 
-import com.group7.krisefikser.model.UserPosition;
+import com.group7.krisefikser.model.location.UserPosition;
+import com.group7.krisefikser.repository.location.UserPositionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 

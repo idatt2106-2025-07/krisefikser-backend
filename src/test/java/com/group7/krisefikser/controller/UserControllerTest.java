@@ -1,11 +1,10 @@
 package com.group7.krisefikser.controller;
 
-import com.group7.krisefikser.dto.response.UserInfoResponse;
+import com.group7.krisefikser.dto.response.user.UserInfoResponse;
 import com.group7.krisefikser.enums.Role;
-import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.service.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
