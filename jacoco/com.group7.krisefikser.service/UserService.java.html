@@ -316,5 +316,19 @@ public class UserService implements UserDetailsService {
         isSharingLocation
     );
   }
+
+  /**
+   * Gets the user ID by email.
+   * This method retrieves the user ID associated with the given email address.
+   * If the user is not found, it throws a RuntimeException.
+   *
+   * @param email the email address of the user
+   * @return the user ID
+   */
+  public Long getUserIdByEmail(String email) {
+<span class="nc" id="L329">    return userRepo.findByEmail(email)</span>
+<span class="nc" id="L330">        .orElseThrow(() -&gt; new RuntimeException(&quot;User not found with email: &quot; + email))</span>
+<span class="nc" id="L331">        .getId();</span>
+  }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

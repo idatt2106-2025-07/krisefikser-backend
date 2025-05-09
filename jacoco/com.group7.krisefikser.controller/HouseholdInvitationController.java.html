@@ -4,7 +4,10 @@ import com.group7.krisefikser.dto.request.InvitationRequest;
 import com.group7.krisefikser.exception.InvitationNotFoundException;
 import com.group7.krisefikser.exception.JwtMissingPropertyException;
 import com.group7.krisefikser.model.HouseholdInvitation;
+import com.group7.krisefikser.repository.UserRepository;
 import com.group7.krisefikser.service.HouseholdInvitationService;
+import com.group7.krisefikser.service.UserService;
+import com.group7.krisefikser.utils.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,8 +37,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = &quot;Household Invitation&quot;, description = &quot;API for managing household invitations&quot;)
 public class HouseholdInvitationController {
   private final HouseholdInvitationService invitationService;
-<span class="fc" id="L37">  private static final Logger logger = Logger</span>
-<span class="fc" id="L38">      .getLogger(HouseholdInvitationController.class.getName());</span>
+<span class="fc" id="L40">  private static final Logger logger = Logger</span>
+<span class="fc" id="L41">      .getLogger(HouseholdInvitationController.class.getName());</span>
+  private final JwtUtils jwtUtils;
+  private final UserRepository userRepository;
+  private final UserService userService;
 
   /**
    * Creates a new household invitation.
@@ -63,32 +69,32 @@ public class HouseholdInvitationController {
   )
   public ResponseEntity&lt;?&gt; createInvitation(@RequestBody InvitationRequest request) {
     try {
-<span class="pc bpc" id="L66" title="2 of 4 branches missed.">      if (request.getEmail() == null || request.getEmail().isBlank()) {</span>
-<span class="nc" id="L67">        return ResponseEntity.badRequest().body(&quot;Email must not be empty&quot;);</span>
+<span class="pc bpc" id="L72" title="2 of 4 branches missed.">      if (request.getEmail() == null || request.getEmail().isBlank()) {</span>
+<span class="nc" id="L73">        return ResponseEntity.badRequest().body(&quot;Email must not be empty&quot;);</span>
       }
 
-<span class="fc" id="L70">      String emailRegex =</span>
+<span class="fc" id="L76">      String emailRegex =</span>
           &quot;^[a-zA-Z0-9_+&amp;*-]+(?:\\.[a-zA-Z0-9_+&amp;*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$&quot;;
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">      if (!request.getEmail().matches(emailRegex)) {</span>
-<span class="nc" id="L73">        return ResponseEntity.badRequest().body(&quot;Invalid email format&quot;);</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">      if (!request.getEmail().matches(emailRegex)) {</span>
+<span class="nc" id="L79">        return ResponseEntity.badRequest().body(&quot;Invalid email format&quot;);</span>
       }
 
-<span class="fc" id="L76">      String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="fc" id="L77">      Long userId = Long.parseLong(userIdStr);</span>
+<span class="fc" id="L82">      String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
+<span class="fc" id="L83">      Long userId = Long.parseLong(userIdStr);</span>
 
-<span class="fc" id="L79">      HouseholdInvitation invitation = invitationService.createInvitation(userId,</span>
-<span class="fc" id="L80">          request.getEmail());</span>
-<span class="fc" id="L81">      logger.info(&quot;Invitation created successfully with token: &quot; + invitation.getInvitationToken());</span>
-<span class="fc" id="L82">      return ResponseEntity.ok(invitation);</span>
+<span class="fc" id="L85">      HouseholdInvitation invitation = invitationService.createInvitation(userId,</span>
+<span class="fc" id="L86">          request.getEmail());</span>
+<span class="fc" id="L87">      logger.info(&quot;Invitation created successfully with token: &quot; + invitation.getInvitationToken());</span>
+<span class="fc" id="L88">      return ResponseEntity.ok(invitation);</span>
 
-<span class="nc" id="L84">    } catch (IllegalArgumentException e) {</span>
-<span class="nc" id="L85">      logger.severe(&quot;Invalid request data: &quot; + e.getMessage());</span>
-<span class="nc" id="L86">      return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="nc" id="L90">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L91">      logger.severe(&quot;Invalid request data: &quot; + e.getMessage());</span>
+<span class="nc" id="L92">      return ResponseEntity.badRequest().body(e.getMessage());</span>
 
-<span class="nc" id="L88">    } catch (Exception e) {</span>
-<span class="nc" id="L89">      logger.severe(&quot;Unexpected error while creating invitation&quot; + e);</span>
-<span class="nc" id="L90">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L91">        .body(&quot;An unexpected error occurred&quot;);</span>
+<span class="nc" id="L94">    } catch (Exception e) {</span>
+<span class="nc" id="L95">      logger.severe(&quot;Unexpected error while creating invitation&quot; + e);</span>
+<span class="nc" id="L96">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L97">        .body(&quot;An unexpected error occurred&quot;);</span>
     }
   }
 
@@ -117,8 +123,9 @@ public class HouseholdInvitationController {
     @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Invitation not found or expired&quot;)
   })
   public ResponseEntity&lt;?&gt; verifyInvitation(@RequestParam String token) {
-<span class="fc" id="L120">    HouseholdInvitation invitation = invitationService.verifyInvitation(token);</span>
-<span class="fc" id="L121">    return ResponseEntity.ok(invitation);</span>
+<span class="fc" id="L126">    logger.info(&quot;Verify invitation token: &quot; + token);</span>
+<span class="fc" id="L127">    HouseholdInvitation invitation = invitationService.verifyInvitation(token);</span>
+<span class="fc" id="L128">    return ResponseEntity.ok(invitation);</span>
   }
 
   /**
@@ -153,39 +160,39 @@ public class HouseholdInvitationController {
   )
   public ResponseEntity&lt;?&gt; acceptInvitation(@RequestBody Map&lt;String, String&gt; requestBody) {
     try {
-<span class="fc" id="L156">      String token = requestBody.get(&quot;token&quot;);</span>
+<span class="fc" id="L163">      String token = requestBody.get(&quot;token&quot;);</span>
 
-<span class="pc bpc" id="L158" title="1 of 4 branches missed.">      if (token == null || token.isBlank()) {</span>
-<span class="fc" id="L159">        return ResponseEntity.badRequest().body(&quot;Token is required&quot;);</span>
+<span class="pc bpc" id="L165" title="3 of 4 branches missed.">      if (token == null || token.isBlank()) {</span>
+<span class="fc" id="L166">        return ResponseEntity.badRequest().body(&quot;Token is required&quot;);</span>
       }
 
-<span class="fc" id="L162">      String userIdStr = SecurityContextHolder.getContext().getAuthentication().getName();</span>
-<span class="fc" id="L163">      Long userId = Long.parseLong(userIdStr);</span>
+<span class="nc" id="L169">      String email = jwtUtils.validateInvitationTokenAndGetEmail(token);</span>
+<span class="nc" id="L170">      Long userId = userService.getUserIdByEmail(email);</span>
 
-<span class="fc" id="L165">      invitationService.acceptInvitation(token, userId);</span>
-<span class="fc" id="L166">      logger.info(&quot;Invitation accepted successfully&quot;);</span>
-<span class="fc" id="L167">      return ResponseEntity.ok().build();</span>
+<span class="nc" id="L172">      invitationService.acceptInvitation(token, userId);</span>
+<span class="nc" id="L173">      logger.info(&quot;Invitation accepted successfully&quot;);</span>
+<span class="nc" id="L174">      return ResponseEntity.ok().build();</span>
 
-<span class="nc" id="L169">    } catch (NumberFormatException e) {</span>
-<span class="nc" id="L170">      logger.severe(&quot;Invalid user ID in security context&quot; + e.getMessage());</span>
-<span class="nc" id="L171">      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(&quot;Invalid authentication context&quot;);</span>
+<span class="nc" id="L176">    } catch (NumberFormatException e) {</span>
+<span class="nc" id="L177">      logger.severe(&quot;Invalid user ID in security context&quot; + e.getMessage());</span>
+<span class="nc" id="L178">      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(&quot;Invalid authentication context&quot;);</span>
 
-<span class="nc" id="L173">    } catch (IllegalArgumentException e) {</span>
-<span class="nc" id="L174">      logger.severe(&quot;Invalid token or user: &quot; + e.getMessage());</span>
-<span class="nc" id="L175">      return ResponseEntity.badRequest().body(e.getMessage());</span>
+<span class="nc" id="L180">    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L181">      logger.severe(&quot;Invalid token or user: &quot; + e.getMessage());</span>
+<span class="nc" id="L182">      return ResponseEntity.badRequest().body(e.getMessage());</span>
 
-<span class="nc" id="L177">    } catch (InvitationNotFoundException e) {</span>
-<span class="nc" id="L178">      logger.severe(&quot;Invitation not found or expired: &quot; + e.getMessage());</span>
-<span class="nc" id="L179">      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(&quot;Invitation not found or expired&quot;);</span>
+<span class="nc" id="L184">    } catch (InvitationNotFoundException e) {</span>
+<span class="nc" id="L185">      logger.severe(&quot;Invitation not found or expired: &quot; + e.getMessage());</span>
+<span class="nc" id="L186">      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(&quot;Invitation not found or expired&quot;);</span>
 
-<span class="nc" id="L181">    } catch (JwtMissingPropertyException e) {</span>
-<span class="nc" id="L182">      logger.severe(&quot;Missing expected property in token: &quot; + e.getMessage());</span>
-<span class="nc" id="L183">      return ResponseEntity.badRequest().body(&quot;Invalid token format&quot;);</span>
+<span class="nc" id="L188">    } catch (JwtMissingPropertyException e) {</span>
+<span class="nc" id="L189">      logger.severe(&quot;Missing expected property in token: &quot; + e.getMessage());</span>
+<span class="nc" id="L190">      return ResponseEntity.badRequest().body(&quot;Invalid token format&quot;);</span>
 
-<span class="nc" id="L185">    } catch (Exception e) {</span>
-<span class="nc" id="L186">      logger.severe(&quot;Unexpected error while accepting invitation&quot; + e);</span>
-<span class="nc" id="L187">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
-<span class="nc" id="L188">        .body(&quot;An unexpected error occurred&quot;);</span>
+<span class="nc" id="L192">    } catch (Exception e) {</span>
+<span class="nc" id="L193">      logger.severe(&quot;Unexpected error while accepting invitation&quot; + e);</span>
+<span class="nc" id="L194">      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</span>
+<span class="nc" id="L195">        .body(&quot;An unexpected error occurred&quot;);</span>
     }
   }
 }
