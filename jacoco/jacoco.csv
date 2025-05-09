@@ -11,7 +11,7 @@ krisefikser,com.group7.krisefikser.repository,NewsArticleRepository,3,85,0,0,2,1
 krisefikser,com.group7.krisefikser.repository,GeneralInfoRepository,174,6,0,0,35,3,7,1,7,1
 krisefikser,com.group7.krisefikser.repository,EmergencyGroupInvitationsRepo,3,120,1,3,2,20,1,7,0,6
 krisefikser,com.group7.krisefikser.repository,AffectedAreaRepo,0,231,0,0,0,47,0,7,0,7
-krisefikser,com.group7.krisefikser.repository,UserRepository,129,232,1,1,25,45,8,12,7,12
+krisefikser,com.group7.krisefikser.repository,UserRepository,140,232,1,1,26,45,8,12,7,12
 krisefikser,com.group7.krisefikser.repository,ItemRepo,9,187,2,2,1,41,2,9,0,9
 krisefikser,com.group7.krisefikser.repository,StorageItemRepo,1,365,2,8,0,69,2,17,0,14
 krisefikser,com.group7.krisefikser.repository,PrivacyPolicyRepository,0,46,0,0,0,10,0,4,0,4
