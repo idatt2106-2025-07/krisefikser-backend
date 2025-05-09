@@ -404,18 +404,18 @@ class StorageItemServiceTest {
     int storageItemId = 1;
     int householdId = 1;
     StorageItem updatedItem = createStorageItem(storageItemId, itemId, householdId, 10,
-            true, LocalDateTime.now().plusDays(15));
+      true, LocalDateTime.now().plusDays(15));
 
     when(householdService.getGroupIdForCurrentUser()).thenReturn(groupId);
     when(storageItemRepo.findById(storageItemId)).thenReturn(Optional.of(new StorageItem(
-            storageItemId, LocalDateTime.now().plusDays(4), 5, householdId, itemId, true)));
+      storageItemId, LocalDateTime.now().plusDays(4), 5, householdId, itemId, true)));
     when(itemRepo.findById(itemId)).thenReturn(Optional.of(new Item()));
     when(storageItemRepo.update(any(StorageItem.class))).thenReturn(updatedItem);
     when(householdRepository.getHouseholdById((long) householdId)).thenReturn(Optional.of(new Household(
-            (long) householdId, "Household Name", null, null, groupId
+      (long) householdId, "Household Name", null, null, groupId
     )));
     StorageItemResponse result = storageItemService.updateSharedStorageItem(storageItemId, new StorageItemRequest(
-            LocalDateTime.now().plusDays(15), 10.0, itemId)
+      LocalDateTime.now().plusDays(15), 10.0, itemId)
     );
 
     assertNotNull(result);
@@ -423,10 +423,9 @@ class StorageItemServiceTest {
     assertEquals(itemId, result.getItemId());
     assertEquals(householdId, result.getHouseholdId());
     assertEquals(10.0, result.getQuantity());
-    verify(storageItemRepo, times(2)).findById(storageItemId);
+    verify(storageItemRepo, times(1)).findById(storageItemId); // Change from 2 to 1
     verify(itemRepo, times(2)).findById(itemId);
     verify(storageItemRepo, times(1)).update(any(StorageItem.class));
-
   }
 
   @Test

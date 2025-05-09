@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StorageItemSortRequest {
-  @Pattern(regexp = "(?i)(quantity|expirationDate)",
-      message = "Sort by must be either 'quantity' or 'expirationDate'")
+  @Pattern(regexp = "(?i)(quantity|expirationDate|name)",
+      message = "Sort by must be either 'quantity' or 'expirationDate', or 'name'")
   private String sortBy = "expirationDate";
 
   @Pattern(regexp = "(?i)(asc|desc)", message = "Sort direction must be either 'asc' or 'desc'")

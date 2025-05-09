@@ -43,4 +43,18 @@ public class StorageItemRequest {
     storageItem.setItemId(itemId);
     return storageItem;
   }
+
+  /**
+   * Updates an existing StorageItem entity with values from this request.
+   * This preserves properties not included in the request, such as shared status.
+   *
+   * @param existingItem the existing StorageItem to update
+   * @return the updated StorageItem entity
+   */
+  public StorageItem updateExistingEntity(StorageItem existingItem) {
+    existingItem.setExpirationDate(expirationDate);
+    existingItem.setQuantity(quantity);
+    existingItem.setItemId(itemId);
+    return existingItem;
+  }
 }

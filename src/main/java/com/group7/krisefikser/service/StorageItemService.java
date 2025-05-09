@@ -102,7 +102,7 @@ public class StorageItemService {
     Long groupId = householdService.getGroupIdForCurrentUser();
 
     List<StorageItem> storageItems = storageItemRepo
-            .getSharedStorageItemsInGroupByItemId(itemId, groupId);
+            .getSharedStorageItemsInGroupByItemId(groupId, itemId);
 
 
     return storageItems.stream()
@@ -174,23 +174,34 @@ public class StorageItemService {
   public StorageItemResponse updateSharedStorageItem(int id,
                                                      StorageItemRequest request) {
 
-
     Long userGroupId = householdService.getGroupIdForCurrentUser();
-    StorageItem item = storageItemRepo.findById(id).orElseThrow(
-            () -> new NoSuchElementException("Storage item not found with id: " + id)
+    StorageItem existingItem = storageItemRepo.findById(id).orElseThrow(
+        () -> new NoSuchElementException("Storage item not found with id: " + id)
     );
-    if (!item.isShared()) {
+
+    if (!existingItem.isShared()) {
       throw new IllegalArgumentException("Item is not shared, user is not allowed to "
-              + "update");
+        + "update");
     }
 
-    Household household = householdRepository.getHouseholdById((long) item.getHouseholdId())
-            .orElseThrow(() -> new NoSuchElementException("Household not found with id: "
-                    + item.getHouseholdId()));
+    Household household = householdRepository.getHouseholdById((long) existingItem.getHouseholdId())
+        .orElseThrow(() -> new NoSuchElementException("Household not found with id: "
+        + existingItem.getHouseholdId()));
+
     if (!household.getEmergencyGroupId().equals(userGroupId)) {
       throw new IllegalArgumentException("User is not allowed to update this item");
     }
-    return updateStorageItemFromRequest(id, item.getHouseholdId(), request);
+
+    StorageItem updatedItem = request.updateExistingEntity(existingItem);
+
+    validateStorageItem(updatedItem);
+
+    if (!itemExists(updatedItem.getItemId())) {
+      throw new RuntimeException("Item not found with id: " + updatedItem.getItemId());
+    }
+
+    StorageItem result = storageItemRepo.update(updatedItem);
+    return convertToStorageItemResponse(result);
   }
 
   /**
