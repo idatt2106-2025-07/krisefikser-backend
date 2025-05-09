@@ -105,17 +105,20 @@ public class EmergencyGroupService {
   }
 
   /**
-   * Retrieves the ID of the group associated with the current users household.
+   * Retrieves the ID of the group associated with the current user's household.
    *
    * @return the ID of the group associated with the user's household
+   * @throws NoSuchElementException if user has no household or household has no group
    */
   private long getGroupIdForCurrentUser() {
     long householdId = getHouseholdIdForCurrentUser();
+    Long emergencyGroupId = householdRepository.getEmergencyIdByHouseholdId(householdId);
 
-    return householdRepository.getHouseholdById(householdId)
-            .orElseThrow(() -> new NoSuchElementException("The requesting user"
-                    + "is not part of a household."))
-            .getId();
+    if (emergencyGroupId == null) {
+      throw new IllegalArgumentException("Your household is not part of any emergency group");
+    }
+
+    return emergencyGroupId;
   }
 
   /**
@@ -172,4 +175,18 @@ public class EmergencyGroupService {
             .toList();
   }
 
+  /**
+   * Retrieves the emergency group ID associated with a household.
+   *
+   * @param householdId the ID of the household
+   * @return the ID of the associated emergency group
+   * @throws NoSuchElementException if the household is not found or has no associated group
+   */
+  public Long getEmergencyGroupIdByHouseholdId(Long householdId) {
+    Long emergencyGroupId = householdRepository.getEmergencyIdByHouseholdId(householdId);
+    if (emergencyGroupId == null) {
+      throw new NoSuchElementException("No emergency group found for household");
+    }
+    return emergencyGroupId;
+  }
 }
