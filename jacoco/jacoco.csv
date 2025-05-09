@@ -33,7 +33,7 @@ krisefikser,com.group7.krisefikser.controller,HcaptchaController,1,75,2,4,0,23,2
 krisefikser,com.group7.krisefikser.controller,PrivacyPolicyController,54,50,2,2,14,16,2,4,0,4
 krisefikser,com.group7.krisefikser.controller,StorageItemController,162,479,4,4,48,128,5,16,1,16
 krisefikser,com.group7.krisefikser.controller,NewsArticleController,0,60,0,2,0,18,0,5,0,4
-krisefikser,com.group7.krisefikser.controller,AuthController,138,198,9,9,34,50,9,8,2,6
+krisefikser,com.group7.krisefikser.controller,AuthController,141,201,10,10,35,51,10,8,2,6
 krisefikser,com.group7.krisefikser.controller,GeneralInfoController,52,116,0,0,15,30,0,7,0,7
 krisefikser,com.group7.krisefikser.controller,SuperAdminController,13,113,1,1,4,30,1,5,0,5
 krisefikser,com.group7.krisefikser.controller,UserController,0,26,0,0,0,7,0,2,0,2
