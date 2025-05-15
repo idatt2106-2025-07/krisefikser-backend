@@ -1,5 +1,11 @@
 # krisefikser-backend
 
+## Reports
+
+[![JavaDoc](https://img.shields.io/badge/Javadoc-green)](https://idatt2106-2025-07.github.io/krisefikser-backend/apidocs/)
+[![Coverage](https://img.shields.io/badge/Test_coverage-green)](https://idatt2106-2025-07.github.io/krisefikser-backend/jacoco/)
+[![Dependency Check](https://img.shields.io/badge/dependency--check-green)](https://idatt2106-2025-07.github.io/krisefikser-backend/owasp/dependency-check-report.html)
+
 ## Overview
 This is the backend repository for the application Krisefikser. It is written in Java
 Spring Boot using JDBC, and it is designed to be run in a Docker container. The application is intended 
